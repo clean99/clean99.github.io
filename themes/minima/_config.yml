@@ -3,11 +3,11 @@ title: "Hi Folks."
 
 #main info
 #owner
-owner: "I am Adi Sakti Jrs"
-email: test@test.test
-info: "A student and web developer from Indonesia 🇮🇩"
+owner: "I am Koh Hom(许峰)⛰️"
+email: xff9924@gmail.com
+info: "A engineer from China🇨🇳 , graduated at SCNU(2022), working as frontend developer at shopee🇸🇬 , former AntGroup, ByteDance staff."
 #description
-desc: "This is Minima, an undoubtedly simple and lightweight dark/light mode theme for Hexo. I created this from scratch using Skeleton CSS boilerplate. It only uses CSS and Vanilla JS, without using unnecessary third-party 'render-blocking' libraries! 😁"
+desc: "I love reading thoughtful book📖  and really execited about today's disprutive innovations(like AI, blockchain). I love workout and exploring healthy and minimal lifestyle, I eat OMAD as a vegan🥬 . Welcome to my blog! Hope you enjoy my blog😊 ."
 
 #menu
 menu:
@@ -30,7 +30,7 @@ usercss: css/user.css
 footer: true
 placename: Earth
 placelink: https://en.wikipedia.org/wiki/Earth
-github: https://github.com/adisaktijrs
+github: https://github.com/clean99
 linkedin: https://linkedin.com/in/adisaktijrs
 twitter: https://twitter.com/adisaktijrs
 instagram: https://instagram.com/adisaktijrs
