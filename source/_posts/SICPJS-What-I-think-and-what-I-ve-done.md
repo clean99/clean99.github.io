@@ -46,3 +46,6 @@ Got inspired by "a good programmer not only programming, but also build vocabula
 ## Catalog & Index
 ### Posts
 {% post_link SICPJS-1-Building-Abstractions-with-Functions %}
+### Others
+[SICPJS Open Source Text Book](https://sourceacademy.org/sicpjs/foreword02)
+[SICP学习指南——bintou老师](https://www.jianshu.com/p/213888357b65)
