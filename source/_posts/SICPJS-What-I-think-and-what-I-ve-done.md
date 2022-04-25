@@ -42,4 +42,7 @@ Got inspired by "a good programmer not only programming, but also build vocabula
 * Vocabulary: new staff of the section, will focues on *what is*, and new staff offen build upon previous staff.
 * Questions: interesting questions, need to down the rabbit hole, may and may not answer.
 * Notes: to record ideas and exercise.
+
 ## Catalog & Index
+### Posts
+{% post_link SICPJS-1-Building-Abstractions-with-Functions %}
