@@ -633,3 +633,94 @@ function accumulate(a, b, f, next, combine, null_value) {
   return accumulate_iter(a, null_value)
 }
 ```
+
+# 1.3.2   Constructing Functions using Lambda Expressions
+## Vocabulary
+- Lambda Expressions: Form like x => x + 4 without name. It's convenient to pass to function as paramater. We use it when there're some small expressions that uneccessary to declaire a function, particularly some functions that will never been reused.
+- conditional statement(if else): make the expression to block, you can write more information in the block.
+
+## Questions
+## Notes
+# 1.3.3   Functions as General Methods
+## Vocabulary
+## Questions
+## Notes
+- Finding roots of equations by the half-interval method
+
+given f(x), find the root of f(x) = 0. also given boundary a,b where root is between [a,b].
+solution:
+
+1. naive way: enum a from b, to see if f(x) = 0 or close to 0. since a and b is continuous, the O depentend on the precision.
+1. half-interval: f(a) * f(b) < 0, if and only if root is between a, b. we take the middle of a, b x to validate if f(x) * f(a) or f(x) * f(b) < 0. set x as a or b again and narrow the range. End when the range is small than T. O(log(b-a)/T). We can see T as the smallest unit, as if T equal 1 then O(log(b-a)).
+
+```javascript
+function find_root(f, r, a, b) {
+  const middle = (a + b) / 2
+  return b - a < r || f(middle) === 0
+         ? middle
+         : f(a) * f(middle) < 0
+         ? find_root(f, r, a, middle)
+         : find_root(f, r, middle, b)
+}
+// add: consider root don't sit between a and b
+function find_root(f, r, a, b) {
+  const middle = (a + b) / 2
+  if(b - a < r || f(middle) === 0) return middle
+  if(f(middle) * f(a) < 0) {
+    return find_root(f, r, a, middle)
+  }
+  if(f(middle) * f(b) < 0) {
+    return find_root(f, r, middle, b)
+  }
+  return new Error('root don't exist at a, b')
+}
+// normal half-interval, find if n locate in sorted arr, which
+// boundary is 0, arr.length - 1
+function binary_search(n, arr, a, b) {
+  const middle = Math.floor((b + a) / 2)
+  return n === arr[middle]
+         ? middle
+         : arr[middle] > n
+         ? binary_search(n, arr, a, middle - 1)
+         : binary_search(n, arr, middle + 1, b)
+}
+// high-order function of binary_search and find_root
+// what is the common part and what is the difference?
+// the flow is: first find a index(in this case middle)
+// then use this index to judge what part the res will sit
+// and then narrow the problem's size and recursive
+function half_interval(range, find_index, judge_index, new_range) {
+  const index = find_index(range)
+  const judgement = judge_index(index)
+  // agreement: judgement === 0: index is res, judgement === something else,
+  // start a new function call
+  return judgement === 0
+         ? index
+         : half_interval(new_range(range, index, judgement),find_index, judge_index, new_range)
+}
+
+// binary_search use half_interval
+function binary_search(n, arr, a, b) {
+  const range = {a, b}
+  const find_index = (range) => {
+    return Math.floor((range.a + range.b) / 2)
+  }
+  const judge_index = (index) => {
+    return arr[index] === n
+           ? 0
+           : arr[index] > n
+           ? -1
+           : 1
+  }
+  const new_range = (range, index, judgement) => {
+    return judgement === 1
+           ? {...range, a: index + 1}
+           : {...range, b: index - 1}
+  }
+  return half_interval(range, find_index, judge_index, new_range)
+}
+// not neccessary at most of the time, we write
+// more code seem this two functions have little
+// same partern😂 just to train the mind of putting two
+// ideas together and see common
+```
