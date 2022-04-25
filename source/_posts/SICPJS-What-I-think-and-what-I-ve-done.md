@@ -8,7 +8,7 @@ tags: sicpjs
 2. The second is bringing two ideas, whether simple or complex, together, and setting them by one another so as to take a view of them at once, without uniting them into one, by which it gets all its ideas of relations. 
 3. The third is separating them from all other ideas that accompany them in their real existence: this is called abstraction, and thus all its general ideas are made.
 
-<img alt="SICPJS POST" src="/img/sicpjs.jpeg" style="height: 600px;">
+<img alt="SICPJS POST" src="/img/sicpjs/sicpjs.jpeg" style="height: 600px;">
 
 ## Why I read this book and what is the goal of the book
   As a CSer, I heard a lot about this book, it is one of the Bible of computer science. I used to read several pages of the original book [SICP](https://www.amazon.com/Instructors-Structure-Interpretation-Computer-Programs/dp/0262692201/ref=sr_1_4?keywords=sicp&qid=1650806078&s=books&sr=1-4), which use Scheme as programming language. But I quited so fast that I couldn't really understood the thought that the book express, at that time I was a freshmen then(BTW, this book server as MIT fresh year text book lol😂 ). But I just skip this book, and read books like [Computer Network Top Down Approach](https://www.amazon.com/Computer-Networking-Top-Down-Approach-7th/dp/0133594149), [Operating System: Three Easy Pieces](https://www.amazon.com/Operating-Systems-Three-Easy-Pieces/dp/198508659X/ref=sr_1_1?keywords=operating+system%3A+three+easy+pieces&qid=1650806134&s=books&sr=1-1). 
@@ -20,6 +20,7 @@ tags: sicpjs
   * Focues on how to express physical or mental processes of real world, exploring human advantage and disadvantage.
   * How to use program to express to processes above, and how to make it clean and elegant.
   * To learn the techniques used to control the complexity of large software systems.
+
 ## Thoughts
 ### The human mind, collections of computer programs, and computer
 * The human mind:
@@ -34,5 +35,11 @@ tags: sicpjs
     * Computer is a harsh taskmaster, every programs it take mush be correct, and what we wish to say mush be said accurately in every detail.
     * Program is getting too large that it s hard to proof the correctness. Thus we must make sure the correctness of every single module.
     * Computer mush obey the laws of physics, shorter distent faster compute.
+
 Those three foci maintain a metastable state and lead a big change to other once they are changed, computer breakthrough leads more massive programs enterprise.
-## Catalog and Notes Structure
+## Notes Structure
+Got inspired by "a good programmer not only programming, but also build vocabulary for further use". This note uses Vocabulary, Questions, Notes to record:
+* Vocabulary: new staff of the section, will focues on *what is*, and new staff offen build upon previous staff.
+* Questions: interesting questions, need to down the rabbit hole, may and may not answer.
+* Notes: to record ideas and exercise.
+## Catalog & Index
