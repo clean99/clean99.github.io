@@ -13,6 +13,7 @@ desc: "I love reading thoughtful book📖  and really excited about today's disp
 menu:
   Works: /Works
   About: /About
+  Comments: /Comments
 
 #index/main page max show posts (in number)
 max_post: 4
