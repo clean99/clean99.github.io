@@ -98,7 +98,15 @@ ignore:
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
 theme: minima
-
+plugins:
+  gitalk:
+    clientID: xxxxxx
+    clientSecret: xxxxxx
+    repo: gitalk
+    owner: clean99
+    admin: 
+      - clean99
+    distractionFreeMode: false
 # Deployment
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
@@ -106,3 +114,4 @@ deploy:
   repo: https://github.com/clean99/clean99.github.io
   # example, https://github.com/hexojs/hexojs.github.io
   branch: master
+
