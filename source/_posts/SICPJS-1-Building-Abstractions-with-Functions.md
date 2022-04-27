@@ -724,3 +724,189 @@ function binary_search(n, arr, a, b) {
 // same partern😂 just to train the mind of putting two
 // ideas together and see common
 ```
+
+# 1.3.4   Functions as Returned Values
+## Vocabulary
+## Questions
+## Notes
+
+- fn as paramater: mean of abstraction the compose / operate function
+- fn as return value: make a new function base on original function, usually warp some extra logic to the function, or compose several function to one.
+
+```javascript
+// example 1: make a damp to a function for instance x -> x * x
+
+function square(x) {
+  return x * x
+}
+
+function average(x, y) {
+  return (x + y) / 2
+}
+
+function square_damp(x) {
+  return average(x, square(x))
+}
+
+// now we have another function need damping, for instance x -> x * x * x
+
+function cube(x) {
+  return x * x * x
+}
+
+function cube_damp(x) {
+  return average(x, cube(x))
+}
+
+// now you can see that most of the process that damp take is the same but
+// only the second paramater of average have difference process
+// you can pass this process as paramater to make it more generate
+
+function damp(x, f) {
+  return average(x, f(x))
+}
+
+damp(x, square)
+
+function sqrt(x) {
+  return fixed_point(x => damp(x, y => x / y), 1)
+}
+
+// we can make the damp function generate new function rather than just
+// return a value
+
+function average_damp(f) {
+  return x => average(x, f(x))
+}
+
+function sqrt(x) {
+  return fixed_point(average_damp(y => x / y), 1)
+}
+
+```
+
+This is a strengthen of expression, without fn as param we can not express abstraction of operation that operate other function. without fn as return value we can not express the abstraction of warping / upgrade a function use extra logic.
+
+- derivative: Dg(x)=(g(x+dx)−g(x))/dx,  dx as a small number, we calculate the difference of g(x) between x + dx and x, then divide with dx.
+
+```javascript
+// deriv is a new function base on g(x), so we can use fn as return value to
+// express this idea
+const dx = 0.000001
+function deriv(g) {
+  return x => (g(x + dx) - g(x)) / dx
+}
+```
+
+- We began section [1.3](https://sourceacademy.org/sicpjs/1.3) with the observation that compound functions are a crucial abstraction mechanism, because they permit us to express general methods of computing as explicit elements in our programming language. Now we've seen how higher-order functions permit us to manipulate these general methods to create further abstractions.
+- we should always be alert to opportunities to identify the underlying abstractions in our programs and create more powerful abstractions, but that doesn't mean one should always write programs in the most abstract way possible. expert programmers know how to choose the level of abstraction appropriate to their task. But it is important to be able to think in terms of these abstractions, so that we can be ready to apply them in new contexts. 
+- first-class elements: programming languages impose fewest restriction of manipulate them.
+   - They may be referred to using names.
+   - They may be passed as arguments to functions.
+   - They may be returned as the results of functions.
+   - They may be included in data structures.
+- js fn as first-class elements: more experssive, but the efficient implemant is a challenge.
+- Exercise 1.40
+
+```javascript
+// given param, generate a function
+function cubic(a, b, c) {
+  return x => cube(x) + a * square(x) + b * x + c
+}
+```
+
+- Exercise 1.41
+
+```javascript
+function double(f) {
+  return x => f(f(x))
+}
+
+double(double(double))(inc)(5);
+
+// double make the original function do twice, so double(double) is 4 times
+
+double(double): x => (f => (x => f(f(f(f(x))))))
+
+// double(double(double)) is 16 times
+
+```
+
+- Exercise 1.42
+
+```javascript
+// abstraction of compose
+function compose(x, f, g) {
+  return f(g(x))
+}
+
+compose(x, square, inc)
+
+function compose(f, g) {
+  return x => f(g(x))
+}
+
+compose(square, inc)(x)
+
+// what's the difference?
+// former only create an abstraction of compose function,
+// return fn as value also create an abstraction of `create an abstraction of compose function`
+// or the abstraction of modifing function
+```
+
+- Exercise 1.43
+
+```javascript
+// given a function and n times, modify the function to repeat itself n times
+function repeated(f, times) {
+  return function rp(x) {
+    if(times === 0){
+      return x
+    }
+    times--;
+    return rp(f(x))
+  }
+}
+```
+
+- Exercise 1.44
+
+```javascript
+// smoothing function,  times
+function smooth_n_fold(f, times) {
+  const dx = 0.00001
+  function smooth(f) {
+    return x => (f(x - dx) + f(x) + f(x + dx)) / 3
+  }
+  return repeated(smooth, times)(f)
+}
+
+// smooth() is the abstraction of process f()
+// while the repeated() is the abstraction of process smooth()
+// with high-order function, every process can be abstract
+```
+
+- Exercise 1.46
+
+iterative improvement: in order to compute result, we first start at a initial guess, then judge whether it is good enough, if no, repeat the process.
+
+```javascript
+function iterative_improve(improve, is_good_enough) {
+  return function repeat(x) {
+    return is_good_enough(x)
+           ? x
+           : repeat(improve(x))
+  }    
+}
+```
+
+- abstractions we have for now:
+   - naming: abstraction of express
+   - function: abstraction of operate
+      - basic function: abstraction of operate data
+      - high-order function: 
+         - function as param: abstraction of operate function(compose funtion)(idea)
+         - function as return value: abstraction of modify / update function(idea)
+
+It is all about increasing your ability of expression.
+
