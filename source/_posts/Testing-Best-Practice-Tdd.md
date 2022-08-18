@@ -1,6 +1,6 @@
 ---
 layout: posts
-title: Testing-Best-Practice-Tdd
+title: Testing Best Practice Tdd
 date: 2022-07-24 17:42:10
 tags: [testing, tdd]
 ---
