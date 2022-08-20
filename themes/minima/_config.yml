@@ -13,6 +13,7 @@ desc: "I love reading thoughtful book📖 . I'm currently focus on improving cod
 menu:
   Works: /Works
   About: /About
+  Links: /Links
 
 #index/main page max show posts (in number)
 max_post: 4
@@ -51,3 +52,6 @@ article:
 # DISQUS comments (sign up to Disqus to get disqus_shortname)
 disqus_enabled: false
 disqus_shortname: https-adisaktijrs-github-io
+
+links:
+  test: www.test.com
