@@ -14,7 +14,7 @@ ChatGPT has garnered significant attention since its release and has become a po
 
 ### 2.1.2 Generate Code
 
-ChatGPT can generate code for you. With the modularity technique, you can generate a large system with ChatGPT very quickly. Refer to my previous post: {% post_link Use-Modular-Design-with-ChatGPT-to-Generate-Code %}
+ChatGPT can generate code for you. With the help of modularity technique, you can generate a large system with ChatGPT very quickly. Refer to my previous post: {% post_link Use-Modular-Design-with-ChatGPT-to-Generate-Code %}
 
 ### 2.1.2 Explain Code
 
