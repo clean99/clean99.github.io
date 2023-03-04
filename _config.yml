@@ -5,7 +5,7 @@
 # Site
 title: Koh Hom's Blog
 subtitle: 'frontend | fullstack | blockchain | framework'
-description: 'A frontend developer from China, who now work at Shopee(SG). Post random things about frontend, fullstack, chrome v8, computer science, etc.'
+description: 'A frontend developer from China, who now work at TikTok(SG). Post random things about frontend, fullstack, chrome v8, computer science, etc.'
 keywords: ''
 author: Koh Hom
 language: en
@@ -97,7 +97,7 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: minima
+theme: cactus
 plugins:
   gitalk:
     clientID: xxxxxx
