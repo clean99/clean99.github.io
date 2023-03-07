@@ -1,5 +1,5 @@
 ---
-title: 'Introduce to Code Complexity Metric: Cognitive Complexity'
+title: 'Introducing Code Complexity Metric: Cognitive Complexity'
 date: 2023-03-04 14:57:22
 tags:
 ---
@@ -205,14 +205,14 @@ Understanding the first two lines isn’t very difficult. On the other hand, the
 When **mixed operators**, boolean expressions become more difficult to understand.
 
 ```tsx
-if (a // +1 for `if`
-		&& b && c // +1
-		|| d || e // +1
-		&& f) // +1
+if (a // +1 `if`
+  && b && c // +1
+  || d || e // +1
+  && f) // +1
 
-if (a // +1 for `if`
-		&& // +1
-		!(b && c)) // +1
+if (a // +1 `if`
+  && // +1
+  !(b && c)) // +1
 ```
 
 ### Recursion
@@ -280,6 +280,22 @@ ones that are far more reflective of their relative understandability.
 ### Metrics that are valuable above the method level
 
 With Cyclomatic Complexity, it can be difficult to differentiate between a class with a large number of simple getters and setters and one that contains complex control flow, as both can have the same number of decision points. However, Cognitive Complexity addresses this limitation by not incrementing for method structure, making it easier to compare the metric values of different classes. As a result, it becomes possible to distinguish between classes with simple structures and those that contain complex control flow, enabling better identification of areas of a program that may be difficult to understand and maintain.
+
+## Industry Standard
+
+| Cyclomatic Complexity | Code Quality | Readability | Maintainability |
+| --- | --- | --- | --- |
+| 1-10 | Clear and well-structured | High | Low |
+| 11-20 | Somewhat complex | Medium | Moderate |
+| 21-50 | Complex | Low | Difficult |
+| 51+ | Very complex | Poor | Very difficult |
+
+| Cognitive Complexity | Code Quality | Readability | Maintainability |
+| --- | --- | --- | --- |
+| 1-5 | Simple and easy to follow | High | Easy |
+| 6-10 | Somewhat complex | Medium | Moderate |
+| 11-20 | Complex | Low | Difficult |
+| 21+ | Very complex | Poor | Very difficult |
 
 ## Setup Complexity Metrics for You Code with ESLint
 
