@@ -88,7 +88,7 @@ During the TRD phase, it's crucial to document test cases for each new module an
 
 ### ****Development: Unit Testing & TDD****
 
-During development, we create test scripts for individual units and strive to pass each test case. These tests act as our first users of the modules. **Writing unit tests offers numerous benefits, such as isolating problems, simplifying troubleshooting, testing boundary cases, and reusing existing tests to ensure we don't accidentally break anything.** By adopting Test-Driven Development (TDD), you can reap even more benefits from unit testing. Check out my blog posts on [**How Testing Speeds Up Your Development**] and [**Testing Best Practices: TDD**] for more information.
+During development, we create test scripts for individual units and strive to pass each test case. These tests act as our first users of the modules. **Writing unit tests offers numerous benefits, such as isolating problems, simplifying troubleshooting, testing boundary cases, and reusing existing tests to ensure we don't accidentally break anything.** By adopting Test-Driven Development (TDD), you can reap even more benefits from unit testing. Check out my blog posts on {% post_link How-Testing-Speeds-Up-Your-Development %} and {% post_link Testing-Best-Practice-Tdd %} for more information.
 
 ### Integration & Testing: E2E Testing
 
