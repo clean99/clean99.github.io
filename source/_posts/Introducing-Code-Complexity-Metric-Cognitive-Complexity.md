@@ -1,7 +1,7 @@
 ---
 title: 'Introducing Code Complexity Metric: Cognitive Complexity'
 date: 2023-03-04 14:57:22
-tags:
+tags: [software engineering]
 ---
 
 ## Background

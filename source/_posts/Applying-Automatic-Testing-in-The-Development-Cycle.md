@@ -1,7 +1,7 @@
 ---
 title: Applying Automatic Testing in The Development Cycle
 date: 2023-04-01 16:23:04
-tags: [Testing, Software Engineering, Software Development Life Cycle, Agile]
+tags: [testing, software engineering, sdlc, agile]
 ---
 ## Background
 
