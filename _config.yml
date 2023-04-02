@@ -102,6 +102,7 @@ plugins:
   gitalk:
     clientID: xxxxxx
     clientSecret: xxxxxx
+    repo: gitalk
     owner: clean99
     admin: 
       - clean99
@@ -113,6 +114,7 @@ deploy:
   repo: https://github.com/clean99/clean99.github.io
   # example, https://github.com/hexojs/hexojs.github.io
   branch: master
+  ignore_hidden: false # 忽略隐藏文件及文件夹(目录)
 
 # https://github.com/dimaslanjaka/hexo-seo
 seo:
@@ -176,3 +178,23 @@ seo:
   # auto generate seo friendly sitemap on http://yoursite.com/sitemap.xml
   # forked from yoast seo
   sitemap: true
+
+# enable: 开启/关闭 推送
+# cron: 执行时间周期
+# count: 每次提交最新的10篇文章，输入0或者不填写则默认为所有文章(建议是最新的10篇文章)
+# date: 更新时间(updated)|创建日期(created)
+# https://github.com/Lete114/hexo-seo-autopush.git
+hexo_seo_autopush:
+  cron: 0 4 * * *
+  baidu:
+    enable: true
+    date: created
+    count: 10
+  bing:
+    enable: true
+    date: created
+    count: 10
+  google:
+    enable: true
+    date: created
+    count: 10
