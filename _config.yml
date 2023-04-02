@@ -3,13 +3,13 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Koh Hom's Blog
-subtitle: 'frontend | fullstack | blockchain | framework'
-description: 'A frontend developer from China, who now work at TikTok(SG). Post random things about frontend, fullstack, chrome v8, computer science, etc.'
-keywords: ''
+title: Koh Hom's Blog | Frontend & Testing Blog
+subtitle: 'Frontend Development, E2E & Unit Testing, Software Engineering Tips & Tutorials'
+description: 'A frontend developer from China, who now work at TikTok(SG). Post random things about frontend, e2e testing, unit testing, software engineering, computer science, etc.'
+keywords: 'frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog'
 author: Koh Hom
 language: en
-timezone: ''
+timezone: 'Asia/Singapore'
 
 # URL
 ## Set your site url here. For example, if you use GitHub Page, set url as 'https://username.github.io/project'
@@ -33,7 +33,7 @@ skip_render:
 # Writing
 new_post_name: :title.md # File name of new posts
 default_layout: post
-titlecase: false # Transform title into titlecase
+titlecase: true # Transform title into titlecase
 external_link:
   enable: true # Open external links in new tab
   field: site # Apply to the whole site
@@ -46,7 +46,7 @@ future: true
 highlight:
   enable: true
   line_number: true
-  auto_detect: false
+  auto_detect: true
   tab_replace: ''
   wrap: true
   hljs: false
@@ -61,14 +61,14 @@ prismjs:
 # per_page: Posts displayed per page. (0 = disable pagination)
 # order_by: Posts order. (Order by date descending by default)
 index_generator:
-  path: ''
+  path: '/'
   per_page: 10
   order_by: -date
 
 # Category & Tag
 default_category: uncategorized
 category_map:
-tag_map:
+tag_map: 'testing, software engineering, sdlc, sicpjs, AI, ChatGPT, frontend'
 
 # Metadata elements
 ## https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta
@@ -102,7 +102,6 @@ plugins:
   gitalk:
     clientID: xxxxxx
     clientSecret: xxxxxx
-    repo: gitalk
     owner: clean99
     admin: 
       - clean99
@@ -115,3 +114,65 @@ deploy:
   # example, https://github.com/hexojs/hexojs.github.io
   branch: master
 
+# https://github.com/dimaslanjaka/hexo-seo
+seo:
+  html:
+    enable: true
+    # fix invalid html
+    fix: true
+    # exclude from minify
+    exclude:
+      - "*.min.{htm,html}"
+  # minify css
+  css:
+    enable: true
+    # If you want to customize the css minifier settings, you can put below
+    # exclude css from minifying, multiple supported
+    exclude:
+      - "**/*.min.css"
+  # minify js
+  js:
+    enable: true
+    # If you want to customize the js minifier settings, you can put below
+    # exclude css from minifying, multiple supported
+    exclude:
+      - "**/*.min.js"
+    # this is terser options, you can customize minifier with terser options https://github.com/terser/terser
+    # below is config example
+    options:
+      compress:
+        dead_code: true
+      mangle:
+        toplevel: true
+        safari10: true
+  # add rich snippets on every posts and pages
+  schema:
+    article:
+      enable: true
+    breadcrumb:
+      enable: true
+    sitelink:
+      enable: true
+      searchUrl: https://www.webmanajemen.com/hexo-seo/search?q=
+  # this function still under development because JAVASCRIPT HEAP MEMORY and my device is 8GB RAM
+  img:
+    enable: true
+    # fix broken images
+    broken: false
+    # default broken images
+    default: https://upload.wikimedia.org/wikipedia/commons/6/65/No-Image-Placeholder.svg
+    # broken images methods
+    # serverside : process broken images from server side (caused javascript heap out of memory, if your post large and your device has insufficient memory)
+    # clientside : process broken image from client side browser with webjs
+    onerror: clientside
+  # external links fix
+  links:
+    # enable or false
+    enable: true
+    # allowed following links, otherwise nofollow others
+    exclude:
+      - webmanajemen.com
+      - web-manajemen.blogspot.com
+  # auto generate seo friendly sitemap on http://yoursite.com/sitemap.xml
+  # forked from yoast seo
+  sitemap: true
