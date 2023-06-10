@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="BackgroundTesting is a critical aspect of any software development process. Ensuring that an application functions as expected and is free of defects is essential for delivering a high-quality product">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Applying Automatic Testing in the Development Cycle">
+<meta property="og:url" content="https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/index.html">
+<meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog">
+<meta property="og:description" content="BackgroundTesting is a critical aspect of any software development process. Ensuring that an application functions as expected and is free of defects is essential for delivering a high-quality product">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://clean99.github.io/img/testing-sdlc/alige.png">
+<meta property="og:image" content="https://clean99.github.io/img/testing-sdlc/sdlc.png">
+<meta property="og:image" content="https://clean99.github.io/img/testing-sdlc/interleaving-code-change.png">
+<meta property="og:image" content="https://clean99.github.io/img/testing-sdlc/dependency.png">
+<meta property="og:image" content="https://clean99.github.io/img/testing-sdlc/combine.png">
+<meta property="og:image" content="https://clean99.github.io/img/testing-sdlc/sdlc-testing.png">
+<meta property="article:published_time" content="2023-04-01T08:23:04.000Z">
+<meta property="article:modified_time" content="2023-06-10T09:33:54.608Z">
+<meta property="article:author" content="Koh Hom">
+<meta property="article:tag" content="testing">
+<meta property="article:tag" content="software engineering">
+<meta property="article:tag" content="sdlc">
+<meta property="article:tag" content="agile">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://clean99.github.io/img/testing-sdlc/alige.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Applying Automatic Testing in the Development Cycle</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&text=Applying Automatic Testing in the Development Cycle"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&title=Applying Automatic Testing in the Development Cycle"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&is_video=false&description=Applying Automatic Testing in the Development Cycle"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Applying Automatic Testing in the Development Cycle&body=Check out this article: https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&title=Applying Automatic Testing in the Development Cycle"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&title=Applying Automatic Testing in the Development Cycle"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&title=Applying Automatic Testing in the Development Cycle"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&title=Applying Automatic Testing in the Development Cycle"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&name=Applying Automatic Testing in the Development Cycle&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&t=Applying Automatic Testing in the Development Cycle"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Background"><span class="toc-number">1.</span> <span class="toc-text">Background</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Development-Cycle"><span class="toc-number">2.</span> <span class="toc-text">Development Cycle</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-Limitations-of-Manual-Testing"><span class="toc-number">3.</span> <span class="toc-text">The Limitations of Manual Testing</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Code-Changes-and-QA-Testing-Overlap"><span class="toc-number">3.1.</span> <span class="toc-text">Code Changes and QA Testing Overlap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dependency-on-Black-Box-Modules"><span class="toc-number">3.2.</span> <span class="toc-text">Dependency on Black Box Modules</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Combinatorial-Explosion"><span class="toc-number">3.3.</span> <span class="toc-text">Combinatorial Explosion</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Applying-Automatic-Testing-in-SDLC"><span class="toc-number">4.</span> <span class="toc-text">Applying Automatic Testing in SDLC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#TRD-Writing-amp-Reviewing-Test-Cases"><span class="toc-number">4.1.</span> <span class="toc-text">TRD: Writing &amp; Reviewing Test Cases</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Development-Unit-Testing-amp-TDD"><span class="toc-number">4.2.</span> <span class="toc-text">Development: Unit Testing &amp; TDD</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Integration-amp-Testing-E2E-Testing"><span class="toc-number">4.3.</span> <span class="toc-text">Integration &amp; Testing: E2E Testing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Patrol-Load-Testing-Performance-Testing-and-More"><span class="toc-number">4.4.</span> <span class="toc-text">Patrol, Load Testing, Performance Testing, and More</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Conclusion"><span class="toc-number">5.</span> <span class="toc-text">Conclusion</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Applying Automatic Testing in the Development Cycle
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Koh Hom</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2023-04-01T08:23:04.000Z" class="dt-published" itemprop="datePublished">2023-04-01</time>
+        
+        (Updated: <time datetime="2023-06-10T09:33:54.608Z" class="dt-updated" itemprop="dateModified">2023-06-10</time>)
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/agile/" rel="tag">agile</a>, <a class="p-category" href="/tags/sdlc/" rel="tag">sdlc</a>, <a class="p-category" href="/tags/software-engineering/" rel="tag">software engineering</a>, <a class="p-category" href="/tags/testing/" rel="tag">testing</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>Testing is a critical aspect of any software development process. Ensuring that an application functions as expected and is free of defects is essential for delivering a high-quality product to end-users. In this section, we will discuss the importance of testing in the development cycle and highlight the benefits of automating this process.</p>
+<p>Testing is an integral part of the production process, and it is crucial to remember that <strong>your software will be tested eventually, whether by you, your automated testing scripts, or the end-user</strong>. Neglecting to test a product thoroughly can result in subpar performance, errors, and, ultimately, dissatisfied customers.</p>
+<p>Most testing tasks are <strong>simple and repetitive</strong>, making them excellent for automation. By automating testing processes, you can save valuable time and resources, improve accuracy, and <strong>reduce the likelihood of human error(Alway bear in mind that Humans are not prefect, they make a lot of stupid mistakes)</strong>. Automated testing can also be <strong>run as frequently as needed</strong>, ensuring that defects are <strong>identified and addressed promptly</strong>.</p>
+<p>Throughout the development cycle, various types of testing should be implemented to catch bugs and issues as early as possible, making them easier to resolve. By incorporating different testing techniques, such as unit testing and end-to-end (E2E) testing, you can ensure that your application is thoroughly vetted at every stage of development. In the following sections, we will explore the standard development cycle and discuss how to apply automated testing effectively within this framework.</p>
+<h2 id="Development-Cycle"><a href="#Development-Cycle" class="headerlink" title="Development Cycle"></a>Development Cycle</h2><p>A standard agile workflow for the software development lifecycle (SDLC) typically consists of several stages, each with its purpose and goals. These stages include:</p>
+<img alt="Agile Software Development Life Cycle" src="/img/testing-sdlc/alige.png">
+
+<ol>
+<li><strong>Ideation</strong>: This phase involves generating ideas, identifying opportunities, and defining the project’s goals and requirements.</li>
+<li><strong>Development</strong>: This includes UX&#x2F;UI, architecting design, coding, integrating.</li>
+<li><strong>Testing</strong>: This phase involves verifying the software’s functionality, performance, and overall quality.</li>
+<li><strong>Deployment</strong>: In this stage, the software is released to a production environment gradually.</li>
+<li><strong>Operations</strong>: The final phase involves maintaining and updating the software as needed, addressing any issues that arise, and continuously improving the product based on user feedback and performance metrics.</li>
+</ol>
+<p>Different companies may have unique variations of the SDLC, tailored to their specific needs and workflows. In my team, our SDLC follows this structure:</p>
+<img alt="Software Development Life Cycle of My Team" src="/img/testing-sdlc/sdlc.png">
+
+<ol>
+<li><strong>Write BRD&#x2F;PRD</strong> (Business Requirements Document&#x2F;Product Requirements Document): These documents outline the project’s goals, objectives, and requirements. They serve as the foundation for subsequent stages of development.</li>
+<li><strong>PRD Review</strong>: Team members(Including Developer) review the PRD to ensure the design is reasonable from both user and developer’s point of view.</li>
+<li><strong>Write TRD</strong> (Technical Requirements Document): This document outlines the technical specifications and architecture of the software, detailing how the product requirements will be implemented.</li>
+<li><strong>TRD Review</strong>: The technical requirements are reviewed by relevant stakeholders, ensuring that the proposed solution aligns with the project’s goals and constraints.</li>
+<li><strong>Implementation</strong> (Front-end&#x2F;Back-end): Developers begin coding the application, focusing on both front-end and back-end components.</li>
+<li><strong>Code Review</strong>: Other team members review the code to ensure it adheres to best practices and meets the project requirements.</li>
+<li><strong>Refactoring</strong>: Any necessary changes or improvements to the code are made during this stage.</li>
+<li><strong>QA Testing</strong>: Quality assurance testing is conducted, including manual and automated tests, to ensure the software meets the desired quality standards.</li>
+<li><strong>Small Traffic</strong>: The application is gradually rolled to a small group of users, closely monitoring performance and user feedback.</li>
+<li><strong>Full Traffic</strong>: The software is finally deployed to all intended users, marking the completion of the development cycle.</li>
+<li><strong>Maintenance</strong>: <strong>There isn’t any prefect system in the world, and the requirement is changing</strong>. So we need to frequently maintain and iterate our system.</li>
+</ol>
+<h2 id="The-Limitations-of-Manual-Testing"><a href="#The-Limitations-of-Manual-Testing" class="headerlink" title="The Limitations of Manual Testing"></a><strong><strong>The Limitations of Manual Testing</strong></strong></h2><p>Although the development cycle can produce quality products, my team still encounters occasional bugs and incidents, some of which are my own responsibility. In March 2023, we experienced five incidents, and while none were severe, they highlighted the need for improvement. <strong>Human error is inevitable, which is why automation is essential.</strong> Let’s examine some specific problems in my team’s incidents.</p>
+<h3 id="Code-Changes-and-QA-Testing-Overlap"><a href="#Code-Changes-and-QA-Testing-Overlap" class="headerlink" title="Code Changes and QA Testing Overlap"></a><strong><strong>Code Changes and QA Testing Overlap</strong></strong></h3><img alt="Code Changes and QA Testing Overlap" src="/img/testing-sdlc/interleaving-code-change.png">
+
+<p>Ideally, <strong>testing should always follow code changes.</strong> However, in practice, this isn’t always feasible. After the QA testing phase, developers must fix bugs, resolve conflicts when merging code, and more. With only manual testing, the process becomes time-consuming and resource-intensive, making it impractical to perform thorough QA testing repeatedly.</p>
+<p>Consider this example from my team’s incidents:</p>
+<ol>
+<li><strong>Merging conflicts led to a missing route</strong>: Rapid product iterations and simultaneous requirements led to frequent conflict resolution. Resolving conflicts can introduce bugs, especially when the person handling the conflict only write part of the code. Focusing manual testing on the requirements themselves allows such incidents to occur.</li>
+</ol>
+<h3 id="Dependency-on-Black-Box-Modules"><a href="#Dependency-on-Black-Box-Modules" class="headerlink" title="Dependency on Black Box Modules"></a><strong><strong>Dependency on Black Box Modules</strong></strong></h3><img alt="Dependencies Explosion" src="/img/testing-sdlc/dependency.png">
+
+<p>Our systems heavily depend on numerous external dependencies. <strong>Modularity is crucial for building complex systems, but it often means relying on black box modules.</strong> Trusting these dependencies can lead to bugs.</p>
+<p>Consider these incidents:</p>
+<ol>
+<li><strong>Dependency changes caused a product entrance to disappear</strong>: Developers may not be aware of the impact their changes have on downstream products. It isn’t practical to have QA manually test all downstream products when a dependency changes.</li>
+<li><strong>Outdated JS Bridge (JSB) documentation led to malfunctioning features in some app versions</strong>: It’s unreasonable to expect developers or QA to test every app version when developing a new feature that uses JSB. Developers trust documentation, but when it’s outdated, incidents can occur.</li>
+</ol>
+<h3 id="Combinatorial-Explosion"><a href="#Combinatorial-Explosion" class="headerlink" title="Combinatorial Explosion"></a><strong><strong>Combinatorial Explosion</strong></strong></h3><img alt="Combinatorial Explosion" src="/img/testing-sdlc/combine.png">
+
+
+<p>Our team serves global users across various regions, languages, platforms, and app versions. Features also have multiple combinations. <strong>The number of possible combinations O(m^n) (A * B * C * D …) is enormous, and most are repetitive.</strong> Humans are not well-suited for this task, as demonstrated by this incident:</p>
+<ol>
+<li><strong>A feature was missing in some regions</strong>: Our team released a feature across multiple regions, but it was missing in some regions for a month. The simple reason was that no one tested it in those regions. <strong>It’s impractical to expect QA to test every region individually for each requirement.</strong></li>
+</ol>
+<h2 id="Applying-Automatic-Testing-in-SDLC"><a href="#Applying-Automatic-Testing-in-SDLC" class="headerlink" title="Applying Automatic Testing in SDLC"></a>Applying Automatic Testing in SDLC</h2><p>One of the keys to enhancing software development agility is <strong>automation</strong>. Considering the limitations of manual testing, we know that <strong>manual work is time-consuming and prone to error</strong>. Thus, we need to incorporate automatic testing in our SDLC. In this section, I will introduce how to apply various types of automatic testing into SDLC and demonstrate their effectiveness in preventing incidents and bugs in our products.</p>
+<img alt="Software Development Life Cycle with Automatic Testing" src="/img/testing-sdlc/sdlc-testing.png">
+
+
+<h3 id="TRD-Writing-amp-Reviewing-Test-Cases"><a href="#TRD-Writing-amp-Reviewing-Test-Cases" class="headerlink" title="TRD: Writing &amp; Reviewing Test Cases"></a><strong><strong>TRD: Writing &amp; Reviewing Test Cases</strong></strong></h3><p>During the TRD phase, it’s crucial to document test cases for each new module and have them reviewed by other developers. <strong>With the introduction of automated testing, test cases provide an excellent way to describe user interactions with our modules.</strong> Test cases might look like: “It should display something when the user clicks something,” or “It should return something when inputting something.” They describe how users (end-users or developers) interact with the modules, serving as documentation in our codebase for maintainability.</p>
+<h3 id="Development-Unit-Testing-amp-TDD"><a href="#Development-Unit-Testing-amp-TDD" class="headerlink" title="Development: Unit Testing &amp; TDD"></a><strong><strong>Development: Unit Testing &amp; TDD</strong></strong></h3><p>During development, we create test scripts for individual units and strive to pass each test case. These tests act as our first users of the modules. <strong>Writing unit tests offers numerous benefits, such as isolating problems, simplifying troubleshooting, testing boundary cases, and reusing existing tests to ensure we don’t accidentally break anything.</strong> By adopting Test-Driven Development (TDD), you can reap even more benefits from unit testing. Check out my blog posts on <a href="/2022/08/18/How-Testing-Speeds-Up-Your-Development/" title="How Testing Speeds Up Your Development">How Testing Speeds Up Your Development</a> and <a href="/2022/07/24/Testing-Best-Practice-Tdd/" title="Testing Best Practice Tdd">Testing Best Practice Tdd</a> for more information.</p>
+<h3 id="Integration-amp-Testing-E2E-Testing"><a href="#Integration-amp-Testing-E2E-Testing" class="headerlink" title="Integration &amp; Testing: E2E Testing"></a>Integration &amp; Testing: E2E Testing</h3><p>Once we’ve completed both front-end and back-end development, we can initiate end-to-end (E2E) testing. By automating manual testing, we significantly reduce the complexity of QA testing. Additionally, we can reuse our previous test cases for regression testing. <strong>This allows developers to confidently modify code and resolve conflicts, knowing that E2E tests will follow their changes and ensure the overall integrity of the application.</strong></p>
+<h3 id="Patrol-Load-Testing-Performance-Testing-and-More"><a href="#Patrol-Load-Testing-Performance-Testing-and-More" class="headerlink" title="Patrol, Load Testing, Performance Testing, and More"></a>Patrol, Load Testing, Performance Testing, and More</h3><p>We can set up E2E testing patrols for our production environment to detect issues <strong>as quickly as possible</strong>, rather than waiting for user feedback. By implementing load testing and performance testing, we can assess our product’s quality from various perspectives, ensuring a more robust and reliable end product.</p>
+<h2 id="Conclusion"><a href="#Conclusion" class="headerlink" title="Conclusion"></a>Conclusion</h2><p>In summary, incorporating automatic testing into the development cycle can significantly reduce development time while improving <strong>reliability, maintainability, and scalability</strong>. By implementing these testing methods, the majority of incidents above can be prevented, leading to a more <strong>agile</strong> and <strong>efficient</strong> SDLC. Applying automatic testing as a vital part of the development process results in higher quality products and a smoother experience for both developers and end-users.</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"e74447b3f58a3fe2a950","clientSecret":"774863e5fb16b4af9ef490f976a034237694fe13","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Background"><span class="toc-number">1.</span> <span class="toc-text">Background</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Development-Cycle"><span class="toc-number">2.</span> <span class="toc-text">Development Cycle</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-Limitations-of-Manual-Testing"><span class="toc-number">3.</span> <span class="toc-text">The Limitations of Manual Testing</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Code-Changes-and-QA-Testing-Overlap"><span class="toc-number">3.1.</span> <span class="toc-text">Code Changes and QA Testing Overlap</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dependency-on-Black-Box-Modules"><span class="toc-number">3.2.</span> <span class="toc-text">Dependency on Black Box Modules</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Combinatorial-Explosion"><span class="toc-number">3.3.</span> <span class="toc-text">Combinatorial Explosion</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Applying-Automatic-Testing-in-SDLC"><span class="toc-number">4.</span> <span class="toc-text">Applying Automatic Testing in SDLC</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#TRD-Writing-amp-Reviewing-Test-Cases"><span class="toc-number">4.1.</span> <span class="toc-text">TRD: Writing &amp; Reviewing Test Cases</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Development-Unit-Testing-amp-TDD"><span class="toc-number">4.2.</span> <span class="toc-text">Development: Unit Testing &amp; TDD</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Integration-amp-Testing-E2E-Testing"><span class="toc-number">4.3.</span> <span class="toc-text">Integration &amp; Testing: E2E Testing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Patrol-Load-Testing-Performance-Testing-and-More"><span class="toc-number">4.4.</span> <span class="toc-text">Patrol, Load Testing, Performance Testing, and More</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Conclusion"><span class="toc-number">5.</span> <span class="toc-text">Conclusion</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&text=Applying Automatic Testing in the Development Cycle"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&title=Applying Automatic Testing in the Development Cycle"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&is_video=false&description=Applying Automatic Testing in the Development Cycle"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Applying Automatic Testing in the Development Cycle&body=Check out this article: https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&title=Applying Automatic Testing in the Development Cycle"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&title=Applying Automatic Testing in the Development Cycle"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&title=Applying Automatic Testing in the Development Cycle"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&title=Applying Automatic Testing in the Development Cycle"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&name=Applying Automatic Testing in the Development Cycle&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/&t=Applying Automatic Testing in the Development Cycle"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2023
+    Koh Hom
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

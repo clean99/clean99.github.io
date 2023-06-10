@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="As frontend developers, most of us don’t like to write testing because “it will slow down development”. I didn’t write tests before and I can feel your pain about writing tests for a “fast-changing” f">
+<meta property="og:type" content="article">
+<meta property="og:title" content="How Testing Speeds Up Your Development">
+<meta property="og:url" content="https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/index.html">
+<meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog">
+<meta property="og:description" content="As frontend developers, most of us don’t like to write testing because “it will slow down development”. I didn’t write tests before and I can feel your pain about writing tests for a “fast-changing” f">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://clean99.github.io/img/testing/developmenttype.png">
+<meta property="og:image" content="https://clean99.github.io/img/testing/preservingbehavior.png">
+<meta property="article:published_time" content="2022-08-18T09:19:01.000Z">
+<meta property="article:modified_time" content="2023-06-10T09:33:54.608Z">
+<meta property="article:author" content="Koh Hom">
+<meta property="article:tag" content="testing">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://clean99.github.io/img/testing/developmenttype.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>How Testing Speeds Up Your Development</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/12/18/Does-Github-Copilot-Worth-It/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/07/24/Some-Common-Mistakes-in-React-Testing/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&text=How Testing Speeds Up Your Development"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&title=How Testing Speeds Up Your Development"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&is_video=false&description=How Testing Speeds Up Your Development"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=How Testing Speeds Up Your Development&body=Check out this article: https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&title=How Testing Speeds Up Your Development"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&title=How Testing Speeds Up Your Development"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&title=How Testing Speeds Up Your Development"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&title=How Testing Speeds Up Your Development"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&name=How Testing Speeds Up Your Development&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&t=How Testing Speeds Up Your Development"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#What-is-development"><span class="toc-number">1.</span> <span class="toc-text">What is development?</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Software-rot"><span class="toc-number">1.1.</span> <span class="toc-text">Software rot</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Maintaining-is-getting-harder-and-harder"><span class="toc-number">1.2.</span> <span class="toc-text">Maintaining is getting harder and harder</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-role-of-testing"><span class="toc-number">2.</span> <span class="toc-text">The role of testing</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Validation-testing"><span class="toc-number">2.1.</span> <span class="toc-text">Validation testing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Regression-testing"><span class="toc-number">2.2.</span> <span class="toc-text">Regression testing</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Other-benefits"><span class="toc-number">3.</span> <span class="toc-text">Other benefits</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        How Testing Speeds Up Your Development
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Koh Hom</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-08-18T09:19:01.000Z" class="dt-published" itemprop="datePublished">2022-08-18</time>
+        
+        (Updated: <time datetime="2023-06-10T09:33:54.608Z" class="dt-updated" itemprop="dateModified">2023-06-10</time>)
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/testing/" rel="tag">testing</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>As frontend developers, most of us don’t like to write testing because “it will slow down development”. I didn’t write tests before and I can feel your pain about writing tests for a “fast-changing” frontend project. But I do want to tell you that in most cases testing can speed up your development instead of slow it down. Unless you are writing the wrong tests. I have an article to show you <a href="/2022/07/24/Some-Common-Mistakes-in-React-Testing/" title="Some Common Mistakes in React Testing">Some Common Mistakes in React Testing</a> that cause you to feel pain during your development. And in this article, I want to show you <strong>why the right tests can speed up your development.</strong></p>
+<h2 id="What-is-development"><a href="#What-is-development" class="headerlink" title="What is development?"></a>What is development?</h2><p>We are developers and we develop software every day. But really, what is development? What do we actually do in our daily work?<br />In <em>working effectively with legacy code</em>, the author thinks that development is all about behavior changes. There are four types of the development process:</p>
+<ol>
+<li>Adding a feature </li>
+<li>Fixing a bug </li>
+<li>Improving the design </li>
+<li>Optimizing resource usage</li>
+</ol>
+<p>Each of them requires a different kind of behavior changes:<img alt="development type" src="/img/testing/developmenttype.png">As you can see, We want to add a new behavior in the software when we add a new feature, and we want to change the old behavior when we fix a bug. But when we are optimizing or refactoring, we usually don’t want our behavior to change. If we make some unexpected changes in our software behavior, we call it <strong>regression</strong>.</p>
+<h3 id="Software-rot"><a href="#Software-rot" class="headerlink" title="Software rot"></a>Software rot</h3><p>Most of us have the experience that fixing bugs or adding a new feature in a legacy project(a big project without well code structure and testing) is more painful and harder than doing a new project from zero to one. This is because <strong>software gets rot day by day</strong> when we keep adding new features to it. The code will become very complex and eventually very hard to maintain. Luckily we have React &#x2F; Vue frame that <strong>modulizes</strong> our website to pages, and pages to components. So it usually won’t become very complex in every component, but it will be at some kind of the point. Even the team with the best code quality can’t prevent software from getting rot, because <strong>decoupling doesn’t mean that you don’t add any couple at all</strong>.</p>
+<h3 id="Maintaining-is-getting-harder-and-harder"><a href="#Maintaining-is-getting-harder-and-harder" class="headerlink" title="Maintaining is getting harder and harder"></a>Maintaining is getting harder and harder</h3><p>So, when the behaviors are getting more and more complex, we will find it even harder to do development while making sure that the existing behavior doesn’t change. When we add behavior in a component, the state, or the dom structure will change. How to guarantee that the <strong>existing behavior is preserved</strong>? How to guarantee that the <strong>new behavior doing what we expected</strong>? And, how to guarantee our <strong>new behavior can work well with our existing behavior</strong>?<br /><strong>Testing can give you confidence.</strong><br><img alt="preserving behavior" src="/img/testing/preservingbehavior.png"></p>
+<h2 id="The-role-of-testing"><a href="#The-role-of-testing" class="headerlink" title="The role of testing"></a>The role of testing</h2><p>Tests can play two roles in development. One is for validation, another is for preventing regression. Those two kind of testing can help you develop with <strong>confidence</strong> and <strong>speed up</strong> in the different development lifecycle.</p>
+<h3 id="Validation-testing"><a href="#Validation-testing" class="headerlink" title="Validation testing"></a>Validation testing</h3><p>When we add new behavior to our program, we want to know that the new behavior act as we want, how? Most frontend developers will write code and then go to the local dev env to check the behavior changing. This is called manual testing. So what’s wrong with this kind of testing? Why automatic testing can be much more effective than manual testing? Here is an example:<br />You developed a small component that appears after a bunch of steps. Let’s say we want to develop a message box that will show after submitting a form that needs to fill 20 fields. <br />So if you use manual testing:</p>
+<ul>
+<li>You need to <strong>type in 20 fields(click, click, type……)</strong> just like your users and then click submit. </li>
+<li>You need to <strong>pray that the server(both your localhost server and backend) won’t break</strong> while you are testing.</li>
+<li>You need to <strong>pray that the dependencies(In this example, the Form component) work correctly</strong>.</li>
+<li>You need to <strong>pray that the whole process can work correctly at one time</strong>. If it doesn’t, guess what? You need to debug the components related to this whole process, including but not limited to, Form component, API, and Message box.</li>
+<li>Your colleague reviews your code and wants you to change some of the code, you need to do the click type cycle again with considerate test cases. It’s just awful!</li>
+</ul>
+<p>As you can see manual testing is all about praying(just kidding). It will become even more awful when there are more dependencies and the component itself is more complex.<br />What about automatic testing? <br />You can just write <strong>a couple of lines of test</strong> to validate that this message box will show the correct message with the corresponding response status code. And then you can write a test with some <strong>mock</strong> field data to test it can submit to backend with expected data and format.<br />I can promise you that you will spend much less time writing those tests and running them(within several seconds for typically frontend tests) than you click click and type and submit in local dev. What’s more, you can know which part is broken if your test failed. Instead of debugging the whole system. And your testing can run <strong>thousands of times</strong>, the is a significant benefit of automated testing.<br /><strong>It’s all about isolation.</strong> Tests help you to isolate every component, so you can gain <strong>fast, precise feedback</strong> every time you change code. With just a couple more codes to write.</p>
+<h3 id="Regression-testing"><a href="#Regression-testing" class="headerlink" title="Regression testing"></a>Regression testing</h3><p>The validation testing is all about validating our new behavior, while the regression testing is for <strong>ensuring the old behavior won’t change as we modify our code</strong>.<br />You just join a new team and your boss doesn’t really like you, he gives some tickets to fix bugs and add new features to a “legacy” project. When you first look into the project’s codebase, you got stock by the mass structure and it doesn’t have any test and document! So you have to do a lot of research (by running the project’s features one by one) to check what this project can do, and which part is broken.<br />After several days, you have the courage to modify the code, you fix a bug by changing some of the state hooks. But guess what, you still <strong>have a high risk to introduce new bugs</strong> because you don’t know what this state hook is for.<br />So if the project has written tests before, what you need to do is just to check its test cases, because <strong>the test cases can serve as documentation</strong>, you can know what the project(components) will do in the specific situation. And if you modify the code, you can have the <strong>confidence</strong> to say that <strong>you didn’t break the important features</strong> after you run all of the tests. So now the tests are <strong>serviced as regression testing to prevent regression</strong>.<br />It will be lucky if you are handling a project that has tests. And for the project without any test, you can still add by yourself to <strong>cover that behavior around the code that you want to modify</strong>.</p>
+<h2 id="Other-benefits"><a href="#Other-benefits" class="headerlink" title="Other benefits"></a>Other benefits</h2><p>There are some other benefits that automatic testing can give you, here are some of them:</p>
+<ul>
+<li><strong>Documentation</strong>: Tests can serve as documentation of your project because it simulates how user interact with the project and how the project react.</li>
+<li><strong>Force you to understand your requirement</strong>: If you don’t know what your requirements are, you can’t write tests, because tests are basically a translation from human word to script. And if you are using <a href="/2022/07/24/Testing-Best-Practice-Tdd/" title="Testing Best Practice Tdd">Testing Best Practice Tdd</a>, <strong>you need to write tests first according to your requirements</strong>, that will be even better to force you to think about requirements first.</li>
+<li><strong>Force you to decouple your code in a good structure</strong>: If your code is coupled and all of the stuff is written in a single component, you are hard to write tests for it since you can’t isolate them anymore. So tests can help you to consider whether that code <strong>structure and design are appropriate</strong>.</li>
+</ul>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"e74447b3f58a3fe2a950","clientSecret":"774863e5fb16b4af9ef490f976a034237694fe13","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#What-is-development"><span class="toc-number">1.</span> <span class="toc-text">What is development?</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Software-rot"><span class="toc-number">1.1.</span> <span class="toc-text">Software rot</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Maintaining-is-getting-harder-and-harder"><span class="toc-number">1.2.</span> <span class="toc-text">Maintaining is getting harder and harder</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#The-role-of-testing"><span class="toc-number">2.</span> <span class="toc-text">The role of testing</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Validation-testing"><span class="toc-number">2.1.</span> <span class="toc-text">Validation testing</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Regression-testing"><span class="toc-number">2.2.</span> <span class="toc-text">Regression testing</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Other-benefits"><span class="toc-number">3.</span> <span class="toc-text">Other benefits</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&text=How Testing Speeds Up Your Development"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&title=How Testing Speeds Up Your Development"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&is_video=false&description=How Testing Speeds Up Your Development"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=How Testing Speeds Up Your Development&body=Check out this article: https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&title=How Testing Speeds Up Your Development"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&title=How Testing Speeds Up Your Development"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&title=How Testing Speeds Up Your Development"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&title=How Testing Speeds Up Your Development"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&name=How Testing Speeds Up Your Development&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/&t=How Testing Speeds Up Your Development"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2023
+    Koh Hom
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

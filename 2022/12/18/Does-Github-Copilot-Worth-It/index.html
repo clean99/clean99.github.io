@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="I personally use copilot to speed up my coding for a long time. I’ve discovered some use cases where git copilot can help me a lot. For me, copilot speeds up my coding progress by at least 30%. So it’">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Does Github Copilot Worth It?">
+<meta property="og:url" content="https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/index.html">
+<meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog">
+<meta property="og:description" content="I personally use copilot to speed up my coding for a long time. I’ve discovered some use cases where git copilot can help me a lot. For me, copilot speeds up my coding progress by at least 30%. So it’">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/css.gif">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/mapping.gif">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/stubs.gif">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/validator.gif">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/signal.gif">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/utils.gif">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/eslint.gif">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/query.png">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/tests.png">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/explain.png">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/refactor.png">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/why%20broken.png">
+<meta property="og:image" content="https://clean99.github.io/img/copilot/tabnine.png">
+<meta property="article:published_time" content="2022-12-18T10:42:26.000Z">
+<meta property="article:modified_time" content="2023-06-10T09:33:54.608Z">
+<meta property="article:author" content="Koh Hom">
+<meta property="article:tag" content="development">
+<meta property="article:tag" content="copilot">
+<meta property="article:tag" content="tdd">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://clean99.github.io/img/copilot/css.gif">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Does Github Copilot Worth It?</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/08/18/How-Testing-Speeds-Up-Your-Development/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&text=Does Github Copilot Worth It?"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&title=Does Github Copilot Worth It?"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&is_video=false&description=Does Github Copilot Worth It?"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Does Github Copilot Worth It?&body=Check out this article: https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&title=Does Github Copilot Worth It?"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&title=Does Github Copilot Worth It?"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&title=Does Github Copilot Worth It?"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&title=Does Github Copilot Worth It?"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&name=Does Github Copilot Worth It?&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&t=Does Github Copilot Worth It?"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Testing-your-code"><span class="toc-number">1.</span> <span class="toc-text">Testing your code</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Trying-to-combine-it-with-TDD"><span class="toc-number">1.1.</span> <span class="toc-text">Trying to combine it with TDD</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Writing-Stylesheet"><span class="toc-number">2.</span> <span class="toc-text">Writing Stylesheet</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Creating-some-useful-mapping"><span class="toc-number">3.</span> <span class="toc-text">Creating some useful mapping</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Generating-stubs-data"><span class="toc-number">4.</span> <span class="toc-text">Generating stubs data</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Regular-expressions-x2F-Validator"><span class="toc-number">5.</span> <span class="toc-text">Regular expressions &#x2F; Validator</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Signal-flow-style-process"><span class="toc-number">6.</span> <span class="toc-text">Signal-flow style process</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Some-helpful-utils"><span class="toc-number">7.</span> <span class="toc-text">Some helpful utils</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Write-vscode-setting-json-or-some-thing-like-that"><span class="toc-number">8.</span> <span class="toc-text">Write vscode setting.json(or some thing like that)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Other-helpful-x2F-competing-tools"><span class="toc-number">9.</span> <span class="toc-text">Other helpful &#x2F; competing tools</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ChatGPT"><span class="toc-number">9.1.</span> <span class="toc-text">ChatGPT</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Query"><span class="toc-number">9.1.1.</span> <span class="toc-text">Query</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Add-tests-based-on-a-list-of-use-cases"><span class="toc-number">9.1.2.</span> <span class="toc-text">Add tests based on a list of use cases</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Explain-code"><span class="toc-number">9.1.3.</span> <span class="toc-text">Explain code</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Refactor"><span class="toc-number">9.1.4.</span> <span class="toc-text">Refactor</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Why-my-code-is-broken"><span class="toc-number">9.1.5.</span> <span class="toc-text">Why my code is broken?</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Tabnine"><span class="toc-number">9.2.</span> <span class="toc-text">Tabnine</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">10.</span> <span class="toc-text">Summary</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Does Github Copilot Worth It?
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Koh Hom</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-12-18T10:42:26.000Z" class="dt-published" itemprop="datePublished">2022-12-18</time>
+        
+        (Updated: <time datetime="2023-06-10T09:33:54.608Z" class="dt-updated" itemprop="dateModified">2023-06-10</time>)
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/copilot/" rel="tag">copilot</a>, <a class="p-category" href="/tags/development/" rel="tag">development</a>, <a class="p-category" href="/tags/tdd/" rel="tag">tdd</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>I personally use copilot to speed up my coding for a long time. I’ve discovered some use cases where git copilot can help me a lot. For me, copilot speeds up my coding progress by at least <strong>30%</strong>. So it’s definitely a good deal for me to subscribe to it for the cost of a cup of coffee (<strong>10$ per month</strong>).<br>Here I want to show you some scenarios where copilot can <strong>accelerate</strong> our development. Also provide some similiar tools for you to apply in your daily work.</p>
+<h2 id="Testing-your-code"><a href="#Testing-your-code" class="headerlink" title="Testing your code"></a>Testing your code</h2><p>One pain-point of writing tests for FE developers is <strong>the unfamiliarity of the test framework’s APIs</strong>. And automatic testing often includes some simple script and also a lot of <strong>repeat</strong>, which is what AI is good at. After a period of use, I found that <strong>TDD</strong> is one of the <strong>best</strong> ways to combine testing with copilot.<br>Copilot works well with all kinds of testing, such as <strong>unit testing</strong>, <strong>e2e testing</strong>. The dataset behind copilot is  almost the whole open source community. You don’t need to worry about whether there exist any APIs that copilot didn’t meet before.</p>
+<h3 id="Trying-to-combine-it-with-TDD"><a href="#Trying-to-combine-it-with-TDD" class="headerlink" title="Trying to combine it with TDD"></a>Trying to combine it with TDD</h3><p>The reason why I use TDD with copilot is that <strong>the copilot will read your code base and give you hints</strong>. So if I write tests first, then the copilot will try to write code based on the tests I wrote before. This saves the amount of time to write <strong>unnecessary comments</strong> just for copilot to write code.<br>Here is a simple todo component with TDD and copilot.</p>
+<div class="video-container"><iframe src="https://www.youtube.com/embed/VhRrEiR2rY0" frameborder="0" loading="lazy" allowfullscreen></iframe></div>
+
+<h2 id="Writing-Stylesheet"><a href="#Writing-Stylesheet" class="headerlink" title="Writing Stylesheet"></a>Writing Stylesheet</h2><p>I <strong>hate</strong> remembering loads of <strong>APIs</strong> and <strong>style rules</strong>. To be honest, humans are not experts at remembering. But computer are. So when I want to write some stylesheet with some <strong>unfamiliar</strong> style rules, I will ask the copilot to help me with that. For instance, I am not really familiar with the functions and rules of grid, so I use copilot to help me up.</p>
+<img alt="CSS with Copilot" src="/img/copilot/css.gif">
+
+<h2 id="Creating-some-useful-mapping"><a href="#Creating-some-useful-mapping" class="headerlink" title="Creating some useful mapping"></a>Creating some useful mapping</h2><p>Frontend developer needs to create <strong>mapping</strong> for localization. We can just use copilot to do that instead of searching on the internet.</p>
+<img alt="Mapping with Copilot" src="/img/copilot/mapping.gif">
+
+<h2 id="Generating-stubs-data"><a href="#Generating-stubs-data" class="headerlink" title="Generating stubs data"></a>Generating stubs data</h2><p>If you write a lot of tests, you need to generate stubs that are random enough. You will find that they are just some <strong>similar</strong> and <strong>repeat</strong> data. <strong>Copilot is also good at doing this.</strong></p>
+<img alt="Stubs with Copilot" src="/img/copilot/stubs.gif">
+
+<h2 id="Regular-expressions-x2F-Validator"><a href="#Regular-expressions-x2F-Validator" class="headerlink" title="Regular expressions &#x2F; Validator"></a>Regular expressions &#x2F; Validator</h2><p>When I write <strong>regular expressions</strong> or <strong>validators</strong>, I always need to go to search on the internet, and then open an online regular expression runner to test if it works properly. Now we have copilot, we can just tell it what rules we need, and it will generate the expression &#x2F; validator for us. <strong>You can write some unit tests for sure.</strong></p>
+<img alt="Validator with Copilot" src="/img/copilot/validator.gif">
+
+<h2 id="Signal-flow-style-process"><a href="#Signal-flow-style-process" class="headerlink" title="Signal-flow style process"></a>Signal-flow style process</h2><p>One of the powerful techniques to handle data is thinking of it as signal flow, which makes the whole process easily <strong>decouple</strong> into several units(like filtering, mapping, reducing…). Copilot works well in this pattern. <strong>We only need to write a comment which tells copilot(and developers) how the data flows, and the code will be generated perfectly.</strong><br><strong>Tips</strong>: Design that has more <strong>modularity</strong> is always easier to <strong>create</strong>, <strong>modify</strong> and <strong>test</strong>. Copilot will also generate more <strong>accurate</strong> code <strong>when the design is good</strong>.</p>
+<img alt="Signal with Copilot" src="/img/copilot/signal.gif">
+
+<h2 id="Some-helpful-utils"><a href="#Some-helpful-utils" class="headerlink" title="Some helpful utils"></a>Some helpful utils</h2><p>I randomly picked this <code>safeStringify</code> util function in my code base. It ends up that the copilot wrote a <strong>better</strong> version than mine.</p>
+<img alt="Utils with Copilot" src="/img/copilot/utils.gif">
+
+<h2 id="Write-vscode-setting-json-or-some-thing-like-that"><a href="#Write-vscode-setting-json-or-some-thing-like-that" class="headerlink" title="Write vscode setting.json(or some thing like that)"></a>Write vscode setting.json(or some thing like that)</h2><p>Another useful case is that when I want to <strong>setup something</strong> on my vscode, I will <strong>just put a comment</strong> and let the copilot do that for me. Most of the time, it works well.<br>Here is an example of setup eslint auto save for my vscode:</p>
+<img alt="Vscode with Copilot" src="/img/copilot/eslint.gif">
+
+<h2 id="Other-helpful-x2F-competing-tools"><a href="#Other-helpful-x2F-competing-tools" class="headerlink" title="Other helpful &#x2F; competing tools"></a>Other helpful &#x2F; competing tools</h2><h3 id="ChatGPT"><a href="#ChatGPT" class="headerlink" title="ChatGPT"></a>ChatGPT</h3><p>I would say chatGPT is a much more powerful tool for us because <strong>it is not limited to code generation</strong>. It can also <strong>explain code</strong>, <strong>refactor code</strong> and <strong>tell you why the code is broken</strong>.(There are many creative ways to use it.) But <strong>copilot cooperates better with IDE</strong>. Now chatGPT is still an individual website, the vscode plugin of chatGPT doesn’t work.</p>
+<h4 id="Query"><a href="#Query" class="headerlink" title="Query"></a>Query</h4><p>Feel free to ask chatGPT <strong>anything</strong>. Some questions are: How to install xxx in linux? What is the best database for social network apps? I have a system like this… How can I improve it? What is the best material to learn react?</p>
+<img alt="Query with ChatGPT" src="/img/copilot/query.png">
+
+<h4 id="Add-tests-based-on-a-list-of-use-cases"><a href="#Add-tests-based-on-a-list-of-use-cases" class="headerlink" title="Add tests based on a list of use cases"></a>Add tests based on a list of use cases</h4><p>Tell the bot what your use cases are, it will give you a super accurate test code. Awesome!</p>
+<img alt="Tests with ChatGPT" src="/img/copilot/tests.png">
+
+<h4 id="Explain-code"><a href="#Explain-code" class="headerlink" title="Explain code"></a>Explain code</h4><p>It can explain your code <strong>super clearly</strong>. One <strong>tip</strong> is that you should <strong>provide the context as much as possible</strong> or the bot will <strong>guess</strong> what a function is for <strong>according to the function name and parameter</strong>, which may lead to <strong>low accuracy</strong>.<br>Here is a random code snippet I picked from my textbook.</p>
+<img alt="Explain with ChatGPT" src="/img/copilot/explain.png">
+
+<h4 id="Refactor"><a href="#Refactor" class="headerlink" title="Refactor"></a>Refactor</h4><p>I was shocked that it not only provides the refactored code, but also <strong>tells you why it will refactor that way</strong>.</p>
+<img alt="Refactor with ChatGPT" src="/img/copilot/refactor.png">
+
+<h4 id="Why-my-code-is-broken"><a href="#Why-my-code-is-broken" class="headerlink" title="Why my code is broken?"></a>Why my code is broken?</h4><p>To tell you why your code messes up. Very helpful when you are learning a new language or library.</p>
+<img alt="Broken with ChatGPT" src="/img/copilot/why broken.png">
+
+<h3 id="Tabnine"><a href="#Tabnine" class="headerlink" title="Tabnine"></a>Tabnine</h3><p>Tabnine’s function is basically the same as github copilot, while it has <strong>more language support</strong> and <strong>enphasizes privacy</strong>. Also, github copilot is <strong>one model for all</strong>, while tabnine prefers <strong>individualised language models</strong>. This will cause some <strong>differences</strong> in their suggestion.<br>I tried Tabnine pro and <strong>it just does not work that well like I thought</strong>. It seems didn’t read my code base and <strong>even provide ts syntax in js files</strong>.<br>My suggestion is to <strong>use github copilot if the language you use are support by github copilot</strong>.</p>
+<img alt="Tabnine compare with Copilot" src="/img/copilot/tabnine.png">
+
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>There are still a lot of scenarios where AI can help me to have a better life. But <strong>the key principle is to know what humans are good at, and what are the limitations of humans.</strong> I’m the person who don’t like do <strong>repeat</strong> work or <strong>remember</strong> a lot of details at all. So I’m super happy that AI came out to help me do loads of work. Will AI replace humans? Probably not. <strong>Because AI still doesn’t have creativity like humans do now.</strong> But with the help of AI, <strong>we can focus on what we are good at, and do the job more effectively and joyfully.</strong></p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"e74447b3f58a3fe2a950","clientSecret":"774863e5fb16b4af9ef490f976a034237694fe13","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Testing-your-code"><span class="toc-number">1.</span> <span class="toc-text">Testing your code</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Trying-to-combine-it-with-TDD"><span class="toc-number">1.1.</span> <span class="toc-text">Trying to combine it with TDD</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Writing-Stylesheet"><span class="toc-number">2.</span> <span class="toc-text">Writing Stylesheet</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Creating-some-useful-mapping"><span class="toc-number">3.</span> <span class="toc-text">Creating some useful mapping</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Generating-stubs-data"><span class="toc-number">4.</span> <span class="toc-text">Generating stubs data</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Regular-expressions-x2F-Validator"><span class="toc-number">5.</span> <span class="toc-text">Regular expressions &#x2F; Validator</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Signal-flow-style-process"><span class="toc-number">6.</span> <span class="toc-text">Signal-flow style process</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Some-helpful-utils"><span class="toc-number">7.</span> <span class="toc-text">Some helpful utils</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Write-vscode-setting-json-or-some-thing-like-that"><span class="toc-number">8.</span> <span class="toc-text">Write vscode setting.json(or some thing like that)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Other-helpful-x2F-competing-tools"><span class="toc-number">9.</span> <span class="toc-text">Other helpful &#x2F; competing tools</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#ChatGPT"><span class="toc-number">9.1.</span> <span class="toc-text">ChatGPT</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Query"><span class="toc-number">9.1.1.</span> <span class="toc-text">Query</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Add-tests-based-on-a-list-of-use-cases"><span class="toc-number">9.1.2.</span> <span class="toc-text">Add tests based on a list of use cases</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Explain-code"><span class="toc-number">9.1.3.</span> <span class="toc-text">Explain code</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Refactor"><span class="toc-number">9.1.4.</span> <span class="toc-text">Refactor</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Why-my-code-is-broken"><span class="toc-number">9.1.5.</span> <span class="toc-text">Why my code is broken?</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Tabnine"><span class="toc-number">9.2.</span> <span class="toc-text">Tabnine</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">10.</span> <span class="toc-text">Summary</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&text=Does Github Copilot Worth It?"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&title=Does Github Copilot Worth It?"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&is_video=false&description=Does Github Copilot Worth It?"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Does Github Copilot Worth It?&body=Check out this article: https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&title=Does Github Copilot Worth It?"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&title=Does Github Copilot Worth It?"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&title=Does Github Copilot Worth It?"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&title=Does Github Copilot Worth It?"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&name=Does Github Copilot Worth It?&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/&t=Does Github Copilot Worth It?"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2023
+    Koh Hom
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

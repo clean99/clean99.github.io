@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="VocabularyQuestionsNotes Compound data: just like compound function, we enhance our expressive power of our language. And elevate the conceptual level at which we can design our programs. Glue data to">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SICPJS 2. Building Abstractions With Data">
+<meta property="og:url" content="https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/index.html">
+<meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog">
+<meta property="og:description" content="VocabularyQuestionsNotes Compound data: just like compound function, we enhance our expressive power of our language. And elevate the conceptual level at which we can design our programs. Glue data to">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://clean99.github.io/img/sicpjs/abstractionbarriers.png">
+<meta property="article:published_time" content="2022-05-02T03:40:54.000Z">
+<meta property="article:modified_time" content="2023-06-10T09:33:54.609Z">
+<meta property="article:author" content="Koh Hom">
+<meta property="article:tag" content="sicpjs">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://clean99.github.io/img/sicpjs/abstractionbarriers.png">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>SICPJS 2. Building Abstractions With Data</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/07/24/Testing-Best-Practice-Tdd/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/04/27/Build-a-Toy-Browser-with-NodeJS/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&text=SICPJS 2. Building Abstractions With Data"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&title=SICPJS 2. Building Abstractions With Data"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&is_video=false&description=SICPJS 2. Building Abstractions With Data"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=SICPJS 2. Building Abstractions With Data&body=Check out this article: https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&title=SICPJS 2. Building Abstractions With Data"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&title=SICPJS 2. Building Abstractions With Data"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&title=SICPJS 2. Building Abstractions With Data"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&title=SICPJS 2. Building Abstractions With Data"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&name=SICPJS 2. Building Abstractions With Data&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&t=SICPJS 2. Building Abstractions With Data"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-1-Introduction-to-Data-Abstraction"><span class="toc-number"></span> <span class="toc-text">2.1  Introduction to Data Abstraction</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary-1"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions-1"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes-1"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-1-1-Example-Arithmetic-Operations-for-Rational-Numbers"><span class="toc-number"></span> <span class="toc-text">2.1.1   Example: Arithmetic Operations for Rational Numbers</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary-2"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions-2"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes-2"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-1-2-Abstraction-Barriers"><span class="toc-number"></span> <span class="toc-text">2.1.2   Abstraction Barriers</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary-3"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions-3"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes-3"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-1-3-What-Is-Meant-by-Data"><span class="toc-number"></span> <span class="toc-text">2.1.3   What Is Meant by Data?</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary-4"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions-4"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes-4"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-1-4-Extended-Exercise-Interval-Arithmetic"><span class="toc-number"></span> <span class="toc-text">2.1.4   Extended Exercise: Interval Arithmetic</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary-5"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions-5"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes-5"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        SICPJS 2. Building Abstractions With Data
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Koh Hom</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-05-02T03:40:54.000Z" class="dt-published" itemprop="datePublished">2022-05-02</time>
+        
+        (Updated: <time datetime="2023-06-10T09:33:54.609Z" class="dt-updated" itemprop="dateModified">2023-06-10</time>)
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/sicpjs/" rel="tag">sicpjs</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <h2 id="Vocabulary"><a href="#Vocabulary" class="headerlink" title="Vocabulary"></a>Vocabulary</h2><h2 id="Questions"><a href="#Questions" class="headerlink" title="Questions"></a>Questions</h2><h2 id="Notes"><a href="#Notes" class="headerlink" title="Notes"></a>Notes</h2><ul>
+<li>Compound data: just like compound function, we enhance our expressive power of our language. And elevate the conceptual level at which we can design our programs.</li>
+<li>Glue data together: compound data glue data together to reduce the complexity of system.</li>
+<li>Data abstraction: modularity data can separate the part of function to deal with data and the part to deal with how the data be repesented.</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// repesent, and deal with rational number</span></span><br><span class="line"><span class="comment">// if don&#x27;t have compound data</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> a_numerator = <span class="number">1</span></span><br><span class="line"><span class="keyword">const</span> a_denominator = <span class="number">4</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> b_numerator = <span class="number">1</span></span><br><span class="line"><span class="keyword">const</span> b_denominator = <span class="number">5</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// there&#x27;s no way you can handle these two rational number without care</span></span><br><span class="line"><span class="comment">// about how they be repesented.</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// compound data</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> a = &#123;</span><br><span class="line">  <span class="attr">numerator</span>: <span class="number">1</span>,</span><br><span class="line">  <span class="attr">denominator</span>: <span class="number">4</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> b = &#123;</span><br><span class="line">  <span class="attr">numerator</span>: <span class="number">1</span>,</span><br><span class="line">  <span class="attr">denominator</span>: <span class="number">5</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">add</span>(<span class="params">a, b</span>)&#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="attr">numerator</span>: a.<span class="property">numerator</span> + b.<span class="property">numerator</span>,</span><br><span class="line">    <span class="attr">denominator</span>: a.<span class="property">denominator</span> + b.<span class="property">denominator</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">add_and_multi</span>(<span class="params">a, b</span>)&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">multi</span>(a, <span class="title function_">add</span>(a, b))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// we don&#x27;t need to care about how a, b repesent data,</span></span><br><span class="line"><span class="comment">// we just abstract how add() and multi() process a, b</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="2-1-Introduction-to-Data-Abstraction"><a href="#2-1-Introduction-to-Data-Abstraction" class="headerlink" title="2.1  Introduction to Data Abstraction"></a>2.1  Introduction to Data Abstraction</h1><h2 id="Vocabulary-1"><a href="#Vocabulary-1" class="headerlink" title="Vocabulary"></a>Vocabulary</h2><ul>
+<li>Data abstraction: compare to function abstraction, data abstraction hide the detail of how to compound it and expose what is</li>
+</ul>
+<h2 id="Questions-1"><a href="#Questions-1" class="headerlink" title="Questions"></a>Questions</h2><h2 id="Notes-1"><a href="#Notes-1" class="headerlink" title="Notes"></a>Notes</h2><ul>
+<li>The basic idea of data abstraction is to structure the programs that are to use compound data objects so that they operate on “abstract data.” That is, our programs should use data in such a way as to make <strong>no assumptions</strong> about the data that are not strictly necessary for performing the task at hand.</li>
+</ul>
+<h1 id="2-1-1-Example-Arithmetic-Operations-for-Rational-Numbers"><a href="#2-1-1-Example-Arithmetic-Operations-for-Rational-Numbers" class="headerlink" title="2.1.1   Example: Arithmetic Operations for Rational Numbers"></a>2.1.1   Example: Arithmetic Operations for Rational Numbers</h1><h2 id="Vocabulary-2"><a href="#Vocabulary-2" class="headerlink" title="Vocabulary"></a>Vocabulary</h2><h2 id="Questions-2"><a href="#Questions-2" class="headerlink" title="Questions"></a>Questions</h2><h2 id="Notes-2"><a href="#Notes-2" class="headerlink" title="Notes"></a>Notes</h2><ul>
+<li>Wishful thinking: assuming something that we have even we not yet implement them, then build something upon them.</li>
+<li>The step of abstract the arithmetic operations of rational:<ul>
+<li>We operate base on data abstraction, so we first hide the detail of data abstraction(wishful thinking)</li>
+<li>We assume that we can construct a rational number, and can extracting its numerator and denominator.</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">make_rati</span>(<span class="params">n, d</span>) <span class="comment">// make rational number which equal n / d</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">numer</span>(<span class="params">r</span>) <span class="comment">// extract rational number&#x27;s numerator</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">denom</span>(<span class="params">r</span>) <span class="comment">// extract rational number&#x27;s denominator</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">add</span>(<span class="params">a, b</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">make_rati</span>((<span class="title function_">numer</span>(a) * <span class="title function_">denom</span>(b) + <span class="title function_">numer</span>(b) * <span class="title function_">denom</span>(a)) / <span class="title function_">denom</span>(a) * <span class="title function_">denom</span>(b))</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>use pair to implement the assuming functions make_rati, numer, denom.</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">pair</span>(<span class="params">head, tail</span>) <span class="comment">// construct a pair with head and tail</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">head</span>(<span class="params">pair</span>) <span class="comment">// return pair&#x27;s head</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">tail</span>(<span class="params">pair</span>) <span class="comment">// return pair&#x27;s tail</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">make_rati</span>(<span class="params">n, d</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> m = <span class="title function_">gcd</span>(n, d)</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">pair</span>(n / m, d / m)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">numer</span>(<span class="params">rati</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">head</span>(rati)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">denom</span>(<span class="params">rati</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">tail</span>(rati)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Exercise 2.1<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// handle positive and negative, we only change make_rati</span></span><br><span class="line"><span class="comment">// since it is the only function that modify/create pair</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">make_rati</span>(<span class="params">n, d</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> m = <span class="title function_">gcd</span>(n, d)</span><br><span class="line">  <span class="keyword">if</span>(n * d &gt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">pair</span>(n / m, d / m)</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span>(n * d &lt; <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span>(n &lt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="title function_">pair</span>(n / m, d / m)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="title function_">pair</span>(n / m, -d / m)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// &#x27;d is zero needs handle&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// if don&#x27;t use * to judge, can make some helper function</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">make_rati</span>(<span class="params">n, d</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> m = <span class="title function_">gcd</span>(n, d)</span><br><span class="line">  <span class="comment">// abstract n and d, only use the sign to compute</span></span><br><span class="line">  <span class="comment">// think about is it necessary to use n and d directly</span></span><br><span class="line">  <span class="comment">// or we can extract the essence to compute</span></span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">sign</span>(<span class="params">x</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> x &lt; <span class="number">0</span></span><br><span class="line">           ? -<span class="number">1</span></span><br><span class="line">           : x &gt; <span class="number">0</span></span><br><span class="line">           ? <span class="number">1</span></span><br><span class="line">           : <span class="number">0</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">abs</span>(<span class="params">x</span>) &#123;</span><br><span class="line">     <span class="keyword">return</span> x &lt; <span class="number">0</span></span><br><span class="line">            ? -x</span><br><span class="line">            : x;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">pair</span>(<span class="title function_">sign</span>(n) * <span class="title function_">sign</span>(d) * <span class="title function_">abs</span>(n / m), <span class="title function_">abs</span>(d / m))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="2-1-2-Abstraction-Barriers"><a href="#2-1-2-Abstraction-Barriers" class="headerlink" title="2.1.2   Abstraction Barriers"></a>2.1.2   Abstraction Barriers</h1><h2 id="Vocabulary-3"><a href="#Vocabulary-3" class="headerlink" title="Vocabulary"></a>Vocabulary</h2><h2 id="Questions-3"><a href="#Questions-3" class="headerlink" title="Questions"></a>Questions</h2><h2 id="Notes-3"><a href="#Notes-3" class="headerlink" title="Notes"></a>Notes</h2><ul>
+<li><p>In general, the underlying idea of data abstraction is to identify for each type of data object a basic set of operations in terms of which all manipulations of data objects of that type will be expressed, and then to use only those operations in manipulating the data.</p>
+<img alt="Abstraction Barriers" src="/img/sicpjs/abstractionbarriers.png">
+The horizontal lines represent _abstraction barriers_ that isolate different "levels" of the system. The barriers will hide the implement details below it. All complex data can be repesent by some ways using primitive data. How to repesent data influnences the programs that operate it. But if we only modify the implementation that will not affect the programs build upon it. The data-abstraction methodology gives us a way to defer that decision without losing the ability to make progress on the rest of the system. (For example, fe no need to wait until the be api finished, fe can start develop whenever the api document(interface) is given).
+</li>
+<li><p>Exercise 2.2</p>
+</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// from top to bottom, using data-abstraction barriers to construct the system</span></span><br><span class="line"><span class="comment">// for calculate midpoint of segment, we need make_segment</span></span><br><span class="line"><span class="comment">// and extract start_segment and end_segement</span></span><br><span class="line"><span class="comment">// use interface to abstract</span></span><br><span class="line">interface segment &#123;</span><br><span class="line">  <span class="attr">make_segment</span>: <span class="function">(<span class="params">start, end</span>) =&gt;</span> segment</span><br><span class="line">  <span class="attr">start_segment</span>: <span class="function">(<span class="params">segment</span>) =&gt;</span> point</span><br><span class="line">  <span class="attr">end_segment</span>: <span class="function">(<span class="params">segment</span>) =&gt;</span> point</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">midpoint_segment</span>(<span class="params">segment</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">avg_point</span>(start_segment, end_segment)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">make_segment</span>(<span class="params">start, end</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">pair</span>(start, end)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">start_segment</span>(<span class="params">segment</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">head</span>(segment)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">end_segment</span>(<span class="params">segment</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">tail</span>(segment)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">interface point &#123;</span><br><span class="line">  <span class="attr">make_point</span>: <span class="function">(<span class="params">x, y</span>) =&gt;</span> point</span><br><span class="line">  <span class="attr">x_point</span>: <span class="function">(<span class="params">point</span>) =&gt;</span> a</span><br><span class="line">  <span class="attr">y_point</span>: <span class="function">(<span class="params">point</span>) =&gt;</span> b</span><br><span class="line">  <span class="attr">avg_point</span>: <span class="function">(<span class="params">start, end</span>) =&gt;</span> point</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">make_point</span>(<span class="params">x, y</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">pair</span>(x, y)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">x_point</span>(<span class="params">point</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">head</span>(point)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">y_point</span>(<span class="params">point</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">tail</span>(point)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// avg use point abstraction</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">avg_point</span>(<span class="params">start, end</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">make_point</span>((<span class="title function_">x_point</span>(start) + <span class="title function_">x_point</span>(end)) / <span class="number">2</span>, (<span class="title function_">y_point</span>(start) + <span class="title function_">y_point</span>(end)) / <span class="number">2</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Exercise 2.3</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">interface &#123;</span><br><span class="line">  <span class="attr">distence_segment</span>: <span class="function">(<span class="params">a, b</span>) =&gt;</span> distence</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">make_rectange</span>(<span class="params">a, b, c, d</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> a_b = <span class="title function_">pair</span>(a, b)</span><br><span class="line">  <span class="keyword">const</span> c_d = <span class="title function_">pair</span>(c, d)</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">pair</span>(a_b, c_d)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">a_rectange</span>(<span class="params">r</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">head</span>(<span class="title function_">head</span>(r))</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">get_w_and_h</span>(<span class="params">r</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> a_to_b = <span class="title function_">distence_segment</span>(<span class="title function_">a_rectange</span>(r), <span class="title function_">b_rectange</span>(r))</span><br><span class="line">  <span class="keyword">const</span> a_to_c = <span class="title function_">distence_segment</span>(<span class="title function_">a_rectange</span>(r), <span class="title function_">c_rectange</span>(r))</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">pair</span>(a_to_b,a_to_c)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">perimeter</span>(<span class="params">r</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> w_h = <span class="title function_">get_w_and_h</span>(r)</span><br><span class="line">  <span class="keyword">return</span> (<span class="title function_">head</span>(w_h) + <span class="title function_">head</span>(w_h)) * <span class="number">2</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">area</span>(<span class="params">r</span>) &#123;</span><br><span class="line"> <span class="keyword">const</span> w_h = <span class="title function_">get_w_and_h</span>(r)</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">head</span>(w_h) * <span class="title function_">head</span>(w_h)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">get_w_and_h</span>(<span class="params">r</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> a_to_b = <span class="title function_">distence_segment</span>(<span class="title function_">a_rectange</span>(r), <span class="title function_">b_rectange</span>(r))</span><br><span class="line">  <span class="keyword">const</span> a_to_c = <span class="title function_">distence_segment</span>(<span class="title function_">a_rectange</span>(r), <span class="title function_">c_rectange</span>(r))</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">pair</span>(a_to_b,a_to_c)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="2-1-3-What-Is-Meant-by-Data"><a href="#2-1-3-What-Is-Meant-by-Data" class="headerlink" title="2.1.3   What Is Meant by Data?"></a>2.1.3   What Is Meant by Data?</h1><h2 id="Vocabulary-4"><a href="#Vocabulary-4" class="headerlink" title="Vocabulary"></a>Vocabulary</h2><ul>
+<li>Data: as defined by some collection of selectors and constructors, together with specified conditions that these functions must fulfill in order to be a valid representation.</li>
+</ul>
+<h2 id="Questions-4"><a href="#Questions-4" class="headerlink" title="Questions"></a>Questions</h2><h2 id="Notes-4"><a href="#Notes-4" class="headerlink" title="Notes"></a>Notes</h2><ul>
+<li>If one can obey the rules and implement the selectors and onstructors, it can use as the data. It should not matter how it implement.</li>
+<li>Message passing: use function represent data, and pass a message to get specify return.</li>
+<li>message passing pair</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// fulfill: z = pair(x, y) head(z) = x tail(z) = y</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">pair</span>(<span class="params">x, y</span>) &#123;</span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">dispatch</span>(<span class="params">m</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> m === <span class="number">0</span></span><br><span class="line">           ? x</span><br><span class="line">           : y</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> dispatch</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">head</span>(<span class="params">z</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">z</span>(<span class="number">0</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">tail</span>(<span class="params">z</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">z</span>(<span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 只要满足规则就可以代表数据，背后是不是真的是一个存储的变量已经不重要了，pair(x, z) 返回（生成）</span></span><br><span class="line"><span class="comment">// 了一个规则可以返回x和y</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Exercise 2.4</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">tail</span>(<span class="params">z</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">z</span>(<span class="function">(<span class="params">x, y</span>) =&gt;</span> y)</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Exercise 2.5</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">pair</span>(<span class="params">a, b</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">fast_expt</span>(<span class="number">2</span>, a) + <span class="title function_">fast_expt</span>(<span class="number">3</span>, b)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">head</span>(<span class="params">p</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> p % <span class="number">2</span> === <span class="number">0</span></span><br><span class="line">         ? <span class="title function_">head</span>(p / <span class="number">2</span>) + <span class="number">1</span></span><br><span class="line">         : <span class="number">0</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">tail</span>(<span class="params">p</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> p % <span class="number">3</span> === <span class="number">0</span></span><br><span class="line">         ? <span class="title function_">tail</span>(p / <span class="number">3</span>) + <span class="number">1</span></span><br><span class="line">         : <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Exercise 2.6</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">zero</span> = f =&gt; <span class="function"><span class="params">x</span> =&gt;</span> x</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">add_1</span>(<span class="params">n</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="params">f</span> =&gt;</span> <span class="function"><span class="params">x</span> =&gt;</span> <span class="title function_">f</span>(<span class="title function_">n</span>(f)(x))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// add_1(zero)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">one</span> = f =&gt; <span class="function"><span class="params">x</span> =&gt;</span> <span class="title function_">f</span>(x)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">two</span> = f =&gt; <span class="function"><span class="params">x</span> =&gt;</span> <span class="title function_">f</span>(<span class="title function_">f</span>(x))</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">plus</span>(<span class="params">p, q</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function"><span class="params">f</span> =&gt;</span> <span class="function"><span class="params">x</span> =&gt;</span> (<span class="title function_">p</span>(f)(<span class="title function_">q</span>(f)(x)))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="2-1-4-Extended-Exercise-Interval-Arithmetic"><a href="#2-1-4-Extended-Exercise-Interval-Arithmetic" class="headerlink" title="2.1.4   Extended Exercise: Interval Arithmetic"></a>2.1.4   Extended Exercise: Interval Arithmetic</h1><h2 id="Vocabulary-5"><a href="#Vocabulary-5" class="headerlink" title="Vocabulary"></a>Vocabulary</h2><h2 id="Questions-5"><a href="#Questions-5" class="headerlink" title="Questions"></a>Questions</h2><h2 id="Notes-5"><a href="#Notes-5" class="headerlink" title="Notes"></a>Notes</h2><ul>
+<li>Exercise 2.7</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">make_interval</span>(<span class="params">x, y</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">pair</span>(x, y)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">upper_bound</span>(<span class="params">i</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">tail</span>(i)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">lower_bound</span>(<span class="params">i</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">head</span>(i)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Exercise 2.8</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">sub_interval</span>(<span class="params">x, y</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">add_interval</span>(x, <span class="title function_">make_interval</span>(<span class="title function_">lower_bound</span>(y),<span class="title function_">upper_bound</span>(y)))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Exercise 2.9</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// proof: width A + width B = width C, where C is A + B (interval)</span></span><br><span class="line"><span class="comment">// A + B = C =&gt; upper(A) + upper(B) = upper(C), lower(A) + lower(B) = lower(C)</span></span><br><span class="line"><span class="comment">// width A + width B  = (upper(A) - lower(A)) / 2 + (upper(B) - lower(B)) / 2 </span></span><br><span class="line"><span class="comment">// = (upper(A) + upper(B) - (lower(A) + lower(B))) / 2 = (upper(C) - lower(C)) / 2 </span></span><br><span class="line"><span class="comment">// = C</span></span><br><span class="line"></span><br><span class="line">[<span class="number">1</span>, <span class="number">2</span>] * [<span class="number">1</span>, <span class="number">2</span>] = [<span class="number">1</span>, <span class="number">4</span>]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Exercise 2.10</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">div_interval</span>(<span class="params">x, y</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">lower_bound</span>(y) &lt;= <span class="number">0</span> &amp;&amp; <span class="title function_">upper_bound</span>(y) &gt;= <span class="number">0</span></span><br><span class="line">         ? <span class="title function_">signal</span>(<span class="string">&#x27;x can&#x27;</span>t be zero<span class="string">&#x27;)</span></span><br><span class="line"><span class="string">         : mul_interval(x, make_interval(lower(y),upper(y)))</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Exercise 2.11</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">mul_interval</span>(<span class="params">x, y</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span>(<span class="title function_">lower_bound</span>(x) &lt;= <span class="number">0</span> &amp;&amp; <span class="title function_">lower_bound</span>(y) &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span>(<span class="title function_">upper_bound</span>(x) &gt;= <span class="number">0</span> &amp;&amp; <span class="title function_">upper_bound</span>(y) &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">const</span> p1 = <span class="title function_">upper_bound</span>(x) * <span class="title function_">upper_bound</span>(y)</span><br><span class="line">      <span class="keyword">const</span> p2 = <span class="title function_">lower_bound</span>(x) * <span class="title function_">lower_bound</span>(y)</span><br><span class="line">      <span class="keyword">const</span> p3 = <span class="title function_">upper_bound</span>(x) * <span class="title function_">lower_bound</span>(y)</span><br><span class="line">      <span class="keyword">const</span> p4 = <span class="title function_">upper_bound</span>(y) * <span class="title function_">lower_bound</span>(x)</span><br><span class="line">      <span class="keyword">return</span> <span class="title function_">make_interval</span>(<span class="title function_">math_min</span>(p1, p2, p3, p4),</span><br><span class="line">                         <span class="title function_">math_max</span>(p1, p2, p3, p4))</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">make_interval</span>(<span class="title function_">upper_bound</span>(x) * <span class="title function_">upper_bound</span>(y),</span><br><span class="line">                         <span class="title function_">lower_bound</span>(x) * <span class="title function_">lower_bound</span>(y))</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">make_interval</span>(<span class="title function_">lower_bound</span>(x) * <span class="title function_">lower_bound</span>(y),</span><br><span class="line">                         <span class="title function_">upper_bound</span>(x) * <span class="title function_">upper_bound</span>(y))</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Exercise 2.12</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">make_center_percent</span>(<span class="params">c, p</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">make_interval</span>(c * (<span class="number">1</span> - p), c * (<span class="number">1</span> + p))</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">center</span>(<span class="params">i</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> (<span class="title function_">lower_bound</span>(i) + <span class="title function_">upper_bound</span>(i)) / <span class="number">2</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">percent</span>(<span class="params">i</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> ((<span class="title function_">upper_bound</span>(i) - <span class="title function_">lower_bound</span>(i)) / <span class="number">2</span>) / <span class="title function_">center</span>(i)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Exercise 2.13</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a * b -&gt; pa * pb</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">mul_interval</span>(<span class="params">x, y</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">make_center_percent</span>(<span class="title function_">center</span>(x) * <span class="title function_">center</span>(y), <span class="title function_">percent</span>(x) * <span class="title function_">percent</span>(y))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>If we only see two endpoints, some problems will become harder to solve. But if we change aspect to see data, it will be come eaiser.</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"e74447b3f58a3fe2a950","clientSecret":"774863e5fb16b4af9ef490f976a034237694fe13","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-1-Introduction-to-Data-Abstraction"><span class="toc-number"></span> <span class="toc-text">2.1  Introduction to Data Abstraction</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary-1"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions-1"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes-1"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-1-1-Example-Arithmetic-Operations-for-Rational-Numbers"><span class="toc-number"></span> <span class="toc-text">2.1.1   Example: Arithmetic Operations for Rational Numbers</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary-2"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions-2"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes-2"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-1-2-Abstraction-Barriers"><span class="toc-number"></span> <span class="toc-text">2.1.2   Abstraction Barriers</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary-3"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions-3"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes-3"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-1-3-What-Is-Meant-by-Data"><span class="toc-number"></span> <span class="toc-text">2.1.3   What Is Meant by Data?</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary-4"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions-4"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes-4"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-1-4-Extended-Exercise-Interval-Arithmetic"><span class="toc-number"></span> <span class="toc-text">2.1.4   Extended Exercise: Interval Arithmetic</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Vocabulary-5"><span class="toc-number">1.</span> <span class="toc-text">Vocabulary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Questions-5"><span class="toc-number">2.</span> <span class="toc-text">Questions</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Notes-5"><span class="toc-number">3.</span> <span class="toc-text">Notes</span></a></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&text=SICPJS 2. Building Abstractions With Data"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&title=SICPJS 2. Building Abstractions With Data"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&is_video=false&description=SICPJS 2. Building Abstractions With Data"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=SICPJS 2. Building Abstractions With Data&body=Check out this article: https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&title=SICPJS 2. Building Abstractions With Data"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&title=SICPJS 2. Building Abstractions With Data"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&title=SICPJS 2. Building Abstractions With Data"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&title=SICPJS 2. Building Abstractions With Data"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&name=SICPJS 2. Building Abstractions With Data&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/&t=SICPJS 2. Building Abstractions With Data"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2023
+    Koh Hom
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>

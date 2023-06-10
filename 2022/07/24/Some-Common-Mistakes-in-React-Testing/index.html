@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+    <meta name="description" content="Most of the frontend developers (at least those who I met) dislike writing tests. I asked them why, and the answer is simple: We don’t have time to do that! Well, I would like to tell you that, writin">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Some Common Mistakes in React Testing">
+<meta property="og:url" content="https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/index.html">
+<meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog">
+<meta property="og:description" content="Most of the frontend developers (at least those who I met) dislike writing tests. I asked them why, and the answer is simple: We don’t have time to do that! Well, I would like to tell you that, writin">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2022-07-24T09:49:27.000Z">
+<meta property="article:modified_time" content="2023-06-10T09:33:54.609Z">
+<meta property="article:author" content="Koh Hom">
+<meta property="article:tag" content="testing">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Some Common Mistakes in React Testing</title>
+    <!-- async scripts -->
+    <!-- Google Analytics -->
+
+
+    <!-- Umami Analytics -->
+
+
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+    <!-- rss -->
+    
+    
+	<!-- mathjax -->
+	
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#" aria-label="Menu"><i class="fa-solid fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" aria-label="Top" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fa-solid fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        <li><a class="icon" aria-label="Previous post" href="/2022/08/18/How-Testing-Speeds-Up-Your-Development/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
+        
+        <li><a class="icon" aria-label="Next post" href="/2022/07/24/Testing-Best-Practice-Tdd/"><i class="fa-solid fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" aria-label="Back to top" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" aria-label="Share post" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&text=Some Common Mistakes in React Testing"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&title=Some Common Mistakes in React Testing"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&is_video=false&description=Some Common Mistakes in React Testing"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Some Common Mistakes in React Testing&body=Check out this article: https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/"><i class="fa-solid fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&title=Some Common Mistakes in React Testing"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&title=Some Common Mistakes in React Testing"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&title=Some Common Mistakes in React Testing"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&title=Some Common Mistakes in React Testing"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&name=Some Common Mistakes in React Testing&description="><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&t=Some Common Mistakes in React Testing"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    
+    
+      <div id="toc">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Mistake-1-testing-implementation-details"><span class="toc-number">1.</span> <span class="toc-text">Mistake 1: testing implementation details</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#False-negatives"><span class="toc-number">1.1.</span> <span class="toc-text">False negatives</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#False-positives"><span class="toc-number">1.2.</span> <span class="toc-text">False positives</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Writing-too-many-harmful-tests"><span class="toc-number">1.3.</span> <span class="toc-text">Writing too many harmful tests</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Testing-Use-Cases"><span class="toc-number">1.4.</span> <span class="toc-text">Testing Use Cases</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mistake-2-100-code-coverage"><span class="toc-number">2.</span> <span class="toc-text">Mistake 2: 100% code coverage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mistake-3-repeat-x2F-coupling-testing"><span class="toc-number">3.</span> <span class="toc-text">Mistake 3: repeat&#x2F;coupling testing</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Repeat-testing"><span class="toc-number">3.1.</span> <span class="toc-text">Repeat testing</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Coupling-testing-This-name-is-created-by-me%F0%9F%A4%A3"><span class="toc-number">3.2.</span> <span class="toc-text">Coupling testing(This name is created by me🤣)</span></a></li></ol></li></ol>
+      </div>
+    
+  </span>
+</div>
+
+    
+    <div class="content index py4 ">
+        
+        <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle p-name" itemprop="name headline">
+        Some Common Mistakes in React Testing
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author p-author h-card" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span class="p-name" itemprop="name">Koh Hom</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2022-07-24T09:49:27.000Z" class="dt-published" itemprop="datePublished">2022-07-24</time>
+        
+        (Updated: <time datetime="2023-06-10T09:33:54.609Z" class="dt-updated" itemprop="dateModified">2023-06-10</time>)
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fa-solid fa-tag"></i>
+        <a class="p-category" href="/tags/testing/" rel="tag">testing</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content e-content" itemprop="articleBody">
+    <p>Most of the frontend developers (at least those who I met) dislike writing tests. I asked them why, and the answer is simple: <em>We don’t have time to do that!</em> Well, I would like to tell you that, writing tests <strong>in the right way</strong> will significantly increase your effectiveness of development (especially in the long-term), instead of wasting your time.</p>
+<p>Writing tests forces you to think about whether the abstraction you made is reasonable, and if it doesn’t, you <strong>won’t even be able to test it</strong>. And if you don’t have a well understanding of what your abstraction can do, you may <strong>get your hand dirty</strong> when writing tests for it. And that is exactly why some folks don’t like writing tests. But if you start to write tests for your project, you will gain the benefit of improving your programming skill.</p>
+<p>I want to help you write more <strong>clean</strong> and <strong>reasonable</strong> tests at beginning of your testing journey, so you can really get the benefit of tests. And here are some mistakes that you should avoid when you writing tests:</p>
+<h3 id="Mistake-1-testing-implementation-details"><a href="#Mistake-1-testing-implementation-details" class="headerlink" title="Mistake 1: testing implementation details"></a>Mistake 1: testing implementation details</h3><p>This is the NO.1 mistake in testing, which is the biggest reason why developers give up testing(I think).</p>
+<p>What are the implementation details? In simple words, it is about <strong>how to do it</strong>. We should keep in mind that we only want to test <strong>what is it.</strong></p>
+<p>Why is it so bad to test <strong>how</strong>? Shouldn’t we make sure that our function runs exactly like what we expect? Here is a simple example:</p>
+<p>Here is the component we wanna test:</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Calculator.jsx</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Calculator</span> <span class="keyword">extends</span> <span class="title class_ inherited__">React.Component</span> &#123;</span><br><span class="line">  state = &#123; <span class="attr">number</span>: <span class="number">0</span> &#125;</span><br><span class="line">  </span><br><span class="line">  setNumber = <span class="function"><span class="params">number</span> =&gt;</span> <span class="variable language_">this</span>.<span class="title function_">setState</span>(&#123; number &#125;)</span><br><span class="line">  </span><br><span class="line">  <span class="title function_">render</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; number &#125; = <span class="variable language_">this</span>.<span class="property">state</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      <span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">div</span>&gt;</span>Count: &#123;number&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">button</span> <span class="attr">onClick</span>=<span class="string">&#123;()</span> =&gt;</span> this.setNumber(number + 1)&#125;&gt;add1<span class="tag">&lt;/<span class="name">button</span>&gt;</span>  </span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">    )</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>We may test its implementation details like this(we will use Enzyme because it expose API that can test implementation details):</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Calculator.test.jsx</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> <span class="title class_">React</span> <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span></span><br><span class="line"><span class="keyword">import</span> <span class="title class_">Enzyme</span>, &#123;mount&#125; <span class="keyword">from</span> <span class="string">&#x27;enzyme&#x27;</span></span><br><span class="line"><span class="keyword">import</span> <span class="title class_">EnzymeAdapter</span> <span class="keyword">from</span> <span class="string">&#x27;enzyme-adapter-react-16&#x27;</span></span><br><span class="line"><span class="keyword">import</span> <span class="title class_">Calculator</span> <span class="keyword">from</span> <span class="string">&#x27;../Calculator&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Setup enzyme&#x27;s react adapter</span></span><br><span class="line"><span class="title class_">Enzyme</span>.<span class="title function_">configure</span>(&#123;<span class="attr">adapter</span>: <span class="keyword">new</span> <span class="title class_">EnzymeAdapter</span>()&#125;)</span><br><span class="line"></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;Calculator render number in state&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> wrapper = <span class="title function_">mount</span>(<span class="language-xml"><span class="tag">&lt;<span class="name">Calculator</span> /&gt;</span></span>)</span><br><span class="line">    </span><br><span class="line">    <span class="title function_">expect</span>(wrapper.<span class="title function_">props</span>().<span class="property">children</span>).<span class="title function_">toBe</span>(<span class="number">0</span>)</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;setNumber should sets the number state properly&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> wrapper = <span class="title function_">mount</span>(<span class="language-xml"><span class="tag">&lt;<span class="name">Calculator</span> /&gt;</span></span>)</span><br><span class="line">  </span><br><span class="line">  <span class="title function_">expect</span>(wrapper.<span class="title function_">state</span>(<span class="string">&#x27;number&#x27;</span>)).<span class="title function_">toBe</span>(<span class="number">0</span>)</span><br><span class="line">  </span><br><span class="line">  wrapper.<span class="title function_">instance</span>().<span class="title function_">setNumber</span>(<span class="number">1</span>)</span><br><span class="line">  </span><br><span class="line">  <span class="title function_">expect</span>(wrapper.<span class="title function_">state</span>(<span class="string">&#x27;number&#x27;</span>)).<span class="title function_">toBe</span>(<span class="number">1</span>)</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<h4 id="False-negatives"><a href="#False-negatives" class="headerlink" title="False negatives"></a>False negatives</h4><p>By testing implementation details, you are basically saying that: <strong>the application should do in this way!</strong> So you are ruling out the possibility of applying other implementations at the same time. What about we need to refactor with other state management libraries (like Redux, Mobx)? You will definitely get a fail after your refactor, while your implementation works correctly. This is false negatives.</p>
+<h4 id="False-positives"><a href="#False-positives" class="headerlink" title="False positives"></a>False positives</h4><p>Because you are testing <strong>how to do it</strong>, you likely forget some of the details(because the details are always so complex), which makes you don’t have the confidence that the result is what you want.</p>
+<p>Let’s say developer Joe just join our team and he decides to move the inline function to the outside. The change is like this:</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Calculator.jsx</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Calculator</span> <span class="keyword">extends</span> <span class="title class_ inherited__">React.Component</span> &#123;</span><br><span class="line">  state = &#123; <span class="attr">number</span>: <span class="number">0</span> &#125;</span><br><span class="line">  </span><br><span class="line">  setNumber = <span class="function"><span class="params">number</span> =&gt;</span> <span class="variable language_">this</span>.<span class="title function_">setState</span>(&#123; number &#125;)</span><br><span class="line">  </span><br><span class="line">  <span class="title function_">render</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; number &#125; = <span class="variable language_">this</span>.<span class="property">state</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// Joe carelessly missed the value of setNumber</span></span><br><span class="line">    <span class="keyword">const</span> <span class="title function_">handleOnClick</span> = (<span class="params"></span>) =&gt; <span class="variable language_">this</span>.<span class="title function_">setNumber</span>()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      <span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">div</span>&gt;</span>Count: &#123;number&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">button</span> <span class="attr">onClick</span>=<span class="string">&#123;handleOnClick&#125;</span>&gt;</span>add1<span class="tag">&lt;/<span class="name">button</span>&gt;</span>  </span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">    )</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>He runs all of the tests and they are all passed. So he happily makes a commit and pushes his code into the codebase. Soon, he gets complaints from his user: Why is the calculator not working? He doesn’t know why either because the tests are all passed. So he has to open his laptop and look into the codebase again to revise the code.</p>
+<p>This is because your tests don’t even make any promise that <strong>your code result is correct</strong>, so it’s not strange that you may get the wrong result in the product while the test keeps passing.</p>
+<h4 id="Writing-too-many-harmful-tests"><a href="#Writing-too-many-harmful-tests" class="headerlink" title="Writing too many harmful tests"></a>Writing too many harmful tests</h4><p>In our example, the implementation is quite simple, so we don’t need to write a lot of tests when we test the implementation details. But what about some complex components? You need to write thousands of lines of tests which not only can’t increase your confidence but also restrict the possibility of refactoring. That is why most developers start writing tests and then give up quickly.</p>
+<h4 id="Testing-Use-Cases"><a href="#Testing-Use-Cases" class="headerlink" title="Testing Use Cases"></a>Testing Use Cases</h4><p>What about we don’t test <strong>How</strong>, and test <strong>What</strong>? By testing the use cases(what will do in special cases), we are saying that: <strong>It should do something by giving some input(event).</strong></p>
+<p>This will give you the possibility to refactor or replace some implementation while you can promise that your product is doing the same thing.</p>
+<p>Let’s write the correct tests for the above example(we will use react-testing-library):</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; screen, render &#125; <span class="keyword">from</span> <span class="string">&#x27;@testing-library/react&#x27;</span></span><br><span class="line"><span class="keyword">import</span> userEvent <span class="keyword">from</span> <span class="string">&#x27;@testing-library/user-event&#x27;</span></span><br><span class="line"><span class="keyword">import</span> <span class="title class_">Calculator</span> <span class="keyword">from</span> <span class="string">&#x27;./Calculator&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// zero</span></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;it should show 0 initially&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="title function_">render</span>(<span class="language-xml"><span class="tag">&lt;<span class="name">Calculator</span> /&gt;</span></span>)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// expect screen show text Count: 0</span></span><br><span class="line">  <span class="title function_">expect</span>(screen.<span class="title function_">getByText</span>(<span class="string">&#x27;Count: 0&#x27;</span>)).<span class="title function_">toBeInTheDocument</span>()</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// one</span></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;it should add 1 when user click add1&#x27;</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="title function_">render</span>(<span class="language-xml"><span class="tag">&lt;<span class="name">Calculator</span> /&gt;</span></span>)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// simulate user click on button</span></span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(screen.<span class="title function_">getByRole</span>(<span class="string">&#x27;button&#x27;</span>))</span><br><span class="line"></span><br><span class="line">  <span class="comment">// expect screen show text Count: 1</span></span><br><span class="line">  <span class="title function_">expect</span>(screen.<span class="title function_">getByText</span>(<span class="string">&#x27;Count: 1&#x27;</span>)).<span class="title function_">toBeInTheDocument</span>()</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// many</span></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;it should add 3 when user click add1 three times&#x27;</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="title function_">render</span>(<span class="language-xml"><span class="tag">&lt;<span class="name">Calculator</span> /&gt;</span></span>)</span><br><span class="line">  </span><br><span class="line">  <span class="comment">// simulate user click on button</span></span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(screen.<span class="title function_">getByRole</span>(<span class="string">&#x27;button&#x27;</span>))</span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(screen.<span class="title function_">getByRole</span>(<span class="string">&#x27;button&#x27;</span>))</span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(screen.<span class="title function_">getByRole</span>(<span class="string">&#x27;button&#x27;</span>))</span><br><span class="line"></span><br><span class="line">  <span class="comment">// expect screen show text Count: 3</span></span><br><span class="line">  <span class="title function_">expect</span>(screen.<span class="title function_">getByText</span>(<span class="string">&#x27;Count: 3&#x27;</span>)).<span class="title function_">toBeInTheDocument</span>()</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>You can see that the tests like this allow you to refactor while it can provide you the confidence that your application is running correctly. That is awesome!</p>
+<h3 id="Mistake-2-100-code-coverage"><a href="#Mistake-2-100-code-coverage" class="headerlink" title="Mistake 2: 100% code coverage"></a>Mistake 2: 100% code coverage</h3><p>If you are trying to achieve 100% coverage in every case, <strong>you are likely wasting time</strong>, especially in frontend. Code coverage may give you the illusion that your code is well tested. But in fact, it can only tell you <strong>How much code will run during your test</strong>. Instead of <strong>Will this code work according to the business requirements</strong>. </p>
+<p>Always keep in mind that you are writing tests for increasing your confidence, and there is a <strong>trade-off</strong> of what code should you cover in testing. One thing is more important than another thing. For example, writing tests for the “About Us” pages won’t increase too much confidence for you, right? We have a lot of pure UI pages in frontend, we could cover them by <a target="_blank" rel="noopener" href="https://jestjs.io/docs/snapshot-testing#:~:text=Snapshot%20tests%20are%20a%20very,file%20stored%20alongside%20the%20test.">snapshot testing</a>, which frees your hand to do something more important.</p>
+<p>For some common libraries, trying to go for 100% coverage is totally appropriate because they are usually more isolated and small, and they are really important code due to the fact that they’re shared in multiple projects.</p>
+<h3 id="Mistake-3-repeat-x2F-coupling-testing"><a href="#Mistake-3-repeat-x2F-coupling-testing" class="headerlink" title="Mistake 3: repeat&#x2F;coupling testing"></a>Mistake 3: repeat&#x2F;coupling testing</h3><p><strong>Tests should always work in isolation.</strong> There are two types of tests that are not isolating:</p>
+<h4 id="Repeat-testing"><a href="#Repeat-testing" class="headerlink" title="Repeat testing"></a>Repeat testing</h4><p>Let’s say you have 100 tests in E2E testing that need an authenticated user. How many times do you need to run through the registration flow to be confident that the flow works? 100 times or 1 time? I think it is safe to say that if it worked once, it should work every time. <strong>Those 99 extra runs are wasted effort.</strong> </p>
+<p>So instead of running through the happy path every time, it’s a better idea to make the same HTTP request that your application makes when you register and log in a new user. Those requests will be <strong>much faster</strong> than clicking and typing around the page.</p>
+<h4 id="Coupling-testing-This-name-is-created-by-me🤣"><a href="#Coupling-testing-This-name-is-created-by-me🤣" class="headerlink" title="Coupling testing(This name is created by me🤣)"></a>Coupling testing(This name is created by me🤣)</h4><p>Let’s take a simple example here:</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> <span class="title class_">React</span> <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">Counter</span> = (<span class="params">props</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> [count, setCount] = <span class="title class_">React</span>.<span class="title function_">useState</span>(<span class="number">0</span>)</span><br><span class="line">  <span class="keyword">const</span> isMax = count &gt;= props.<span class="property">maxCount</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> <span class="title function_">handleReset</span> = (<span class="params"></span>) =&gt; <span class="title function_">setCount</span>(<span class="number">0</span>)</span><br><span class="line">  <span class="keyword">const</span> <span class="title function_">handleClick</span> = (<span class="params"></span>) =&gt; <span class="title function_">setCount</span>(<span class="function"><span class="params">currentCount</span> =&gt;</span> currentCount + <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">span</span>&gt;</span>Count: &#123;count&#125;<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">button</span> <span class="attr">onClick</span>=<span class="string">&#123;handleClick&#125;</span> <span class="attr">disabled</span>=<span class="string">&#123;isMax&#125;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        add one</span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;/<span class="name">button</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      &#123;isMax ? <span class="tag">&lt;<span class="name">button</span> <span class="attr">onClick</span>=<span class="string">&#123;handleReset&#125;</span>&gt;</span>reset<span class="tag">&lt;/<span class="name">button</span>&gt;</span> : null&#125;</span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">  )</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> &#123;<span class="title class_">Counter</span>&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>We could write tests for the component like this:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> <span class="title class_">React</span> <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123;render&#125; <span class="keyword">from</span> <span class="string">&#x27;@testing-library/react&#x27;</span></span><br><span class="line"><span class="keyword">import</span> userEvent <span class="keyword">from</span> <span class="string">&#x27;@testing-library/user-event&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123;<span class="title class_">Counter</span>&#125; <span class="keyword">from</span> <span class="string">&#x27;../counter&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> &#123; getByText, getByRole &#125; = <span class="title function_">render</span>(<span class="language-xml"><span class="tag">&lt;<span class="name">Counter</span> <span class="attr">maxCount</span>=<span class="string">&#123;2&#125;</span> /&gt;</span></span>)</span><br><span class="line"><span class="keyword">const</span> addOneButton = <span class="title function_">getByRole</span>(<span class="string">&#x27;button&#x27;</span>, &#123; <span class="attr">name</span>: <span class="string">&#x27;add one&#x27;</span> &#125;)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;it should render initial count 0&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="title function_">expect</span>(<span class="title function_">getByText</span>(<span class="string">&#x27;Count: 0&#x27;</span>)).<span class="title function_">toBeInTheDocument</span>()</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;it should render 1 when click add one button&#x27;</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(addOneButton)</span><br><span class="line">  </span><br><span class="line">  <span class="title function_">expect</span>(<span class="title function_">getByText</span>(<span class="string">&#x27;Count: 1&#x27;</span>)).<span class="title function_">toBeInTheDocument</span>()</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="title function_">test</span>(<span class="string">`it should disable add one button and show reset button when it&#x27;s hit the maxCount`</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(addOneButton)</span><br><span class="line">  </span><br><span class="line">  <span class="title function_">expect</span>(<span class="title function_">getByRole</span>(addOneButton)).<span class="title function_">toBeDisabled</span>()</span><br><span class="line">  <span class="title function_">expect</span>(<span class="title function_">getByRole</span>(<span class="string">&#x27;button&#x27;</span>, &#123; <span class="attr">name</span>: <span class="string">&#x27;reset&#x27;</span> &#125;)).<span class="title function_">toBeInTheDocument</span>()</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;it should reset count to 0 when click reset button&#x27;</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(addOneButton)</span><br><span class="line">  </span><br><span class="line">  <span class="title function_">expect</span>(<span class="title function_">getByText</span>(<span class="string">&#x27;Count: 0&#x27;</span>)).<span class="title function_">toBeInTheDocument</span>()</span><br><span class="line">&#125;)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Looks pretty good, right? We have 100% coverage of code, we are very confident to say that our code is been well tested. But wait, now developer joe takes our project and looks at those tests. He considers that the second test is unnecessary because the add one button is already tested in the following test case, so he decides to delete it. Boom! He got 3 fail tests immediately:</p>
+<p>This is because those tests are not isolated, instead, they rely on each other. So if we refactor or skip one of them, other tests are likely to fail.</p>
+<p>The solution is we can wrap the render utils into a function, and call it in every test. So that every test will get its own instance and isolate it from other tests. (You can use <code>beforeEach</code> to do the same thing here but I will show you why I don’t like it later.)</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> <span class="title class_">React</span> <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123;render&#125; <span class="keyword">from</span> <span class="string">&#x27;@testing-library/react&#x27;</span></span><br><span class="line"><span class="keyword">import</span> userEvent <span class="keyword">from</span> <span class="string">&#x27;@testing-library/user-event&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123;<span class="title class_">Counter</span>&#125; <span class="keyword">from</span> <span class="string">&#x27;../counter&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">renderCounter</span>(<span class="params">props</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; getByText, getByRole &#125; = <span class="title function_">render</span>(<span class="language-xml"><span class="tag">&lt;<span class="name">Counter</span> <span class="attr">maxCount</span>=<span class="string">&#123;2&#125;</span> &#123;<span class="attr">...props</span>&#125; /&gt;</span></span>)</span><br><span class="line">  <span class="keyword">const</span> addOneButton = <span class="title function_">getByRole</span>(<span class="string">&#x27;button&#x27;</span>, &#123; <span class="attr">name</span>: <span class="string">&#x27;add one&#x27;</span> &#125;)</span><br><span class="line">  <span class="keyword">return</span> &#123; getByText, getByRole, addOneButton &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;it should render initial count 0&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; getByText &#125; = <span class="title function_">renderCounter</span>()</span><br><span class="line">  <span class="title function_">expect</span>(<span class="title function_">getByText</span>(<span class="string">&#x27;Count: 0&#x27;</span>)).<span class="title function_">toBeInTheDocument</span>()</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;it should render 1 when click add one button&#x27;</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; getByText, addOneButton &#125; = <span class="title function_">renderCounter</span>()</span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(addOneButton)</span><br><span class="line">  </span><br><span class="line">  <span class="title function_">expect</span>(<span class="title function_">getByText</span>(<span class="string">&#x27;Count: 1&#x27;</span>)).<span class="title function_">toBeInTheDocument</span>()</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="title function_">test</span>(<span class="string">`it should disable add one button and show reset button when it&#x27;s hit the maxCount`</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; getByRole, addOneButton &#125; = <span class="title function_">renderCounter</span>()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(addOneButton)</span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(addOneButton)</span><br><span class="line"></span><br><span class="line">  <span class="title function_">expect</span>(addOneButton).<span class="title function_">toBeDisabled</span>()</span><br><span class="line">  <span class="title function_">expect</span>(<span class="title function_">getByRole</span>(<span class="string">&#x27;button&#x27;</span>, &#123; <span class="attr">name</span>: <span class="string">&#x27;reset&#x27;</span> &#125;)).<span class="title function_">toBeInTheDocument</span>()</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="title function_">test</span>(<span class="string">&#x27;it should reset count to 0 when click reset button&#x27;</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; getByText, getByRole &#125; = <span class="title function_">renderCounter</span>()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(addOneButton)</span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(addOneButton)</span><br><span class="line">  <span class="keyword">await</span> userEvent.<span class="title function_">click</span>(<span class="title function_">getByRole</span>(<span class="string">&#x27;button&#x27;</span>, &#123; <span class="attr">name</span>: <span class="string">&#x27;reset&#x27;</span> &#125;))</span><br><span class="line"></span><br><span class="line">  <span class="title function_">expect</span>(<span class="title function_">getByText</span>(<span class="string">&#x27;Count: 0&#x27;</span>)).<span class="title function_">toBeInTheDocument</span>()</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"e74447b3f58a3fe2a950","clientSecret":"774863e5fb16b4af9ef490f976a034237694fe13","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+        
+          <li><a href="/">Home</a></li>
+        
+          <li><a href="/about/">About</a></li>
+        
+          <li><a href="/archives/">Writing</a></li>
+        
+          <li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    
+    
+      <div id="toc-footer" style="display: none">
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#Mistake-1-testing-implementation-details"><span class="toc-number">1.</span> <span class="toc-text">Mistake 1: testing implementation details</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#False-negatives"><span class="toc-number">1.1.</span> <span class="toc-text">False negatives</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#False-positives"><span class="toc-number">1.2.</span> <span class="toc-text">False positives</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Writing-too-many-harmful-tests"><span class="toc-number">1.3.</span> <span class="toc-text">Writing too many harmful tests</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Testing-Use-Cases"><span class="toc-number">1.4.</span> <span class="toc-text">Testing Use Cases</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mistake-2-100-code-coverage"><span class="toc-number">2.</span> <span class="toc-text">Mistake 2: 100% code coverage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mistake-3-repeat-x2F-coupling-testing"><span class="toc-number">3.</span> <span class="toc-text">Mistake 3: repeat&#x2F;coupling testing</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Repeat-testing"><span class="toc-number">3.1.</span> <span class="toc-text">Repeat testing</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Coupling-testing-This-name-is-created-by-me%F0%9F%A4%A3"><span class="toc-number">3.2.</span> <span class="toc-text">Coupling testing(This name is created by me🤣)</span></a></li></ol></li></ol>
+      </div>
+    
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.facebook.com/sharer.php?u=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://twitter.com/share?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&text=Some Common Mistakes in React Testing"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.linkedin.com/shareArticle?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&title=Some Common Mistakes in React Testing"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://pinterest.com/pin/create/bookmarklet/?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&is_video=false&description=Some Common Mistakes in React Testing"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=Some Common Mistakes in React Testing&body=Check out this article: https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/"><i class="fa-solid fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://getpocket.com/save?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&title=Some Common Mistakes in React Testing"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://reddit.com/submit?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&title=Some Common Mistakes in React Testing"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.stumbleupon.com/submit?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&title=Some Common Mistakes in React Testing"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://digg.com/submit?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&title=Some Common Mistakes in React Testing"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="http://www.tumblr.com/share/link?url=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&name=Some Common Mistakes in React Testing&description="><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" target="_blank" rel="noopener" href="https://news.ycombinator.com/submitlink?u=https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/&t=Some Common Mistakes in React Testing"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fa-solid fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        
+          <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fa-solid fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fa-solid fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2020-2023
+    Koh Hom
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+        <!--
+       --><li><a href="/">Home</a></li><!--
+     --><!--
+       --><li><a href="/about/">About</a></li><!--
+     --><!--
+       --><li><a href="/archives/">Writing</a></li><!--
+     --><!--
+       --><li><a target="_blank" rel="noopener" href="http://github.com/probberechts">Projects</a></li><!--
+     -->
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+
+
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" onload="this.onload=null;this.rel='stylesheet'"/>
+
+
+    <!-- jquery -->
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" crossorigin="anonymous"></script>
+
+
+
+
+<!-- clipboard -->
+
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.7/clipboard.min.js" crossorigin="anonymous"></script>
+  
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="fa-regular fa-clone"></i>';
+    btn += '</span>';
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Baidu Analytics -->
+
+<!-- Cloudflare Analytics -->
+
+<!-- Disqus Comments -->
+
+<!-- utterances Comments -->
+
+</body>
+</html>
