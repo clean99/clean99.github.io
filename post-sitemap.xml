@@ -3,7 +3,7 @@
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://clean99.github.io</loc>
-    <lastmod>2023-11-28T13:25:03+08:00</lastmod>
+    <lastmod>2023-11-28T13:37:43+08:00</lastmod>
     <priority>1</priority>
     <changefreq>daily</changefreq>
   </url>
@@ -56,13 +56,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://clean99.github.io/2022/07/24/Testing-Best-Practice-Tdd/</loc>
+    <loc>https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/</loc>
     <lastmod>2023-06-10T17:33:54+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/</loc>
+    <loc>https://clean99.github.io/2022/07/24/Testing-Best-Practice-Tdd/</loc>
     <lastmod>2023-06-10T17:33:54+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
@@ -74,13 +74,13 @@
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://clean99.github.io/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/</loc>
+    <loc>https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/</loc>
     <lastmod>2023-06-10T17:33:54+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/</loc>
+    <loc>https://clean99.github.io/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/</loc>
     <lastmod>2023-06-10T17:33:54+08:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
