@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>React Server Component Internals(Source Code Review)</title>
+  
+  <link rel="canonical" href="https://clean99.github.io/2024/04/10/React-Server-Component-Internals/">
+  
+  <meta name="description" content="What is React Server Component(RSC)?React Server Component is a new feature of React that allows the server and the client(browser) to collaborate in ">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.ioundefined">
+  
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="React Server Component Internals(Source Code Review)" />
+  
+  <meta property="og:description" content="What is React Server Component(RSC)?React Server Component is a new feature of React that allows the server and the client(browser) to collaborate in ">
+  
+  <meta property="og:url" content="https://clean99.github.io/2024/04/10/React-Server-Component-Internals/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="React Server Component Internals(Source Code Review)">
+  
+  <meta name="twitter:description" content="What is React Server Component(RSC)?React Server Component is a new feature of React that allows the server and the client(browser) to collaborate in ">
+  
+  
+  <meta name="twitter:image" content="https://clean99.github.ioundefined">
+  
+  <meta name="twitter:url" content="https://clean99.github.io/2024/04/10/React-Server-Component-Internals/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="six columns ml-1">
+    <h1 class="mt-2">
+      Hi Folks.
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/">Home</a>
+        
+          
+          <a href="/Works" class="ml">Works</a>
+          
+        
+          
+          <a href="/About" class="ml">About</a>
+          
+        
+          
+          <a href="/Links" class="ml">Links</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">Email</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <h2>React Server Component Internals(Source Code Review)</h2>
+
+  <h2 id="What-is-React-Server-Component-RSC"><a href="#What-is-React-Server-Component-RSC" class="headerlink" title="What is React Server Component(RSC)?"></a>What is React Server Component(RSC)?</h2><p>React Server Component is a new feature of React that allows the server and the client(browser) to collaborate in rendering React applications. Simply put, it moves part of the rendering process to the server to improve the overall performance.</p>
+<h3 id="Typical-Construction-Flow-of-React-Element-Tree"><a href="#Typical-Construction-Flow-of-React-Element-Tree" class="headerlink" title="Typical Construction Flow of React Element Tree"></a>Typical Construction Flow of React Element Tree</h3><p>To better understand why we need to move the rendering process to the server, let’s look at how the client-side render method renders a react element tree(JSX):</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// App Component</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">App</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">ComponentA</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">ComponentB</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ComponentA</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ComponentA</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="language-xml"><span class="tag">&lt;<span class="name">h1</span> <span class="attr">onClick</span>=<span class="string">&#123;()</span> =&gt;</span> alert(&quot;cool!&quot;)&#125;&gt;Hello from Component A<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ComponentB</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ComponentB</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> data = <span class="keyword">await</span> <span class="title function_">fetchDataApi</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span>&#123;data&#125; fetched from Component B<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>The above Components will be transformed into <code>Virtual DOM</code>(react element tree) after we use <code>React.createElement</code> to render it:</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title class_">App</span> = &#123;</span><br><span class="line">  <span class="attr">$$typeof</span>: <span class="title class_">Symbol</span>(react.<span class="property">element</span>),</span><br><span class="line">  <span class="attr">type</span>: <span class="string">&quot;div&quot;</span>,</span><br><span class="line">  <span class="attr">props</span>: &#123;</span><br><span class="line">    <span class="attr">children</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">$$typeof</span>: <span class="title class_">Symbol</span>(react.<span class="property">element</span>),</span><br><span class="line">        <span class="attr">type</span>: <span class="title class_">ComponentA</span>,</span><br><span class="line">        <span class="attr">props</span>: &#123;</span><br><span class="line">          <span class="attr">children</span>: [</span><br><span class="line">             <span class="attr">$$typeof</span>: <span class="title class_">Symbol</span>(react.<span class="property">element</span>),</span><br><span class="line">              <span class="attr">type</span>: <span class="string">&quot;h1&quot;</span>,</span><br><span class="line">              <span class="attr">props</span>: &#123;</span><br><span class="line">                <span class="attr">onClick</span>: <span class="function">() =&gt;</span> <span class="title function_">alert</span>(<span class="string">&quot;cool!&quot;</span>)</span><br><span class="line">              &#125;,</span><br><span class="line">          ]</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">$$typeof</span>: <span class="title class_">Symbol</span>(react.<span class="property">element</span>),</span><br><span class="line">        <span class="attr">type</span>: <span class="title class_">ComponentB</span>,</span><br><span class="line">        <span class="attr">props</span>: &#123;</span><br><span class="line">          <span class="attr">children</span>: [</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">          ]</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Then <code>ReactDOM.render</code> will render this react element tree into <code>HTML</code> format and attach it to HTML.</p>
+<p>Two things to notice here are:</p>
+<ol>
+<li><strong>The whole tree construction process is done in the browser</strong>: This means that if one of your components has heavy logic like <code>ComponentB</code>‘s <code>fetchData</code>, it will slow down the tree construction and occupy the resource of the browser.</li>
+<li><strong>There are function existed in this tree(type, onClick prop)</strong>: This makes the <strong>Serialization</strong>(Turn the tree to a JSON string) infeasible.</li>
+</ol>
+<h3 id="RSC-Construction-Flow-of-React-Element-Tree"><a href="#RSC-Construction-Flow-of-React-Element-Tree" class="headerlink" title="RSC Construction Flow of React Element Tree"></a>RSC Construction Flow of React Element Tree</h3><p>RSC improves the performance via separating those calculation-intense components rendered as server components, while those components that create interactive logic are handled by the client as client components.</p>
+<img alt="RSC 1" src="/img/rsc/rsc-1.png">
+
+<p>When a client requires a server component, the server side will first construct the react element tree by parsing all server components on the tree skipping all client components, and leaving a placeholder with an instruction to tell the client side to fill it up in a browser(We will walk through the detail implementation later).</p>
+<p>So when user open a page build with rsc, they will typically see server components are rendered, and then the components with interactive logic are rendered.</p>
+<h3 id="What’s-the-differences-between-RSC-and-SSR"><a href="#What’s-the-differences-between-RSC-and-SSR" class="headerlink" title="What’s the differences between RSC and SSR?"></a>What’s the differences between RSC and SSR?</h3><p>There is another concept that is easy to mix with RSC, which is SSR(server-side rendering). Though they all doing some jobs in server side, they are quite different.</p>
+<p>The main difference is <strong>granularity</strong>. SSR renders a page on server side each request, while the RSC render a component each request, and it request the client side to fill up all the placeholder inside the component to finish.</p>
+<p>In other word, SSR’s output is a HTML, and RSC’s output is a react element tree.</p>
+<p>In SSR, after client side gets the HTML, it will use (hydrate(reactNode, domNode, callback?)[<a target="_blank" rel="noopener" href="https://react.dev/reference/react-dom/hydrate]">https://react.dev/reference/react-dom/hydrate]</a> to attach the html with react node, so that the react can take care of DOM(enabling interactive events). And RSC doesn’t require hydrate process because client components are rendered in browser.</p>
+<h2 id="Why-RSC"><a href="#Why-RSC" class="headerlink" title="Why RSC?"></a>Why RSC?</h2><p>So what is the benefits of RSC? The browser is a good place for this, because it allows your React application to be interactive — you can install event handlers, keep track of state, mutate your React tree in response to events, and update the DOM efficiently. But in these use cases, react server components could be a better choice:</p>
+<ol>
+<li><strong>Rendering a slice of data(fetching a lot of data)</strong>: Rendering the component in server side can allow you directly access the data, you don’t need to hop through different public API endpoint. And if your component only require a small slice of data, this can reduce the bundle size of client request because it only return the data that it needs.</li>
+<li><strong>Access sensitive logic and data</strong>: server component is stored and ran in server, which means that you don’t need to expose your data and logic to public, this increases safety.</li>
+<li><strong>Loading heavy code module</strong>: When other people try hard to think about how to use limited resource of browser to load heavy code module(like using service worker), you put the code in server instead, the server is more scalable and stable with much more resource than browser.</li>
+</ol>
+<h2 id="Components"><a href="#Components" class="headerlink" title="Components"></a>Components</h2><p>Without further ado, let’s start introducing how react(and other frameworks) implement RSC. To control the complexity, we will separate the RSC system into several components, simplified them and build them one by one.</p>
+<h3 id="Serialization"><a href="#Serialization" class="headerlink" title="Serialization"></a>Serialization</h3><p>The life of a page using RSC always starts at the server, server will render an incomplete <strong>serializable</strong> react element tree and send to client, let the client to fill up the tree and render as HTML. Let’s start by looking at how server render an <strong>serializable</strong> react element tree in this section.</p>
+<ul>
+<li><strong>Separate server component from client component</strong>: In order to handle the component correctly, we need a way to separate server&#x2F;client component. React team defines this based on the extension of the file: <code>.server.jsx</code> and <code>.client.jsx</code>. This Definition is easy for humans and bundlers to tell them apart.</li>
+</ul>
+<p>We modify our previous example a bit using RSC like this:</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// App.server.jsx</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">App</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">ComponentA</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">ComponentB</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ComponentA.client.jsx</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ComponentA</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="language-xml"><span class="tag">&lt;<span class="name">h1</span> <span class="attr">onClick</span>=<span class="string">&#123;()</span> =&gt;</span> alert(&quot;cool!&quot;)&#125;&gt;Hello from Component A<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ComponentB.server.jsx</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ComponentB</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> data = <span class="keyword">await</span> <span class="title function_">fetchDataApi</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span>&#123;data&#125; fetched from Component B<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>The serialization output is like this:</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title class_">App</span> = &#123;</span><br><span class="line">  <span class="attr">$$typeof</span>: <span class="title class_">Symbol</span>(react.<span class="property">element</span>),</span><br><span class="line">  <span class="attr">type</span>: <span class="string">&quot;div&quot;</span>,</span><br><span class="line">  <span class="attr">props</span>: &#123;</span><br><span class="line">    <span class="attr">children</span>: [</span><br><span class="line">      <span class="comment">// ComponentA client component</span></span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">$$typeof</span>: <span class="title class_">Symbol</span>(react.<span class="property">element</span>),</span><br><span class="line">        <span class="attr">type</span>: <span class="title class_">ComponentA</span>,</span><br><span class="line">        <span class="attr">props</span>: &#123;</span><br><span class="line">          <span class="attr">children</span>: [</span><br><span class="line">             <span class="attr">$$typeof</span>: <span class="title class_">Symbol</span>(react.<span class="property">element</span>),</span><br><span class="line">              <span class="attr">type</span>: <span class="string">&quot;h1&quot;</span>,</span><br><span class="line">              <span class="attr">props</span>: &#123;</span><br><span class="line">                <span class="attr">onClick</span>: <span class="function">() =&gt;</span> <span class="title function_">alert</span>(<span class="string">&quot;cool!&quot;</span>)</span><br><span class="line">              &#125;,</span><br><span class="line">          ]</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="comment">//  ComponentB server component</span></span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">$$typeof</span>: <span class="title class_">Symbol</span>(react.<span class="property">element</span>),</span><br><span class="line">        <span class="attr">type</span>: <span class="title class_">ComponentB</span>,</span><br><span class="line">        <span class="attr">props</span>: &#123;</span><br><span class="line">          <span class="attr">children</span>: [</span><br><span class="line">            <span class="comment">// ...</span></span><br><span class="line">          ]</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>There are two things that it is not available to <code>serialize</code> here:</p>
+<ol>
+<li><strong>The <code>type</code> field</strong>: <code>type</code> field is a function when it is a react component, which is not JSON-serializable.(It is coupling with memory.)</li>
+<li><strong>The props of client component</strong>: client component may contain <code>onClick: () =&gt; alert(&quot;cool!&quot;)</code> function, which is also not JSON-serializable.</li>
+</ol>
+<p>To JSON-stringify everything, react passes a <code>replacer</code> function to <code>JSON.stringify</code>, to deal with the <code>type</code> function reference and replace client component with a placeholder. Check out the source code (resolveModelToJSON)[<a target="_blank" rel="noopener" href="https://github.com/facebook/react/blob/42c30e8b122841d7fe72e28e36848a6de1363b0c/packages/react-server/src/ReactFlightServer.js#L368]">https://github.com/facebook/react/blob/42c30e8b122841d7fe72e28e36848a6de1363b0c/packages/react-server/src/ReactFlightServer.js#L368]</a>.</p>
+<p>Here I create a simplified version to help you understand:</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// value is the react model we pass</span></span><br><span class="line"><span class="comment">// this is in server side so we have request context</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">resolveModelToJSON</span>(<span class="params">request, parent, key, value</span>) &#123;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span>  (</span><br><span class="line">    <span class="keyword">typeof</span> value === <span class="string">&#x27;object&#x27;</span> &amp;&amp;</span><br><span class="line">    value !== <span class="literal">null</span> &amp;&amp;</span><br><span class="line">    value.<span class="property">$$typeof</span> === <span class="variable constant_">REACT_ELEMENT_TYPE</span></span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="attr">element</span>: <span class="title class_">React</span>$Element&lt;<span class="built_in">any</span>&gt; = value;</span><br><span class="line">    <span class="comment">// server component or plain html element</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      value = <span class="title function_">attemptResolveElement</span>(</span><br><span class="line">        element.<span class="property">type</span>,</span><br><span class="line">        element.<span class="property">key</span>,</span><br><span class="line">        element.<span class="property">ref</span>,</span><br><span class="line">        element.<span class="property">props</span>,</span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// client side component</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isModuleReference</span>(value)) &#123;</span><br><span class="line">      <span class="comment">// get file path like &quot;./src/ClientComponent.client.js&quot;</span></span><br><span class="line">      <span class="comment">// name is the file export, e.g. name: &quot;default&quot; -&gt; ClientComponent is the default export...</span></span><br><span class="line">      <span class="keyword">const</span> <span class="attr">moduleMetaData</span>: <span class="title class_">ModuleMetaData</span> = <span class="title function_">resolveModuleMetaData</span>(</span><br><span class="line">        request.<span class="property">bundlerConfig</span>,</span><br><span class="line">        moduleReference,</span><br><span class="line">      );</span><br><span class="line">      <span class="comment">// placeholder++</span></span><br><span class="line">      request.<span class="property">pendingChunks</span>++;</span><br><span class="line">      <span class="comment">// assign an ID for this module</span></span><br><span class="line">      <span class="keyword">const</span> moduleId = request.<span class="property">nextChunkId</span>++;</span><br><span class="line">      <span class="comment">// add module meta data to chunk</span></span><br><span class="line">      <span class="title function_">emitModuleChunk</span>(request, moduleId, moduleMetaData);</span><br><span class="line">      <span class="comment">// cache</span></span><br><span class="line">      writtenModules.<span class="title function_">set</span>(moduleKey, moduleId);</span><br><span class="line">      <span class="comment">// return id as a reference</span></span><br><span class="line">      <span class="keyword">return</span> <span class="title function_">serializeByValueID</span>(moduleId);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">function</span> <span class="title function_">attemptResolveElement</span>(<span class="params"></span></span><br><span class="line"><span class="params">    <span class="keyword">type</span>: <span class="built_in">any</span>,</span></span><br><span class="line"><span class="params">    key: <span class="literal">null</span> | React$Key,</span></span><br><span class="line"><span class="params">    ref: mixed,</span></span><br><span class="line"><span class="params">    props: <span class="built_in">any</span>,</span></span><br><span class="line"><span class="params">  </span>): <span class="title class_">ReactModel</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="keyword">type</span> === <span class="string">&#x27;function&#x27;</span>) &#123;</span><br><span class="line">      <span class="comment">// This is a server-side component.</span></span><br><span class="line">      <span class="comment">// render it directly using props and return the result</span></span><br><span class="line">      <span class="keyword">return</span> <span class="title function_">type</span>(props);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="keyword">typeof</span> <span class="keyword">type</span> === <span class="string">&#x27;string&#x27;</span>) &#123;</span><br><span class="line">      <span class="comment">// This is a host element. E.g. HTML.</span></span><br><span class="line">      <span class="comment">// It is already serializable, return it directly</span></span><br><span class="line">      <span class="keyword">return</span> [<span class="variable constant_">REACT_ELEMENT_TYPE</span>, <span class="keyword">type</span>, key, props];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// client component, leave it here</span></span><br><span class="line">    <span class="comment">// This might be a built-in React component. We&#x27;ll let the client decide.</span></span><br><span class="line">    <span class="comment">// Any built-in works as long as its props are serializable.</span></span><br><span class="line">    <span class="keyword">return</span> [<span class="variable constant_">REACT_ELEMENT_TYPE</span>, <span class="keyword">type</span>, key, props];</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">ModuleMetaData</span> = &#123;</span><br><span class="line">  <span class="attr">id</span>: <span class="built_in">string</span>,</span><br><span class="line">  <span class="attr">name</span>: <span class="built_in">string</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">resolveModuleMetaData</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="attr">id</span>: moduleReference.<span class="property">filepath</span>,</span><br><span class="line">    <span class="attr">name</span>: moduleReference.<span class="property">name</span>,</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>The output of client component is like this:</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">$$typeof</span>: <span class="title class_">Symbol</span>(react.<span class="property">element</span>),</span><br><span class="line">  <span class="comment">// The type field  now has a reference object,</span></span><br><span class="line">  <span class="comment">// instead of the actual component function</span></span><br><span class="line">  <span class="attr">type</span>: &#123;</span><br><span class="line">    <span class="attr">$$typeof</span>: <span class="title class_">Symbol</span>(react.<span class="property">module</span>.<span class="property">reference</span>),</span><br><span class="line">    <span class="comment">// ClientComponent is the default export...</span></span><br><span class="line">    <span class="attr">name</span>: <span class="string">&quot;default&quot;</span>,</span><br><span class="line">    <span class="comment">// from this file!</span></span><br><span class="line">    <span class="attr">filename</span>: <span class="string">&quot;./src/ClientComponent.client.js&quot;</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">props</span>: &#123; <span class="attr">children</span>: <span class="string">&quot;oh my&quot;</span> &#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>This whole process happens during <strong>bundling</strong>. React has a official <strong>react-server-dom-webpack</strong> loader which can match ***.client.jsx** and turn them to <code>moduleReference</code> object.</p>
+<p>At the end of the serialization process, we send a JSON that represent this serializable React tree to client like this:</p>
+<img alt='RSC 2' src='/img/rsc/rsc-2.png'>
+
+<p>Three things happened:</p>
+<ol>
+<li>html tags keep the same.</li>
+<li>server components rendered.</li>
+<li>client components became <code>moduleReference</code> object.</li>
+</ol>
+<h3 id="Suspense-Streaming"><a href="#Suspense-Streaming" class="headerlink" title="Suspense(Streaming)"></a>Suspense(Streaming)</h3><p>Now we managed to separate part of work to server, so that we can expect a better performance when rendering. Because the output is serializable, we can do even more. Now client side needs to wait until the whole react element tree is received from server side, there are a lot of time is wasted in client side. We can apply <strong>streaming</strong> concept to make this process progressively. <strong>Streaming</strong> means that server side will send the react element tree slice by slice during the construction process, instead of sending the whole tree until the construction is done. The <strong>Suspense</strong> feature in react plays an important role to implement this.</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// The Suspense component allows us to wait for the DataFetchingComponent to load</span></span><br><span class="line"><span class="comment">// while showing some fallback content.</span></span><br><span class="line"><span class="comment">// When the DataFetchingComponent is loaded, it will replace the fallback content.</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">DataFetchingComponent</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> [data, setData] = <span class="title function_">useState</span>(<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Fetch data on component mount</span></span><br><span class="line">  <span class="title function_">useEffect</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="title function_">fetchData</span>().<span class="title function_">then</span>(<span class="function"><span class="params">data</span> =&gt;</span> <span class="title function_">setData</span>(data));</span><br><span class="line">  &#125;, []);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// If data is not yet fetched, return null</span></span><br><span class="line">  <span class="keyword">if</span> (!data) <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span>&#123;data&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">App</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="comment">// Wrap the data fetching component inside the Suspense component</span></span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">Suspense</span> <span class="attr">fallback</span>=<span class="string">&#123;</span>&lt;<span class="attr">div</span>&gt;</span>Loading...<span class="tag">&lt;/<span class="name">div</span>&gt;</span>&#125;&gt;</span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">DataFetchingComponent</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">Suspense</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>There are two places that RSC will use suspense feature to optimaze performance:</p>
+<ol>
+<li><strong>Server component rendering</strong><br>Server component utilizes this feature to output a suspense placeholder(promise) when the server component is fetching data, or doing heavy calculation before finishing rendering. Once the rendering is finished, it will push a completed component chunk to client side and ask it to fill up the tree.</li>
+</ol>
+<p>Here is the simple implementation:</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">resolveModelToJSON</span>(<span class="params"></span></span><br><span class="line"><span class="params">  request: Request,</span></span><br><span class="line"><span class="params">  parent: &#123;+[key: <span class="built_in">string</span> | <span class="built_in">number</span>]: ReactModel&#125; | $ReadOnlyArray&lt;ReactModel&gt;,</span></span><br><span class="line"><span class="params">  key: <span class="built_in">string</span>,</span></span><br><span class="line"><span class="params">  value: ReactModel,</span></span><br><span class="line"><span class="params"></span>): <span class="title class_">ReactJSONValue</span> &#123;</span><br><span class="line">  <span class="comment">// Resolve server components.</span></span><br><span class="line">  <span class="keyword">while</span> (</span><br><span class="line">    <span class="keyword">typeof</span> value === <span class="string">&#x27;object&#x27;</span> &amp;&amp;</span><br><span class="line">    value !== <span class="literal">null</span> &amp;&amp;</span><br><span class="line">    value.<span class="property">$$typeof</span> === <span class="variable constant_">REACT_ELEMENT_TYPE</span></span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> Concatenate keys of parents onto children.</span></span><br><span class="line">    <span class="keyword">const</span> <span class="attr">element</span>: <span class="title class_">React</span>$Element&lt;<span class="built_in">any</span>&gt; = (<span class="attr">value</span>: <span class="built_in">any</span>);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="comment">// Attempt to render the server component.</span></span><br><span class="line">      value = <span class="title function_">attemptResolveElement</span>(</span><br><span class="line">        element.<span class="property">type</span>,</span><br><span class="line">        element.<span class="property">key</span>,</span><br><span class="line">        element.<span class="property">ref</span>,</span><br><span class="line">        element.<span class="property">props</span>,</span><br><span class="line">      );</span><br><span class="line">    &#125; <span class="keyword">catch</span> (x) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">typeof</span> x === <span class="string">&#x27;object&#x27;</span> &amp;&amp; x !== <span class="literal">null</span> &amp;&amp; <span class="keyword">typeof</span> x.<span class="property">then</span> === <span class="string">&#x27;function&#x27;</span>) &#123;</span><br><span class="line">        <span class="comment">// Something suspended, we&#x27;ll need to create a new segment and resolve it later.</span></span><br><span class="line">        request.<span class="property">pendingChunks</span>++;</span><br><span class="line">        <span class="keyword">const</span> newSegment = <span class="title function_">createSegment</span>(request, value);</span><br><span class="line">        <span class="keyword">const</span> ping = newSegment.<span class="property">ping</span>;</span><br><span class="line">        <span class="comment">// when x promise is finished, push completed chunk to client side</span></span><br><span class="line">        x.<span class="title function_">then</span>(ping, ping);</span><br><span class="line">        <span class="keyword">return</span> <span class="title function_">serializeByRefID</span>(newSegment.<span class="property">id</span>);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><strong>Client component rendering</strong></li>
+</ol>
+<p>Remember when server sends react element tree to client side, client components are still yet to render, so they will suspense first until the client renders them.</p>
+<p>This suspense and stream feature enable the browser too incrementally render the data as they become available.</p>
+<p>You might wonder how can a react element tree(JSON) become a stream, react server component use a simple format to make this possible. The format is like this:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">M1</span>:&#123;<span class="string">&quot;id&quot;</span>:<span class="string">&quot;./src/ClientComponent.client.js&quot;</span>,<span class="string">&quot;chunks&quot;</span>:[<span class="string">&quot;client1&quot;</span>],<span class="string">&quot;name&quot;</span>:<span class="string">&quot;&quot;</span>&#125;</span><br><span class="line"><span class="attr">J0</span>:[<span class="string">&quot;$&quot;</span>,<span class="string">&quot;@1&quot;</span>,<span class="literal">null</span>,&#123;<span class="string">&quot;children&quot;</span>:[<span class="string">&quot;$&quot;</span>,<span class="string">&quot;span&quot;</span>,<span class="literal">null</span>,&#123;<span class="string">&quot;children&quot;</span>:<span class="string">&quot;Hello from server land&quot;</span>&#125;]&#125;]</span><br></pre></td></tr></table></figure>
+
+<p>The lines that start with <code>M</code> defines a client component module reference, with the information needed to look up the component function in the client bundles.</p>
+<p>The line starting with <code>J</code> defines an actual React element tree, with things like <code>@1</code> referencing client components defined by the <code>M</code> lines.</p>
+<p>This format is very streamable — Given that each row is a module&#x2F;component, as soon as the client has read a whole row, it can parse a snippet of JSON and make some progress.</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Tweets.server.js</span></span><br><span class="line"><span class="keyword">import</span> &#123; fetch &#125; <span class="keyword">from</span> <span class="string">&#x27;react-fetch&#x27;</span> <span class="comment">// React&#x27;s Suspense-aware fetch()</span></span><br><span class="line"><span class="keyword">import</span> <span class="title class_">Tweet</span> <span class="keyword">from</span> <span class="string">&#x27;./Tweet.client&#x27;</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">function</span> <span class="title function_">Tweets</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> tweets = <span class="title function_">fetch</span>(<span class="string">`/tweets`</span>).<span class="title function_">json</span>()</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      &#123;tweets.slice(0, 2).map((tweet) =&gt; (</span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">li</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">          <span class="tag">&lt;<span class="name">Tweet</span> <span class="attr">tweet</span>=<span class="string">&#123;tweet&#125;</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;/<span class="name">li</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      ))&#125;</span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span></span><br><span class="line">  )</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Tweet.client.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">function</span> <span class="title function_">Tweet</span>(<span class="params">&#123; tweet &#125;</span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="language-xml"><span class="tag">&lt;<span class="name">div</span> <span class="attr">onClick</span>=<span class="string">&#123;()</span> =&gt;</span> alert(`Written by $&#123;tweet.username&#125;`)&#125;&gt;&#123;tweet.body&#125;<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// OuterServerComponent.server.js</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">function</span> <span class="title function_">OuterServerComponent</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">ClientComponent</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">ServerComponent</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">Suspense</span> <span class="attr">fallback</span>=<span class="string">&#123;</span>&#x27;<span class="attr">Loading</span> <span class="attr">tweets...</span>&#x27;&#125;&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">Tweets</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;/<span class="name">Suspense</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">ClientComponent</span>&gt;</span></span></span><br><span class="line">  )</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>The output stream is like this:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">M1</span>:&#123;<span class="string">&quot;id&quot;</span>:<span class="string">&quot;./src/ClientComponent.client.js&quot;</span>,<span class="string">&quot;chunks&quot;</span>:[<span class="string">&quot;client1&quot;</span>],<span class="string">&quot;name&quot;</span>:<span class="string">&quot;&quot;</span>&#125;</span><br><span class="line"><span class="attr">S2</span>:<span class="string">&quot;react.suspense&quot;</span></span><br><span class="line"><span class="attr">J0</span>:[<span class="string">&quot;$&quot;</span>,<span class="string">&quot;@1&quot;</span>,<span class="literal">null</span>,&#123;<span class="string">&quot;children&quot;</span>:[[<span class="string">&quot;$&quot;</span>,<span class="string">&quot;span&quot;</span>,<span class="literal">null</span>,&#123;<span class="string">&quot;children&quot;</span>:<span class="string">&quot;Hello from server land&quot;</span>&#125;],[<span class="string">&quot;$&quot;</span>,<span class="string">&quot;$2&quot;</span>,<span class="literal">null</span>,&#123;<span class="string">&quot;fallback&quot;</span>:<span class="string">&quot;Loading tweets...&quot;</span>,<span class="string">&quot;children&quot;</span>:<span class="string">&quot;@3&quot;</span>&#125;]]&#125;]</span><br><span class="line"><span class="attr">M4</span>:&#123;<span class="string">&quot;id&quot;</span>:<span class="string">&quot;./src/Tweet.client.js&quot;</span>,<span class="string">&quot;chunks&quot;</span>:[<span class="string">&quot;client8&quot;</span>],<span class="string">&quot;name&quot;</span>:<span class="string">&quot;&quot;</span>&#125;</span><br><span class="line"><span class="attr">J3</span>:[<span class="string">&quot;$&quot;</span>,<span class="string">&quot;ul&quot;</span>,<span class="literal">null</span>,&#123;<span class="string">&quot;children&quot;</span>:[[<span class="string">&quot;$&quot;</span>,<span class="string">&quot;li&quot;</span>,<span class="literal">null</span>,&#123;<span class="string">&quot;children&quot;</span>:[<span class="string">&quot;$&quot;</span>,<span class="string">&quot;@4&quot;</span>,<span class="literal">null</span>,&#123;<span class="string">&quot;tweet&quot;</span>:&#123;...&#125;&#125;&#125;]&#125;],[<span class="string">&quot;$&quot;</span>,<span class="string">&quot;li&quot;</span>,<span class="literal">null</span>,&#123;<span class="string">&quot;children&quot;</span>:[<span class="string">&quot;$&quot;</span>,<span class="string">&quot;@4&quot;</span>,<span class="literal">null</span>,&#123;<span class="string">&quot;tweet&quot;</span>:&#123;...&#125;&#125;&#125;]&#125;]]&#125;]</span><br></pre></td></tr></table></figure>
+
+<p><code>J0</code> now has a suspense boundary, and inside the boundary, there is a <code>@3</code> that has not finished rendering and pushed to the stream. RSC continue push <code>M4</code> to the stream and when <code>@3</code> is ready, it is push to the stream as <code>J3</code>.</p>
+<h3 id="Client-Reconstructs-the-React-Tree"><a href="#Client-Reconstructs-the-React-Tree" class="headerlink" title="Client Reconstructs the React Tree"></a>Client Reconstructs the React Tree</h3><p>When client receives the React Tree stream, it will start reconstructing the completed React tree and render to HTML progressively. </p>
+<img alt='RSC 3' src='/img/rsc/rsc-3.png'>
+
+<p>React provides a method called <code>createFromFetch</code> in <code>react-server-dom-webpack</code> to render RSC. The basic usage is like this:</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; createFromFetch &#125; <span class="keyword">from</span> <span class="string">&#x27;react-server-dom-webpack&#x27;</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ClientRootComponent</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="comment">// fetch() from our RSC API endpoint.  react-server-dom-webpack</span></span><br><span class="line">  <span class="comment">// can then take the fetch result and reconstruct the React</span></span><br><span class="line">  <span class="comment">// element tree</span></span><br><span class="line">  <span class="keyword">const</span> response = <span class="title function_">createFromFetch</span>(<span class="title function_">fetch</span>(<span class="string">&#x27;/rsc?...&#x27;</span>))</span><br><span class="line">  <span class="keyword">return</span> <span class="language-xml"><span class="tag">&lt;<span class="name">Suspense</span> <span class="attr">fallback</span>=<span class="string">&#123;null&#125;</span>&gt;</span>&#123;response.readRoot() /* Returns a React element! */&#125;<span class="tag">&lt;/<span class="name">Suspense</span>&gt;</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>response.readRoot()</code> read the stream from <code>/rsc?...</code> and update the react element progressively.</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  <p><a class="classtest-link" href="/tags/Frontend/" rel="tag">Frontend</a>, <a class="classtest-link" href="/tags/React/" rel="tag">React</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a> — Apr 10, 2024</p>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">Made with ❤ and
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        at <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>
