@@ -16,7 +16,7 @@ menu:
   Links: /Links
 
 #index/main page max show posts (in number)
-max_post: 4
+max_post: 12
 
 # Colors use hex color without #
 # Theme color
