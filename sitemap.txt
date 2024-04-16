@@ -1,3 +1,4 @@
+https://clean99.github.io/2024/04/16/React-Performance-Optimization/
 https://clean99.github.io/2024/04/10/React-Server-Component-Internals/
 https://clean99.github.io/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/
 https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/
