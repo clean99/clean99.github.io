@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>测试如何加速你的开发</title>
+  
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/">
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/" />
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/" />
+  
+  <meta name="description" content="作为前端开发者，我们大多数人都不喜欢写测试，因为”它会拖慢开发进度”。我以前也不写测试，我能理解你在为一个”快速迭代”的前端项目编写测试时的痛苦。但我确实想告诉你，在大多数情况下，测试可以加速你的开发，而不是拖慢它——除非你写的是错误的测试。我有一篇文章 Some Common Mistakes i">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.ioundefined">
+  
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="测试如何加速你的开发" />
+  
+  <meta property="og:description" content="作为前端开发者，我们大多数人都不喜欢写测试，因为”它会拖慢开发进度”。我以前也不写测试，我能理解你在为一个”快速迭代”的前端项目编写测试时的痛苦。但我确实想告诉你，在大多数情况下，测试可以加速你的开发，而不是拖慢它——除非你写的是错误的测试。我有一篇文章 Some Common Mistakes i">
+  
+  <meta property="og:url" content="https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="测试如何加速你的开发">
+  
+  <meta name="twitter:description" content="作为前端开发者，我们大多数人都不喜欢写测试，因为”它会拖慢开发进度”。我以前也不写测试，我能理解你在为一个”快速迭代”的前端项目编写测试时的痛苦。但我确实想告诉你，在大多数情况下，测试可以加速你的开发，而不是拖慢它——除非你写的是错误的测试。我有一篇文章 Some Common Mistakes i">
+  
+  
+  <meta name="twitter:image" content="https://clean99.github.ioundefined">
+  
+  <meta name="twitter:url" content="https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="five columns ml-1">
+    <h1 class="mt-2">
+      <a href="/zh/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="two columns" style="max-width: 80px; text-align: right;">
+    <h1 class="mt-2 mode">
+      <a href="/2022/08/18/How-Testing-Speeds-Up-Your-Development/" onclick="localStorage.setItem('preferredLang', 'en')" style="text-decoration:none;font-size:0.75em;border:1px solid;padding:2px 6px;border-radius:3px">
+        EN
+      </a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/zh/">首页</a>
+        
+          
+          <a href="/zh/Works" class="ml">作品</a>
+          
+        
+          
+          <a href="/zh/About" class="ml">关于</a>
+          
+        
+          
+          <a href="/zh/Links" class="ml">友链</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">邮箱</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <h2>测试如何加速你的开发</h2>
+
+  
+  <p style="margin-bottom: 0.5rem;">
+    <a href="/2022/08/18/How-Testing-Speeds-Up-Your-Development/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+      Read in English
+    </a>
+  </p>
+  
+
+  <p>作为前端开发者，我们大多数人都不喜欢写测试，因为”它会拖慢开发进度”。我以前也不写测试，我能理解你在为一个”快速迭代”的前端项目编写测试时的痛苦。但我确实想告诉你，在大多数情况下，测试可以加速你的开发，而不是拖慢它——除非你写的是错误的测试。我有一篇文章 <a href="/2022/07/24/Some-Common-Mistakes-in-React-Testing/" title="Some Common Mistakes in React Testing">Some Common Mistakes in React Testing</a> 展示了哪些做法会让你在开发过程中感到痛苦。而在这篇文章中，我想向你展示<strong>为什么正确的测试能加速你的开发。</strong></p>
+<h2 id="什么是开发？"><a href="#什么是开发？" class="headerlink" title="什么是开发？"></a>什么是开发？</h2><p>我们是开发者，每天都在开发软件。但说真的，什么是开发？我们在日常工作中实际上做的是什么？<br />在《修改代码的艺术》一书中，作者认为开发的本质是行为变更。开发过程有四种类型：</p>
+<ol>
+<li>添加功能</li>
+<li>修复 Bug</li>
+<li>改进设计</li>
+<li>优化资源使用</li>
+</ol>
+<p>每种类型都需要不同种类的行为变更：<img alt="development type" src="/img/testing/developmenttype.png">如你所见，我们在添加新功能时希望在软件中增加新行为，在修复 Bug 时希望改变旧行为。但当我们进行优化或重构时，通常不希望行为发生变化。如果我们在软件行为中引入了意外的变化，我们称之为<strong>回归（regression）</strong>。</p>
+<h3 id="软件腐化"><a href="#软件腐化" class="headerlink" title="软件腐化"></a>软件腐化</h3><p>我们大多数人都有这样的经历：在一个遗留项目（一个没有良好代码结构和测试的大型项目）中修复 Bug 或添加新功能，比从零开始做一个新项目更加痛苦和困难。这是因为<strong>随着我们不断添加新功能，软件会日益腐化</strong>。代码将变得非常复杂，最终极难维护。幸运的是，我们有 React &#x2F; Vue 框架将网站<strong>模块化</strong>为页面，再将页面模块化为组件。所以通常不会让每个组件都变得非常复杂，但到了某个时间点还是会的。即便是代码质量最高的团队也无法阻止软件腐化，因为<strong>解耦并不意味着你完全不会引入耦合</strong>。</p>
+<h3 id="维护越来越难"><a href="#维护越来越难" class="headerlink" title="维护越来越难"></a>维护越来越难</h3><p>因此，当行为变得越来越复杂时，我们会发现在确保现有行为不变的前提下进行开发变得愈加困难。当我们在组件中添加行为时，state 或 DOM 结构都会发生变化。如何保证<strong>现有行为得到保留</strong>？如何保证<strong>新行为按我们预期执行</strong>？以及，如何保证<strong>新行为能与现有行为良好协作</strong>？<br /><strong>测试能给你信心。</strong><br><img alt="preserving behavior" src="/img/testing/preservingbehavior.png"></p>
+<h2 id="测试的角色"><a href="#测试的角色" class="headerlink" title="测试的角色"></a>测试的角色</h2><p>测试在开发中可以扮演两种角色：一种是验证，另一种是防止回归。这两种测试可以在不同的开发生命周期中帮助你以<strong>信心</strong>开发并<strong>提速</strong>。</p>
+<h3 id="验证性测试"><a href="#验证性测试" class="headerlink" title="验证性测试"></a>验证性测试</h3><p>当我们向程序中添加新行为时，我们想知道新行为是否符合预期，怎么做呢？大多数前端开发者会编写代码，然后去本地开发环境检查行为变化。这就叫做手动测试。那么这种测试有什么问题呢？为什么自动化测试比手动测试更有效？这里有一个例子：<br />你开发了一个小组件，它在一系列步骤之后才会出现。假设我们要开发一个消息框，它会在提交一个需要填写 20 个字段的表单之后显示。<br />如果你使用手动测试：</p>
+<ul>
+<li>你需要<strong>填写 20 个字段（点击、点击、输入……）</strong>，就像你的用户一样，然后点击提交。</li>
+<li>你需要<strong>祈祷服务器（包括你的本地服务器和后端）在测试过程中不会崩溃</strong>。</li>
+<li>你需要<strong>祈祷依赖项（在本例中是 Form 组件）能正确工作</strong>。</li>
+<li>你需要<strong>祈祷整个流程能一次性正确运行</strong>。如果不能，猜怎么着？你需要调试与整个流程相关的组件，包括但不限于 Form 组件、API 和消息框。</li>
+<li>你的同事审查你的代码并要求你修改部分代码，你需要用周全的测试用例再次进行点击输入的循环。真的很痛苦！</li>
+</ul>
+<p>如你所见，手动测试就是在不停祈祷（开个玩笑）。当依赖项越来越多，组件本身越来越复杂时，情况会变得更加糟糕。<br />那么自动化测试怎么样？<br />你只需<strong>编写几行测试代码</strong>来验证这个消息框是否会根据相应的响应状态码显示正确的消息。然后你可以写一个使用一些<strong>模拟（mock）</strong>字段数据的测试，来验证它能以期望的数据和格式提交给后端。<br />我可以向你保证，编写这些测试并运行它们（对于典型的前端测试，通常只需几秒钟）所花费的时间，远少于你在本地开发环境中不断点击、输入、提交的时间。而且，如果你的测试失败，你可以知道哪个部分出了问题，而不是调试整个系统。并且你的测试可以运行<strong>数千次</strong>，这是自动化测试的一个显著优势。<br /><strong>这一切的核心在于隔离。</strong> 测试帮助你隔离每个组件，这样每次修改代码时，你都能获得<strong>快速、精准的反馈</strong>，而只需多写几行代码。</p>
+<h3 id="回归测试"><a href="#回归测试" class="headerlink" title="回归测试"></a>回归测试</h3><p>验证性测试用于验证我们的新行为，而回归测试则是为了<strong>确保我们在修改代码时旧行为不会改变</strong>。<br />你刚加入一个新团队，你的老板并不太喜欢你，他给了你一些工单，要求你在一个”遗留”项目中修复 Bug 并添加新功能。当你第一次查看项目代码库时，你被那混乱的结构惊到了，而且它没有任何测试和文档！所以你不得不做大量研究（通过逐一运行项目功能）来检查这个项目能做什么，以及哪些部分出了问题。<br />几天后，你鼓起勇气修改代码，通过修改某些 state hook 修复了一个 Bug。但猜怎么着，你<strong>仍然很有可能引入新的 Bug</strong>，因为你不知道这个 state hook 的用途。<br />所以如果项目之前已经写好了测试，你需要做的就是查看测试用例，因为<strong>测试用例可以作为文档</strong>，你可以了解项目（组件）在特定情况下会做什么。而且如果你修改了代码，在运行完所有测试后，你可以有<strong>信心</strong>地说<strong>你没有破坏重要功能</strong>。此时测试就充当了<strong>回归测试来防止回归</strong>。<br />如果你接手的项目有测试，那你很幸运。而对于没有任何测试的项目，你仍然可以自己添加，以<strong>覆盖你想要修改的代码周围的行为</strong>。</p>
+<h2 id="其他优势"><a href="#其他优势" class="headerlink" title="其他优势"></a>其他优势</h2><p>自动化测试还能给你带来一些其他好处，以下是其中一些：</p>
+<ul>
+<li><strong>文档</strong>：测试可以作为项目的文档，因为它模拟了用户如何与项目交互以及项目如何响应。</li>
+<li><strong>迫使你理解需求</strong>：如果你不知道需求是什么，你就无法编写测试，因为测试本质上是将人类语言翻译成脚本。而如果你使用 <a href="/2022/07/24/Testing-Best-Practice-Tdd/" title="Testing Best Practice Tdd">Testing Best Practice Tdd</a>，<strong>你需要根据需求先编写测试</strong>，这会更好地迫使你首先思考需求。</li>
+<li><strong>迫使你以良好的结构解耦代码</strong>：如果你的代码是耦合的，所有的东西都写在一个单独的组件中，你就很难为它编写测试，因为你无法再隔离它们了。所以测试可以帮助你思考代码的<strong>结构和设计是否合理</strong>。</li>
+</ul>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  <p><a class="classtest-link" href="/tags/testing/" rel="tag">testing</a> — Aug 18, 2022</p>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">用 ❤ 和
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        制作于 <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>

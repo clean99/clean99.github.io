@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>如何设计优秀的测试用例</title>
+  
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/">
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
+  
+  <meta name="description" content="软件测试是一件困难的事情。好的测试用例可以帮助你提升代码的可维护性和稳定性，而糟糕的测试用例不仅无法带来收益，某些情况下甚至会拖慢你的开发进程。 很高兴看到我们团队现在写了很多测试用例，但其中有些并没有真正使团队受益，甚至成了开发的负担。我认为部分原因是我们缺乏关于如何设计真正有用的好测试用例的指导">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.ioundefined">
+  
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="如何设计优秀的测试用例" />
+  
+  <meta property="og:description" content="软件测试是一件困难的事情。好的测试用例可以帮助你提升代码的可维护性和稳定性，而糟糕的测试用例不仅无法带来收益，某些情况下甚至会拖慢你的开发进程。 很高兴看到我们团队现在写了很多测试用例，但其中有些并没有真正使团队受益，甚至成了开发的负担。我认为部分原因是我们缺乏关于如何设计真正有用的好测试用例的指导">
+  
+  <meta property="og:url" content="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="如何设计优秀的测试用例">
+  
+  <meta name="twitter:description" content="软件测试是一件困难的事情。好的测试用例可以帮助你提升代码的可维护性和稳定性，而糟糕的测试用例不仅无法带来收益，某些情况下甚至会拖慢你的开发进程。 很高兴看到我们团队现在写了很多测试用例，但其中有些并没有真正使团队受益，甚至成了开发的负担。我认为部分原因是我们缺乏关于如何设计真正有用的好测试用例的指导">
+  
+  
+  <meta name="twitter:image" content="https://clean99.github.ioundefined">
+  
+  <meta name="twitter:url" content="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="five columns ml-1">
+    <h1 class="mt-2">
+      <a href="/zh/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="two columns" style="max-width: 80px; text-align: right;">
+    <h1 class="mt-2 mode">
+      <a href="/2024/04/10/How-to-Design-GOOD-Test-Cases/" onclick="localStorage.setItem('preferredLang', 'en')" style="text-decoration:none;font-size:0.75em;border:1px solid;padding:2px 6px;border-radius:3px">
+        EN
+      </a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/zh/">首页</a>
+        
+          
+          <a href="/zh/Works" class="ml">作品</a>
+          
+        
+          
+          <a href="/zh/About" class="ml">关于</a>
+          
+        
+          
+          <a href="/zh/Links" class="ml">友链</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">邮箱</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <h2>如何设计优秀的测试用例</h2>
+
+  
+  <p style="margin-bottom: 0.5rem;">
+    <a href="/2024/04/10/How-to-Design-GOOD-Test-Cases/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+      Read in English
+    </a>
+  </p>
+  
+
+  <p>软件测试是一件困难的事情。好的测试用例可以帮助你提升代码的可维护性和稳定性，而糟糕的测试用例不仅无法带来收益，某些情况下甚至会拖慢你的开发进程。</p>
+<p>很高兴看到我们团队现在写了很多测试用例，但其中有些并没有真正使团队受益，甚至成了开发的负担。我认为部分原因是我们缺乏关于如何设计真正有用的好测试用例的指导。因此，我想为如何在单元测试（UT）和端到端测试（E2E）中编写测试用例建立一个基本框架。</p>
+<p>为了理解这些框架为何如此构建，我们首先需要学习测试的通用知识。我们稍后会讨论这个问题。</p>
+<h2 id="为什么我们需要测试？"><a href="#为什么我们需要测试？" class="headerlink" title="为什么我们需要测试？"></a>为什么我们需要测试？</h2><p>为了编写好的测试用例，我们需要理解我们的目标。在开发软件时，我们需要测试的原因有很多。以下是最显而易见的一个：</p>
+<ul>
+<li><strong>免受 Bug 侵害</strong>：确保我们的软件今天是正确的，在未知的未来也是正确的。</li>
+</ul>
+<p>随着软件的增长，你将不可避免地需要验证越来越多的逻辑，以确保你对代码的修改是正确的，并且不会意外破坏已有的功能。自动化测试是降低验证成本的好方法。</p>
+<h2 id="为什么软件测试很难？"><a href="#为什么软件测试很难？" class="headerlink" title="为什么软件测试很难？"></a>为什么软件测试很难？</h2><p>软件测试的核心挑战有两点：</p>
+<ol>
+<li><strong>可能的测试用例空间通常太大，无法穷举覆盖</strong>。假设我们要测试一个 32 位浮点乘法操作 a*b，就有 2^64 个测试用例！</li>
+<li><strong>软件行为在可能输入的空间上是非连续且离散变化的</strong>。例如，如果我们要测试 abs(a) 函数，当 a &lt; 0 和 a &gt;&#x3D; 0 时它的行为是不同的。</li>
+</ol>
+<p>系统在广泛的输入范围内看似运行正常，却可能在某个单一边界点上突然失败。</p>
+<p>因此，测试用例必须经过仔细和系统地选择。</p>
+<h2 id="热身：为乘法函数设计测试用例"><a href="#热身：为乘法函数设计测试用例" class="headerlink" title="热身：为乘法函数设计测试用例"></a>热身：为乘法函数设计测试用例</h2><figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * ...</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> a  an argument</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> b  another argument</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@returns</span> the multiply of a and b.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> <span class="keyword">function</span> <span class="title function_">multiply</span>(<span class="params"><span class="attr">a</span>: <span class="built_in">number</span>, <span class="attr">b</span>: <span class="built_in">number</span></span>): <span class="built_in">number</span>;</span><br></pre></td></tr></table></figure>
+
+<p>什么是这个函数的好的测试套件？</p>
+<h2 id="系统性测试"><a href="#系统性测试" class="headerlink" title="系统性测试"></a>系统性测试</h2><p>系统性测试意味着我们以有原则的方式选择测试用例，目标是设计一个具有三个理想属性的测试套件：</p>
+<ul>
+<li><strong>正确（Correct）</strong>：一个正确的测试套件应接受规格说明的所有合法实现。这让我们可以自由地在内部<strong>修改</strong>实现，而无需修改测试套件。</li>
+<li><strong>充分（Thorough）</strong>：一个充分的测试套件能尽可能多地发现实现中的实际 Bug。</li>
+<li><strong>精简（Small）</strong>：我们希望在保持充分性的同时编写<strong>更少</strong>的测试用例。</li>
+</ul>
+<h2 id="通过分区选择测试用例"><a href="#通过分区选择测试用例" class="headerlink" title="通过分区选择测试用例"></a>通过分区选择测试用例</h2><p>软件通常有大范围的输入值，在不同范围内产生不同的行为。我们希望选择一组测试用例，既<strong>足够精简</strong>以便于编写、维护和快速运行，又足够充分以发现程序中的 Bug。</p>
+<p>为此，我们将输入空间划分为<strong>分区（partitions）</strong>，每个分区包含一组输入。</p>
+<img alt="Test Case Design 1" src="/img/test-case-design/1.png"  width="300">
+
+<p>然后我们从每个分区中选择一个测试用例，这就构成了我们的测试套件。</p>
+<p>分区背后的思想是将输入空间划分为若干组相似的输入，程序在这些输入上具有相似的行为。</p>
+<p>让我们看看 <code>abs(a)</code> 函数：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * ...</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> a  the argument whose absolute value is to be determined</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@returns</span> the absolute value of the argument.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"> <span class="keyword">function</span> <span class="title function_">abs</span>(<span class="params"><span class="attr">a</span>: <span class="built_in">number</span></span>): <span class="built_in">number</span></span><br></pre></td></tr></table></figure>
+
+<p>我们关注该函数在输入空间中会产生不同行为的地方：</p>
+<ol>
+<li>当 <code>a &gt;= 0</code> 时，<code>abs()</code> 返回 <code>a</code>。</li>
+<li>当 <code>a &lt; 0</code> 时，<code>abs()</code> 返回 <code>-a</code>。</li>
+</ol>
+<p>因此我们可以将输入空间 <code>a: number</code> 划分为 <code>a &lt; 0</code> 和 <code>a &gt;= 0</code> 两个分区，如下所示：</p>
+<img alt="Test Case Design 2" src="/img/test-case-design/2.png" width="300">
+
+<p>然后我们从每个分区中选取一个测试用例，构成我们的测试套件：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// case 1: negative input</span></span><br><span class="line"><span class="title function_">expect</span>(<span class="title function_">abs</span>(-<span class="number">1</span>)).<span class="title function_">toBe</span>(<span class="number">1</span>);</span><br><span class="line"><span class="comment">// case 2: non negative input</span></span><br><span class="line"><span class="title function_">expect</span>(<span class="title function_">abs</span>(<span class="number">2</span>)).<span class="title function_">toBe</span>(<span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="在分区中包含边界值"><a href="#在分区中包含边界值" class="headerlink" title="在分区中包含边界值"></a>在分区中包含边界值</h2><p>Bug 往往发生在分区之间的边界处。一些例子：</p>
+<ul>
+<li>0 是正数和负数之间的边界</li>
+<li>数值类型的最大值和最小值，如 <code>Number.MAX_SAFE_INTEGER</code> 或 <code>Number.MAX_VALUE</code></li>
+<li>集合类型的空值，如空字符串、空数组或空集合</li>
+<li>序列（如字符串或数组）的第一个和最后一个元素</li>
+</ul>
+<p>为什么这些边界值危险？主要有两个原因：</p>
+<ol>
+<li>**程序员经常犯”差一错误（off-by-one）”**，比如写 <code>&lt;=</code> 而不是 <code>&lt;</code>，或者将计数器初始化为 0 而不是 1。</li>
+<li><strong>边界可能是代码行为不连续的地方</strong>：例如，当用作整数的数值变量超过 <code>Number.MAX_SAFE_INTEGER</code> 时，它会突然开始失去精度。</li>
+</ol>
+<p>因此，我们可以在 <code>abs()</code> 测试套件中添加另一个测试用例：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// case 1: negative input</span></span><br><span class="line"><span class="title function_">expect</span>(<span class="title function_">abs</span>(-<span class="number">1</span>)).<span class="title function_">toBe</span>(<span class="number">1</span>);</span><br><span class="line"><span class="comment">// case 2: non negative input</span></span><br><span class="line"><span class="title function_">expect</span>(<span class="title function_">abs</span>(<span class="number">2</span>)).<span class="title function_">toBe</span>(<span class="number">2</span>);</span><br><span class="line"><span class="comment">// case 3: 0 is the boundary case</span></span><br><span class="line"><span class="title function_">expect</span>(<span class="title function_">abs</span>(<span class="number">0</span>)).<span class="title function_">toBe</span>(<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="在同一测试用例中覆盖多个分区"><a href="#在同一测试用例中覆盖多个分区" class="headerlink" title="在同一测试用例中覆盖多个分区"></a>在同一测试用例中覆盖多个分区</h2><p>在前面的例子中，我们从一个分区中选取一个输入作为一个测试用例。这很好。但随着程序变得更加复杂，存在多个输入维度时，我们可能会面临这样的问题：即使每个分区只选取一个测试用例，输入的组合数量仍然非常庞大，从而打破了我们希望测试套件精简且快速的原则。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Let</span><span class="string">&#x27;s take a look at the multiply example:</span></span><br><span class="line"><span class="string">/**</span></span><br><span class="line"><span class="string"> * ...</span></span><br><span class="line"><span class="string"> * @param a  an argument</span></span><br><span class="line"><span class="string"> * @param b  another argument</span></span><br><span class="line"><span class="string"> * @returns the multiply of a and b.</span></span><br><span class="line"><span class="string"> */</span></span><br><span class="line"><span class="string"> function multiply(a: number, b: number): number;</span></span><br></pre></td></tr></table></figure>
+
+<p>这个函数有一个<strong>二维</strong>输入空间，由所有整数对 (a, b) 组成。根据乘法规则，我们可以将输入空间划分为以下分区：</p>
+<ul>
+<li>a 和 b 都是正数，结果为正数</li>
+<li>a 和 b 都是负数，结果为正数</li>
+<li>a 为正数，b 为负数，结果为负数</li>
+<li>a 为负数，b 为正数，结果为负数</li>
+</ul>
+<p>然后，我们添加边界情况：</p>
+<ul>
+<li>a 或 b 为 0，因为结果始终为 0</li>
+<li>a 或 b 为 1，即乘法的单位元素<br>为了确保输入数字很大时也能正常工作，我们还需要测试 Number.MAX_SAFE_INTEGER、Number.MIN_SAFE_INTEGER。因此我们有：</li>
+<li>a 或 b 是小数或大数（即小到可以精确表示为数值，或大到超出数值范围）</li>
+</ul>
+<p>将每个维度分别划分为：</p>
+<ul>
+<li>0</li>
+<li>1</li>
+<li>小正整数（≤ Number.MAX_SAFE_INTEGER 且 &gt; 1）</li>
+<li>小负整数（≥ Number.MIN_SAFE_INTEGER 且 &lt; 0）</li>
+<li>大正整数（&gt; Number.MAX_SAFE_INTEGER）</li>
+<li>大负整数（&lt; Number.MIN_SAFE_INTEGER）</li>
+</ul>
+<p>最终我们得到一个复杂的分区图，如下所示：</p>
+<img alt="Test Case Design 3" src="/img/test-case-design/3.png"  width="300">
+
+<p>如果我们为每个分区选取一个测试用例（图中的点），共有 <code>36</code> 种组合。这太多了！这就是所谓的<strong>组合爆炸</strong>。而这仅仅是两个维度。</p>
+<p>如何解决？我们意识到测试用例的数量随维度增加而增加：<strong>O(n) &#x3D; s^n</strong>，其中 <code>s</code> 是每个维度的分区数，<code>n</code> 是维度数量。并且从单个维度的角度来看，我们在<strong>重复</strong>覆盖相同的分区。因此，我们可以将每个输入 <code>a</code> 和 <code>b</code> 的特征视为输入空间的两个独立分区，每个分区只考虑一个值：</p>
+<img alt="Test Case Design 4" src="/img/test-case-design/4.png"  width="300">
+
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// partition on a:</span></span><br><span class="line"><span class="comment">//   a = 0</span></span><br><span class="line"><span class="comment">//   a = 1</span></span><br><span class="line"><span class="comment">//   a is small integer &gt; 1</span></span><br><span class="line"><span class="comment">//   a is small integer &lt; 0</span></span><br><span class="line"><span class="comment">//   a is large positive integer</span></span><br><span class="line"><span class="comment">//   a is large negative integer</span></span><br><span class="line"><span class="comment">//      (where &quot;small&quot; fits in a TypeScript number, and &quot;large&quot; doesn&#x27;t)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// partition on b:</span></span><br><span class="line"><span class="comment">//   b = 0</span></span><br><span class="line"><span class="comment">//   b = 1</span></span><br><span class="line"><span class="comment">//   b is small integer &gt; 1</span></span><br><span class="line"><span class="comment">//   b is small integer &lt; 0</span></span><br><span class="line"><span class="comment">//   b is large positive integer</span></span><br><span class="line"><span class="comment">//   b is large negative integer</span></span><br></pre></td></tr></table></figure>
+
+<p>然后我们将这些值组合在一起，不重复地覆盖每个维度的所有分区，且随着维度增加，复杂度不会增加：<strong>O(n) &#x3D; s</strong>。</p>
+<p>这确实<strong>增加</strong>了遗漏 Bug 的风险，但我们可以添加另一层分区来覆盖部分组合：</p>
+<img alt="Test Case Design 5" src="/img/test-case-design/5.png"  width="300">
+
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// a and b are both positive, a is a small integer, b is a LARGE_NUMBER</span></span><br><span class="line"><span class="title function_">expect</span>(<span class="title function_">multiply</span>(<span class="number">5</span>, <span class="variable constant_">LARGE_NUMBER</span>)).<span class="title function_">toBe</span>(<span class="number">5</span> * <span class="variable constant_">LARGE_NUMBER</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// a and b are both negative, a is a small negative integer, b is NEGATIVE_LARGE_NUMBER</span></span><br><span class="line"><span class="title function_">expect</span>(<span class="title function_">multiply</span>(-<span class="number">4</span>, <span class="variable constant_">NEGATIVE_LARGE_NUMBER</span>)).<span class="title function_">toBe</span>(-<span class="number">4</span> * <span class="variable constant_">NEGATIVE_LARGE_NUMBER</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// a is positive and b is negative, a is a LARGE_NUMBER, b is a small negative integer</span></span><br><span class="line"><span class="title function_">expect</span>(<span class="title function_">multiply</span>(<span class="variable constant_">LARGE_NUMBER</span>, -<span class="number">3</span>)).<span class="title function_">toBe</span>(<span class="variable constant_">LARGE_NUMBER</span> * -<span class="number">3</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// a is negative and b is positive, a is NEGATIVE_LARGE_NUMBER, b is a small positive integer</span></span><br><span class="line"><span class="title function_">expect</span>(<span class="title function_">multiply</span>(<span class="variable constant_">NEGATIVE_LARGE_NUMBER</span>, <span class="number">2</span>)).<span class="title function_">toBe</span>(<span class="variable constant_">NEGATIVE_LARGE_NUMBER</span> * <span class="number">2</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// one or both are 0, a is 0, b is a 1</span></span><br><span class="line"><span class="title function_">expect</span>(<span class="title function_">multiply</span>(<span class="number">0</span>, <span class="number">1</span>)).<span class="title function_">toBe</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// one or both are 0, a is a 1, b is 0</span></span><br><span class="line"><span class="title function_">expect</span>(<span class="title function_">multiply</span>(<span class="number">1</span>, <span class="number">0</span>)).<span class="title function_">toBe</span>(<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  <p><a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/Testing/" rel="tag">Testing</a> — Apr 10, 2024</p>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">用 ❤ 和
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        制作于 <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>

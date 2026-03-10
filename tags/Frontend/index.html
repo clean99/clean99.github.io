@@ -11,11 +11,13 @@
   <meta charset="utf-8">
 
   
-  <title>Posts Related to Frontend</title>
+  <title>Posts Related to — Frontend</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml,sitemap.txt" />
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/tags/Frontend/">
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/tags/Frontend/" />
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/Frontend/" />
   
   <meta name="description" content="A frontend developer from China, who now work at TikTok(SG). Post random things about frontend, e2e testing, unit testing, software engineering, computer science, etc.">
   
@@ -28,14 +30,14 @@
   
   <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="Posts Related to Frontend" />
+  <meta property="og:title" content="Posts Related to — Frontend" />
   
   <meta property="og:description" content="A frontend developer from China, who now work at TikTok(SG). Post random things about frontend, e2e testing, unit testing, software engineering, computer science, etc.">
   
   <meta property="og:url" content="https://clean99.github.io/tags/Frontend/" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Posts Related to Frontend">
+  <meta name="twitter:title" content="Posts Related to — Frontend">
   
   <meta name="twitter:description" content="A frontend developer from China, who now work at TikTok(SG). Post random things about frontend, e2e testing, unit testing, software engineering, computer science, etc.">
   
@@ -139,8 +141,36 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
 
-<meta name="generator" content="Hexo 6.3.0"></head>
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
 
 <body>
   <div class="container">
@@ -174,9 +204,17 @@
     </h1>
   </div>
 
-  <div class="six columns ml-1">
+  <div class="five columns ml-1">
     <h1 class="mt-2">
-      Hi Folks.
+      <a href="/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="two columns" style="max-width: 80px; text-align: right;">
+    <h1 class="mt-2 mode">
+      <a href="/zh/tags/Frontend/" onclick="localStorage.setItem('preferredLang', 'zh')" style="text-decoration:none;font-size:0.75em;border:1px solid;padding:2px 6px;border-radius:3px">
+        中文
+      </a>
     </h1>
   </div>
 
@@ -213,6 +251,24 @@
 
 
    <h3>Posts Related to — Frontend</h3>
+
+
+
+  <article>
+    <div class="row">
+
+      <div class="three columns left lit">
+        <p class="bottom">Mar 10, 2026</p>
+      </div>
+      <div class="nine columns left mb-3">
+        <a href="/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/">
+          
+            A Complete SEO Overhaul for My Hexo Blog — What I Found and How I Fixed It
+          
+        </a>
+      </div>
+    </div>
+  </article>
 
 
 

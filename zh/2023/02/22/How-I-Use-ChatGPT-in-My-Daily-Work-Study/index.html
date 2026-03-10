@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>我如何在日常工作与学习中使用 ChatGPT？</title>
+  
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/">
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/" />
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/" />
+  
+  <meta name="description" content="1. 背景ChatGPT 自发布以来就获得了广泛关注，已成为许多专业人士的常用工具。尽管它已被广泛讨论，但探索 ChatGPT 如何在我们的日常工作中发挥作用仍然很重要。在这篇文章中，我将分享一些我认为特别实用的 ChatGPT 应用场景。 2. 使用方式2.1 编程2.1.2 生成代码ChatGP">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.ioundefined">
+  
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="我如何在日常工作与学习中使用 ChatGPT？" />
+  
+  <meta property="og:description" content="1. 背景ChatGPT 自发布以来就获得了广泛关注，已成为许多专业人士的常用工具。尽管它已被广泛讨论，但探索 ChatGPT 如何在我们的日常工作中发挥作用仍然很重要。在这篇文章中，我将分享一些我认为特别实用的 ChatGPT 应用场景。 2. 使用方式2.1 编程2.1.2 生成代码ChatGP">
+  
+  <meta property="og:url" content="https://clean99.github.io/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="我如何在日常工作与学习中使用 ChatGPT？">
+  
+  <meta name="twitter:description" content="1. 背景ChatGPT 自发布以来就获得了广泛关注，已成为许多专业人士的常用工具。尽管它已被广泛讨论，但探索 ChatGPT 如何在我们的日常工作中发挥作用仍然很重要。在这篇文章中，我将分享一些我认为特别实用的 ChatGPT 应用场景。 2. 使用方式2.1 编程2.1.2 生成代码ChatGP">
+  
+  
+  <meta name="twitter:image" content="https://clean99.github.ioundefined">
+  
+  <meta name="twitter:url" content="https://clean99.github.io/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="five columns ml-1">
+    <h1 class="mt-2">
+      <a href="/zh/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="two columns" style="max-width: 80px; text-align: right;">
+    <h1 class="mt-2 mode">
+      <a href="/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/" onclick="localStorage.setItem('preferredLang', 'en')" style="text-decoration:none;font-size:0.75em;border:1px solid;padding:2px 6px;border-radius:3px">
+        EN
+      </a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/zh/">首页</a>
+        
+          
+          <a href="/zh/Works" class="ml">作品</a>
+          
+        
+          
+          <a href="/zh/About" class="ml">关于</a>
+          
+        
+          
+          <a href="/zh/Links" class="ml">友链</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">邮箱</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <h2>我如何在日常工作与学习中使用 ChatGPT？</h2>
+
+  
+  <p style="margin-bottom: 0.5rem;">
+    <a href="/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+      Read in English
+    </a>
+  </p>
+  
+
+  <h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h2><p>ChatGPT 自发布以来就获得了广泛关注，已成为许多专业人士的常用工具。尽管它已被广泛讨论，但探索 ChatGPT 如何在我们的日常工作中发挥作用仍然很重要。在这篇文章中，我将分享一些我认为特别实用的 ChatGPT 应用场景。</p>
+<h2 id="2-使用方式"><a href="#2-使用方式" class="headerlink" title="2. 使用方式"></a>2. 使用方式</h2><h3 id="2-1-编程"><a href="#2-1-编程" class="headerlink" title="2.1 编程"></a>2.1 编程</h3><h3 id="2-1-2-生成代码"><a href="#2-1-2-生成代码" class="headerlink" title="2.1.2 生成代码"></a>2.1.2 生成代码</h3><p>ChatGPT 可以为你生成代码。借助模块化技术，你可以用 ChatGPT 非常快速地生成一个大型系统。请参考我之前的文章：<a href="/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/" title="Use Modular Design with ChatGPT to Generate Code">Use Modular Design with ChatGPT to Generate Code</a></p>
+<h3 id="2-1-2-解释代码"><a href="#2-1-2-解释代码" class="headerlink" title="2.1.2 解释代码"></a>2.1.2 解释代码</h3><p>它可以非常清晰地解释你的代码。一个技巧是你应该尽可能提供上下文，否则机器人会根据函数名和参数来猜测函数的用途，这可能导致准确性降低。<br>下面是我从教材中随机挑选的一段代码片段。</p>
+<img alt="chatgpt" src="/img/chatgpt/chatgpt-17.png">
+
+<h3 id="2-1-3-为我编写测试用例-x2F-Storybook（以及更多内容）"><a href="#2-1-3-为我编写测试用例-x2F-Storybook（以及更多内容）" class="headerlink" title="2.1.3 为我编写测试用例 &#x2F; Storybook（以及更多内容）"></a>2.1.3 为我编写测试用例 &#x2F; Storybook（以及更多内容）</h3><p>我必须说，ChatGPT 在编写测试和 Storybook 用例方面堪称专家，我几乎不需要修改它给出的内容。让我们来看一个例子：</p>
+<h4 id="2-1-3-1-单元测试"><a href="#2-1-3-1-单元测试" class="headerlink" title="2.1.3.1 单元测试"></a>2.1.3.1 单元测试</h4><img alt="chatgpt" src="/img/chatgpt/chatgpt-18.png">
+
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; render, screen &#125; <span class="keyword">from</span> <span class="string">&#x27;@testing-library/react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="title class_">MessageBubble</span> <span class="keyword">from</span> <span class="string">&#x27;./MessageBubble&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="title function_">describe</span>(<span class="string">&#x27;&lt;MessageBubble /&gt;&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> text = <span class="string">&#x27;Hello, world!&#x27;</span>;</span><br><span class="line">  <span class="keyword">const</span> direction = <span class="string">&#x27;left&#x27;</span>;</span><br><span class="line">  <span class="keyword">const</span> imgUrl = <span class="string">&#x27;https://via.placeholder.com/50&#x27;</span>;</span><br><span class="line">  <span class="keyword">const</span> username = <span class="string">&#x27;Alice&#x27;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">it</span>(<span class="string">&#x27;should render the message text, avatar, and username&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="title function_">render</span>(</span><br><span class="line">      <span class="language-xml"><span class="tag">&lt;<span class="name">MessageBubble</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">text</span>=<span class="string">&#123;text&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">direction</span>=<span class="string">&#123;direction&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">imgUrl</span>=<span class="string">&#123;imgUrl&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">username</span>=<span class="string">&#123;username&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">      /&gt;</span></span></span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> messageText = screen.<span class="title function_">getByText</span>(text);</span><br><span class="line">    <span class="keyword">const</span> avatarImg = screen.<span class="title function_">getByAltText</span>(<span class="string">`<span class="subst">$&#123;username&#125;</span>&#x27;s avatar`</span>);</span><br><span class="line">    <span class="keyword">const</span> usernameText = screen.<span class="title function_">getByText</span>(username);</span><br><span class="line"></span><br><span class="line">    <span class="title function_">expect</span>(messageText).<span class="title function_">toBeInTheDocument</span>();</span><br><span class="line">    <span class="title function_">expect</span>(avatarImg).<span class="title function_">toHaveAttribute</span>(<span class="string">&#x27;src&#x27;</span>, imgUrl);</span><br><span class="line">    <span class="title function_">expect</span>(usernameText).<span class="title function_">toBeInTheDocument</span>();</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="title function_">it</span>(<span class="string">&#x27;should display the message bubble in the correct direction&#x27;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="title function_">render</span>(</span><br><span class="line">      <span class="language-xml"><span class="tag">&lt;<span class="name">MessageBubble</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">text</span>=<span class="string">&#123;text&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">direction</span>=<span class="string">&#123;direction&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">imgUrl</span>=<span class="string">&#123;imgUrl&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">        <span class="attr">username</span>=<span class="string">&#123;username&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">      /&gt;</span></span></span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> messageBubble = screen.<span class="title function_">getByTestId</span>(<span class="string">&#x27;message-bubble&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (direction === <span class="string">&#x27;left&#x27;</span>) &#123;</span><br><span class="line">      <span class="title function_">expect</span>(messageBubble).<span class="title function_">toHaveClass</span>(<span class="string">&#x27;left&#x27;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (direction === <span class="string">&#x27;right&#x27;</span>) &#123;</span><br><span class="line">      <span class="title function_">expect</span>(messageBubble).<span class="title function_">toHaveClass</span>(<span class="string">&#x27;right&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-1-3-2-Storybook"><a href="#2-1-3-2-Storybook" class="headerlink" title="2.1.3.2 Storybook"></a>2.1.3.2 Storybook</h4><img alt="chatgpt" src="/img/chatgpt/chatgpt-19.png">
+
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="title class_">React</span> <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">Story</span>, <span class="title class_">Meta</span> &#125; <span class="keyword">from</span> <span class="string">&#x27;@storybook/react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="title class_">MessageBubble</span>, &#123; <span class="title class_">MessageBubbleProps</span> &#125; <span class="keyword">from</span> <span class="string">&#x27;./MessageBubble&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> &#123;</span><br><span class="line">  <span class="attr">title</span>: <span class="string">&#x27;MessageBubble&#x27;</span>,</span><br><span class="line">  <span class="attr">component</span>: <span class="title class_">MessageBubble</span>,</span><br><span class="line">&#125; <span class="keyword">as</span> <span class="title class_">Meta</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title class_">Template</span>: <span class="title class_">Story</span>&lt;<span class="title class_">MessageBubbleProps</span>&gt; = <span class="function">(<span class="params">args</span>) =&gt;</span> <span class="language-xml"><span class="tag">&lt;<span class="name">MessageBubble</span> &#123;<span class="attr">...args</span>&#125; /&gt;</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title class_">LeftBubble</span> = <span class="title class_">Template</span>.<span class="title function_">bind</span>(&#123;&#125;);</span><br><span class="line"><span class="title class_">LeftBubble</span>.<span class="property">args</span> = &#123;</span><br><span class="line">  <span class="attr">text</span>: <span class="string">&#x27;Hello, world!&#x27;</span>,</span><br><span class="line">  <span class="attr">direction</span>: <span class="string">&#x27;left&#x27;</span>,</span><br><span class="line">  <span class="attr">imgUrl</span>: <span class="string">&#x27;https://via.placeholder.com/50&#x27;</span>,</span><br><span class="line">  <span class="attr">username</span>: <span class="string">&#x27;Alice&#x27;</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title class_">RightBubble</span> = <span class="title class_">Template</span>.<span class="title function_">bind</span>(&#123;&#125;);</span><br><span class="line"><span class="title class_">RightBubble</span>.<span class="property">args</span> = &#123;</span><br><span class="line">  <span class="attr">text</span>: <span class="string">&#x27;Hi there!&#x27;</span>,</span><br><span class="line">  <span class="attr">direction</span>: <span class="string">&#x27;right&#x27;</span>,</span><br><span class="line">  <span class="attr">imgUrl</span>: <span class="string">&#x27;https://via.placeholder.com/50&#x27;</span>,</span><br><span class="line">  <span class="attr">username</span>: <span class="string">&#x27;Bob&#x27;</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-文档"><a href="#2-2-文档" class="headerlink" title="2.2 文档"></a>2.2 文档</h2><p>ChatGPT 在处理文档方面同样表现出色。以下是一些使用场景：</p>
+<h3 id="2-2-1-文档优化"><a href="#2-2-1-文档优化" class="headerlink" title="2.2.1 文档优化"></a>2.2.1 文档优化</h3><ul>
+<li>优化前的段落：</li>
+</ul>
+<blockquote>
+<p>背景：ChatGPT 在发布后一夜成名。每个人都在使用 ChatGPT，每个人都在谈论 ChatGPT。但它如何帮助我们的日常工作呢？今天我想分享一些我发现非常有用的 ChatGPT 使用案例。</p>
+</blockquote>
+<ul>
+<li>优化后的段落：</li>
+</ul>
+<blockquote>
+<p>背景：ChatGPT 自发布以来就获得了广泛关注，已成为许多专业人士的常用工具。尽管它已被广泛讨论，但探索 ChatGPT 如何在我们的日常工作中发挥作用仍然很重要。在这篇文章中，我将分享一些我认为特别实用的 ChatGPT 应用场景。</p>
+</blockquote>
+<h3 id="2-2-2-扩展你的想法"><a href="#2-2-2-扩展你的想法" class="headerlink" title="2.2.2 扩展你的想法"></a>2.2.2 扩展你的想法</h3><p>给 ChatGPT 以下文本：</p>
+<blockquote>
+<p>盈利模式：</p>
+<ol>
+<li>会员制：向会员按月收费以获取利润。</li>
+<li>广告：使用 Google 广告来盈利。</li>
+<li>捐赠：添加一个”请我喝咖啡”页面供人们捐款。<br>帮我扩展这个盈利模式。</li>
+</ol>
+</blockquote>
+<p>扩展后：</p>
+<blockquote>
+<ol>
+<li>高级功能：提供只能通过付费订阅或一次性付款才能访问的高级或独家功能。这可以包括更深入的分析、个性化推荐，或访问更大的信息数据库。</li>
+<li>联盟营销：与其他公司合作，从通过推荐链接销售的产品或服务中赚取佣金。这是一种在推广符合受众兴趣的产品的同时赚取额外收入的好方法。<br>…..</li>
+</ol>
+</blockquote>
+<h3 id="2-2-3-摘要"><a href="#2-2-3-摘要" class="headerlink" title="2.2.3 摘要"></a>2.2.3 摘要</h3><p>让 ChatGPT 对上面的段落进行总结：<br>该段落讨论了平台或细分领域不同的变现方式。可以对高级功能收费；联盟营销通过推荐链接赚取佣金；赞助涉及与相关品牌合作创作付费内容；咨询允许提供专家建议并收费；电商涉及销售与平台或细分领域相关的产品；许可允许其他组织使用你的内容或数据以实现变现。<br>也可以随意让它总结更长的文本，比如一本书。</p>
+<h2 id="2-3-设计"><a href="#2-3-设计" class="headerlink" title="2.3 设计"></a>2.3 设计</h2><h3 id="2-3-1-我应该用什么？（依赖选型）"><a href="#2-3-1-我应该用什么？（依赖选型）" class="headerlink" title="2.3.1 我应该用什么？（依赖选型）"></a>2.3.1 我应该用什么？（依赖选型）</h3><p>向 ChatGPT 描述你的需求，ChatGPT 会帮你找到合适的工具。<br>我要创建一个社交网络应用，负载主要在查询用户关系上，我希望数据库设计更简单，我应该使用什么数据库？<br>以下是答案：<br>如果你想要更简单的数据库设计，并且主要关注点是查询用户关系，那么图数据库可能是你社交网络应用的一个好选择。<br>Neo4j 或 Amazon Neptune 等图数据库专门为处理数据点之间的复杂关系而设计，非常适合用户通过各种关系相互连接的社交网络应用。在图数据库中，关系是一等公民，数据模型以节点（代表实体）和边（代表节点之间的关系）为中心。这可以使查询和分析关系更加直观和高效。<br>此外，图数据库针对关系遍历进行了优化，这可以使某些类型的查询比传统关系型数据库更快。它们还被设计为水平扩展，因此可以处理大量数据和流量。<br>总体而言，如果你的重点是用户关系并且想要更简单的数据模型，图数据库可能是个好选择。但是，仔细评估你的具体需求并咨询数据库专家或开发团队以确定最适合你应用的方案非常重要。</p>
+<h2 id="2-4-学习"><a href="#2-4-学习" class="headerlink" title="2.4 学习"></a>2.4 学习</h2><h3 id="2-4-1-规划我的学习计划（学习路线图生成）"><a href="#2-4-1-规划我的学习计划（学习路线图生成）" class="headerlink" title="2.4.1 规划我的学习计划（学习路线图生成）"></a>2.4.1 规划我的学习计划（学习路线图生成）</h3><p>问：</p>
+<blockquote>
+<p>我想成为一名前端开发者，我应该学习哪些主题？</p>
+</blockquote>
+<p>答：</p>
+<blockquote>
+<p>如果你想成为一名前端开发者，你应该从学习以下主题开始：</p>
+<ol>
+<li>HTML：超文本标记语言是每个网站的基础，用于构建和组织内容。</li>
+<li>CSS：层叠样式表用于网站的样式和设计，使其在视觉上美观且具有响应性。</li>
+<li>JavaScript：一种用于向网站添加交互性、动态行为和功能的编程语言。</li>
+<li>用户体验（UX）：UX 设计旨在创建直观易用的网站，为用户提供积极的体验。<br>…..</li>
+</ol>
+</blockquote>
+<h3 id="2-4-2-推荐免费学习资源"><a href="#2-4-2-推荐免费学习资源" class="headerlink" title="2.4.2 推荐免费学习资源"></a>2.4.2 推荐免费学习资源</h3><p>问：</p>
+<blockquote>
+<p>我想作为初学者学习 ReactJS，你推荐我学习哪些免费资源？</p>
+</blockquote>
+<p>答：</p>
+<blockquote>
+<p>作为初学者学习 ReactJS 有很多免费资源可用。以下是我推荐的一些最佳免费资源：</p>
+<ol>
+<li>ReactJS 官方文档：ReactJS 官方网站提供了涵盖从基础到高级主题的详尽文档和教程。</li>
+<li>Codecademy 的 ReactJS 教程：Codecademy 提供了一个免费的交互式教程，涵盖 ReactJS 的基础知识并帮助你构建第一个 React 应用。</li>
+<li>Traversy Media 的 ReactJS 速成课程：这个免费的 YouTube 视频教程是 ReactJS 的绝佳入门教程，涵盖创建组件和处理状态的基础知识。</li>
+<li>Egghead 的 ReactJS 基础课程：Egghead 是一个提供各种编程主题免费和付费课程的平台，包括 ReactJS。ReactJS 基础课程是初学者的绝佳资源，涵盖 JSX、props 和 state 等主题。<br>……</li>
+</ol>
+</blockquote>
+<h3 id="2-4-3-我理解得对吗？"><a href="#2-4-3-我理解得对吗？" class="headerlink" title="2.4.3 我理解得对吗？"></a>2.4.3 我理解得对吗？</h3><p>自学最大的痛点之一是没有老师来告诉你是否在以正确的方式学习和理解。ChatGPT 可以充当老师来告诉你是否做得正确。</p>
+<h4 id="2-4-3-1-模拟考试"><a href="#2-4-3-1-模拟考试" class="headerlink" title="2.4.3.1 模拟考试"></a>2.4.3.1 模拟考试</h4><p>问：</p>
+<blockquote>
+<p>模拟一场 ReactJS 考试，10 道题</p>
+</blockquote>
+<p>答：</p>
+<blockquote>
+<p>当然，这是一套有 10 道题的模拟考试，用于测试你对 ReactJS 的掌握程度：</p>
+<ol>
+<li>什么是 JSX，它与普通 JavaScript 语法有何不同？</li>
+<li>ReactJS 中的组件是什么，你如何定义和使用组件？</li>
+<li>React 中”props”对象的用途是什么，你如何从父组件向子组件传递数据？</li>
+<li>React 中 state 和 props 的区别是什么，你何时会使用其中一个而不是另一个？</li>
+<li>React 中的虚拟 DOM 是什么，它如何提升 Web 应用的性能？<br>……</li>
+</ol>
+</blockquote>
+<h4 id="2-4-3-2-模拟面试"><a href="#2-4-3-2-模拟面试" class="headerlink" title="2.4.3.2 模拟面试"></a>2.4.3.2 模拟面试</h4><p>我：</p>
+<blockquote>
+<p>你能为我模拟一场 TikTok 2-1 前端技术面试吗？</p>
+</blockquote>
+<p>ChatGPT：</p>
+<blockquote>
+<p>当然，我可以进行一场 TikTok 2-1 前端技术职位的模拟面试。这是第一个问题：<br>问题：你有使用 React.js 的经验吗？你是如何在以往的项目中使用它的？</p>
+</blockquote>
+<p>我：</p>
+<blockquote>
+<p>我有 3 年的 ReactJS 使用经验，我在自己的副业项目和工作中都用过它。</p>
+</blockquote>
+<p>ChatGPT：</p>
+<blockquote>
+<p>很好！你能告诉我你在之前的某个项目中使用 React.js 实现的一个具体功能吗？在实现过程中你遇到了哪些挑战，你是如何克服的？<br>……</p>
+</blockquote>
+<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h2><p>ChatGPT 可以帮助我们编写代码、解释代码、编写测试用例和文档，甚至通过模拟考试和面试充当老师。随着它每天变得越来越强大，未来它能做的事情会更多。有效使用 ChatGPT 的关键在于将大问题分解为小问题，并为 AI 模型提供清晰的上下文。总体而言，ChatGPT 是优化工作流程和提高生产力的强大工具。我希望看到更多关于它的使用案例。</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  <p><a class="classtest-link" href="/tags/AI/" rel="tag">AI</a>, <a class="classtest-link" href="/tags/ChatGPT/" rel="tag">ChatGPT</a>, <a class="classtest-link" href="/tags/code-generation/" rel="tag">code generation</a>, <a class="classtest-link" href="/tags/frontend/" rel="tag">frontend</a>, <a class="classtest-link" href="/tags/software-engineering/" rel="tag">software engineering</a>, <a class="classtest-link" href="/tags/testing/" rel="tag">testing</a> — Feb 22, 2023</p>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">用 ❤ 和
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        制作于 <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>

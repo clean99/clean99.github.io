@@ -13,9 +13,11 @@
   
   <title>Does Github Copilot Worth It?</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml,sitemap.txt" />
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/">
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2022/12/18/Does-Github-Copilot-Worth-It/" />
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/" />
   
   <meta name="description" content="I personally use copilot to speed up my coding for a long time. I’ve discovered some use cases where git copilot can help me a lot. For me, copilot sp">
   
@@ -139,8 +141,36 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
 
-<meta name="generator" content="Hexo 6.3.0"></head>
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
 
 <body>
   <div class="container">
@@ -174,9 +204,17 @@
     </h1>
   </div>
 
-  <div class="six columns ml-1">
+  <div class="five columns ml-1">
     <h1 class="mt-2">
-      Hi Folks.
+      <a href="/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="two columns" style="max-width: 80px; text-align: right;">
+    <h1 class="mt-2 mode">
+      <a href="/zh/2022/12/18/Does-Github-Copilot-Worth-It/" onclick="localStorage.setItem('preferredLang', 'zh')" style="text-decoration:none;font-size:0.75em;border:1px solid;padding:2px 6px;border-radius:3px">
+        中文
+      </a>
     </h1>
   </div>
 
@@ -210,6 +248,14 @@
 
         <div class="trans">
             <h2>Does Github Copilot Worth It?</h2>
+
+  
+  <p style="margin-bottom: 0.5rem;">
+    <a href="/zh/2022/12/18/Does-Github-Copilot-Worth-It/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
+      阅读中文版
+    </a>
+  </p>
+  
 
   <p>I personally use copilot to speed up my coding for a long time. I’ve discovered some use cases where git copilot can help me a lot. For me, copilot speeds up my coding progress by at least <strong>30%</strong>. So it’s definitely a good deal for me to subscribe to it for the cost of a cup of coffee (<strong>10$ per month</strong>).<br>Here I want to show you some scenarios where copilot can <strong>accelerate</strong> our development. Also provide some similiar tools for you to apply in your daily work.</p>
 <h2 id="Testing-your-code"><a href="#Testing-your-code" class="headerlink" title="Testing your code"></a>Testing your code</h2><p>One pain-point of writing tests for FE developers is <strong>the unfamiliarity of the test framework’s APIs</strong>. And automatic testing often includes some simple script and also a lot of <strong>repeat</strong>, which is what AI is good at. After a period of use, I found that <strong>TDD</strong> is one of the <strong>best</strong> ways to combine testing with copilot.<br>Copilot works well with all kinds of testing, such as <strong>unit testing</strong>, <strong>e2e testing</strong>. The dataset behind copilot is  almost the whole open source community. You don’t need to worry about whether there exist any APIs that copilot didn’t meet before.</p>

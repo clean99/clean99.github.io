@@ -13,9 +13,11 @@
   
   <title>How to Design GOOD Test Cases</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml,sitemap.txt" />
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/">
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
   
   <meta name="description" content="Testing for software is hard. Good test cases can help you increase maintainability and stability of your code, while bad test cases not only can not ">
   
@@ -139,8 +141,36 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
 
-<meta name="generator" content="Hexo 6.3.0"></head>
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
 
 <body>
   <div class="container">
@@ -174,9 +204,17 @@
     </h1>
   </div>
 
-  <div class="six columns ml-1">
+  <div class="five columns ml-1">
     <h1 class="mt-2">
-      Hi Folks.
+      <a href="/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="two columns" style="max-width: 80px; text-align: right;">
+    <h1 class="mt-2 mode">
+      <a href="/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" onclick="localStorage.setItem('preferredLang', 'zh')" style="text-decoration:none;font-size:0.75em;border:1px solid;padding:2px 6px;border-radius:3px">
+        中文
+      </a>
     </h1>
   </div>
 
@@ -210,6 +248,14 @@
 
         <div class="trans">
             <h2>How to Design GOOD Test Cases</h2>
+
+  
+  <p style="margin-bottom: 0.5rem;">
+    <a href="/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
+      阅读中文版
+    </a>
+  </p>
+  
 
   <p>Testing for software is hard. Good test cases can help you increase maintainability and stability of your code, while bad test cases not only can not benefit you, some things can even slow down your development process.</p>
 <p>It is good to see many test cases written in our team now, but some of them are not really benefit our team and even become burden of the development. I think part of the reason is because we don’t have instructions for how to design good test cases that really help us out. So I’d like to build a basic framework about how to write test cases in UT and E2E.</p>

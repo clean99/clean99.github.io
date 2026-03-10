@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>在开发周期中应用自动化测试</title>
+  
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/">
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" />
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" />
+  
+  <meta name="description" content="背景测试是任何软件开发流程中的关键环节。确保应用程序按预期运行、没有缺陷，是向终端用户交付高质量产品的基本要求。本节将探讨测试在开发周期中的重要性，并重点介绍自动化测试流程的优势。 测试是生产流程不可或缺的一部分，务必牢记：你的软件最终一定会被测试，无论是由你、你的自动化测试脚本，还是终端用户来完成">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.ioundefined">
+  
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="在开发周期中应用自动化测试" />
+  
+  <meta property="og:description" content="背景测试是任何软件开发流程中的关键环节。确保应用程序按预期运行、没有缺陷，是向终端用户交付高质量产品的基本要求。本节将探讨测试在开发周期中的重要性，并重点介绍自动化测试流程的优势。 测试是生产流程不可或缺的一部分，务必牢记：你的软件最终一定会被测试，无论是由你、你的自动化测试脚本，还是终端用户来完成">
+  
+  <meta property="og:url" content="https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="在开发周期中应用自动化测试">
+  
+  <meta name="twitter:description" content="背景测试是任何软件开发流程中的关键环节。确保应用程序按预期运行、没有缺陷，是向终端用户交付高质量产品的基本要求。本节将探讨测试在开发周期中的重要性，并重点介绍自动化测试流程的优势。 测试是生产流程不可或缺的一部分，务必牢记：你的软件最终一定会被测试，无论是由你、你的自动化测试脚本，还是终端用户来完成">
+  
+  
+  <meta name="twitter:image" content="https://clean99.github.ioundefined">
+  
+  <meta name="twitter:url" content="https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="five columns ml-1">
+    <h1 class="mt-2">
+      <a href="/zh/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="two columns" style="max-width: 80px; text-align: right;">
+    <h1 class="mt-2 mode">
+      <a href="/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" onclick="localStorage.setItem('preferredLang', 'en')" style="text-decoration:none;font-size:0.75em;border:1px solid;padding:2px 6px;border-radius:3px">
+        EN
+      </a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/zh/">首页</a>
+        
+          
+          <a href="/zh/Works" class="ml">作品</a>
+          
+        
+          
+          <a href="/zh/About" class="ml">关于</a>
+          
+        
+          
+          <a href="/zh/Links" class="ml">友链</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">邮箱</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <h2>在开发周期中应用自动化测试</h2>
+
+  
+  <p style="margin-bottom: 0.5rem;">
+    <a href="/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+      Read in English
+    </a>
+  </p>
+  
+
+  <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>测试是任何软件开发流程中的关键环节。确保应用程序按预期运行、没有缺陷，是向终端用户交付高质量产品的基本要求。本节将探讨测试在开发周期中的重要性，并重点介绍自动化测试流程的优势。</p>
+<p>测试是生产流程不可或缺的一部分，务必牢记：<strong>你的软件最终一定会被测试，无论是由你、你的自动化测试脚本，还是终端用户来完成</strong>。疏于彻底测试产品，可能导致性能低下、出现错误，最终让客户不满。</p>
+<p>大多数测试任务<strong>简单且重复</strong>，非常适合自动化。通过自动化测试流程，你可以节省宝贵的时间和资源、提升准确性，并<strong>降低人为错误的可能性（始终牢记：人类并不完美，会犯很多低级错误）</strong>。自动化测试还可以<strong>按需频繁运行</strong>，确保缺陷能被<strong>及时发现和处理</strong>。</p>
+<p>在整个开发周期中，应当实施各种类型的测试，以便尽早发现 Bug 和问题，使其更易于解决。通过结合单元测试、端到端（E2E）测试等不同测试技术，可以确保应用程序在开发的每个阶段都得到全面验证。接下来的章节将探讨标准开发周期，并讨论如何在这一框架内有效地应用自动化测试。</p>
+<h2 id="开发周期"><a href="#开发周期" class="headerlink" title="开发周期"></a>开发周期</h2><p>敏捷软件开发生命周期（SDLC）的标准工作流通常由几个阶段组成，每个阶段都有其目的和目标，包括：</p>
+<img alt="敏捷软件开发生命周期" src="/img/testing-sdlc/alige.png">
+
+<ol>
+<li><strong>构想</strong>：此阶段涉及产生想法、识别机会，以及定义项目目标和需求。</li>
+<li><strong>开发</strong>：包括 UX&#x2F;UI 设计、架构设计、编码和集成。</li>
+<li><strong>测试</strong>：此阶段涉及验证软件的功能、性能和整体质量。</li>
+<li><strong>部署</strong>：在此阶段，软件被逐步发布到生产环境。</li>
+<li><strong>运维</strong>：最后阶段涉及按需维护和更新软件、解决出现的问题，并根据用户反馈和性能指标持续改进产品。</li>
+</ol>
+<p>不同公司可能有其独特的 SDLC 变体，以满足各自的需求和工作流程。在我的团队中，我们的 SDLC 遵循以下结构：</p>
+<img alt="我团队的软件开发生命周期" src="/img/testing-sdlc/sdlc.png">
+
+<ol>
+<li><strong>撰写 BRD&#x2F;PRD</strong>（业务需求文档&#x2F;产品需求文档）：这些文档概述了项目的目标、宗旨和需求，是后续开发阶段的基础。</li>
+<li><strong>PRD 评审</strong>：团队成员（包括开发人员）审查 PRD，从用户和开发者的角度确保设计合理。</li>
+<li><strong>撰写 TRD</strong>（技术需求文档）：该文档概述了软件的技术规范和架构，详细说明如何实现产品需求。</li>
+<li><strong>TRD 评审</strong>：相关利益方评审技术需求，确保提出的解决方案与项目目标和约束条件一致。</li>
+<li><strong>实现</strong>（前端&#x2F;后端）：开发人员开始编写应用程序代码，专注于前端和后端组件。</li>
+<li><strong>代码评审</strong>：其他团队成员审查代码，确保其遵循最佳实践并满足项目需求。</li>
+<li><strong>重构</strong>：在此阶段对代码进行必要的修改或改进。</li>
+<li><strong>QA 测试</strong>：进行质量保证测试，包括手动和自动化测试，确保软件达到预期的质量标准。</li>
+<li><strong>小流量</strong>：将应用程序逐步推送给一小部分用户，密切监控性能和用户反馈。</li>
+<li><strong>全量流量</strong>：软件最终部署给所有目标用户，标志着开发周期的完成。</li>
+<li><strong>维护</strong>：<strong>世界上不存在完美的系统，需求也在不断变化</strong>。因此我们需要频繁地维护和迭代我们的系统。</li>
+</ol>
+<h2 id="手动测试的局限性"><a href="#手动测试的局限性" class="headerlink" title="手动测试的局限性"></a>手动测试的局限性</h2><p>尽管开发周期可以产出高质量的产品，但我的团队偶尔仍会遇到 Bug 和故障，其中一些由我自己负责。2023 年 3 月，我们经历了五次故障，虽然没有一次特别严重，但它们凸显了改进的必要性。<strong>人为错误不可避免，这正是自动化不可或缺的原因。</strong> 让我们来分析一下我团队故障中的一些具体问题。</p>
+<h3 id="代码变更与-QA-测试的交叉"><a href="#代码变更与-QA-测试的交叉" class="headerlink" title="代码变更与 QA 测试的交叉"></a>代码变更与 QA 测试的交叉</h3><img alt="代码变更与 QA 测试的交叉" src="/img/testing-sdlc/interleaving-code-change.png">
+
+<p>理想情况下，<strong>测试应始终跟随代码变更进行</strong>。然而在实践中，这并不总是可行的。在 QA 测试阶段之后，开发人员还需要修复 Bug、解决合并代码时的冲突等。仅依靠手动测试，整个过程既耗时又消耗资源，反复进行全面 QA 测试变得不切实际。</p>
+<p>以我团队故障中的这个例子为例：</p>
+<ol>
+<li><strong>合并冲突导致路由缺失</strong>：快速的产品迭代和同时进行的需求导致频繁的冲突解决。解决冲突可能引入 Bug，尤其是当处理冲突的人只编写了部分代码时。将手动测试聚焦于需求本身，使此类故障得以发生。</li>
+</ol>
+<h3 id="对黑盒模块的依赖"><a href="#对黑盒模块的依赖" class="headerlink" title="对黑盒模块的依赖"></a>对黑盒模块的依赖</h3><img alt="依赖爆炸" src="/img/testing-sdlc/dependency.png">
+
+<p>我们的系统严重依赖众多外部依赖项。<strong>模块化对于构建复杂系统至关重要，但这通常意味着依赖黑盒模块。</strong> 信任这些依赖项可能导致 Bug 的产生。</p>
+<p>以下是一些故障案例：</p>
+<ol>
+<li><strong>依赖变更导致产品入口消失</strong>：开发人员可能不了解其变更对下游产品的影响。当依赖项发生变化时，让 QA 手动测试所有下游产品是不切实际的。</li>
+<li><strong>过时的 JS Bridge（JSB）文档导致某些 App 版本功能异常</strong>：在开发使用 JSB 的新功能时，要求开发人员或 QA 测试每个 App 版本是不合理的。开发人员相信文档，但当文档过时时，故障就会发生。</li>
+</ol>
+<h3 id="组合爆炸"><a href="#组合爆炸" class="headerlink" title="组合爆炸"></a>组合爆炸</h3><img alt="组合爆炸" src="/img/testing-sdlc/combine.png">
+
+<p>我们的团队服务于全球各地区、语言、平台和 App 版本的用户。功能也有多种组合。<strong>可能的组合数量 O(m^n)（A * B * C * D …）是巨大的，且大多数是重复性的。</strong> 人类并不擅长这项任务，如以下故障所示：</p>
+<ol>
+<li><strong>某些地区缺少某个功能</strong>：我们团队在多个地区发布了一个功能，但有一个月在某些地区缺失了该功能。简单的原因是没有人在这些地区进行测试。<strong>期望 QA 为每个需求单独测试每个地区是不切实际的。</strong></li>
+</ol>
+<h2 id="在-SDLC-中应用自动化测试"><a href="#在-SDLC-中应用自动化测试" class="headerlink" title="在 SDLC 中应用自动化测试"></a>在 SDLC 中应用自动化测试</h2><p>提升软件开发敏捷性的关键之一是<strong>自动化</strong>。考虑到手动测试的局限性，我们知道<strong>手动工作既耗时又容易出错</strong>。因此，我们需要在 SDLC 中融入自动化测试。本节将介绍如何将各种类型的自动化测试应用于 SDLC，并展示它们在预防产品故障和 Bug 方面的有效性。</p>
+<img alt="含自动化测试的软件开发生命周期" src="/img/testing-sdlc/sdlc-testing.png">
+
+
+<h3 id="TRD：编写与评审测试用例"><a href="#TRD：编写与评审测试用例" class="headerlink" title="TRD：编写与评审测试用例"></a>TRD：编写与评审测试用例</h3><p>在 TRD 阶段，记录每个新模块的测试用例并让其他开发人员评审至关重要。<strong>引入自动化测试后，测试用例提供了一种极佳的方式来描述用户与我们模块的交互。</strong> 测试用例可能类似于：”当用户点击某物时，应显示某内容”，或”输入某内容时，应返回某内容”。它们描述了用户（终端用户或开发人员）如何与模块交互，作为代码库中的文档，提升了可维护性。</p>
+<h3 id="开发：单元测试与-TDD"><a href="#开发：单元测试与-TDD" class="headerlink" title="开发：单元测试与 TDD"></a>开发：单元测试与 TDD</h3><p>在开发过程中，我们为各个单元创建测试脚本，并努力通过每个测试用例。这些测试是我们模块的第一批”用户”。<strong>编写单元测试有诸多好处，例如隔离问题、简化排查、测试边界情况，以及复用现有测试确保我们不会意外破坏已有功能。</strong> 通过采用测试驱动开发（TDD），你可以从单元测试中获得更多收益。查看我关于 <a href="/2022/08/18/How-Testing-Speeds-Up-Your-Development/" title="How Testing Speeds Up Your Development">How Testing Speeds Up Your Development</a> 和 <a href="/2022/07/24/Testing-Best-Practice-Tdd/" title="Testing Best Practice Tdd">Testing Best Practice Tdd</a> 的博文了解更多信息。</p>
+<h3 id="集成与测试：E2E-测试"><a href="#集成与测试：E2E-测试" class="headerlink" title="集成与测试：E2E 测试"></a>集成与测试：E2E 测试</h3><p>完成前端和后端开发后，我们可以启动端到端（E2E）测试。通过自动化手动测试，我们显著降低了 QA 测试的复杂性。此外，我们可以复用之前的测试用例进行回归测试。<strong>这让开发人员能够自信地修改代码和解决冲突，因为 E2E 测试会跟随他们的变更，确保应用程序的整体完整性。</strong></p>
+<h3 id="巡检、压力测试、性能测试等"><a href="#巡检、压力测试、性能测试等" class="headerlink" title="巡检、压力测试、性能测试等"></a>巡检、压力测试、性能测试等</h3><p>我们可以为生产环境设置 E2E 测试巡检，以<strong>尽快</strong>发现问题，而不是等待用户反馈。通过实施压力测试和性能测试，我们可以从多个角度评估产品质量，确保最终产品更加健壮和可靠。</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>总而言之，将自动化测试融入开发周期可以在提升<strong>可靠性、可维护性和可扩展性</strong>的同时，显著缩短开发时间。通过实施这些测试方法，上述大多数故障都可以得到预防，从而形成更<strong>敏捷</strong>、更<strong>高效</strong>的 SDLC。将自动化测试作为开发流程的重要组成部分，最终带来更高质量的产品，以及对开发人员和终端用户都更顺畅的体验。</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  <p><a class="classtest-link" href="/tags/agile/" rel="tag">agile</a>, <a class="classtest-link" href="/tags/sdlc/" rel="tag">sdlc</a>, <a class="classtest-link" href="/tags/software-engineering/" rel="tag">software engineering</a>, <a class="classtest-link" href="/tags/testing/" rel="tag">testing</a> — Apr 1, 2023</p>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">用 ❤ 和
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        制作于 <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>

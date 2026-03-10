@@ -13,9 +13,11 @@
   
   <title>The Software Engineering Concept Behind Tailwind CSS(Compared With StyleX)</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml,sitemap.txt" />
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/">
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/" />
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/" />
   
   <meta name="description" content="BackgroundThis article will show you how TailwindCSS can really increase our productivity and project maintainability by better organizing our code in">
   
@@ -139,8 +141,36 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
 
-<meta name="generator" content="Hexo 6.3.0"></head>
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
 
 <body>
   <div class="container">
@@ -174,9 +204,17 @@
     </h1>
   </div>
 
-  <div class="six columns ml-1">
+  <div class="five columns ml-1">
     <h1 class="mt-2">
-      Hi Folks.
+      <a href="/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="two columns" style="max-width: 80px; text-align: right;">
+    <h1 class="mt-2 mode">
+      <a href="/zh/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/" onclick="localStorage.setItem('preferredLang', 'zh')" style="text-decoration:none;font-size:0.75em;border:1px solid;padding:2px 6px;border-radius:3px">
+        中文
+      </a>
     </h1>
   </div>
 
@@ -210,6 +248,14 @@
 
         <div class="trans">
             <h2>The Software Engineering Concept Behind Tailwind CSS(Compared With StyleX)</h2>
+
+  
+  <p style="margin-bottom: 0.5rem;">
+    <a href="/zh/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
+      阅读中文版
+    </a>
+  </p>
+  
 
   <h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p>This article will show you how TailwindCSS can really increase our <strong>productivity</strong> and project <strong>maintainability</strong> by better organizing our code in certain scenarios.</p>
 <h2 id="Performance-Effect"><a href="#Performance-Effect" class="headerlink" title="Performance Effect"></a>Performance Effect</h2><blockquote>

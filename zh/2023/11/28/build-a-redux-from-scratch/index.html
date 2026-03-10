@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>从零构建 Redux（Redux 源码解读）</title>
+  
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/zh/2023/11/28/build-a-redux-from-scratch/">
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/11/28/build-a-redux-from-scratch/" />
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2023/11/28/build-a-redux-from-scratch/" />
+  
+  <meta name="description" content="状态不过是一个 getter&amp;#x2F;setter。  本文你将学到什么 Redux 与 React-Redux 的设计与实现：本文深入探讨 Redux 和 React-Redux 的设计与实现，展示它们如何管理应用状态并促进组件间的通信。 状态管理（Getter、Setter）：你将理解状态管理">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.ioundefined">
+  
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="从零构建 Redux（Redux 源码解读）" />
+  
+  <meta property="og:description" content="状态不过是一个 getter&amp;#x2F;setter。  本文你将学到什么 Redux 与 React-Redux 的设计与实现：本文深入探讨 Redux 和 React-Redux 的设计与实现，展示它们如何管理应用状态并促进组件间的通信。 状态管理（Getter、Setter）：你将理解状态管理">
+  
+  <meta property="og:url" content="https://clean99.github.io/zh/2023/11/28/build-a-redux-from-scratch/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="从零构建 Redux（Redux 源码解读）">
+  
+  <meta name="twitter:description" content="状态不过是一个 getter&amp;#x2F;setter。  本文你将学到什么 Redux 与 React-Redux 的设计与实现：本文深入探讨 Redux 和 React-Redux 的设计与实现，展示它们如何管理应用状态并促进组件间的通信。 状态管理（Getter、Setter）：你将理解状态管理">
+  
+  
+  <meta name="twitter:image" content="https://clean99.github.ioundefined">
+  
+  <meta name="twitter:url" content="https://clean99.github.io/zh/2023/11/28/build-a-redux-from-scratch/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="five columns ml-1">
+    <h1 class="mt-2">
+      <a href="/zh/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="two columns" style="max-width: 80px; text-align: right;">
+    <h1 class="mt-2 mode">
+      <a href="/2023/11/28/build-a-redux-from-scratch/" onclick="localStorage.setItem('preferredLang', 'en')" style="text-decoration:none;font-size:0.75em;border:1px solid;padding:2px 6px;border-radius:3px">
+        EN
+      </a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/zh/">首页</a>
+        
+          
+          <a href="/zh/Works" class="ml">作品</a>
+          
+        
+          
+          <a href="/zh/About" class="ml">关于</a>
+          
+        
+          
+          <a href="/zh/Links" class="ml">友链</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">邮箱</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <h2>从零构建 Redux（Redux 源码解读）</h2>
+
+  
+  <p style="margin-bottom: 0.5rem;">
+    <a href="/2023/11/28/build-a-redux-from-scratch/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+      Read in English
+    </a>
+  </p>
+  
+
+  <blockquote>
+<p>状态不过是一个 getter&#x2F;setter。</p>
+</blockquote>
+<h2 id="本文你将学到什么"><a href="#本文你将学到什么" class="headerlink" title="本文你将学到什么"></a>本文你将学到什么</h2><ol>
+<li><strong>Redux 与 React-Redux 的设计与实现</strong>：本文深入探讨 Redux 和 React-Redux 的设计与实现，展示它们如何管理应用状态并促进组件间的通信。</li>
+<li><strong>状态管理（Getter、Setter）</strong>：你将理解状态管理的基本模式，并能够理解其他任何状态管理工具。</li>
+<li><strong>发布&#x2F;订阅设计模式</strong>：本文解释了发布&#x2F;订阅模式，这是 Redux 状态更新和通知机制的核心概念。</li>
+</ol>
+<h2 id="什么是-Redux？"><a href="#什么是-Redux？" class="headerlink" title="什么是 Redux？"></a>什么是 Redux？</h2><p>Redux 是一个面向 JavaScript 应用的可预测状态容器。它就像一个功能更强大的 React 状态。React 的状态仅限于各个组件，而 Redux 允许你在一个地方管理整个应用的状态。</p>
+<p>Redux 通过将整个应用的状态存储在单一 store 中的一个 JavaScript 对象来解决这个问题。这使得随时间追踪变化、调试，乃至将状态持久化到本地存储并在下次加载时恢复，都变得更加容易。</p>
+<img src='/img/redux/redux-achi.png' alt='redux arch' />
+
+<p>Redux 包含以下几个组成部分：</p>
+<ul>
+<li><strong>Action</strong>：一个描述发生了什么以及要对状态进行哪些更改的普通对象。</li>
+<li><strong>Dispatcher</strong>：一个接收 action 对象并将其发送到 store 以改变状态的函数。</li>
+<li><strong>Store</strong>：持有应用状态的中央仓库。它允许访问状态、分发 action 以及注册监听器。</li>
+<li><strong>View</strong>：显示 store 提供的数据的用户界面。它可以根据用户交互触发 action。</li>
+</ul>
+<p>如果应用中发生了某个操作，例如按下按钮需要改变状态，则通过 action 来完成状态变更。这会触发视图的重新渲染。</p>
+<p>让我们来看一个计数器的实现：</p>
+<img src='/img/redux/counter.png' alt='redux arch' />
+
+<p><code>action</code> 对应用状态的影响通过 <code>reducer</code> 来定义。在实践中，<code>reducer</code> 是一个接收当前状态和 action 作为参数的函数，它返回一个新状态。</p>
+<p>现在为我们的应用定义一个 <code>reducer</code>：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// the first state is the current state in store, and the function return</span></span><br><span class="line"><span class="comment">// a new state after action.</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">counterReducer</span> = (<span class="params">state, action</span>) =&gt; &#123;</span><br><span class="line"><span class="keyword">if</span> (action.<span class="property">type</span> === <span class="string">&#x27;INCREMENT&#x27;</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> state + <span class="number">1</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (action.<span class="property">type</span> === <span class="string">&#x27;DECREMENT&#x27;</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> state - <span class="number">1</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (action.<span class="property">type</span> === <span class="string">&#x27;ZERO&#x27;</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> state;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>action</code> 的格式如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">type</span>: <span class="string">&#x27;INCREMENT&#x27;</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有了 <code>reducer</code>，我们就可以使用 <code>redux</code> 定义一个 <code>store</code>。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; createStore &#125; <span class="keyword">from</span> <span class="string">&#x27;redux&#x27;</span>;</span><br><span class="line"><span class="comment">// initial state is 0</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">counterReducer</span> = (<span class="params">state = <span class="number">0</span>, action</span>) =&gt; &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> store = <span class="title function_">createStore</span>(counterReducer);</span><br></pre></td></tr></table></figure>
+
+<p><code>store</code> 有两个核心方法：<code>dispatch</code> 和 <code>subscribe</code>。函数可以 <code>subscribe</code> 到一个 store，<code>dispatch</code> 接收一个 action 并改变状态，当状态改变时，已 <code>subscribe</code> 到该 store 的函数将被调用。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> store = <span class="title function_">createStore</span>(counterReducer);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(store.<span class="title function_">getState</span>());</span><br><span class="line">store.<span class="title function_">dispatch</span>(&#123; <span class="attr">type</span>: <span class="string">&#x27;INCREMENT&#x27;</span> &#125;);</span><br><span class="line">store.<span class="title function_">dispatch</span>(&#123; <span class="attr">type</span>: <span class="string">&#x27;INCREMENT&#x27;</span> &#125;);</span><br><span class="line">store.<span class="title function_">dispatch</span>(&#123; <span class="attr">type</span>: <span class="string">&#x27;INCREMENT&#x27;</span> &#125;);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(store.<span class="title function_">getState</span>());</span><br><span class="line">store.<span class="title function_">dispatch</span>(&#123; <span class="attr">type</span>: <span class="string">&#x27;ZERO&#x27;</span> &#125;);</span><br><span class="line">store.<span class="title function_">dispatch</span>(&#123; <span class="attr">type</span>: <span class="string">&#x27;DECREMENT&#x27;</span> &#125;);</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(store.<span class="title function_">getState</span>());</span><br><span class="line"></span><br><span class="line"><span class="comment">// console output</span></span><br><span class="line"><span class="number">0</span></span><br><span class="line"><span class="number">3</span></span><br><span class="line">-<span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="发布-x2F-订阅模式"><a href="#发布-x2F-订阅模式" class="headerlink" title="发布&#x2F;订阅模式"></a>发布&#x2F;订阅模式</h2><p><code>redux</code> 遵循<strong>发布&#x2F;订阅</strong>设计模式。其中 <strong>store</strong> 是订阅和发布消息的通道。<strong>dispatch</strong> 方法用于向 store 发布消息。当消息被分发时，应用的状态随之改变。<strong>subscribe</strong> 方法允许函数（订阅者）订阅 store，当状态因分发的消息而发生改变时，这些订阅者会收到通知。</p>
+<img src='/img/redux/subscribe.png' alt='subscribe' />
+
+<p><code>发布/订阅</code>模式的一些优势：</p>
+<ul>
+<li><p><strong>组件间松耦合</strong>：<code>publish</code>（发布）某内容的组件不需要知道谁在 <code>subscribe</code>（订阅）该通道，使系统更加模块化和灵活。</p>
+</li>
+<li><p><strong>高可扩展性</strong>（理论上，Pub&#x2F;Sub 允许任意数量的发布者与任意数量的订阅者通信）。</p>
+</li>
+</ul>
+<h2 id="Redux-实现"><a href="#Redux-实现" class="headerlink" title="Redux 实现"></a>Redux 实现</h2><blockquote>
+<p>以下代码经过简化，请查阅原始代码：<a target="_blank" rel="noopener" href="https://github.com/reduxjs/redux/blob/e124f0bf9b8a4a64389485b5c4506fc0798d7f3f/src/createStore.ts#L41">createStore.ts – github</a></p>
+</blockquote>
+<p>如我们所见，<code>redux</code> 的核心是 <code>createStore</code> 函数，以及 store 的 <code>dispatch</code>、<code>subscribe</code> 方法。我们先跳过其他方法，实现这些核心函数。</p>
+<p>首先定义它们的接口：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">Action</span> &#123;</span><br><span class="line">    <span class="attr">type</span>: <span class="built_in">string</span>;</span><br><span class="line">    [<span class="attr">extraProps</span>: <span class="built_in">string</span>]: <span class="built_in">any</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Reducer</span>&lt;T&gt; &#123;</span><br><span class="line">    (<span class="attr">state</span>: T, <span class="attr">action</span>: <span class="title class_">Action</span>): T;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// a store should have dispatch, subscribe methods</span></span><br><span class="line"><span class="keyword">interface</span> <span class="title class_">Store</span>&lt;T&gt; &#123;</span><br><span class="line">    <span class="attr">dispatch</span>: <span class="function">(<span class="params"><span class="attr">action</span>: <span class="title class_">Action</span></span>) =&gt;</span> <span class="built_in">void</span>; <span class="comment">// setter</span></span><br><span class="line">    <span class="attr">subscribe</span>: <span class="function">(<span class="params"><span class="attr">listener</span>: () =&gt; <span class="built_in">void</span></span>) =&gt;</span> <span class="built_in">void</span>;</span><br><span class="line">    <span class="attr">getState</span>: <span class="function">() =&gt;</span> T; <span class="comment">// getter</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// accept a reducer and initial state, return a store object</span></span><br><span class="line"><span class="keyword">function</span> createStore&lt;T&gt;(<span class="attr">reducer</span>: <span class="title class_">Reducer</span>&lt;T&gt;, <span class="attr">initialState</span>?: T): <span class="title class_">Store</span>&lt;T&gt;; <span class="comment">// create</span></span><br></pre></td></tr></table></figure>
+
+<p>第一步，实现存储逻辑和基本框架：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> createStore&lt;T&gt;(<span class="attr">reducer</span>: <span class="title class_">Reducer</span>&lt;T&gt;, <span class="attr">initialState</span>?: T): <span class="title class_">Store</span>&lt;T&gt; &#123;</span><br><span class="line">    <span class="comment">// store reduce and state to local variable</span></span><br><span class="line">    <span class="keyword">let</span> currentReducer = reducer;</span><br><span class="line">    <span class="keyword">let</span> <span class="attr">currentState</span>: T | <span class="literal">undefined</span> = initialState;</span><br><span class="line">    <span class="comment">// store listen(function that subscribe to this store) in a map id -&gt; func</span></span><br><span class="line">    <span class="keyword">let</span> <span class="attr">currentListeners</span>: <span class="title class_">Map</span>&lt;<span class="built_in">number</span>, <span class="title class_">ListenerCallback</span>&gt; | <span class="literal">null</span> = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line">    <span class="comment">// a id that will assign to the listener</span></span><br><span class="line">    <span class="keyword">let</span> listenerIdCounter = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">subscribe</span>(<span class="params"><span class="attr">listener</span>: () =&gt; <span class="built_in">void</span></span>) &#123;</span><br><span class="line">        <span class="comment">// store listener</span></span><br><span class="line">        <span class="keyword">const</span> listenerId = listenerIdCounter++;</span><br><span class="line">        currentListeners.<span class="title function_">set</span>(listenerId, listener);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">dispatch</span>(<span class="params"><span class="attr">action</span>: <span class="title class_">Action</span></span>) &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">getState</span>(<span class="params"></span>) &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        dispatch,</span><br><span class="line">        subscribe,</span><br><span class="line">        getState,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后实现 dispatch 逻辑。当分发一个 action 时，当前状态会改变，并随后调用所有监听器。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> createStore&lt;T&gt;(<span class="attr">reducer</span>: <span class="title class_">Reducer</span>&lt;T&gt;, <span class="attr">initialState</span>?: T): <span class="title class_">Store</span>&lt;T&gt; &#123;</span><br><span class="line">    <span class="comment">// store reduce and state to local variable</span></span><br><span class="line">    <span class="keyword">let</span> currentReducer = reducer;</span><br><span class="line">    <span class="keyword">let</span> <span class="attr">currentState</span>: T | <span class="literal">undefined</span> = initialState;</span><br><span class="line">    <span class="comment">// store listen(function that subscribe to this store) in a map id -&gt; func</span></span><br><span class="line">    <span class="keyword">let</span> <span class="attr">currentListeners</span>: <span class="title class_">Map</span>&lt;<span class="built_in">number</span>, <span class="title class_">ListenerCallback</span>&gt; | <span class="literal">null</span> = <span class="keyword">new</span> <span class="title class_">Map</span>();</span><br><span class="line">    <span class="comment">// a id that will assign to the listener</span></span><br><span class="line">    <span class="keyword">let</span> listenerIdCounter = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">subscribe</span>(<span class="params"><span class="attr">listener</span>: () =&gt; <span class="built_in">void</span></span>) &#123;</span><br><span class="line">        <span class="comment">// store listener</span></span><br><span class="line">        <span class="keyword">const</span> listenerId = listenerIdCounter++;</span><br><span class="line">        currentListeners.<span class="title function_">set</span>(listenerId, listener);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">dispatch</span>(<span class="params"><span class="attr">action</span>: <span class="title class_">Action</span></span>) &#123;</span><br><span class="line">        <span class="comment">// We will call reducer using action and current state, and update current state</span></span><br><span class="line">        currentState = <span class="title function_">currentReducer</span>(currentState, action);</span><br><span class="line">        <span class="comment">// Call all listener one by one after update the state</span></span><br><span class="line">        currentListeners.<span class="title function_">forEach</span>(<span class="function"><span class="params">listener</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="title function_">listener</span>();</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">getState</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> currentState;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        dispatch,</span><br><span class="line">        subscribe,</span><br><span class="line">        getState,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>至此，我们的玩具 redux 已经完成。注意这是一个没有任何错误处理的简化系统，如果你查看 redux 的源码，会发现几乎一半的代码都在处理错误。</p>
+<h2 id="介绍-React-Redux"><a href="#介绍-React-Redux" class="headerlink" title="介绍 React-Redux"></a>介绍 React-Redux</h2><p>至此 redux 流程的前半部分已经完成，我们现在可以：分发一个 action -&gt; store 状态更新。但如何更新视图呢？我们需要引入 <code>react-redux</code>，React Redux 提供了一对自定义 React hooks，让你的 React 组件能与 Redux store 交互。</p>
+<p><code>useSelector</code> 从 store 状态中读取一个值并订阅更新（getter），而 <code>useDispatch</code> 返回 store 的 <code>dispatch</code> 方法，让你可以分发 action（setter）。当 <code>dispatch</code> 某内容时，传播过程发生，通知所有使用 <code>useSelector</code> 的组件更新它们的值。</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// store</span></span><br><span class="line"><span class="title class_">ReactDOM</span>.<span class="title function_">render</span>(</span><br><span class="line">  <span class="language-xml"><span class="tag">&lt;<span class="name">Provider</span> <span class="attr">store</span>=<span class="string">&#123;store&#125;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;<span class="name">App</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">  &lt;/Provider &gt;,</span></span><br><span class="line"><span class="language-xml">  document.getElementById(&#x27;root&#x27;)</span></span><br><span class="line"><span class="language-xml">);</span></span><br><span class="line"><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">export function Counter() &#123;</span></span><br><span class="line"><span class="language-xml">    // getter</span></span><br><span class="line"><span class="language-xml">    const count = useSelector((state) =&gt; state.count)</span></span><br><span class="line"><span class="language-xml">    // setter</span></span><br><span class="line"><span class="language-xml">    const dispatch = useDispatch()</span></span><br><span class="line"><span class="language-xml"></span></span><br><span class="line"><span class="language-xml">    return (</span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">className</span>=<span class="string">&#123;styles.row&#125;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">            <span class="tag">&lt;<span class="name">button</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">            <span class="attr">className</span>=<span class="string">&#123;styles.button&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">            <span class="attr">aria-label</span>=<span class="string">&quot;Increment value&quot;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">            <span class="attr">onClick</span>=<span class="string">&#123;()</span> =&gt;</span> dispatch(increment())&#125;</span></span><br><span class="line"><span class="language-xml">            &gt;</span></span><br><span class="line"><span class="language-xml">            +</span></span><br><span class="line"><span class="language-xml">            <span class="tag">&lt;/<span class="name">button</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">            <span class="tag">&lt;<span class="name">span</span> <span class="attr">className</span>=<span class="string">&#123;styles.value&#125;</span>&gt;</span>&#123;count&#125;<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">            <span class="tag">&lt;<span class="name">button</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">            <span class="attr">className</span>=<span class="string">&#123;styles.button&#125;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">            <span class="attr">aria-label</span>=<span class="string">&quot;Decrement value&quot;</span></span></span></span><br><span class="line"><span class="tag"><span class="language-xml">            <span class="attr">onClick</span>=<span class="string">&#123;()</span> =&gt;</span> dispatch(decrement())&#125;</span></span><br><span class="line"><span class="language-xml">            &gt;</span></span><br><span class="line"><span class="language-xml">            -</span></span><br><span class="line"><span class="language-xml">            <span class="tag">&lt;/<span class="name">button</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        &#123;/* omit additional rendering output here */&#125;</span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">    )</span></span><br><span class="line"><span class="language-xml">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="订阅（传播）"><a href="#订阅（传播）" class="headerlink" title="订阅（传播）"></a>订阅（传播）</h2><p><code>react-redux</code> 的核心原理是<code>传播</code>（propagation）。<code>传播</code>代表这样一个过程：当状态发生改变时，它会通知根节点，根节点将信息传递给其子节点，信息就这样在整棵树中传播。</p>
+<p>我们创建一个 Subscription 接口，包含以下内容：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">interface</span> <span class="title class_">Subscription</span> &#123;</span><br><span class="line">    <span class="comment">// add children subscription, thus a tree structure is formed</span></span><br><span class="line">    <span class="attr">addNestedSub</span>: <span class="function">(<span class="params"><span class="attr">listener</span>: <span class="title class_">VoidFunc</span></span>) =&gt;</span> <span class="title class_">VoidFunc</span></span><br><span class="line">    <span class="comment">// propagate the information to its children nodes</span></span><br><span class="line">    <span class="attr">notifyNestedSubs</span>: <span class="title class_">VoidFunc</span></span><br><span class="line">    <span class="comment">// check whether the node is subscribed</span></span><br><span class="line">    <span class="attr">isSubscribed</span>: <span class="function">() =&gt;</span> <span class="built_in">boolean</span></span><br><span class="line">    <span class="comment">// do something when the node is notified</span></span><br><span class="line">    <span class="attr">handleChangeWrapper</span>: <span class="title class_">VoidFunc</span></span><br><span class="line">    <span class="comment">// this is for component to attach their function to this node so that handleChangeWrapper can call it</span></span><br><span class="line">    <span class="attr">onStateChange</span>?: <span class="title class_">VoidFunc</span> | <span class="literal">null</span></span><br><span class="line">    <span class="comment">// try to subscribe to a store</span></span><br><span class="line">    <span class="attr">trySubscribe</span>: <span class="title class_">VoidFunc</span></span><br><span class="line">    <span class="comment">// unsubscribe the node for garbage collection</span></span><br><span class="line">    <span class="attr">tryUnsubscribe</span>: <span class="title class_">VoidFunc</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">interface</span> <span class="title class_">ListenerCollection</span> &#123;</span><br><span class="line">    <span class="attr">notify</span>: <span class="function">() =&gt;</span> <span class="built_in">void</span>;</span><br><span class="line">    <span class="attr">subscribe</span>: <span class="function">(<span class="params"><span class="attr">callback</span>: () =&gt; <span class="built_in">void</span></span>) =&gt;</span> <span class="built_in">void</span>;</span><br><span class="line">    <span class="attr">unsubscribe</span>:</span><br><span class="line">&#125;[]</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">function</span> <span class="title function_">createSubscription</span>(<span class="params"><span class="attr">store</span>: <span class="built_in">any</span>, <span class="attr">parentSub</span>?: <span class="title class_">Subscription</span></span>) &#123;</span><br><span class="line">    <span class="comment">// for store unsubscribe function</span></span><br><span class="line">    <span class="keyword">let</span> <span class="attr">unsubscribe</span>: <span class="title class_">VoidFunc</span> | <span class="literal">undefined</span>;</span><br><span class="line">    <span class="comment">// for store the listeners</span></span><br><span class="line">    <span class="comment">// for simplification we don&#x27;t implement the listener methods here, we will do some wishful thinking and assume that we have a ListenerCollection class which is a link list that stores all the listeners(callback)</span></span><br><span class="line">    <span class="keyword">let</span> <span class="attr">listeners</span>: <span class="title class_">ListenerCollection</span>;</span><br><span class="line">    <span class="comment">// Is this specific subscription subscribed (or only nested ones?)</span></span><br><span class="line">    <span class="keyword">let</span> selfSubscribed = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">isSubscribed</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> selfSubscribed;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">trySubscribe</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="comment">// if it is a root node, subscribe its method to store</span></span><br><span class="line">        <span class="comment">// else add to parent&#x27;s listeners</span></span><br><span class="line">        <span class="keyword">if</span> (!unsubscribe) &#123;</span><br><span class="line">            unsubscribe = parentSub</span><br><span class="line">                ? parentSub.<span class="title function_">addNestedSub</span>(handleChangeWrapper)</span><br><span class="line">                : store.<span class="title function_">subscribe</span>(handleChangeWrapper);</span><br><span class="line">            <span class="comment">// create a empty link list of listener for preparing a space for its children nodes</span></span><br><span class="line">            listeners = <span class="title function_">createListenerCollection</span>();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">tryUnsubscribe</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (unsubscribe) &#123;</span><br><span class="line">            <span class="comment">// call unsubscribe method, unsubscribe from store or parent listeners</span></span><br><span class="line">            <span class="title function_">unsubscribe</span>();</span><br><span class="line">            unsubscribe = <span class="literal">undefined</span>;</span><br><span class="line">            <span class="comment">// clear its listeners</span></span><br><span class="line">            listeners.<span class="title function_">clear</span>();</span><br><span class="line">            listeners = <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// for children nodes to add their listener to parent node</span></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">addNestedSub</span>(<span class="params"><span class="attr">listener</span>: () =&gt; <span class="built_in">void</span></span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> cleanupListener = listeners.<span class="title function_">subscribe</span>(listener);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="function">() =&gt;</span> &#123;</span><br><span class="line">            <span class="comment">// unsubscribe</span></span><br><span class="line">            <span class="title function_">tryUnsubscribe</span>();</span><br><span class="line">            <span class="comment">// clear its listeners</span></span><br><span class="line">            <span class="title function_">cleanupListener</span>();</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// force rerender</span></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">handleChangeWrapper</span>(<span class="params"></span>) &#123;</span><br><span class="line">        subscription.<span class="title function_">onStateChange</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// propagate change</span></span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">notifyNestedSubs</span>(<span class="params"></span>) &#123;</span><br><span class="line">        listeners.<span class="title function_">notify</span>()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> <span class="attr">subscription</span>: <span class="title class_">Subscription</span> = &#123;</span><br><span class="line">        addNestedSub,</span><br><span class="line">        notifyNestedSubs,</span><br><span class="line">        handleChangeWrapper,</span><br><span class="line">        isSubscribed,</span><br><span class="line">        trySubscribe,</span><br><span class="line">        tryUnsubscribe,</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> subscription;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>现在我们有了一种与特定 <code>store</code> 关联的订阅创建方式。基本流程是：</p>
+<ol>
+<li>以 <code>store</code> 调用 <code>createSubscription</code> 并调用 <code>trySubscribe</code> 获取一个 <code>root</code> 订阅，我们也可以为 <code>onStateChange</code> 指定一个回调。</li>
+<li>以 <code>store</code> 和 <code>root</code> 调用 <code>createSubscription</code> 获取子订阅，当调用 <code>trySubscribe</code> 时，不再将 <code>onStateChange</code> 绑定到 <code>store</code>，而是添加到 <code>root</code> 的监听器列表中。</li>
+<li>当 <code>store</code> 改变时，<code>root</code> 的 <code>onStateChange</code> 被调用，<code>root</code> 调用 <code>notifyNestedSubs</code> 通知子订阅，子订阅同样递归通知它们自己的子订阅。这样，树中的所有节点都得到了通知，这个过程称为<code>传播</code>。</li>
+</ol>
+<h2 id="Provider"><a href="#Provider" class="headerlink" title="Provider"></a>Provider</h2><p>首先，我们需要将状态存储在某个地方，<code>react-redux</code> 使用 <code>Context</code> 来存储。</p>
+<p>以下是一个简单的 <code>Context</code> 示例：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title class_">CounterContext</span> = <span class="title class_">React</span>.<span class="title function_">createContext</span>(<span class="string">&#x27;counter&#x27;</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">App</span> <span class="keyword">extends</span> <span class="title class_ inherited__">React.Component</span> &#123;</span><br><span class="line">  <span class="title function_">render</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      <span class="language-xml"><span class="tag">&lt;<span class="name">CounterContext.Provider</span> <span class="attr">value</span>=<span class="string">&#123;0&#125;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        <span class="tag">&lt;<span class="name">Counter</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;/<span class="name">CounterContext.Provider</span>&gt;</span></span></span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>作为 Provider 子节点的组件可以通过 <code>useContext</code> 访问 <code>CounterContext</code>：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title function_">Counter</span> = (<span class="params"></span>) =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> counter = <span class="title function_">useContext</span>(<span class="title class_">CounterContext</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (<span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">        &#123;counter&#125;</span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们先来看如何实现 <code>Provider</code>，它创建并将 <code>store</code> 和 <code>subscription</code> 注入到子组件中。</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title class_">ReactReduxContext</span> = <span class="title class_">React</span>.<span class="title function_">createContext</span>(<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">Provider</span>(<span class="params">&#123;store, children&#125;</span>)&#123;</span><br><span class="line">    <span class="comment">// provider will create a subscription when store with root is changed.</span></span><br><span class="line">    <span class="keyword">const</span> contextValue = <span class="title function_">useMemo</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> subscription = <span class="keyword">new</span> <span class="title class_">Subscription</span>(store);</span><br><span class="line">        subscription.<span class="property">onStateChange</span> = subscription.<span class="property">notifyNestedSubs</span>;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            store,</span><br><span class="line">            subscription,</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;, [store]);</span><br><span class="line">    <span class="comment">// get initial state</span></span><br><span class="line">    <span class="keyword">const</span> previousState = <span class="title function_">useMemo</span>(<span class="function">() =&gt;</span> store.<span class="title function_">getState</span>(), [store]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// when previousState or contextValue change, try to subscribe again</span></span><br><span class="line">    <span class="title function_">useLayoutEffect</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; subscription &#125; = contextValue</span><br><span class="line">        <span class="comment">// subscribe to new store</span></span><br><span class="line">        subscription.<span class="title function_">trySubscribe</span>()</span><br><span class="line">        <span class="comment">// if the state is changed, notify listeners</span></span><br><span class="line">        <span class="keyword">if</span> (previousState !== store.<span class="title function_">getState</span>()) &#123;</span><br><span class="line">            subscription.<span class="title function_">notifyNestedSubs</span>()</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="function">() =&gt;</span> &#123;</span><br><span class="line">            subscription.<span class="title function_">tryUnsubscribe</span>()</span><br><span class="line">            subscription.<span class="property">onStateChange</span> = <span class="literal">null</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;, [contextValue, previousState])</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        <span class="comment">// inject subscription and store to children nodes</span></span><br><span class="line">    	<span class="language-xml"><span class="tag">&lt;<span class="name">ReactReduxContext.Provider</span> <span class="attr">value</span>=<span class="string">&#123;contextValue&#125;</span>&gt;</span>&#123;children&#125;<span class="tag">&lt;/<span class="name">ReactReduxContext.Provider</span>&gt;</span></span></span><br><span class="line">    );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="useSelector"><a href="#useSelector" class="headerlink" title="useSelector"></a>useSelector</h2><p>现在我们可以在子组件中获取 <code>store</code> 和根订阅了，接下来实现 <code>useSelector</code> hook，它向订阅树中添加一个订阅，并在状态改变时强制组件重新渲染。</p>
+<p>这里我们使用 <code>useReducer</code> 来通知组件进行<code>重新渲染</code>。</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">MyComponent</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// when dispatch is call, the component will rerender</span></span><br><span class="line">    <span class="keyword">const</span> [state, dispatch] = <span class="title function_">useReducer</span>(<span class="function">(<span class="params">s</span>) =&gt;</span> s + <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后实现一个简化版的 <code>useSelector</code> hook：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// whenever the state in store is changed, update the state and inform a rerender.</span></span><br><span class="line"><span class="comment">// a selector callback for filter the state we want, equalityFn is for compare state change, here we use strictly equal ===</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">useSelector</span>(<span class="params">selector, equalityFn = (a, b) =&gt; a === b</span>) &#123;</span><br><span class="line">    <span class="comment">// get store and root subscription from context</span></span><br><span class="line">    <span class="keyword">const</span> &#123; store, <span class="attr">subscription</span>: contextSub &#125; = <span class="title function_">useContext</span>(<span class="title class_">ReactReduxContext</span>);</span><br><span class="line">    <span class="comment">// utilize the forceRender function for rerender</span></span><br><span class="line">    <span class="keyword">const</span> [, forceRender] = <span class="title function_">useReducer</span>(<span class="function">(<span class="params">s</span>) =&gt;</span> s + <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="comment">// create a new subscription for the component that call this hook with root subscription</span></span><br><span class="line">    <span class="keyword">const</span> subscription = <span class="title function_">useMemo</span>(<span class="function">() =&gt;</span> <span class="keyword">new</span> <span class="title class_">Subscription</span>(store, contextSub), [</span><br><span class="line">        store,</span><br><span class="line">        contextSub,</span><br><span class="line">    ]);</span><br><span class="line">    <span class="comment">// get current state when re-render</span></span><br><span class="line">    <span class="keyword">const</span> storeState = store.<span class="title function_">getState</span>();</span><br><span class="line">    <span class="comment">// store selected state</span></span><br><span class="line">    <span class="keyword">let</span> selectedState;</span><br><span class="line">    <span class="comment">// cache selector, store state, selected state when every time render</span></span><br><span class="line">    <span class="keyword">const</span> latestSelector = <span class="title function_">useRef</span>();</span><br><span class="line">    <span class="keyword">const</span> latestStoreState = <span class="title function_">useRef</span>();</span><br><span class="line">    <span class="keyword">const</span> latestSelectedState = <span class="title function_">useRef</span>();</span><br><span class="line">    <span class="title function_">useLayoutEffect</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">        latestSelector.<span class="property">current</span> = selector;</span><br><span class="line">        latestStoreState.<span class="property">current</span> = storeState;</span><br><span class="line">        latestSelectedState.<span class="property">current</span> = selectedState;</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// if the cache is needed to update</span></span><br><span class="line">    <span class="keyword">if</span> (</span><br><span class="line">        selector !== latestSelector.<span class="property">current</span> ||</span><br><span class="line">        storeState !== latestStoreState.<span class="property">current</span></span><br><span class="line">    ) &#123;</span><br><span class="line">        <span class="comment">// calculate new selected state</span></span><br><span class="line">        <span class="keyword">const</span> newSelectedState = <span class="title function_">selector</span>(storeState);</span><br><span class="line">        <span class="comment">// if new selected state is not equal to the previous state</span></span><br><span class="line">        <span class="keyword">if</span> (</span><br><span class="line">            latestSelectedState.<span class="property">current</span> === <span class="literal">undefined</span> ||</span><br><span class="line">            !<span class="title function_">equalityFn</span>(newSelectedState, latestSelectedState.<span class="property">current</span>)</span><br><span class="line">        ) &#123;</span><br><span class="line">            <span class="comment">// update state</span></span><br><span class="line">            selectedState = newSelectedState</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// use previous state</span></span><br><span class="line">            selectedState = latestSelectedState.<span class="property">current</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// use previous state</span></span><br><span class="line">        selectedState = latestSelectedState.<span class="property">current</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// attach checkForUpdates to the subscription&#x27;s onStateChange</span></span><br><span class="line">    <span class="comment">//Every time subscriptions are updated, checkForUpdates will be called</span></span><br><span class="line">    <span class="title function_">useLayoutEffect</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// compare store state with current state</span></span><br><span class="line">        <span class="comment">// if it is not equal, update current state</span></span><br><span class="line">        <span class="comment">// force re-render the component</span></span><br><span class="line">        <span class="keyword">function</span> <span class="title function_">checkForUpdates</span>(<span class="params"></span>) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">const</span> newStoreState = store.<span class="title function_">getState</span>();</span><br><span class="line">                <span class="keyword">const</span> newSelectedState = latestSelector.<span class="title function_">current</span>(newStoreState);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">if</span> (<span class="title function_">equalityFn</span>(newSelectedState, latestSelectedState.<span class="property">current</span>)) &#123;</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                latestSelectedState.<span class="property">current</span> = newSelectedState;</span><br><span class="line">                latestStoreState.<span class="property">current</span> = newStoreState;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// re-render anyway</span></span><br><span class="line">            <span class="title function_">forceRender</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// attach checkForUpdates to the subscription&#x27;s onStateChange</span></span><br><span class="line">        subscription.<span class="property">onStateChange</span> = checkForUpdates;</span><br><span class="line">        subscription.<span class="title function_">trySubscribe</span>();</span><br><span class="line">        <span class="comment">// call checkForUpdates for initialization</span></span><br><span class="line">        <span class="title function_">checkForUpdates</span>();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="function">() =&gt;</span> subscription.<span class="title function_">tryUnsubscribe</span>();</span><br><span class="line">    &#125;, [store, subscription]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// return state we want</span></span><br><span class="line">    <span class="keyword">return</span> selectedState;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="useReducer"><a href="#useReducer" class="headerlink" title="useReducer"></a>useReducer</h3><p>如你所见，这里使用 <code>useReducer</code> 来触发状态更新并触发 <code>render</code>。你可能想知道为什么不用 <code>useState</code> 来做同样的事情。<code>useState</code> 确实可以用来强制重新渲染，但需要编写额外的代码。</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// useReducer</span></span><br><span class="line"><span class="keyword">const</span> [, forceRender] = <span class="title function_">useReducer</span>(<span class="function">(<span class="params">s</span>) =&gt;</span> s + <span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line"><span class="comment">// useState</span></span><br><span class="line"><span class="keyword">const</span> [, setState] = <span class="title function_">useState</span>(<span class="number">0</span>);</span><br><span class="line"><span class="keyword">const</span> <span class="title function_">forceRender</span> = (<span class="params"></span>) =&gt; <span class="title function_">setState</span>(<span class="function"><span class="params">prev</span> =&gt;</span> prev + <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="useDispatch"><a href="#useDispatch" class="headerlink" title="useDispatch"></a>useDispatch</h2><p><code>useDispatch</code> 相对简单，它从 context 中获取 <code>dispatch</code> 函数：</p>
+<figure class="highlight tsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">useDispatch</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; store &#125; = <span class="title function_">useContext</span>(<span class="title class_">ReactReduxContext</span>);</span><br><span class="line">    <span class="keyword">return</span> store.<span class="property">dispatch</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  <p><a class="classtest-link" href="/tags/frontend/" rel="tag">frontend</a>, <a class="classtest-link" href="/tags/react/" rel="tag">react</a>, <a class="classtest-link" href="/tags/software-engineering/" rel="tag">software engineering</a> — Nov 28, 2023</p>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">用 ❤ 和
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        制作于 <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>

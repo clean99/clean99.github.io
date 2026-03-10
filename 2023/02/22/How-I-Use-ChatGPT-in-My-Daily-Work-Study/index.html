@@ -13,9 +13,11 @@
   
   <title>How I Use ChatGPT in My Daily Work&amp;Study?</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml,sitemap.txt" />
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/">
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/" />
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/" />
   
   <meta name="description" content="1. BackgroundChatGPT has garnered significant attention since its release and has become a popular tool for many professionals. While it’s been widely">
   
@@ -139,8 +141,36 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
 
-<meta name="generator" content="Hexo 6.3.0"></head>
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
 
 <body>
   <div class="container">
@@ -174,9 +204,17 @@
     </h1>
   </div>
 
-  <div class="six columns ml-1">
+  <div class="five columns ml-1">
     <h1 class="mt-2">
-      Hi Folks.
+      <a href="/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="two columns" style="max-width: 80px; text-align: right;">
+    <h1 class="mt-2 mode">
+      <a href="/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/" onclick="localStorage.setItem('preferredLang', 'zh')" style="text-decoration:none;font-size:0.75em;border:1px solid;padding:2px 6px;border-radius:3px">
+        中文
+      </a>
     </h1>
   </div>
 
@@ -210,6 +248,14 @@
 
         <div class="trans">
             <h2>How I Use ChatGPT in My Daily Work&Study?</h2>
+
+  
+  <p style="margin-bottom: 0.5rem;">
+    <a href="/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
+      阅读中文版
+    </a>
+  </p>
+  
 
   <h2 id="1-Background"><a href="#1-Background" class="headerlink" title="1. Background"></a>1. Background</h2><p>ChatGPT has garnered significant attention since its release and has become a popular tool for many professionals. While it’s been widely discussed, it’s important to explore how ChatGPT can benefit us in our day-to-day work. In this article, I will be sharing some of the practical applications of ChatGPT that I have found to be particularly useful.</p>
 <h2 id="2-Ways-to-Use-It"><a href="#2-Ways-to-Use-It" class="headerlink" title="2. Ways to Use It"></a>2. Ways to Use It</h2><h3 id="2-1-Coding"><a href="#2-1-Coding" class="headerlink" title="2.1 Coding"></a>2.1 Coding</h3><h3 id="2-1-2-Generate-Code"><a href="#2-1-2-Generate-Code" class="headerlink" title="2.1.2 Generate Code"></a>2.1.2 Generate Code</h3><p>ChatGPT can generate code for you. With the help of modularity technique, you can generate a large system with ChatGPT very quickly. Refer to my previous post: <a href="/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/" title="Use Modular Design with ChatGPT to Generate Code">Use Modular Design with ChatGPT to Generate Code</a></p>
