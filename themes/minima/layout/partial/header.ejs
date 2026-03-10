@@ -1,8 +1,8 @@
-<div class="row">
+<header class="row" role="banner">
   <div class="two columns" style="max-width: 50px">
     <h1 class="mt-2 mode">
-      <div onclick=setDarkMode(true) id="darkBtn"><%= theme.switch_dark %></div>
-      <div onclick=setDarkMode(false) id="lightBtn" class=hidden><%= theme.switch_light %></div>
+      <div onclick=setDarkMode(true) id="darkBtn" role="button" aria-label="Switch to dark mode"><%= theme.switch_dark %></div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden role="button" aria-label="Switch to light mode"><%= theme.switch_light %></div>
       <script >
         if (localStorage.getItem('preferredTheme') == 'dark') {
           setDarkMode(true)
@@ -27,12 +27,12 @@
 
   <div class="six columns ml-1">
     <h1 class="mt-2">
-      <%= theme.title %>
+      <a href="<%= config.root %>" style="text-decoration: none; color: inherit;"><%= theme.title %></a>
     </h1>
   </div>
 
   <div class="twelve columns">
-    <div class="row">
+    <nav class="row" aria-label="Main navigation">
       <div class="nine columns left">
         <a href="<%= config.root %>">Home</a>
         <% for (name in theme.menu) { %>
@@ -48,7 +48,7 @@
           <% } %>
         <% } %>
       </div>
-    </div>
+    </nav>
     <hr style="margin-bottom: 2.6rem">
   </div>
-</div>
+</header>

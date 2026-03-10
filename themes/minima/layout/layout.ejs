@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= config.language || 'en' %>">
 
 <head>
 
@@ -15,74 +15,147 @@
     config.author = ""
   }
 
-  var title = title = config.title;
+  var siteName = config.title;
+  var pageTitle = siteName;
   if (is_archive()){
-    title = 'All Posts - ' + config.author;
+    pageTitle = 'All Posts - ' + siteName;
   } else if (is_post()){
-    title = page.title;
+    pageTitle = page.title + ' | ' + siteName;
   } else if (is_page()){
-    title = page.title + ' - ' + config.author;
+    pageTitle = page.title + ' | ' + siteName;
   } else if (is_tag()){
-    title = 'Posts Related to ' + page.tag;
+    pageTitle = 'Posts Related to ' + page.tag + ' | ' + siteName;
+  }
+
+  var canonicalUrl = url.replace(/index\.html$/, '');
+
+  var pageDesc = config.description;
+  if (is_page() && page.description) {
+    pageDesc = page.description;
+  } else if (page.content) {
+    pageDesc = strip_html(page.content).replace(/\n/g, ' ').trim().substring(0, 160);
+  }
+
+  var pageImage = config.url + (theme.thumbnail || '/images/thumbnail.jpg');
+  if ((is_post() || is_page()) && page.thumbnail) {
+    pageImage = config.url + page.thumbnail;
+  }
+
+  var ogType = 'website';
+  if (is_post()) {
+    ogType = 'article';
   }
   %>
-  <title><%= title %></title>
+  <title><%= pageTitle %></title>
+
+  <!-- DNS Prefetch & Preconnect -->
+  <link rel="dns-prefetch" href="//www.googletagmanager.com">
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+
+  <!-- Canonical & Sitemap -->
   <% if (config.sitemap) { %>
-  <link rel="sitemap" href="<%-config.url + config.sitemap.path %>" />
+  <link rel="sitemap" type="application/xml" href="<%- config.url + '/' + config.sitemap.path %>" />
   <% } %>
-  <link rel="canonical" href="<%= url.replace(/index\.html$/, '').replace(/index\.html$/, '') %>">
-  <% if (is_page()){ %>
-  <meta name="description" content="<%= page.description %>">
-  <% } else if (page.content){ %>
-  <meta name="description" content="<%= strip_html(page.content).replace(/\n/g, " ").replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150) %>">
-  <% } else { %>
-  <meta name="description" content="<%= config.description %>">
+  <link rel="canonical" href="<%= canonicalUrl %>">
+  <% if (config.feed) { %>
+  <link rel="alternate" type="application/atom+xml" title="<%= config.title %>" href="<%- config.url + '/' + config.feed.path %>">
   <% } %>
-  <% if (config.keywords) { %>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="<%= pageDesc %>">
+  <% if (is_post() && page.tags && page.tags.length) { %>
+  <meta name="keywords" content="<%= page.tags.map(function(tag){ return tag.name; }).join(', ') %>">
+  <% } else if (config.keywords) { %>
   <meta name="keywords" content="<%= config.keywords %>">
   <% } %>
   <meta name="author" content="<%- config.author %>">
-  <% if (is_post() || is_page()) { %>
-  <meta property="og:image" content="<%-config.url + page.thumbnail %>">
-  <% } else { %>
-  <meta property="og:image" content="<%-config.url + theme.thumbnail %>">
-  <% } %>
-  <meta property="og:site_name" content="<%= config.title %>" />
-  <meta property="og:type" content="article" />
-  <meta property="og:title" content="<%= title %>" />
-  <% if (is_page()){ %>
-  <meta property="og:description" content="<%= page.description %>">
-  <% } else if (page.content){ %>
-  <meta property="og:description" content="<%= strip_html(page.content).replace(/\n/g, " ").replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150) %>">
-  <% } else { %>
-  <meta property="og:description" content="<%= config.description %>">
-  <% } %>
-  <meta property="og:url" content="<%= url.replace(/index\.html$/, '').replace(/index\.html$/, '') %>" />
+  <meta name="robots" content="index, follow">
 
+  <!-- Open Graph -->
+  <meta property="og:site_name" content="<%= config.title %>" />
+  <meta property="og:type" content="<%= ogType %>" />
+  <meta property="og:title" content="<%= pageTitle %>" />
+  <meta property="og:description" content="<%= pageDesc %>">
+  <meta property="og:url" content="<%= canonicalUrl %>" />
+  <meta property="og:image" content="<%- pageImage %>">
+  <meta property="og:locale" content="en_US" />
+  <% if (is_post()) { %>
+  <meta property="article:published_time" content="<%= date_xml(page.date) %>" />
+  <meta property="article:modified_time" content="<%= date_xml(page.updated || page.date) %>" />
+  <meta property="article:author" content="<%= config.author %>" />
+  <% if (page.tags && page.tags.length) { %>
+  <% page.tags.forEach(function(tag){ %>
+  <meta property="article:tag" content="<%= tag.name %>" />
+  <% }); %>
+  <% } %>
+  <% } %>
+
+  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="<%= title %>">
-  <% if (is_page()){ %>
-  <meta name="twitter:description" content="<%= page.description %>">
-  <% } else if (page.content){ %>
-  <meta name="twitter:description" content="<%= strip_html(page.content).replace(/\n/g, " ").replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150) %>">
-  <% } else { %>
-  <meta name="twitter:description" content="<%= config.description %>">
-  <% } %>
-  <% if (is_post() || is_page()) { %>
-  <meta name="twitter:image" content="<%-config.url + page.thumbnail %>">
-  <% } else { %>
-  <meta name="twitter:image" content="<%-config.url + theme.thumbnail %>">
-  <% } %>
-  <meta name="twitter:url" content="<%= url.replace(/index\.html$/, '').replace(/index\.html$/, '') %>" />
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="<%= pageTitle %>">
+  <meta name="twitter:description" content="<%= pageDesc %>">
+  <meta name="twitter:image" content="<%- pageImage %>">
+  <meta name="twitter:url" content="<%= canonicalUrl %>" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- JSON-LD Structured Data -->
+  <% if (is_post()) { %>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": "<%- canonicalUrl %>"
+    },
+    "headline": "<%- page.title.replace(/"/g, '\\"') %>",
+    "description": "<%- pageDesc.replace(/"/g, '\\"') %>",
+    "image": "<%- pageImage %>",
+    "author": {
+      "@type": "Person",
+      "name": "<%- config.author %>",
+      "url": "<%- config.url %>/About/"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "<%- config.title.replace(/"/g, '\\"') %>",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "<%- config.url %>/images/favicon.png"
+      }
+    },
+    "datePublished": "<%- date_xml(page.date) %>",
+    "dateModified": "<%- date_xml(page.updated || page.date) %>"
+    <% if (page.tags && page.tags.length) { %>,
+    "keywords": [<%= page.tags.map(function(tag){ return '"' + tag.name.replace(/"/g, '\\"') + '"'; }).join(', ') %>]
+    <% } %>
+  }
+  </script>
+  <% } else if (is_home()) { %>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "<%- config.title.replace(/"/g, '\\"') %>",
+    "url": "<%- config.url %>",
+    "description": "<%- config.description.replace(/"/g, '\\"') %>",
+    "author": {
+      "@type": "Person",
+      "name": "<%- config.author %>"
+    }
+  }
+  </script>
+  <% } %>
+
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="<%- config.root %>fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="<%- config.root %>fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
