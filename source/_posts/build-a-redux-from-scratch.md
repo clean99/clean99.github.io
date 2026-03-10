@@ -2,6 +2,8 @@
 title: Build a Redux from Scratch(Redux Source Code Review)
 date: 2023-11-28 13:03:50
 tags: [software engineering, frontend, react]
+lang: en
+i18n_key: build-a-redux-from-scratch
 ---
 
 

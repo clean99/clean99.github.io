@@ -1,20 +1,13 @@
-<article itemscope itemtype="https://schema.org/BlogPosting">
-  <header>
-    <h1 itemprop="headline"><%- page.title %></h1>
-    <div class="post-meta">
-      <time datetime="<%= date_xml(page.date) %>" itemprop="datePublished"><%- full_date(page.date, 'll') %></time>
-      <% if (page.updated && page.updated.isAfter && page.updated.isAfter(page.date)) { %>
-      <span> (Updated: <time datetime="<%= date_xml(page.updated) %>" itemprop="dateModified"><%- full_date(page.updated, 'll') %></time>)</span>
-      <% } %>
-    </div>
-  </header>
+  <h2><%- page.title %></h2>
 
-  <div itemprop="articleBody">
-    <%- page.content%>
-  </div>
+  <% if (page.i18n_key) { %>
+  <p style="margin-bottom: 0.5rem;">
+    <a href="<%- alternate_url() %>" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', '<%= is_zh() ? 'en' : 'zh' %>')">
+      <%= __('post.lang_switch') %>
+    </a>
+  </p>
+  <% } %>
 
-  <footer>
-    <p><%- list_tags(page.tags, {class: 'classtest', show_count: false, style: false}) %></p>
-  </footer>
-</article>
-<%- partial('partial/comments') %>
+  <%- page.content%>
+  <p><%- list_tags(page.tags, {class: 'classtest', show_count: false, style: false}) %> — <%- full_date(page.date, 'll') %></p>
+  <%- partial('partial/comments') %>

@@ -2,6 +2,8 @@
 title: Building Fault Tolerant React App With Error Boundary(Error Boundary Best Practice)
 date: 2024-05-06 16:45:11
 tags: [frontend, react, error-handling, error-boundary, fault-tolerance, robustness, reliability]
+lang: en
+i18n_key: Building-Fault-Tolerant-React-App-With-Error-Boundary
 ---
 
 This Article will showcase what is the best practice to utilize error boundary to build a robust and fault tolerant react app. It includes: When to use Error Boundary, Build a Error Boundary HOC with Error Handling and Error Reporting.

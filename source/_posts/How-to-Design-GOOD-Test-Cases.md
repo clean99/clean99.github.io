@@ -2,6 +2,8 @@
 title: How to Design GOOD Test Cases
 date: 2024-04-10 18:47:43
 tags: [Software Engineering, Testing]
+lang: en
+i18n_key: How-to-Design-GOOD-Test-Cases
 ---
 
 Testing for software is hard. Good test cases can help you increase maintainability and stability of your code, while bad test cases not only can not benefit you, some things can even slow down your development process.

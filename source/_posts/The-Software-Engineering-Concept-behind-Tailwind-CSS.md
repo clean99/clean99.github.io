@@ -2,6 +2,8 @@
 title: The Software Engineering Concept behind Tailwind CSS(Compared with StyleX)
 date: 2024-04-10 18:45:47
 tags: [Software Engineering, Frontend]
+lang: en
+i18n_key: The-Software-Engineering-Concept-behind-Tailwind-CSS
 ---
 
 ## Background

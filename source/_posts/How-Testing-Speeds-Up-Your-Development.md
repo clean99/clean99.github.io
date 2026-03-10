@@ -2,6 +2,8 @@
 title: How Testing Speeds Up Your Development
 date: 2022-08-18 17:19:01
 tags: testing
+lang: en
+i18n_key: How-Testing-Speeds-Up-Your-Development
 ---
 
 As frontend developers, most of us don't like to write testing because "it will slow down development". I didn't write tests before and I can feel your pain about writing tests for a "fast-changing" frontend project. But I do want to tell you that in most cases testing can speed up your development instead of slow it down. Unless you are writing the wrong tests. I have an article to show you {% post_link Some-Common-Mistakes-in-React-Testing %} that cause you to feel pain during your development. And in this article, I want to show you **why the right tests can speed up your development.**

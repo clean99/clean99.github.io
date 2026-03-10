@@ -2,6 +2,8 @@
 title: Learning How React Hooks Work by Building a Naive useState
 date: 2024-04-10 18:49:41
 tags: [Software Engineering, Frontend, React]
+lang: en
+i18n_key: Learning-How-React-Hooks-Work-by-Building-a-Naive-useState
 ---
 
 ## An Interview Question

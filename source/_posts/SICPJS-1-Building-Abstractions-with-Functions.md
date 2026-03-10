@@ -2,6 +2,8 @@
 title: SICPJS 1. Building Abstractions with Functions
 date: 2022-04-25 10:39:55
 tags: sicpjs
+lang: en
+i18n_key: SICPJS-1-Building-Abstractions-with-Functions
 ---
 ## Vocabulary
 

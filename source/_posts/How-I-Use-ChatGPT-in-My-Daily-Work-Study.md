@@ -2,6 +2,8 @@
 title: How I Use ChatGPT in My Daily Work&Study?
 date: 2023-02-22 13:47:51
 tags: [ChatGPT, AI, code generation, frontend, testing, software engineering]
+lang: en
+i18n_key: How-I-Use-ChatGPT-in-My-Daily-Work-Study
 ---
 
 ## 1. Background

@@ -2,6 +2,8 @@
 title: Does Github Copilot Worth It?
 date: 2022-12-18 18:42:26
 tags: [development, copilot, tdd]
+lang: en
+i18n_key: Does-Github-Copilot-Worth-It
 ---
 
 I personally use copilot to speed up my coding for a long time. I've discovered some use cases where git copilot can help me a lot. For me, copilot speeds up my coding progress by at least **30%**. So it's definitely a good deal for me to subscribe to it for the cost of a cup of coffee (**10$ per month**).

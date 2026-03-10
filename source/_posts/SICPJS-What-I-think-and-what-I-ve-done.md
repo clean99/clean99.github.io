@@ -2,6 +2,8 @@
 title: SICPJS thinking about the book and study plan / catalog
 date: 2022-04-24 20:48:38
 tags: sicpjs
+lang: en
+i18n_key: SICPJS-What-I-think-and-what-I-ve-done
 ---
 > The acts of the mind, wherein it exerts its power over simple ideas, are chiefly these three:
 > 1. Combining several simple ideas into one compound one, and thus all complex ideas are made. 

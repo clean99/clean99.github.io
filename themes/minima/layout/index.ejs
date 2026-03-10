@@ -1,32 +1,36 @@
-<section class="row">
+<div class="row">
   <div class="column">
-    <h1 class="mb-2"><%= theme.owner %></h1>
-    <p><%= theme.info %></p>
-    <p><%= theme.desc %></p>
+    <!-- Main information from i18n -->
+    <h2 class="mb-2"><%= __('owner') %></h2>
+    <p><%= __('info') %></p>
+    <p><%= __('desc') %></p>
   </div>
-</section>
+</div>
 
-<section>
-  <h2>Recent Posts</h2>
+<h3><%= __('index.recent_posts') %></h3>
 
-  <% site.posts.sort('date', 'desc').limit(theme.max_post).forEach(function(post){ %>
-  <article class="row">
-    <div class="three columns left lit">
-      <time class="bottom" datetime="<%= date_xml(post.date) %>"><%- full_date(post.date, 'll') %></time>
-    </div>
-    <div class="nine columns left mb-3">
-      <a href="<%- url_for(post.path) %>" >
-        <% if (post.title == "") { %>
-          no title
-        <% } else { %>
-          <%- post.title %>
-        <% } %>
-      </a>
-    </div>
-  </article>
-  <% }) %>
+<%
+var currentLang = page.lang || (page.path && page.path.indexOf('zh/') === 0 ? 'zh' : 'en');
+var filteredPosts = site.posts.filter(function(p) {
+  return (p.lang || 'en') === currentLang;
+}).sort('date', -1).limit(theme.max_post);
+%>
+<% filteredPosts.forEach(function(post){ %>
+<div class="row">
 
-  <nav>
-    <h3><a href="<%= config.root %>archives">All Posts</a></h3>
-  </nav>
-</section>
+  <div class="three columns left lit">
+    <p class="bottom"><%- full_date(post.date, 'll') %></p>
+  </div>
+  <div class="nine columns left mb-3">
+    <a href="<%- url_for(post.path) %>" >
+      <% if (post.title == "") { %>
+        no title
+      <% } else { %>
+        <%- post.title %>
+      <% } %>
+    </a>
+  </div>
+</div>
+<% }) %>
+
+<h4> <a href="<%- lang_url('archives') %>"><%= __('index.all_posts') %></a></h4>
