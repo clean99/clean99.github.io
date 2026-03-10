@@ -25,17 +25,9 @@
     </h1>
   </div>
 
-  <div class="five columns ml-1">
+  <div class="six columns ml-1">
     <h1 class="mt-2">
       <a href="<%- lang_root() %>" style="text-decoration:none;color:inherit"><%= theme.title %></a>
-    </h1>
-  </div>
-
-  <div class="two columns" style="max-width: 80px; text-align: right;">
-    <h1 class="mt-2 mode">
-      <a href="<%- alternate_url() %>" onclick="localStorage.setItem('preferredLang', '<%= is_zh() ? 'en' : 'zh' %>')" style="text-decoration:none;font-size:0.75em;border:1px solid;padding:2px 6px;border-radius:3px">
-        <%= __('lang_switch.label') %>
-      </a>
     </h1>
   </div>
 
