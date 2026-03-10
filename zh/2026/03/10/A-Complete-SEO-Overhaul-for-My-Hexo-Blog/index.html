@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>从第一性原理理解 SEO —— 一次博客全面改造的深度复盘</title>
+  
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/">
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" />
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" />
+  
+  <meta name="description" content="大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件、改这个配置。但清单无法帮你理解 为什么 ——不理解为什么，你永远不知道自己遗漏了什么。 最近我对这个博客做了一次全面的 SEO 改造。比起逐条记录”发现了什么、修了什么”，我更想分享的是背后的思维模型。一旦用这个视角看 SEO，所">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.ioundefined">
+  
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="从第一性原理理解 SEO —— 一次博客全面改造的深度复盘" />
+  
+  <meta property="og:description" content="大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件、改这个配置。但清单无法帮你理解 为什么 ——不理解为什么，你永远不知道自己遗漏了什么。 最近我对这个博客做了一次全面的 SEO 改造。比起逐条记录”发现了什么、修了什么”，我更想分享的是背后的思维模型。一旦用这个视角看 SEO，所">
+  
+  <meta property="og:url" content="https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="从第一性原理理解 SEO —— 一次博客全面改造的深度复盘">
+  
+  <meta name="twitter:description" content="大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件、改这个配置。但清单无法帮你理解 为什么 ——不理解为什么，你永远不知道自己遗漏了什么。 最近我对这个博客做了一次全面的 SEO 改造。比起逐条记录”发现了什么、修了什么”，我更想分享的是背后的思维模型。一旦用这个视角看 SEO，所">
+  
+  
+  <meta name="twitter:image" content="https://clean99.github.ioundefined">
+  
+  <meta name="twitter:url" content="https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="six columns ml-1">
+    <h1 class="mt-2">
+      <a href="/zh/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/zh/">首页</a>
+        
+          
+          <a href="/zh/Works" class="ml">作品</a>
+          
+        
+          
+          <a href="/zh/About" class="ml">关于</a>
+          
+        
+          
+          <a href="/zh/Links" class="ml">友链</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">邮箱</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <h2>从第一性原理理解 SEO —— 一次博客全面改造的深度复盘</h2>
+
+  
+  <p style="margin-bottom: 0.5rem;">
+    <a href="/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+      Read in English
+    </a>
+  </p>
+  
+
+  <p>大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件、改这个配置。但清单无法帮你理解 <strong>为什么</strong> ——不理解为什么，你永远不知道自己遗漏了什么。</p>
+<p>最近我对这个博客做了一次全面的 SEO 改造。比起逐条记录”发现了什么、修了什么”，我更想分享的是背后的<strong>思维模型</strong>。一旦用这个视角看 SEO，所有优化都变得显而易见。</p>
+<h2 id="第一性原理：搜索引擎是程序"><a href="#第一性原理：搜索引擎是程序" class="headerlink" title="第一性原理：搜索引擎是程序"></a>第一性原理：搜索引擎是程序</h2><p>这是唯一需要记住的事。Google、Bing、Baidu——它们本质上都是程序，做三件事：</p>
+<ol>
+<li><strong>发现</strong>你的页面（爬取）</li>
+<li><strong>解析并理解</strong>页面内容（索引）</li>
+<li>根据相关性和质量<strong>排序</strong>（排名）</li>
+</ol>
+<p>SEO 不是在玩弄算法，而是<strong>让你的内容的数据结构显式化、机器可读</strong>。搜索引擎的爬虫本质上是一个 parser——和所有 parser 一样，输入的结构越清晰，它工作得越好。</p>
+<p>从这个原理出发，我们可以把所有 SEO 工作分成三个层次：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">第三层：分发层 — 你的内容在社交平台上如何呈现？</span><br><span class="line">第二层：理解层 — 搜索引擎能否理解你的页面在说什么？</span><br><span class="line">第一层：发现层 — 搜索引擎能否找到你的内容？</span><br></pre></td></tr></table></figure>
+
+<p>每一层都依赖下面一层。我们自底向上来看。</p>
+<h2 id="第一层：发现（Discoverability）"><a href="#第一层：发现（Discoverability）" class="headerlink" title="第一层：发现（Discoverability）"></a>第一层：发现（Discoverability）</h2><p>搜索引擎在排名你的内容之前，首先得找到它。有几个机制协同工作来实现这一点。</p>
+<h3 id="Sitemap：站点的目录"><a href="#Sitemap：站点的目录" class="headerlink" title="Sitemap：站点的目录"></a>Sitemap：站点的目录</h3><p>Sitemap 是一个 XML 文件，告诉爬虫你站点上的每个 URL，以及每个页面最后修改的时间。可以类比为一本书的目录——爬虫当然<em>可以</em>通过跟随链接找到你的页面，但 sitemap 把这件事变得显式而完整。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">url</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">loc</span>&gt;</span>https://your-site.com/2024/04/10/my-post/<span class="tag">&lt;/<span class="name">loc</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">lastmod</span>&gt;</span>2024-04-10<span class="tag">&lt;/<span class="name">lastmod</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>但光生成 sitemap 不够——你还需要<strong>告诉爬虫去哪里找它</strong>。有两个位置：</p>
+<ol>
+<li><p><strong><code>robots.txt</code></strong> ——任何爬虫访问站点时读取的第一个文件：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="symbol">Sitemap:</span> https:<span class="comment">//your-site.com/sitemap.xml</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>HTML <code>&lt;head&gt;</code></strong> ——给从页面本身开始爬取的爬虫：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;sitemap&quot;</span> <span class="attr">type</span>=<span class="string">&quot;application/xml&quot;</span> <span class="attr">href</span>=<span class="string">&quot;/sitemap.xml&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>这里有一个容易忽略的细节：<code>lastmod</code> 字段的数据源。如果用文件修改时间（<code>mtime</code>）作为来源，每次 <code>git clone</code> 或 CI 重新构建都会重置所有时间戳——爬虫会以为你整个站点都刚更新过，这反而是一个负面信号。我把 Hexo 配置从 <code>updated_option: &#39;mtime&#39;</code> 改为 <code>updated_option: &#39;date&#39;</code>，让日期来自文章 front-matter——确定性的、版本控制的。</p>
+<h3 id="RSS-Feed：被遗忘的发现渠道"><a href="#RSS-Feed：被遗忘的发现渠道" class="headerlink" title="RSS Feed：被遗忘的发现渠道"></a>RSS Feed：被遗忘的发现渠道</h3><p>RSS&#x2F;Atom 订阅源经常被认为是早期 Web 的遗物。但对技术博客来说，它有两个重要用途：</p>
+<ol>
+<li><strong>内容聚合器</strong>（Feedly、dev.to 等）通过 feed 发现和索引你的内容。</li>
+<li><strong>搜索引擎</strong>把 feed 作为补充的内容发现机制，特别是对新鲜内容。</li>
+</ol>
+<p>HTML <code>&lt;head&gt;</code> 中需要声明 feed，这样浏览器和爬虫才能自动发现：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;alternate&quot;</span> <span class="attr">type</span>=<span class="string">&quot;application/atom+xml&quot;</span> <span class="attr">title</span>=<span class="string">&quot;Your Blog&quot;</span> <span class="attr">href</span>=<span class="string">&quot;/atom.xml&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>我的博客之前完全没有 feed。加上 <code>hexo-generator-feed</code> 插件并配置好之后，内容多了一个完全独立的被发现渠道。</p>
+<h3 id="URL-结构：每个页面的唯一身份"><a href="#URL-结构：每个页面的唯一身份" class="headerlink" title="URL 结构：每个页面的唯一身份"></a>URL 结构：每个页面的唯一身份</h3><p>每个页面需要且只需要一个 canonical URL。同一内容的多个 URL 会稀释排名信号，让爬虫困惑。</p>
+<p>Hexo 中一个常见的错误：<code>trailing_index: true</code> 会生成类似 <code>/2024/04/10/my-post/index.html</code> 的 URL。而”干净版” <code>/2024/04/10/my-post/</code> 是同一个内容、不同的 URL——瞬间产生了重复内容问题。修复很简单：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">pretty_urls:</span></span><br><span class="line">  <span class="attr">trailing_index:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">trailing_html:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>同时，每个页面应该包含一个 <code>&lt;link rel=&quot;canonical&quot;&gt;</code> 标签指向它的权威 URL。这是给爬虫的明确信号：”如果你在多个 URL 找到了这个内容，这个才是算数的。”</p>
+<h2 id="第二层：理解（Understanding）"><a href="#第二层：理解（Understanding）" class="headerlink" title="第二层：理解（Understanding）"></a>第二层：理解（Understanding）</h2><p>爬虫找到你的页面后，需要理解页面说的是什么、包含什么类型的内容、不同信息之间是什么关系。这是大多数博客最薄弱的环节——也是提升空间最大的地方。</p>
+<h3 id="语义化-HTML：用爬虫听得懂的语言说话"><a href="#语义化-HTML：用爬虫听得懂的语言说话" class="headerlink" title="语义化 HTML：用爬虫听得懂的语言说话"></a>语义化 HTML：用爬虫听得懂的语言说话</h3><p>HTML5 引入语义元素是有原因的。<code>&lt;div&gt;</code> 告诉 parser 的信息量是零。<code>&lt;article&gt;</code> 告诉它”这是主要内容”。<code>&lt;nav&gt;</code> 说”这是导航”。<code>&lt;time&gt;</code> 说”这是一个日期”。</p>
+<p>搜索引擎用这些元素来构建页面的内部表示。没有它们，爬虫只能基于启发式规则猜测——而启发式是有损的。</p>
+<p>我的文章模板改造前后对比：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 改造前 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>文章标题<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span>文章内容...<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">p</span>&gt;</span>tag1, tag2 — Apr 10, 2024<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 改造后 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">article</span> <span class="attr">itemscope</span> <span class="attr">itemtype</span>=<span class="string">&quot;https://schema.org/BlogPosting&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">header</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">h1</span> <span class="attr">itemprop</span>=<span class="string">&quot;headline&quot;</span>&gt;</span>文章标题<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">time</span> <span class="attr">datetime</span>=<span class="string">&quot;2024-04-10T00:00:00Z&quot;</span> <span class="attr">itemprop</span>=<span class="string">&quot;datePublished&quot;</span>&gt;</span>Apr 10, 2024<span class="tag">&lt;/<span class="name">time</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">header</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">itemprop</span>=<span class="string">&quot;articleBody&quot;</span>&gt;</span></span><br><span class="line">    文章内容...</span><br><span class="line">  <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">article</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里有几个关键变化：</p>
+<p><strong><code>&lt;article&gt;</code> 包裹</strong> ——显式标记内容的边界。这在有导航、侧边栏、页脚的页面上尤其重要——爬虫需要分清哪部分是<em>真正的内容</em>，哪部分是页面装饰。</p>
+<p><strong><code>&lt;h1&gt;</code> 替代 <code>&lt;h2&gt;</code></strong> ——标题层级很重要。每个页面应该有且只有一个 <code>&lt;h1&gt;</code> 代表页面的主题。用 <code>&lt;h2&gt;</code> 做文章标题是层级违规——暗示文章标题从属于某个不存在的 <code>&lt;h1&gt;</code>。</p>
+<p><strong><code>&lt;time&gt;</code> 及 <code>datetime</code> 属性</strong> ——人类可读的日期 “Apr 10, 2024” 是有歧义的（月在前还是日在前？）。<code>datetime</code> 属性提供了一个无歧义的 ISO 8601 时间戳，任何 parser 都能可靠地解析。</p>
+<p><strong>导航的 <code>&lt;nav&gt;</code> 标签</strong> ——我还把头部导航包在了 <code>&lt;nav aria-label=&quot;Main navigation&quot;&gt;</code> 里。这同时服务于 SEO（爬虫可以识别并降权导航链接，在分析内容时不被干扰）和无障碍访问（屏幕阅读器可以直接跳到导航或跳过导航）。</p>
+<h3 id="JSON-LD-结构化数据：显式的数据契约"><a href="#JSON-LD-结构化数据：显式的数据契约" class="headerlink" title="JSON-LD 结构化数据：显式的数据契约"></a>JSON-LD 结构化数据：显式的数据契约</h3><p>语义化 HTML 已经很好了，但它仍然是隐式的——爬虫需要<em>推断</em>关系。JSON-LD 把这些关系变成显式的。它是你和搜索引擎之间的契约：”这是这个页面的结构化数据，不需要推断。”</p>
+<p>对于博客，两种 schema 最重要：</p>
+<p><strong>首页的 <code>WebSite</code> schema</strong> ——告诉搜索引擎你的站点叫什么、在哪里：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;@context&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://schema.org&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;@type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;WebSite&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;博客名&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;url&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://your-site.com&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;博客描述&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>每篇文章的 <code>BlogPosting</code> schema</strong> ——为单篇文章提供完整的元数据图：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;@context&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://schema.org&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;@type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;BlogPosting&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;headline&quot;</span><span class="punctuation">:</span> <span class="string">&quot;文章标题&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;datePublished&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2024-04-10T00:00:00Z&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;dateModified&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2024-04-10T00:00:00Z&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;author&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="attr">&quot;@type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Person&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;作者名&quot;</span> <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;publisher&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;@type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Organization&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;博客名&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;logo&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span> <span class="attr">&quot;@type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;ImageObject&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;url&quot;</span><span class="punctuation">:</span> <span class="string">&quot;https://.../logo.png&quot;</span> <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;keywords&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;标签1&quot;</span><span class="punctuation">,</span> <span class="string">&quot;标签2&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>JSON-LD 的关键价值在于<strong>它让富媒体结果（Rich Results）成为可能</strong>。没有它，Google 只能把你的页面显示为一条普通的蓝色链接。有了它，Google 可以渲染富摘要——作者信息、发布日期、文章面包屑导航——显著提升搜索结果中的点击率。</p>
+<p>你可以用 Google 的 <a target="_blank" rel="noopener" href="https://search.google.com/test/rich-results">Rich Results Test</a> 来验证结构化数据。如果测试结果显示零个合格的富媒体结果，说明你在白白浪费流量。</p>
+<h3 id="lt-title-gt-标签：搜索结果中的标题"><a href="#lt-title-gt-标签：搜索结果中的标题" class="headerlink" title="&lt;title&gt; 标签：搜索结果中的标题"></a><code>&lt;title&gt;</code> 标签：搜索结果中的标题</h3><p><code>&lt;title&gt;</code> 标签是 SEO 中最显眼的部分——它就是用户在搜索结果中看到的可点击标题。两个规则：</p>
+<ol>
+<li><strong>每个页面必须唯一。</strong> 如果所有页面标题一样，Google 无法区分它们。</li>
+<li><strong>应该包含站点名称。</strong> 这有助于品牌识别，帮助用户在一堆搜索结果中认出你的内容。</li>
+</ol>
+<p>我的博客之前文章页面只显示文章标题——“React Performance Optimization”。修改后变成 “React Performance Optimization | Koh Hom’s Blog”。每种页面类型都有描述性的、唯一的标题：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="title function_">is_post</span>()) &#123;</span><br><span class="line">  pageTitle = page.<span class="property">title</span> + <span class="string">&#x27; | &#x27;</span> + config.<span class="property">title</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="title function_">is_archive</span>()) &#123;</span><br><span class="line">  pageTitle = <span class="string">&#x27;All Posts - &#x27;</span> + config.<span class="property">title</span>;</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="title function_">is_tag</span>()) &#123;</span><br><span class="line">  pageTitle = <span class="string">&#x27;Posts about &#x27;</span> + page.<span class="property">tag</span> + <span class="string">&#x27; | &#x27;</span> + config.<span class="property">title</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="页面级的-Meta-Description-和-Keywords"><a href="#页面级的-Meta-Description-和-Keywords" class="headerlink" title="页面级的 Meta Description 和 Keywords"></a>页面级的 Meta Description 和 Keywords</h3><p>Meta description 不直接影响排名，但它<strong>直接影响点击率</strong>——Google 经常把它用作搜索结果标题下面的摘要文本。好的 description 是一段 150-160 字符的总结，告诉读者点进来能得到什么。</p>
+<p>Keywords 同理。虽然 Google 已经不看 <code>&lt;meta name=&quot;keywords&quot;&gt;</code>，但 Bing 和百度仍然参考。更重要的是，页面级别的关键词是主题相关性的信号。我的博客之前每个页面都用全站统一的关键词。修改后，文章页面用自己的标签生成关键词：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 文章页：使用文章标签 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;keywords&quot;</span> <span class="attr">content</span>=<span class="string">&quot;React, Frontend, Software Engineering&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 首页：使用全站关键词 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">&quot;keywords&quot;</span> <span class="attr">content</span>=<span class="string">&quot;frontend development, testing, software engineering&quot;</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="第三层：分发（Distribution）"><a href="#第三层：分发（Distribution）" class="headerlink" title="第三层：分发（Distribution）"></a>第三层：分发（Distribution）</h2><p>SEO 不仅仅是关于 Google。当有人在 Twitter、LinkedIn 或 Slack 分享你的文章时，这些平台也会爬取你的页面——它们用另一套 meta 标签来生成链接预览卡片。</p>
+<h3 id="Open-Graph：社交媒体的数据契约"><a href="#Open-Graph：社交媒体的数据契约" class="headerlink" title="Open Graph：社交媒体的数据契约"></a>Open Graph：社交媒体的数据契约</h3><p>Open Graph（OG）标签是 Facebook 发明的协议，但现在被 Twitter、LinkedIn、Slack、Discord 和所有主流平台通用支持。它们控制链接预览卡片中显示什么内容。</p>
+<p>我的博客中最常见的错误：**<code>og:type</code> 在所有页面都被设为 <code>&quot;article&quot;</code>**，包括首页和归档页。这在语义上是错的——首页是 <code>website</code>，不是 <code>article</code>。设错不会导致明显的错误，但会降低社交分享预览的质量，发送错误的信号。</p>
+<p>更关键的是，博客文章应该包含时间元数据。没有 <code>article:published_time</code> 和 <code>article:modified_time</code>，平台无法展示内容的写作时间——而对于技术内容，时效性极其重要。读者会跳过看起来过时的文章。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 只在真正的博客文章页面 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">&quot;og:type&quot;</span> <span class="attr">content</span>=<span class="string">&quot;article&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">&quot;article:published_time&quot;</span> <span class="attr">content</span>=<span class="string">&quot;2024-04-10T00:00:00Z&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">&quot;article:modified_time&quot;</span> <span class="attr">content</span>=<span class="string">&quot;2024-04-10T00:00:00Z&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">&quot;article:author&quot;</span> <span class="attr">content</span>=<span class="string">&quot;Author Name&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">&quot;article:tag&quot;</span> <span class="attr">content</span>=<span class="string">&quot;React&quot;</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- 首页、归档页、标签页 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">meta</span> <span class="attr">property</span>=<span class="string">&quot;og:type&quot;</span> <span class="attr">content</span>=<span class="string">&quot;website&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Twitter-Cards：平台定制化"><a href="#Twitter-Cards：平台定制化" class="headerlink" title="Twitter Cards：平台定制化"></a>Twitter Cards：平台定制化</h3><p>Twitter (X) 有自己的卡片系统，叠加在 Open Graph 之上。大多数博客缺少的关键标签：<code>twitter:site</code>（把卡片和你的 Twitter 账号关联）和 <code>twitter:creator</code>（标注内容作者）。没有它们，分享链接时就失去了和个人主页的关联——白白错过涨粉和内容归属的机会。</p>
+<h2 id="性能维度"><a href="#性能维度" class="headerlink" title="性能维度"></a>性能维度</h2><p>Google 的 Core Web Vitals 已经是确认的排名因素。我发现的两个性能相关的 SEO 问题值得展开讨论，因为它们体现了一个更广泛的原则。</p>
+<h3 id="资源提示（Resource-Hints）：降低外部依赖的延迟"><a href="#资源提示（Resource-Hints）：降低外部依赖的延迟" class="headerlink" title="资源提示（Resource Hints）：降低外部依赖的延迟"></a>资源提示（Resource Hints）：降低外部依赖的延迟</h3><p>页面加载时，浏览器需要为每个外部域名解析 DNS、建立 TCP 连接、执行 TLS 握手。仅 Google Analytics 一项，就是 <code>www.googletagmanager.com</code>——在任何数据传输之前大约 100-300ms 的延迟。</p>
+<p>资源提示让你提前启动这个过程：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;dns-prefetch&quot;</span> <span class="attr">href</span>=<span class="string">&quot;//www.googletagmanager.com&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;preconnect&quot;</span> <span class="attr">href</span>=<span class="string">&quot;https://www.googletagmanager.com&quot;</span> <span class="attr">crossorigin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p><code>dns-prefetch</code> 只处理 DNS 解析。<code>preconnect</code> 更进一步——还建立 TCP 连接和 TLS 握手。原理和 Web 性能优化中的 prefetch 一样：<strong>把工作提前到时间线更早的位置，让它不再阻塞关键路径</strong>。</p>
+<h3 id="字体预加载：一个隐蔽的路径解析-Bug"><a href="#字体预加载：一个隐蔽的路径解析-Bug" class="headerlink" title="字体预加载：一个隐蔽的路径解析 Bug"></a>字体预加载：一个隐蔽的路径解析 Bug</h3><p>我的博客的字体预加载链接使用了相对路径：<code>../fonts/font.woff2</code>。这在首页（<code>/index.html</code> → 解析为 <code>/fonts/font.woff2</code>）能正常工作，但在嵌套页面（<code>/2024/04/10/post/index.html</code> → 解析为 <code>/2024/04/10/fonts/font.woff2</code>，404）就挂了。</p>
+<p>预加载失败时，浏览器回退到按需加载字体，造成 FOUT（Flash of Unstyled Text）并增加 CLS（Cumulative Layout Shift）——三个 Core Web Vitals 指标之一。</p>
+<p>修复方法是通过 Hexo 的 <code>config.root</code> 使用绝对路径：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;preload&quot;</span> <span class="attr">href</span>=<span class="string">&quot;&lt;%- config.root %&gt;fonts/font.woff2&quot;</span> <span class="attr">as</span>=<span class="string">&quot;font&quot;</span> <span class="attr">type</span>=<span class="string">&quot;font/woff2&quot;</span> <span class="attr">crossorigin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这是一个通用教训：<strong>HTML <code>&lt;head&gt;</code> 中引用的资源永远使用绝对路径</strong>，因为 <code>&lt;head&gt;</code> 在每个嵌套层级的页面间是共享的。</p>
+<h2 id="全貌"><a href="#全貌" class="headerlink" title="全貌"></a>全貌</h2><p>自底向上看完整的心智模型：</p>
+<figure class="highlight coq"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────────────────────────────┐</span><br><span class="line">│  第三层：分发                                      │</span><br><span class="line">│  <span class="keyword">Open</span> <span class="keyword">Graph</span>, Twitter Cards, 文章时间元数据          │</span><br><span class="line">│  → 控制你的内容在社交平台上如何呈现                   │</span><br><span class="line">├──────────────────────────────────────────────────┤</span><br><span class="line">│  第二层：理解                                      │</span><br><span class="line">│  JSON-LD, 语义化 HTML, &lt;title&gt;, meta 标签          │</span><br><span class="line">│  → 告诉搜索引擎你的内容是什么意思                     │</span><br><span class="line">├──────────────────────────────────────────────────┤</span><br><span class="line">│  第一层：发现                                      │</span><br><span class="line">│  Sitemap, robots.txt, RSS Feed, <span class="keyword">Canonical</span> URL     │</span><br><span class="line">│  → 确保搜索引擎能找到你的内容                        │</span><br><span class="line">├──────────────────────────────────────────────────┤</span><br><span class="line">│  基础：性能                                        │</span><br><span class="line">│  Core Web Vitals, 资源提示, 预加载                  │</span><br><span class="line">│  → 通过页面体验影响排名                              │</span><br><span class="line">└──────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>每一项 SEO 优化都落在这些层中的某一个。当你遇到新的 SEO 建议时，问自己：这属于哪一层？它是帮助爬虫<strong>发现</strong>我的内容、<strong>理解</strong>它、还是<strong>分发</strong>它？这个框架把一堆看似随机的最佳实践变成了一个连贯的系统。</p>
+<p>根本性的收获：<strong>SEO 就是面向机器的数据结构设计</strong>。你的 HTML 是搜索引擎消费的 API。Meta 标签是响应头。JSON-LD 是响应体。语义元素是 schema 定义。你把这个 API 设计得越好，机器就越能理解和呈现你的内容。</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  <p><a class="classtest-link" href="/tags/Frontend/" rel="tag">Frontend</a>, <a class="classtest-link" href="/tags/SEO/" rel="tag">SEO</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/Web-Performance/" rel="tag">Web Performance</a> — Mar 10, 2026</p>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">用 ❤ 和
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        制作于 <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+
+      <!-- Language switcher (globe icon) -->
+      <a class="ml-0 footer-link icon" href="/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" onclick="localStorage.setItem('preferredLang', 'en')" style="text-decoration: none" aria-label="Read in English" title="Read in English">
+        <svg class="svg-hov" width="18" role="img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><title>English</title><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </a>
+
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>
