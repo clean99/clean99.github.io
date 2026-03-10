@@ -1,6 +1,7 @@
 ---
 title: About
 date: 2026-03-10 17:00:00
+lang: en
 ---
 
 # Hey, I'm Xu Feng (许峰) 👋

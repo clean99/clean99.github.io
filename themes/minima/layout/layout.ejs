@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= page_lang() %>">
 
 <head>
 
@@ -17,13 +17,13 @@
 
   var title = title = config.title;
   if (is_archive()){
-    title = 'All Posts - ' + config.author;
+    title = __('archive.title') + ' - ' + config.author;
   } else if (is_post()){
     title = page.title;
   } else if (is_page()){
     title = page.title + ' - ' + config.author;
   } else if (is_tag()){
-    title = 'Posts Related to ' + page.tag;
+    title = __('tag.related_to') + ' ' + page.tag;
   }
   %>
   <title><%= title %></title>
@@ -31,6 +31,8 @@
   <link rel="sitemap" href="<%-config.url + config.sitemap.path %>" />
   <% } %>
   <link rel="canonical" href="<%= url.replace(/index\.html$/, '').replace(/index\.html$/, '') %>">
+  <link rel="alternate" hreflang="<%= page_lang() === 'zh' ? 'en' : 'zh' %>" href="<%= config.url %><%= alternate_url() %>" />
+  <link rel="alternate" hreflang="<%= page_lang() %>" href="<%= url.replace(/index\.html$/, '') %>" />
   <% if (is_page()){ %>
   <meta name="description" content="<%= page.description %>">
   <% } else if (page.content){ %>
@@ -110,6 +112,33 @@
 
   <%- partial('googleadds/headeradd') %>
 
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
 
 </head>
 

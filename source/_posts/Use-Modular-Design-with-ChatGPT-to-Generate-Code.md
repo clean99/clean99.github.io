@@ -2,6 +2,8 @@
 title: Use Modular Design with ChatGPT to Generate Code
 date: 2023-02-22 14:37:47
 tags: [ChatGPT, AI, code generation, frontend, software engineering]
+lang: en
+i18n_key: Use-Modular-Design-with-ChatGPT-to-Generate-Code
 ---
 
 > You can find all the code of this article in this [codesandbox](https://codesandbox.io/s/focused-scott-0pxlid?file=/src/App.tsx).

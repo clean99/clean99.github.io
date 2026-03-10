@@ -2,6 +2,8 @@
 title: Web Performance Optimization Strategies and Practices
 date: 2024-04-10 18:41:30
 tags: [Software Engineering, Web Performance, Frontend]
+lang: en
+i18n_key: Web-Performance-Optimization
 ---
 
 Web performance optimization is crucial and it has a lot of ways to implement, this is a note of how I optimize my company's project, and come up with several generic strategies that can be applied in different situations:

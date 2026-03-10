@@ -1,0 +1,34 @@
+owner: "I am Koh Hom(许峰)⛰️"
+info: "A software engineer, graduated from SCNU(2022), working as a frontend developer at TikTok🇸🇬."
+desc: "I love reading thoughtful books📖. I'm currently focused on improving code quality and learning testing. I love working out and exploring a healthy, minimal lifestyle. Anyway, welcome to my blog! Hope you enjoy it😊."
+
+nav:
+  home: Home
+  works: Works
+  about: About
+  links: Links
+  email: Email
+
+index:
+  recent_posts: Recent Posts
+  all_posts: All Posts
+
+archive:
+  title: All Posts
+
+tag:
+  related_to: "Posts Related to —"
+
+pagination:
+  recent: Recent
+  older: Older
+
+footer:
+  made_with: "Made with ❤ and"
+  at: "at"
+
+post:
+  lang_switch: "阅读中文版"
+
+lang_switch:
+  label: "中文"

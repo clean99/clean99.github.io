@@ -8,7 +8,9 @@ subtitle: 'Frontend Development, E2E & Unit Testing, Software Engineering Tips &
 description: 'A frontend developer from China, who now work at TikTok(SG). Post random things about frontend, e2e testing, unit testing, software engineering, computer science, etc.'
 keywords: 'frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog'
 author: Koh Hom
-language: en
+language:
+  - en
+  - zh
 timezone: 'Asia/Singapore'
 
 # URL

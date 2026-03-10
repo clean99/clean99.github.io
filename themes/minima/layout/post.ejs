@@ -1,5 +1,13 @@
   <h2><%- page.title %></h2>
 
+  <% if (page.i18n_key) { %>
+  <p style="margin-bottom: 0.5rem;">
+    <a href="<%- alternate_url() %>" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', '<%= is_zh() ? 'en' : 'zh' %>')">
+      <%= __('post.lang_switch') %>
+    </a>
+  </p>
+  <% } %>
+
   <%- page.content%>
   <p><%- list_tags(page.tags, {class: 'classtest', show_count: false, style: false}) %> — <%- full_date(page.date, 'll') %></p>
   <%- partial('partial/comments') %>

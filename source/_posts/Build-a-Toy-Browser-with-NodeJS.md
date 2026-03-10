@@ -2,6 +2,8 @@
 title: Build a Toy Browser with NodeJS
 date: 2022-04-27 20:45:44
 tags: browser
+lang: en
+i18n_key: Build-a-Toy-Browser-with-NodeJS
 ---
 ## Before Starting
 

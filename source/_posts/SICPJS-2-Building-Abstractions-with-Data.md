@@ -2,6 +2,8 @@
 title: SICPJS 2. Building Abstractions with Data
 date: 2022-05-02 11:40:54
 tags: sicpjs
+lang: en
+i18n_key: SICPJS-2-Building-Abstractions-with-Data
 ---
 ## Vocabulary
 ## Questions

@@ -3,6 +3,8 @@ layout: posts
 title: Some Common Mistakes in React Testing
 date: 2022-07-24 17:49:27
 tags: testing
+lang: en
+i18n_key: Some-Common-Mistakes-in-React-Testing
 ---
 
 Most of the frontend developers (at least those who I met) dislike writing tests. I asked them why, and the answer is simple: _We don't have time to do that!_ Well, I would like to tell you that, writing tests **in the right way** will significantly increase your effectiveness of development (especially in the long-term), instead of wasting your time.

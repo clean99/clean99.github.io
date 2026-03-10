@@ -2,6 +2,8 @@
 title: Crafting GPT-based Customer Support Chatbot from 0 to 1 — Algorithm Portion
 date: 2023-06-10 17:45:29
 tags: [AI, ChatGPT]
+lang: en
+i18n_key: Crafting-GPT-based-Customer-Support-Chatbot-Algorithm
 ---
 
 ## Abstract

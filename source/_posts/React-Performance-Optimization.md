@@ -2,6 +2,8 @@
 title: React Runtime Performance Optimization
 date: 2024-04-16 08:32:53
 tags: [Software Engineering, Frontend, React]
+lang: en
+i18n_key: React-Performance-Optimization
 ---
 
 There are two directions that we can optimize the performance of react application:
