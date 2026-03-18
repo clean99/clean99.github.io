@@ -3,6 +3,7 @@ title: "Vibe Coding vs Spec-Driven Coding: The Evolution of AI-Assisted Developm
 date: 2026-03-18 15:00:00
 tags: [AI, Software Engineering, Claude Code, OpenSpec, code generation]
 lang: en
+i18n_key: Vibe-Coding-VS-Spec-Driven-Coding
 ---
 
 > **TL;DR**: Vibe Coding lets AI improvise freely—fast but unpredictable. Spec-Driven Coding constrains AI behavior through persistent specification files, delivering predictable and traceable output. This post breaks down both approaches using real-world experience with OpenSpec + Claude Code.

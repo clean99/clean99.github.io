@@ -3,6 +3,8 @@ title: Vibe Coding vs Spec-Driven Coding — AI Coding 的演化之路
 date: 2026-03-18 15:00:00
 tags: [AI, Software Engineering, Claude Code, OpenSpec, code generation]
 lang: zh
+i18n_key: Vibe-Coding-VS-Spec-Driven-Coding
+permalink: zh/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/
 ---
 
 > **TL;DR**: Vibe Coding（氛围编码）让 AI 自由发挥，速度快但不可控；Spec-Driven Coding 通过持久化的规范文件约束 AI 行为，实现可预测、可追溯的输出。本文用 OpenSpec + Claude Code 的实践经验，拆解两种模式的差异和适用场景。
