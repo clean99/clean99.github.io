@@ -1,9 +1,9 @@
-https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding-zh/
 https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/
+https://clean99.github.io/zh/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/
 https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/
 https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/
-https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/
 https://clean99.github.io/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/
+https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/
 https://clean99.github.io/zh/2024/04/16/React-Performance-Optimization/
 https://clean99.github.io/2024/04/16/React-Performance-Optimization/
 https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/
