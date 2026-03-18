@@ -15,7 +15,7 @@
     config.author = ""
   }
 
-  var title = title = config.title;
+  var title = config.title;
   if (is_archive()){
     title = __('archive.title') + ' - ' + config.author;
   } else if (is_post()){
@@ -30,7 +30,7 @@
   <% if (config.sitemap) { %>
   <link rel="sitemap" href="<%-config.url + config.sitemap.path %>" />
   <% } %>
-  <link rel="canonical" href="<%= url.replace(/index\.html$/, '').replace(/index\.html$/, '') %>">
+  <link rel="canonical" href="<%= url.replace(/index\.html$/, '') %>">
   <link rel="alternate" hreflang="<%= page_lang() === 'zh' ? 'en' : 'zh' %>" href="<%= config.url %><%= alternate_url() %>" />
   <link rel="alternate" hreflang="<%= page_lang() %>" href="<%= url.replace(/index\.html$/, '') %>" />
   <% if (is_page()){ %>
@@ -59,7 +59,7 @@
   <% } else { %>
   <meta property="og:description" content="<%= config.description %>">
   <% } %>
-  <meta property="og:url" content="<%= url.replace(/index\.html$/, '').replace(/index\.html$/, '') %>" />
+  <meta property="og:url" content="<%= url.replace(/index\.html$/, '') %>" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="<%= title %>">
@@ -75,7 +75,7 @@
   <% } else { %>
   <meta name="twitter:image" content="<%-config.url + theme.thumbnail %>">
   <% } %>
-  <meta name="twitter:url" content="<%= url.replace(/index\.html$/, '').replace(/index\.html$/, '') %>" />
+  <meta name="twitter:url" content="<%= url.replace(/index\.html$/, '') %>" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
