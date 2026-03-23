@@ -1,7 +1,9 @@
 ---
 title: SEO from First Principles — A Deep Dive through My Blog's Overhaul
 date: 2026-03-10 14:00:00
-tags: [Frontend, Software Engineering, Web Performance, SEO]
+tags: [Frontend, Software Engineering, Web Performance, SEO, AI]
+lang: en
+i18n_key: A-Complete-SEO-Overhaul-for-My-Hexo-Blog
 ---
 
 Most SEO guides give you a checklist: add this meta tag, install that plugin, set this config. But checklists don't help you understand **why** — and without understanding why, you'll never know what you're missing.
@@ -260,12 +262,108 @@ The fix is to use absolute paths via Hexo's `config.root`:
 
 This is a general lesson: **always use absolute paths for resources referenced in the HTML `<head>`**, because the `<head>` is shared across pages at every nesting level.
 
+## Layer 4: AI Search Readiness (GEO)
+
+There's a new layer that didn't exist two years ago. AI-powered search — Google AI Overviews, ChatGPT web search, Perplexity — is fundamentally changing how content gets discovered and cited. This is called Generative Engine Optimization (GEO), and it operates on a different set of principles.
+
+### llms.txt: A README for AI Crawlers
+
+Just as `robots.txt` tells traditional crawlers what they can access, `llms.txt` tells AI crawlers what your site is about. It's a plain-text file at your site root that provides a structured, human-readable summary — optimized for LLM context windows rather than HTML parsers.
+
+```markdown
+# Your Blog Name
+
+> One-line description of your site.
+
+## Topics Covered
+- Topic 1 (subtopics)
+- Topic 2 (subtopics)
+
+## Recent Posts
+- [Post Title](https://your-site.com/post-url/)
+
+## Links
+- Blog: https://your-site.com
+- GitHub: https://github.com/username
+```
+
+### AI Crawler Access Rules
+
+By default, many sites block AI crawlers. If you want your content cited in AI-generated answers, you need to explicitly allow them in `robots.txt`:
+
+```
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+```
+
+This is a conscious trade-off. You're granting AI systems permission to train on or cite your content. For a personal tech blog, the visibility benefit far outweighs the cost.
+
+### Citability: Writing for AI Extraction
+
+AI search engines don't just rank pages — they extract and cite specific passages. To be citable:
+
+1. **Lead with the answer.** The TL;DR pattern at the top of posts isn't just good for readers — it gives AI models a clean, self-contained passage to quote.
+2. **Use clear heading hierarchies.** AI models segment content by headings. Vague headings like "Discussion" or "More Info" are less likely to be cited than specific ones like "How JSON-LD Enables Rich Results."
+3. **Structure data explicitly.** Tables, numbered lists, and code blocks are easier for models to extract than free-flowing paragraphs.
+
+## Automating SEO Audits with Claude Code Skills
+
+After doing the initial manual overhaul, I discovered [claude-seo](https://github.com/AgriciDaniel/claude-seo) — a community-built Claude Code skill that automates comprehensive SEO audits. It's a perfect example of the Skills paradigm I wrote about in my [Agent Skills](/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/) post.
+
+### What It Does
+
+`claude-seo` is a skill ecosystem with 13 sub-skills and 7 specialized subagents:
+
+- **`/seo-audit`** — Full-site crawl with parallel subagent delegation
+- **`/seo-technical`** — Crawlability, indexability, Core Web Vitals, security headers
+- **`/seo-content`** — E-E-A-T assessment, readability, thin content detection
+- **`/seo-schema`** — JSON-LD detection, validation, and generation
+- **`/seo-hreflang`** — International SEO validation
+- **`/seo-geo`** — AI search readiness (GEO), citability scoring
+- **`/seo-page`** — Deep single-page analysis
+
+### Installation
+
+One command:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/install.sh | bash
+```
+
+It installs into `~/.claude/skills/seo/`, sets up a Python venv for dependencies, and optionally installs Playwright for visual analysis.
+
+### What It Found on This Blog
+
+Running `/seo-audit https://clean99.github.io` against my blog confirmed and extended the findings from my manual audit. The key takeaway: **a skill-driven audit catches things you'd never think to check manually** — AI crawler accessibility, passage-level citability, hreflang validation across all page combinations, and more.
+
+The skill also validated that all my previous fixes (JSON-LD, hreflang, og:type, etc.) were correctly implemented — essentially providing automated regression testing for SEO.
+
+### Why Skills Matter for SEO
+
+SEO is a perfect use case for Skills because:
+
+1. **It's a fixed workflow.** The audit process follows the same pattern every time: crawl → analyze → score → recommend.
+2. **It requires domain expertise.** The skill encapsulates SEO knowledge (E-E-A-T criteria, schema validation rules, GEO best practices) that you'd otherwise need to look up repeatedly.
+3. **It's composable.** Individual sub-skills (`/seo-schema`, `/seo-hreflang`) can be invoked independently for targeted checks after making changes.
+
+This maps exactly to the Skill design principles: single responsibility, clean interfaces, reusability. The `claude-seo` skill is essentially the SEO mental model from this post, operationalized as executable code.
+
 ## Putting It All Together
 
 Here's the mental model, bottom-up:
 
 ```
 ┌──────────────────────────────────────────────────┐
+│  Layer 4: AI Search Readiness (GEO)              │
+│  llms.txt, AI crawler rules, citability          │
+│  → Ensures AI search engines can cite you        │
+├──────────────────────────────────────────────────┤
 │  Layer 3: Distribution                           │
 │  Open Graph, Twitter Cards, article metadata     │
 │  → Controls how your content appears when shared │
@@ -284,6 +382,8 @@ Here's the mental model, bottom-up:
 └──────────────────────────────────────────────────┘
 ```
 
-Every SEO optimization falls into one of these layers. When you encounter a new SEO recommendation, ask yourself: which layer does this belong to? Is it helping crawlers **find** my content, **understand** it, or **distribute** it? This framework turns a seemingly random collection of best practices into a coherent system.
+Every SEO optimization falls into one of these layers. When you encounter a new SEO recommendation, ask yourself: which layer does this belong to? Is it helping crawlers **find** my content, **understand** it, **distribute** it, or make it **citable by AI**? This framework turns a seemingly random collection of best practices into a coherent system.
 
-The fundamental takeaway: **SEO is data structure design for machines**. Your HTML is an API that search engines consume. Meta tags are the response headers. JSON-LD is the response body. Semantic elements are the schema. The better you design this API, the better machines can understand and surface your content.
+The fundamental takeaway: **SEO is data structure design for machines**. Your HTML is an API that search engines consume. Meta tags are the response headers. JSON-LD is the response body. Semantic elements are the schema. `llms.txt` is the API documentation. The better you design this API, the better machines — whether traditional crawlers or AI models — can understand and surface your content.
+
+And with tools like `claude-seo`, you can automate the verification of this entire stack. The mental model gives you understanding; the skill gives you enforcement.
