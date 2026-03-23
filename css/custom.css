@@ -326,6 +326,36 @@ figure.highlight .line {
   color: #d4d4d4;
 }
 
+/* Hexo highlight.js syntax colors (VSCode Dark+ theme) */
+figure.highlight .comment,
+figure.highlight .quote { color: #6a9955; font-style: italic; }
+figure.highlight .keyword,
+figure.highlight .selector-tag,
+figure.highlight .deletion { color: #569cd6; }
+figure.highlight .string,
+figure.highlight .addition { color: #ce9178; }
+figure.highlight .number,
+figure.highlight .literal { color: #b5cea8; }
+figure.highlight .attr,
+figure.highlight .attribute { color: #9cdcfe; }
+figure.highlight .built_in,
+figure.highlight .builtin-name { color: #dcdcaa; }
+figure.highlight .type,
+figure.highlight .class .title,
+figure.highlight .title { color: #4ec9b0; }
+figure.highlight .symbol,
+figure.highlight .bullet { color: #d4d4d4; }
+figure.highlight .meta { color: #d7ba7d; }
+figure.highlight .name,
+figure.highlight .tag { color: #569cd6; }
+figure.highlight .variable,
+figure.highlight .template-variable { color: #9cdcfe; }
+figure.highlight .regexp { color: #d16969; }
+figure.highlight .section { color: #ffd700; }
+figure.highlight .selector-class,
+figure.highlight .selector-id { color: #d7ba7d; }
+figure.highlight .params { color: #d4d4d4; }
+
 body.darkmode figure.highlight {
   background: #1e1e1e;
 }
