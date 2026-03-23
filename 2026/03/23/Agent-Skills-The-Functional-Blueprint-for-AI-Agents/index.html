@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>Agent Skills: The Functional Blueprint for AI Agents</title>
+  
+  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/">
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" />
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" />
+  
+  <meta name="description" content="TL;DR: A Skill is essentially a function that runs on an LLM — it encapsulates a fixed workflow, defines inputs&amp;#x2F;outputs, and can be reused across">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.ioundefined">
+  
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Agent Skills: The Functional Blueprint for AI Agents" />
+  
+  <meta property="og:description" content="TL;DR: A Skill is essentially a function that runs on an LLM — it encapsulates a fixed workflow, defines inputs&amp;#x2F;outputs, and can be reused across">
+  
+  <meta property="og:url" content="https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Agent Skills: The Functional Blueprint for AI Agents">
+  
+  <meta name="twitter:description" content="TL;DR: A Skill is essentially a function that runs on an LLM — it encapsulates a fixed workflow, defines inputs&amp;#x2F;outputs, and can be reused across">
+  
+  
+  <meta name="twitter:image" content="https://clean99.github.ioundefined">
+  
+  <meta name="twitter:url" content="https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- Language detection and redirect -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+
+    if (!stored) {
+      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+      localStorage.setItem('preferredLang', stored);
+    }
+
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath;
+      if (stored === 'zh') {
+        newPath = '/zh' + path;
+      } else {
+        newPath = path.replace(/^\/zh(\/|$)/, '/');
+      }
+      if (newPath !== path) {
+        window.location.replace(newPath + window.location.search + window.location.hash);
+      }
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="six columns ml-1">
+    <h1 class="mt-2">
+      <a href="/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/">Home</a>
+        
+          
+          <a href="/Works" class="ml">Works</a>
+          
+        
+          
+          <a href="/About" class="ml">About</a>
+          
+        
+          
+          <a href="/Links" class="ml">Links</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">Email</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <h2>Agent Skills: The Functional Blueprint for AI Agents</h2>
+
+  
+  <p style="margin-bottom: 0.5rem;">
+    <a href="/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
+      阅读中文版
+    </a>
+  </p>
+  
+
+  <blockquote>
+<p><strong>TL;DR</strong>: A Skill is essentially a function that runs on an LLM — it encapsulates a fixed workflow, defines inputs&#x2F;outputs, and can be reused across any AI Agent. This post breaks down what Skills really are, their design principles, and practical engineering guidelines for building them.</p>
+</blockquote>
+<h2 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h2><p><img src="/img/agent-skills/amnesic-agents.png" alt="The Problem with Amnesic Agents"></p>
+<p>The Agentic AI space keeps minting new concepts, and Skills has been the most discussed — and in my view, the most important — over the past few months. This post documents my journey exploring Skills: what I learned, how I understand them, and what I’ve put into practice.</p>
+<h2 id="First-Principles-of-Skills"><a href="#First-Principles-of-Skills" class="headerlink" title="First Principles of Skills"></a>First Principles of Skills</h2><p><img src="/img/agent-skills/first-principles.png" alt="First Principles: Skills as Functions for LLMs"></p>
+<p><strong>A Skill is fundamentally a function in programming.</strong></p>
+<p>In traditional programming, we abstract repetitive business logic into functions for reuse. Skills do exactly the same thing, except the executor is an LLM instead of a CPU. A function runs on hardware; a Skill runs on a language model. This means core principles of modular programming — single responsibility, clean interfaces, composability — apply directly to Skill design.</p>
+<h2 id="What-Is-a-Skill"><a href="#What-Is-a-Skill" class="headerlink" title="What Is a Skill?"></a>What Is a Skill?</h2><blockquote>
+<p>Official definition: A Skill is a <strong>simple folder</strong> that encapsulates a specific task or a set of workflow instructions. It lets an Agent learn once and reuse your preferences, processes, and domain knowledge across all future interactions.</p>
+</blockquote>
+<p>Standard file structure:</p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">your-skill-name<span class="symbol">/</span></span><br><span class="line">├── SKILL.md             <span class="comment"># Required: core instruction file with YAML metadata + workflow</span></span><br><span class="line">├── scripts<span class="symbol">/</span>             <span class="comment"># Optional: executable scripts (Python, Bash, etc.)</span></span><br><span class="line">├── references<span class="symbol">/</span>          <span class="comment"># Optional: supplementary docs loaded on demand</span></span><br><span class="line">└── assets<span class="symbol">/</span>              <span class="comment"># Optional: templates, icons, static resources</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="When-Do-You-Need-a-Skill"><a href="#When-Do-You-Need-a-Skill" class="headerlink" title="When Do You Need a Skill?"></a>When Do You Need a Skill?</h2><p>If we treat prompts as natural-language programming, then Skills answer the question: “When should I extract a function?”</p>
+<p><strong>When a similar pattern keeps appearing in your workflow, abstract it into a Skill.</strong></p>
+<p>Example: I have a workflow for generating full-stack technical documents — it pulls a PRD from Feishu, fetches Figma designs, reads the codebase, and outputs a structured doc. This breaks down into four independent Skills:</p>
+<ol>
+<li><strong>Fetch Feishu Doc Skill</strong> — downloads the PRD in an AI-readable format</li>
+<li><strong>Fetch Figma Design Skill</strong> — parses design files for AI consumption</li>
+<li><strong>Fetch Codebase Skill</strong> — pulls the target repository</li>
+<li><strong>Write Tech Doc Skill</strong> — generates a professional document from the above inputs</li>
+</ol>
+<p>Each Skill is independently reusable, and together they form an end-to-end document generation pipeline. Without Skills, you’d have to teach the Agent every step from scratch each time — like onboarding a new hire for every single task.</p>
+<p><img src="/img/agent-skills/skill-chaining.png" alt="The Workflow Vision: Skill Chaining"></p>
+<h2 id="Skill-vs-MCP"><a href="#Skill-vs-MCP" class="headerlink" title="Skill vs MCP"></a>Skill vs MCP</h2><p><img src="/img/agent-skills/skill-vs-mcp.png" alt="Defining the Boundaries: Skill vs MCP"></p>
+<p>Many people confuse Skills with MCP, or assume Skills will replace MCP. They operate on entirely different dimensions.</p>
+<p><strong>A Skill is the recipe. MCP is the kitchen.</strong></p>
+<ul>
+<li><strong>MCP</strong> provides the <strong>capability layer</strong> — which systems the Agent can connect to and what actions it can perform. Think stoves, knives, and refrigerators.</li>
+<li><strong>Skill</strong> provides the <strong>methodology</strong> — what to do when, in what order, how to handle edge cases, and how to validate the result.</li>
+</ul>
+<p>Skills frequently depend on one or more MCPs. They collaborate, not compete.</p>
+<h2 id="How-Skills-Work-Under-the-Hood"><a href="#How-Skills-Work-Under-the-Hood" class="headerlink" title="How Skills Work Under the Hood"></a>How Skills Work Under the Hood</h2><h3 id="Progressive-Disclosure-Load-Context-on-Demand"><a href="#Progressive-Disclosure-Load-Context-on-Demand" class="headerlink" title="Progressive Disclosure: Load Context on Demand"></a>Progressive Disclosure: Load Context on Demand</h3><p><img src="/img/agent-skills/progressive-disclosure.png" alt="Progressive Disclosure"></p>
+<p>The key difference between a Skill and a long prompt is the loading strategy: <strong>expose the minimum necessary information first, then expand layer by layer once relevance is confirmed.</strong></p>
+<ul>
+<li><strong>Layer 1 (YAML Frontmatter)</strong>: Always loaded in the system prompt. Contains only the name, purpose, and trigger conditions. Its job is to tell the model: “When should you think of me?”</li>
+<li><strong>Layer 2 (SKILL.md Body)</strong>: Loaded only when the Agent determines the Skill is relevant. Contains the full instructions and workflow.</li>
+<li><strong>Layer 3 (Supplementary Files)</strong>: Detailed docs, examples, and templates in <code>references/</code> or <code>scripts/</code>, loaded only when the workflow specifically requires them.</li>
+</ul>
+<p>The core value: <strong>accumulate extensive experience, but surface only what’s needed right now.</strong></p>
+<h3 id="Single-Responsibility-Design-Like-a-Microservice"><a href="#Single-Responsibility-Design-Like-a-Microservice" class="headerlink" title="Single Responsibility: Design Like a Microservice"></a>Single Responsibility: Design Like a Microservice</h3><p><img src="/img/agent-skills/microservice-mindset.png" alt="The Microservice Mindset"></p>
+<p>A Skill should not be an “all-in-one manager.” It should be a clearly bounded workflow unit.</p>
+<p>Real-world tasks are often multi-stage. For incident response, you might need a “Log Query” Skill to locate anomalies, a “Change Audit” Skill to compare recent deployments, and a “Conclusion Summary” Skill to write the report. If every Skill tried to do everything end-to-end, you’d end up with overlapping, bloated prompts rather than stronger capabilities.</p>
+<p><strong>A good Skill owns only the part it does best and composes well with others.</strong></p>
+<h3 id="Plain-Text-Zero-Lock-In"><a href="#Plain-Text-Zero-Lock-In" class="headerlink" title="Plain Text, Zero Lock-In"></a>Plain Text, Zero Lock-In</h3><p>Skills are plain text files (Markdown + helper scripts), bound to no specific tool, framework, model, or deployment environment. As long as the target environment supports the Skill spec and has the required dependencies, the Skill just works. This makes experience transferable and portable.</p>
+<h2 id="How-to-Design-a-Good-Skill"><a href="#How-to-Design-a-Good-Skill" class="headerlink" title="How to Design a Good Skill"></a>How to Design a Good Skill</h2><h3 id="Engineering-Principles"><a href="#Engineering-Principles" class="headerlink" title="Engineering Principles"></a>Engineering Principles</h3><ul>
+<li><strong>Atomic &amp; Single Responsibility</strong>: One Skill, one well-defined job. Avoid “Swiss Army knife” Skills — split them into smaller units.</li>
+<li><strong>Stable I&#x2F;O Contract</strong>: Trigger conditions and outputs should be predictable. The <code>description</code> field is the most important part of this contract.</li>
+<li><strong>Idempotency</strong>: Operations with side effects (create, delete) must be safe to run multiple times. Include “already exists?” checks.</li>
+<li><strong>Observability</strong>: Define log output formats for key steps to enable quick debugging.</li>
+</ul>
+<h3 id="YAML-Metadata-The-Trigger-Brain"><a href="#YAML-Metadata-The-Trigger-Brain" class="headerlink" title="YAML Metadata: The Trigger Brain"></a>YAML Metadata: The Trigger Brain</h3><p>The YAML Front Matter in <code>SKILL.md</code> directly determines whether and when the Agent loads your Skill.</p>
+<p>Minimum format:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">name:</span> <span class="string">your-skill-name</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">What</span> <span class="string">it</span> <span class="string">does.</span> <span class="string">Use</span> <span class="string">when</span> <span class="string">user</span> <span class="string">asks</span> <span class="string">to</span> [<span class="string">specific</span> <span class="string">phrases</span>]<span class="string">.</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure>
+
+<p>The <code>description</code> must communicate two things: <strong>what this Skill does, and when to use it.</strong></p>
+<p>Good examples:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Specific with trigger phrases</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">Analyzes</span> <span class="string">Figma</span> <span class="string">design</span> <span class="string">files</span> <span class="string">and</span> <span class="string">generates</span> <span class="string">developer</span> <span class="string">handoff</span> <span class="string">documentation.</span> <span class="string">Use</span> <span class="string">when</span> <span class="string">user</span> <span class="string">uploads</span> <span class="string">.fig</span> <span class="string">files,</span> <span class="string">asks</span> <span class="string">for</span> <span class="string">&quot;design specs&quot;</span> <span class="string">or</span> <span class="string">&quot;design-to-code handoff&quot;</span><span class="string">.</span></span><br></pre></td></tr></table></figure>
+
+<p>Bad examples:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Too vague, no trigger conditions</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">Helps</span> <span class="string">with</span> <span class="string">projects.</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="File-Naming-Conventions"><a href="#File-Naming-Conventions" class="headerlink" title="File Naming Conventions"></a>File Naming Conventions</h3><ul>
+<li>Folders use <strong>kebab-case</strong>, e.g., <code>notion-project-setup</code></li>
+<li>The core file must be named <strong><code>SKILL.md</code></strong> (case-sensitive)</li>
+<li><strong>No <code>README.md</code></strong> inside Skill folders</li>
+</ul>
+<h2 id="Evaluation-and-Testing"><a href="#Evaluation-and-Testing" class="headerlink" title="Evaluation and Testing"></a>Evaluation and Testing</h2><p><img src="/img/agent-skills/evaluation-matrix.png" alt="QA for Agents: The Evaluation Matrix"></p>
+<p>Like traditional software testing, Skill validation needs three layers:</p>
+<ol>
+<li><strong>Trigger Tests</strong> — Does the Skill activate in the right scenarios?</li>
+<li><strong>Functional Tests</strong> — Are API calls and outputs correct?</li>
+<li><strong>Performance Comparison</strong> — Does the Skill actually improve efficiency over manual prompts?</li>
+</ol>
+<h2 id="Best-Practice-How-to-Create-Skills-Quickly"><a href="#Best-Practice-How-to-Create-Skills-Quickly" class="headerlink" title="Best Practice: How to Create Skills Quickly"></a>Best Practice: How to Create Skills Quickly</h2><p>My current workflow: <strong>Start a task → complete it with Prompt + MCP → use <code>skill-creator</code> to generate a Skill → reuse on similar tasks → continuously improve.</strong></p>
+<p>The key is to run the process manually first, confirm it works, then abstract it into a Skill — rather than designing in a vacuum.</p>
+<hr>
+<p><em>Skills are the function abstraction of the Agentic AI era. Mastering Skill design is like mastering function design — it determines how much of your experience you can crystallize into reusable capabilities, rather than starting from scratch every time.</em></p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+  <p><a class="classtest-link" href="/tags/AI/" rel="tag">AI</a>, <a class="classtest-link" href="/tags/Agent/" rel="tag">Agent</a>, <a class="classtest-link" href="/tags/Claude-Code/" rel="tag">Claude Code</a>, <a class="classtest-link" href="/tags/Skills/" rel="tag">Skills</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a> — Mar 23, 2026</p>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">Made with ❤ and
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        at <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+
+      <!-- Language switcher (globe icon) -->
+      <a class="ml-0 footer-link icon" href="/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" onclick="localStorage.setItem('preferredLang', 'zh')" style="text-decoration: none" aria-label="阅读中文版" title="阅读中文版">
+        <svg class="svg-hov" width="18" role="img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><title>中文</title><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </a>
+
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>
