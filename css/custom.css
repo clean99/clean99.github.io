@@ -264,6 +264,72 @@ body {
   transition: all 0.3s ease-in-out;
 }
 
+/* Hexo highlight code blocks */
+figure.highlight {
+  overflow-x: auto;
+  margin: 0.5em 0;
+  border-radius: 6px;
+  background: #292929;
+}
+
+figure.highlight table {
+  width: auto;
+  border: 0;
+}
+
+figure.highlight tr {
+  border: 0;
+}
+
+figure.highlight td {
+  padding: 0;
+  border: 0;
+}
+
+figure.highlight td.gutter {
+  width: 40px;
+  padding: 0.8em 0.5em;
+  vertical-align: top;
+  user-select: none;
+}
+
+figure.highlight td.gutter pre {
+  color: #666;
+  text-align: right;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+figure.highlight td.code {
+  padding: 0.8em 1em;
+}
+
+figure.highlight td.code pre {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+figure.highlight pre {
+  margin: 0;
+  line-height: 1.5;
+  font-size: 13px;
+  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+figure.highlight .line {
+  color: #d4d4d4;
+}
+
+body.darkmode figure.highlight {
+  background: #1e1e1e;
+}
+
 body.darkmode {
   background: rgb(34, 34, 38);
   color: rgb(230, 230, 230);
