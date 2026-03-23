@@ -11,13 +11,14 @@
   <meta charset="utf-8">
 
   
-  <title>用 NodeJS 构建一个玩具浏览器</title>
+  <title>用 NodeJS 构建一个玩具浏览器 | Koh Hom&#39;s Blog</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/">
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/" />
   
   <meta name="description" content="开始之前没错，我又给自己挖了一个坑。我看到了一本名为《Web Browser Engineering》的有趣书籍，它教如何用 Python 构建一个浏览器。由于我现在正在学习 SICPJS，并将在课程结束时构建一个编译器，我认为这两门课程可能有些关联。我阅读了这本书的目录，确实，这本书主要聚焦于浏览">
   
@@ -26,34 +27,49 @@
   
   <meta name="author" content="Koh Hom">
   
-  <meta property="og:image" content="https://clean99.github.ioundefined">
-  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="用 NodeJS 构建一个玩具浏览器" />
+  <meta property="article:published_time" content="2022-04-27T12:45:44.000Z" />
+  <meta property="article:modified_time" content="2022-04-27T12:45:44.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="browser" />
+  
+  
+  <meta property="og:title" content="用 NodeJS 构建一个玩具浏览器 | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
   
   <meta property="og:description" content="开始之前没错，我又给自己挖了一个坑。我看到了一本名为《Web Browser Engineering》的有趣书籍，它教如何用 Python 构建一个浏览器。由于我现在正在学习 SICPJS，并将在课程结束时构建一个编译器，我认为这两门课程可能有些关联。我阅读了这本书的目录，确实，这本书主要聚焦于浏览">
   
   <meta property="og:url" content="https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="用 NodeJS 构建一个玩具浏览器">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="用 NodeJS 构建一个玩具浏览器 | Koh Hom&#39;s Blog">
   
   <meta name="twitter:description" content="开始之前没错，我又给自己挖了一个坑。我看到了一本名为《Web Browser Engineering》的有趣书籍，它教如何用 Python 构建一个浏览器。由于我现在正在学习 SICPJS，并将在课程结束时构建一个编译器，我认为这两门课程可能有些关联。我阅读了这本书的目录，确实，这本书主要聚焦于浏览">
   
-  
-  <meta name="twitter:image" content="https://clean99.github.ioundefined">
-  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -141,30 +157,27 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
-  <!-- Language detection and redirect -->
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"用 NodeJS 构建一个玩具浏览器","datePublished":"2022-04-27T12:45:44.000Z","dateModified":"2022-04-27T12:45:44.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/","mainEntityOfPage":"https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/","inLanguage":"zh-CN","description":"开始之前没错，我又给自己挖了一个坑。我看到了一本名为《Web Browser Engineering》的有趣书籍，它教如何用 Python 构建一个浏览器。由于我现在正在学习 SICPJS，并将在课程结束时构建一个编译器，我认为这两门课程可能有些关联。我阅读了这本书的目录，确实，这本书主要聚焦于浏览器的核心功能：渲染、网络、解析 DOM 等。但它似乎回避了深入探讨 JS 引擎部分，而是使用 eva","keywords":["browser"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"用 NodeJS 构建一个玩具浏览器","item":"https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
   <script>
   (function() {
     var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
     var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
     var current = isZh ? 'zh' : 'en';
-
-    if (!stored) {
-      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-      localStorage.setItem('preferredLang', stored);
-    }
-
     if (stored !== current) {
       var path = window.location.pathname;
-      var newPath;
-      if (stored === 'zh') {
-        newPath = '/zh' + path;
-      } else {
-        newPath = path.replace(/^\/zh(\/|$)/, '/');
-      }
-      if (newPath !== path) {
-        window.location.replace(newPath + window.location.search + window.location.hash);
-      }
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
     }
   })();
   </script>
@@ -239,17 +252,22 @@
 </div>
 
         <div class="trans">
-            <h2>用 NodeJS 构建一个玩具浏览器</h2>
-
-  
-  <p style="margin-bottom: 0.5rem;">
-    <a href="/2022/04/27/Build-a-Toy-Browser-with-NodeJS/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
-      Read in English
-    </a>
-  </p>
-  
-
-  <h2 id="开始之前"><a href="#开始之前" class="headerlink" title="开始之前"></a>开始之前</h2><p>没错，我又给自己挖了一个坑。我看到了一本名为《Web Browser Engineering》的有趣书籍，它教如何用 Python 构建一个浏览器。由于我现在正在学习 SICPJS，并将在课程结束时构建一个编译器，我认为这两门课程可能有些关联。我阅读了这本书的目录，确实，这本书主要聚焦于浏览器的核心功能：渲染、网络、解析 DOM 等。但它似乎回避了深入探讨 JS 引擎部分，而是使用 <code>eval()</code> 来解析 JS 代码。所以我认为将两者结合起来是个好主意。</p>
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">用 NodeJS 构建一个玩具浏览器</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/2022/04/27/Build-a-Toy-Browser-with-NodeJS/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+          Read in English
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2022-04-27T12:45:44.000Z">
+      <meta itemprop="dateModified" content="2022-04-27T12:45:44.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <h2 id="开始之前"><a href="#开始之前" class="headerlink" title="开始之前"></a>开始之前</h2><p>没错，我又给自己挖了一个坑。我看到了一本名为《Web Browser Engineering》的有趣书籍，它教如何用 Python 构建一个浏览器。由于我现在正在学习 SICPJS，并将在课程结束时构建一个编译器，我认为这两门课程可能有些关联。我阅读了这本书的目录，确实，这本书主要聚焦于浏览器的核心功能：渲染、网络、解析 DOM 等。但它似乎回避了深入探讨 JS 引擎部分，而是使用 <code>eval()</code> 来解析 JS 代码。所以我认为将两者结合起来是个好主意。</p>
 <p>此外，我决定用 NodeJS 而非 Python 来实现这个浏览器。原因如下：</p>
 <ol>
 <li>这是练习和学习 NodeJS API 的好机会。</li>
@@ -270,7 +288,11 @@
 		var gitalk = new Gitalk(gitalkConfig);
 	    gitalk.render("gitalk-container");
 	    </script>
-  <p><a class="classtest-link" href="/tags/browser/" rel="tag">browser</a> — Apr 27, 2022</p>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/browser/" rel="tag">browser</a> — <time datetime="2022-04-27T12:45:44.000Z">Apr 27, 2022</time></p>
+    </footer>
+  </article>
   
 
 

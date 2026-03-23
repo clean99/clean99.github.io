@@ -11,13 +11,14 @@
   <meta charset="utf-8">
 
   
-  <title>如何设计优秀的测试用例</title>
+  <title>如何设计优秀的测试用例 | Koh Hom&#39;s Blog</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/">
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
   
   <meta name="description" content="软件测试是一件困难的事情。好的测试用例可以帮助你提升代码的可维护性和稳定性，而糟糕的测试用例不仅无法带来收益，某些情况下甚至会拖慢你的开发进程。 很高兴看到我们团队现在写了很多测试用例，但其中有些并没有真正使团队受益，甚至成了开发的负担。我认为部分原因是我们缺乏关于如何设计真正有用的好测试用例的指导">
   
@@ -26,34 +27,51 @@
   
   <meta name="author" content="Koh Hom">
   
-  <meta property="og:image" content="https://clean99.github.ioundefined">
-  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="如何设计优秀的测试用例" />
+  <meta property="article:published_time" content="2024-04-10T10:47:43.000Z" />
+  <meta property="article:modified_time" content="2024-04-10T10:47:43.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="Testing" />
+  
+  
+  <meta property="og:title" content="如何设计优秀的测试用例 | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
   
   <meta property="og:description" content="软件测试是一件困难的事情。好的测试用例可以帮助你提升代码的可维护性和稳定性，而糟糕的测试用例不仅无法带来收益，某些情况下甚至会拖慢你的开发进程。 很高兴看到我们团队现在写了很多测试用例，但其中有些并没有真正使团队受益，甚至成了开发的负担。我认为部分原因是我们缺乏关于如何设计真正有用的好测试用例的指导">
   
   <meta property="og:url" content="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="如何设计优秀的测试用例">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="如何设计优秀的测试用例 | Koh Hom&#39;s Blog">
   
   <meta name="twitter:description" content="软件测试是一件困难的事情。好的测试用例可以帮助你提升代码的可维护性和稳定性，而糟糕的测试用例不仅无法带来收益，某些情况下甚至会拖慢你的开发进程。 很高兴看到我们团队现在写了很多测试用例，但其中有些并没有真正使团队受益，甚至成了开发的负担。我认为部分原因是我们缺乏关于如何设计真正有用的好测试用例的指导">
   
-  
-  <meta name="twitter:image" content="https://clean99.github.ioundefined">
-  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -141,30 +159,27 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
-  <!-- Language detection and redirect -->
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"如何设计优秀的测试用例","datePublished":"2024-04-10T10:47:43.000Z","dateModified":"2024-04-10T10:47:43.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/","mainEntityOfPage":"https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/","inLanguage":"zh-CN","description":"软件测试是一件困难的事情。好的测试用例可以帮助你提升代码的可维护性和稳定性，而糟糕的测试用例不仅无法带来收益，某些情况下甚至会拖慢你的开发进程。 很高兴看到我们团队现在写了很多测试用例，但其中有些并没有真正使团队受益，甚至成了开发的负担。我认为部分原因是我们缺乏关于如何设计真正有用的好测试用例的指导。因此，我想为如何在单元测试（UT）和端到端测试（E2E）中编写测试用例建立一个基本框架。 为了理解","keywords":["Software Engineering","Testing"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"如何设计优秀的测试用例","item":"https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
   <script>
   (function() {
     var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
     var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
     var current = isZh ? 'zh' : 'en';
-
-    if (!stored) {
-      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-      localStorage.setItem('preferredLang', stored);
-    }
-
     if (stored !== current) {
       var path = window.location.pathname;
-      var newPath;
-      if (stored === 'zh') {
-        newPath = '/zh' + path;
-      } else {
-        newPath = path.replace(/^\/zh(\/|$)/, '/');
-      }
-      if (newPath !== path) {
-        window.location.replace(newPath + window.location.search + window.location.hash);
-      }
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
     }
   })();
   </script>
@@ -239,17 +254,22 @@
 </div>
 
         <div class="trans">
-            <h2>如何设计优秀的测试用例</h2>
-
-  
-  <p style="margin-bottom: 0.5rem;">
-    <a href="/2024/04/10/How-to-Design-GOOD-Test-Cases/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
-      Read in English
-    </a>
-  </p>
-  
-
-  <p>软件测试是一件困难的事情。好的测试用例可以帮助你提升代码的可维护性和稳定性，而糟糕的测试用例不仅无法带来收益，某些情况下甚至会拖慢你的开发进程。</p>
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">如何设计优秀的测试用例</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/2024/04/10/How-to-Design-GOOD-Test-Cases/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+          Read in English
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2024-04-10T10:47:43.000Z">
+      <meta itemprop="dateModified" content="2024-04-10T10:47:43.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <p>软件测试是一件困难的事情。好的测试用例可以帮助你提升代码的可维护性和稳定性，而糟糕的测试用例不仅无法带来收益，某些情况下甚至会拖慢你的开发进程。</p>
 <p>很高兴看到我们团队现在写了很多测试用例，但其中有些并没有真正使团队受益，甚至成了开发的负担。我认为部分原因是我们缺乏关于如何设计真正有用的好测试用例的指导。因此，我想为如何在单元测试（UT）和端到端测试（E2E）中编写测试用例建立一个基本框架。</p>
 <p>为了理解这些框架为何如此构建，我们首先需要学习测试的通用知识。我们稍后会讨论这个问题。</p>
 <h2 id="为什么我们需要测试？"><a href="#为什么我们需要测试？" class="headerlink" title="为什么我们需要测试？"></a>为什么我们需要测试？</h2><p>为了编写好的测试用例，我们需要理解我们的目标。在开发软件时，我们需要测试的原因有很多。以下是最显而易见的一个：</p>
@@ -357,7 +377,11 @@
 		var gitalk = new Gitalk(gitalkConfig);
 	    gitalk.render("gitalk-container");
 	    </script>
-  <p><a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/Testing/" rel="tag">Testing</a> — Apr 10, 2024</p>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/Testing/" rel="tag">Testing</a> — <time datetime="2024-04-10T10:47:43.000Z">Apr 10, 2024</time></p>
+    </footer>
+  </article>
   
 
 

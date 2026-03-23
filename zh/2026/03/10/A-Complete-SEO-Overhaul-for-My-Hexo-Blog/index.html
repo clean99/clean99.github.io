@@ -11,13 +11,14 @@
   <meta charset="utf-8">
 
   
-  <title>从第一性原理理解 SEO —— 一次博客全面改造的深度复盘</title>
+  <title>从第一性原理理解 SEO —— 一次博客全面改造的深度复盘 | Koh Hom&#39;s Blog</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/">
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" />
   
   <meta name="description" content="大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件、改这个配置。但清单无法帮你理解 为什么 ——不理解为什么，你永远不知道自己遗漏了什么。 最近我对这个博客做了一次全面的 SEO 改造。比起逐条记录”发现了什么、修了什么”，我更想分享的是背后的思维模型。一旦用这个视角看 SEO，所">
   
@@ -26,34 +27,57 @@
   
   <meta name="author" content="Koh Hom">
   
-  <meta property="og:image" content="https://clean99.github.ioundefined">
-  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="从第一性原理理解 SEO —— 一次博客全面改造的深度复盘" />
+  <meta property="article:published_time" content="2026-03-10T06:00:00.000Z" />
+  <meta property="article:modified_time" content="2026-03-10T06:00:00.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Frontend" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="Web Performance" />
+  
+  <meta property="article:tag" content="SEO" />
+  
+  <meta property="article:tag" content="AI" />
+  
+  
+  <meta property="og:title" content="从第一性原理理解 SEO —— 一次博客全面改造的深度复盘 | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
   
   <meta property="og:description" content="大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件、改这个配置。但清单无法帮你理解 为什么 ——不理解为什么，你永远不知道自己遗漏了什么。 最近我对这个博客做了一次全面的 SEO 改造。比起逐条记录”发现了什么、修了什么”，我更想分享的是背后的思维模型。一旦用这个视角看 SEO，所">
   
   <meta property="og:url" content="https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="从第一性原理理解 SEO —— 一次博客全面改造的深度复盘">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="从第一性原理理解 SEO —— 一次博客全面改造的深度复盘 | Koh Hom&#39;s Blog">
   
   <meta name="twitter:description" content="大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件、改这个配置。但清单无法帮你理解 为什么 ——不理解为什么，你永远不知道自己遗漏了什么。 最近我对这个博客做了一次全面的 SEO 改造。比起逐条记录”发现了什么、修了什么”，我更想分享的是背后的思维模型。一旦用这个视角看 SEO，所">
   
-  
-  <meta name="twitter:image" content="https://clean99.github.ioundefined">
-  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -141,30 +165,27 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
-  <!-- Language detection and redirect -->
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"从第一性原理理解 SEO —— 一次博客全面改造的深度复盘","datePublished":"2026-03-10T06:00:00.000Z","dateModified":"2026-03-10T06:00:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/","mainEntityOfPage":"https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/","inLanguage":"zh-CN","description":"大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件、改这个配置。但清单无法帮你理解 为什么 ——不理解为什么，你永远不知道自己遗漏了什么。 最近我对这个博客做了一次全面的 SEO 改造。比起逐条记录”发现了什么、修了什么”，我更想分享的是背后的思维模型。一旦用这个视角看 SEO，所有优化都变得显而易见。 第一性原理：搜索引擎是程序这是唯一需要记住的事。Google、Bing、Ba","keywords":["Frontend","Software Engineering","Web Performance","SEO","AI"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"从第一性原理理解 SEO —— 一次博客全面改造的深度复盘","item":"https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
   <script>
   (function() {
     var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
     var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
     var current = isZh ? 'zh' : 'en';
-
-    if (!stored) {
-      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-      localStorage.setItem('preferredLang', stored);
-    }
-
     if (stored !== current) {
       var path = window.location.pathname;
-      var newPath;
-      if (stored === 'zh') {
-        newPath = '/zh' + path;
-      } else {
-        newPath = path.replace(/^\/zh(\/|$)/, '/');
-      }
-      if (newPath !== path) {
-        window.location.replace(newPath + window.location.search + window.location.hash);
-      }
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
     }
   })();
   </script>
@@ -239,17 +260,22 @@
 </div>
 
         <div class="trans">
-            <h2>从第一性原理理解 SEO —— 一次博客全面改造的深度复盘</h2>
-
-  
-  <p style="margin-bottom: 0.5rem;">
-    <a href="/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
-      Read in English
-    </a>
-  </p>
-  
-
-  <p>大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件、改这个配置。但清单无法帮你理解 <strong>为什么</strong> ——不理解为什么，你永远不知道自己遗漏了什么。</p>
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">从第一性原理理解 SEO —— 一次博客全面改造的深度复盘</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+          Read in English
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2026-03-10T06:00:00.000Z">
+      <meta itemprop="dateModified" content="2026-03-10T06:00:00.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <p>大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件、改这个配置。但清单无法帮你理解 <strong>为什么</strong> ——不理解为什么，你永远不知道自己遗漏了什么。</p>
 <p>最近我对这个博客做了一次全面的 SEO 改造。比起逐条记录”发现了什么、修了什么”，我更想分享的是背后的<strong>思维模型</strong>。一旦用这个视角看 SEO，所有优化都变得显而易见。</p>
 <h2 id="第一性原理：搜索引擎是程序"><a href="#第一性原理：搜索引擎是程序" class="headerlink" title="第一性原理：搜索引擎是程序"></a>第一性原理：搜索引擎是程序</h2><p>这是唯一需要记住的事。Google、Bing、Baidu——它们本质上都是程序，做三件事：</p>
 <ol>
@@ -343,11 +369,50 @@
 <figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;preload&quot;</span> <span class="attr">href</span>=<span class="string">&quot;&lt;%- config.root %&gt;fonts/font.woff2&quot;</span> <span class="attr">as</span>=<span class="string">&quot;font&quot;</span> <span class="attr">type</span>=<span class="string">&quot;font/woff2&quot;</span> <span class="attr">crossorigin</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>这是一个通用教训：<strong>HTML <code>&lt;head&gt;</code> 中引用的资源永远使用绝对路径</strong>，因为 <code>&lt;head&gt;</code> 在每个嵌套层级的页面间是共享的。</p>
-<h2 id="全貌"><a href="#全貌" class="headerlink" title="全貌"></a>全貌</h2><p>自底向上看完整的心智模型：</p>
-<figure class="highlight coq"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────────────────────────────┐</span><br><span class="line">│  第三层：分发                                      │</span><br><span class="line">│  <span class="keyword">Open</span> <span class="keyword">Graph</span>, Twitter Cards, 文章时间元数据          │</span><br><span class="line">│  → 控制你的内容在社交平台上如何呈现                   │</span><br><span class="line">├──────────────────────────────────────────────────┤</span><br><span class="line">│  第二层：理解                                      │</span><br><span class="line">│  JSON-LD, 语义化 HTML, &lt;title&gt;, meta 标签          │</span><br><span class="line">│  → 告诉搜索引擎你的内容是什么意思                     │</span><br><span class="line">├──────────────────────────────────────────────────┤</span><br><span class="line">│  第一层：发现                                      │</span><br><span class="line">│  Sitemap, robots.txt, RSS Feed, <span class="keyword">Canonical</span> URL     │</span><br><span class="line">│  → 确保搜索引擎能找到你的内容                        │</span><br><span class="line">├──────────────────────────────────────────────────┤</span><br><span class="line">│  基础：性能                                        │</span><br><span class="line">│  Core Web Vitals, 资源提示, 预加载                  │</span><br><span class="line">│  → 通过页面体验影响排名                              │</span><br><span class="line">└──────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+<h2 id="第四层：AI-搜索就绪（GEO）"><a href="#第四层：AI-搜索就绪（GEO）" class="headerlink" title="第四层：AI 搜索就绪（GEO）"></a>第四层：AI 搜索就绪（GEO）</h2><p>有一个新的层次是两年前不存在的。AI 驱动的搜索——Google AI Overviews、ChatGPT 网页搜索、Perplexity——正在从根本上改变内容被发现和引用的方式。这被称为生成式引擎优化（Generative Engine Optimization, GEO），它基于一套不同的原则运作。</p>
+<h3 id="llms-txt：给-AI-爬虫的-README"><a href="#llms-txt：给-AI-爬虫的-README" class="headerlink" title="llms.txt：给 AI 爬虫的 README"></a>llms.txt：给 AI 爬虫的 README</h3><p>就像 <code>robots.txt</code> 告诉传统爬虫它们能访问什么一样，<code>llms.txt</code> 告诉 AI 爬虫你的站点是关于什么的。它是放在站点根目录的纯文本文件，提供一个结构化的、人类可读的摘要——针对 LLM 的上下文窗口优化，而非 HTML 解析器。</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># 你的博客名</span></span><br><span class="line"></span><br><span class="line"><span class="quote">&gt; 站点的一句话描述</span></span><br><span class="line"></span><br><span class="line"><span class="section">## 涵盖主题</span></span><br><span class="line"><span class="bullet">-</span> 主题 1（子主题）</span><br><span class="line"><span class="bullet">-</span> 主题 2（子主题）</span><br><span class="line"></span><br><span class="line"><span class="section">## 近期文章</span></span><br><span class="line"><span class="bullet">-</span> [<span class="string">文章标题</span>](<span class="link">https://your-site.com/post-url/</span>)</span><br><span class="line"></span><br><span class="line"><span class="section">## 链接</span></span><br><span class="line"><span class="bullet">-</span> 博客：https://your-site.com</span><br><span class="line"><span class="bullet">-</span> GitHub：https://github.com/username</span><br></pre></td></tr></table></figure>
 
-<p>每一项 SEO 优化都落在这些层中的某一个。当你遇到新的 SEO 建议时，问自己：这属于哪一层？它是帮助爬虫<strong>发现</strong>我的内容、<strong>理解</strong>它、还是<strong>分发</strong>它？这个框架把一堆看似随机的最佳实践变成了一个连贯的系统。</p>
-<p>根本性的收获：<strong>SEO 就是面向机器的数据结构设计</strong>。你的 HTML 是搜索引擎消费的 API。Meta 标签是响应头。JSON-LD 是响应体。语义元素是 schema 定义。你把这个 API 设计得越好，机器就越能理解和呈现你的内容。</p>
+<h3 id="AI-爬虫访问规则"><a href="#AI-爬虫访问规则" class="headerlink" title="AI 爬虫访问规则"></a>AI 爬虫访问规则</h3><p>默认情况下，许多站点会屏蔽 AI 爬虫。如果你希望你的内容被 AI 生成的回答引用，需要在 <code>robots.txt</code> 中显式允许它们：</p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="params">User-agent:</span> GPTBot</span><br><span class="line"><span class="params">Allow:</span> <span class="symbol">/</span></span><br><span class="line"></span><br><span class="line"><span class="params">User-agent:</span> ClaudeBot</span><br><span class="line"><span class="params">Allow:</span> <span class="symbol">/</span></span><br><span class="line"></span><br><span class="line"><span class="params">User-agent:</span> PerplexityBot</span><br><span class="line"><span class="params">Allow:</span> <span class="operator">/</span></span><br></pre></td></tr></table></figure>
+
+<p>这是一个有意识的取舍。你在授权 AI 系统训练或引用你的内容。对于个人技术博客来说，可见性的收益远大于成本。</p>
+<h3 id="可引用性：为-AI-提取而写作"><a href="#可引用性：为-AI-提取而写作" class="headerlink" title="可引用性：为 AI 提取而写作"></a>可引用性：为 AI 提取而写作</h3><p>AI 搜索引擎不只是排名页面——它们提取并引用特定的段落。要被引用：</p>
+<ol>
+<li><strong>先给答案。</strong> 文章顶部的 TL;DR 不仅对读者友好——它给 AI 模型提供了一个干净的、自包含的可引用段落。</li>
+<li><strong>使用清晰的标题层级。</strong> AI 模型按标题分割内容。模糊的标题如”讨论”或”更多信息”被引用的概率远低于具体的标题如”JSON-LD 如何实现富媒体结果”。</li>
+<li><strong>显式地结构化数据。</strong> 表格、有序列表和代码块比自由流动的段落更容易被模型提取。</li>
+</ol>
+<h2 id="用-Claude-Code-Skills-自动化-SEO-审计"><a href="#用-Claude-Code-Skills-自动化-SEO-审计" class="headerlink" title="用 Claude Code Skills 自动化 SEO 审计"></a>用 Claude Code Skills 自动化 SEO 审计</h2><p>在完成初始的手动改造之后，我发现了 <a target="_blank" rel="noopener" href="https://github.com/AgriciDaniel/claude-seo">claude-seo</a>——一个社区构建的 Claude Code skill，能自动化全面的 SEO 审计。它是我在 <a href="/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/">Agent Skills</a> 一文中讨论的 Skills 范式的完美案例。</p>
+<h3 id="它做什么"><a href="#它做什么" class="headerlink" title="它做什么"></a>它做什么</h3><p><code>claude-seo</code> 是一个 skill 生态系统，包含 13 个子 skill 和 7 个专业 subagent：</p>
+<ul>
+<li><strong><code>/seo-audit</code></strong> — 全站爬取，并行 subagent 委派</li>
+<li><strong><code>/seo-technical</code></strong> — 可爬取性、可索引性、Core Web Vitals、安全头</li>
+<li><strong><code>/seo-content</code></strong> — E-E-A-T 评估、可读性、薄内容检测</li>
+<li><strong><code>/seo-schema</code></strong> — JSON-LD 检测、验证和生成</li>
+<li><strong><code>/seo-hreflang</code></strong> — 国际化 SEO 验证</li>
+<li><strong><code>/seo-geo</code></strong> — AI 搜索就绪（GEO）、可引用性评分</li>
+<li><strong><code>/seo-page</code></strong> — 单页深度分析</li>
+</ul>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>一行命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -fsSL https://raw.githubusercontent.com/AgriciDaniel/claude-seo/main/install.sh | bash</span><br></pre></td></tr></table></figure>
+
+<p>它安装到 <code>~/.claude/skills/seo/</code>，为依赖设置 Python venv，可选安装 Playwright 用于视觉分析。</p>
+<h3 id="它在这个博客上发现了什么"><a href="#它在这个博客上发现了什么" class="headerlink" title="它在这个博客上发现了什么"></a>它在这个博客上发现了什么</h3><p>对我的博客运行 <code>/seo-audit https://clean99.github.io</code> 后，它确认并扩展了我手动审计的发现。关键收获：<strong>skill 驱动的审计能发现你手动检查永远想不到的问题</strong>——AI 爬虫可访问性、段落级可引用性、所有页面组合的 hreflang 验证等。</p>
+<p>这个 skill 还验证了我之前所有的修复（JSON-LD、hreflang、og:type 等）都正确实现了——本质上为 SEO 提供了自动化回归测试。</p>
+<h3 id="为什么-Skills-适合-SEO"><a href="#为什么-Skills-适合-SEO" class="headerlink" title="为什么 Skills 适合 SEO"></a>为什么 Skills 适合 SEO</h3><p>SEO 是 Skills 的完美用例，因为：</p>
+<ol>
+<li><strong>它是固定流程。</strong> 审计过程每次都遵循相同的模式：爬取 → 分析 → 评分 → 建议。</li>
+<li><strong>它需要领域专业知识。</strong> Skill 封装了 SEO 知识（E-E-A-T 标准、schema 验证规则、GEO 最佳实践），否则你需要反复查阅。</li>
+<li><strong>它是可组合的。</strong> 单独的子 skill（<code>/seo-schema</code>、<code>/seo-hreflang</code>）可以在修改后独立调用进行定向检查。</li>
+</ol>
+<p>这完全符合 Skill 的设计原则：单一职责、清晰接口、可复用性。<code>claude-seo</code> 本质上就是这篇文章中的 SEO 思维模型，被操作化为可执行代码。</p>
+<h2 id="全貌"><a href="#全貌" class="headerlink" title="全貌"></a>全貌</h2><p>自底向上看完整的心智模型：</p>
+<figure class="highlight coq"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">┌──────────────────────────────────────────────────┐</span><br><span class="line">│  第四层：AI 搜索就绪 (GEO)                         │</span><br><span class="line">│  llms.txt, AI 爬虫规则, 可引用性                    │</span><br><span class="line">│  → 确保 AI 搜索引擎能引用你的内容                    │</span><br><span class="line">├──────────────────────────────────────────────────┤</span><br><span class="line">│  第三层：分发                                      │</span><br><span class="line">│  <span class="keyword">Open</span> <span class="keyword">Graph</span>, Twitter Cards, 文章时间元数据          │</span><br><span class="line">│  → 控制你的内容在社交平台上如何呈现                   │</span><br><span class="line">├──────────────────────────────────────────────────┤</span><br><span class="line">│  第二层：理解                                      │</span><br><span class="line">│  JSON-LD, 语义化 HTML, &lt;title&gt;, meta 标签          │</span><br><span class="line">│  → 告诉搜索引擎你的内容是什么意思                     │</span><br><span class="line">├──────────────────────────────────────────────────┤</span><br><span class="line">│  第一层：发现                                      │</span><br><span class="line">│  Sitemap, robots.txt, RSS Feed, <span class="keyword">Canonical</span> URL     │</span><br><span class="line">│  → 确保搜索引擎能找到你的内容                        │</span><br><span class="line">├──────────────────────────────────────────────────┤</span><br><span class="line">│  基础：性能                                        │</span><br><span class="line">│  Core Web Vitals, 资源提示, 预加载                  │</span><br><span class="line">│  → 通过页面体验影响排名                              │</span><br><span class="line">└──────────────────────────────────────────────────┘</span><br></pre></td></tr></table></figure>
+
+<p>每一项 SEO 优化都落在这些层中的某一个。当你遇到新的 SEO 建议时，问自己：这属于哪一层？它是帮助爬虫<strong>发现</strong>我的内容、<strong>理解</strong>它、<strong>分发</strong>它、还是让 <strong>AI 能引用</strong>它？这个框架把一堆看似随机的最佳实践变成了一个连贯的系统。</p>
+<p>根本性的收获：<strong>SEO 就是面向机器的数据结构设计</strong>。你的 HTML 是搜索引擎消费的 API。Meta 标签是响应头。JSON-LD 是响应体。语义元素是 schema 定义。<code>llms.txt</code> 是 API 文档。你把这个 API 设计得越好，机器——无论是传统爬虫还是 AI 模型——就越能理解和呈现你的内容。</p>
+<p>而有了 <code>claude-seo</code> 这样的工具，你可以自动化验证整个技术栈。思维模型给你理解力；skill 给你执行力。</p>
 
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
@@ -358,7 +423,11 @@
 		var gitalk = new Gitalk(gitalkConfig);
 	    gitalk.render("gitalk-container");
 	    </script>
-  <p><a class="classtest-link" href="/tags/Frontend/" rel="tag">Frontend</a>, <a class="classtest-link" href="/tags/SEO/" rel="tag">SEO</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/Web-Performance/" rel="tag">Web Performance</a> — Mar 10, 2026</p>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/AI/" rel="tag">AI</a>, <a class="classtest-link" href="/tags/Frontend/" rel="tag">Frontend</a>, <a class="classtest-link" href="/tags/SEO/" rel="tag">SEO</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/Web-Performance/" rel="tag">Web Performance</a> — <time datetime="2026-03-10T06:00:00.000Z">Mar 10, 2026</time></p>
+    </footer>
+  </article>
   
 
 

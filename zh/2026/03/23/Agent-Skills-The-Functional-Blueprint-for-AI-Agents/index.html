@@ -11,13 +11,14 @@
   <meta charset="utf-8">
 
   
-  <title>Agent Skills 探索实录 — AI Agent 时代的函数式蓝图</title>
+  <title>Agent Skills 探索实录 — AI Agent 时代的函数式蓝图 | Koh Hom&#39;s Blog</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/">
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" />
   
   <meta name="description" content="TL;DR: Skill 就是跑在大模型上的函数——封装固定流程、定义输入输出、支持跨 Agent 复用。本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践，帮你把零散的 Prompt 经验沉淀为可复用的能力单元。  背景 Agentic AI 领域概念层出不穷，而 Skills 是">
   
@@ -26,34 +27,57 @@
   
   <meta name="author" content="Koh Hom">
   
-  <meta property="og:image" content="https://clean99.github.ioundefined">
-  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="Agent Skills 探索实录 — AI Agent 时代的函数式蓝图" />
+  <meta property="article:published_time" content="2026-03-23T08:00:00.000Z" />
+  <meta property="article:modified_time" content="2026-03-23T08:00:00.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="AI" />
+  
+  <meta property="article:tag" content="Claude Code" />
+  
+  <meta property="article:tag" content="Agent" />
+  
+  <meta property="article:tag" content="Skills" />
+  
+  
+  <meta property="og:title" content="Agent Skills 探索实录 — AI Agent 时代的函数式蓝图 | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
   
   <meta property="og:description" content="TL;DR: Skill 就是跑在大模型上的函数——封装固定流程、定义输入输出、支持跨 Agent 复用。本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践，帮你把零散的 Prompt 经验沉淀为可复用的能力单元。  背景 Agentic AI 领域概念层出不穷，而 Skills 是">
   
   <meta property="og:url" content="https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Agent Skills 探索实录 — AI Agent 时代的函数式蓝图">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="Agent Skills 探索实录 — AI Agent 时代的函数式蓝图 | Koh Hom&#39;s Blog">
   
   <meta name="twitter:description" content="TL;DR: Skill 就是跑在大模型上的函数——封装固定流程、定义输入输出、支持跨 Agent 复用。本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践，帮你把零散的 Prompt 经验沉淀为可复用的能力单元。  背景 Agentic AI 领域概念层出不穷，而 Skills 是">
   
-  
-  <meta name="twitter:image" content="https://clean99.github.ioundefined">
-  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -141,30 +165,27 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
-  <!-- Language detection and redirect -->
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Agent Skills 探索实录 — AI Agent 时代的函数式蓝图","datePublished":"2026-03-23T08:00:00.000Z","dateModified":"2026-03-23T08:00:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/","mainEntityOfPage":"https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/","inLanguage":"zh-CN","description":"TL;DR: Skill 就是跑在大模型上的函数——封装固定流程、定义输入输出、支持跨 Agent 复用。本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践，帮你把零散的 Prompt 经验沉淀为可复用的能力单元。 背景 Agentic AI 领域概念层出不穷，而 Skills 是近几个月讨论最多、我认为也最重要的一个。本文记录了我探索 Skills 的过程，以及对其理解和实践的全","keywords":["Software Engineering","AI","Claude Code","Agent","Skills"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Agent Skills 探索实录 — AI Agent 时代的函数式蓝图","item":"https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
   <script>
   (function() {
     var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
     var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
     var current = isZh ? 'zh' : 'en';
-
-    if (!stored) {
-      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-      localStorage.setItem('preferredLang', stored);
-    }
-
     if (stored !== current) {
       var path = window.location.pathname;
-      var newPath;
-      if (stored === 'zh') {
-        newPath = '/zh' + path;
-      } else {
-        newPath = path.replace(/^\/zh(\/|$)/, '/');
-      }
-      if (newPath !== path) {
-        window.location.replace(newPath + window.location.search + window.location.hash);
-      }
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
     }
   })();
   </script>
@@ -239,17 +260,22 @@
 </div>
 
         <div class="trans">
-            <h2>Agent Skills 探索实录 — AI Agent 时代的函数式蓝图</h2>
-
-  
-  <p style="margin-bottom: 0.5rem;">
-    <a href="/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
-      Read in English
-    </a>
-  </p>
-  
-
-  <blockquote>
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">Agent Skills 探索实录 — AI Agent 时代的函数式蓝图</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+          Read in English
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2026-03-23T08:00:00.000Z">
+      <meta itemprop="dateModified" content="2026-03-23T08:00:00.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <blockquote>
 <p><strong>TL;DR</strong>: Skill 就是跑在大模型上的函数——封装固定流程、定义输入输出、支持跨 Agent 复用。本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践，帮你把零散的 Prompt 经验沉淀为可复用的能力单元。</p>
 </blockquote>
 <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p><img src="/img/agent-skills/amnesic-agents.png" alt="The Problem with Amnesic Agents"></p>
@@ -338,7 +364,11 @@
 		var gitalk = new Gitalk(gitalkConfig);
 	    gitalk.render("gitalk-container");
 	    </script>
-  <p><a class="classtest-link" href="/tags/AI/" rel="tag">AI</a>, <a class="classtest-link" href="/tags/Agent/" rel="tag">Agent</a>, <a class="classtest-link" href="/tags/Claude-Code/" rel="tag">Claude Code</a>, <a class="classtest-link" href="/tags/Skills/" rel="tag">Skills</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a> — Mar 23, 2026</p>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/AI/" rel="tag">AI</a>, <a class="classtest-link" href="/tags/Agent/" rel="tag">Agent</a>, <a class="classtest-link" href="/tags/Claude-Code/" rel="tag">Claude Code</a>, <a class="classtest-link" href="/tags/Skills/" rel="tag">Skills</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a> — <time datetime="2026-03-23T08:00:00.000Z">Mar 23, 2026</time></p>
+    </footer>
+  </article>
   
 
 

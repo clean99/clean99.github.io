@@ -11,13 +11,14 @@
   <meta charset="utf-8">
 
   
-  <title>React 服务器组件内部原理（源码解析）</title>
+  <title>React 服务器组件内部原理（源码解析） | Koh Hom&#39;s Blog</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/">
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/React-Server-Component-Internals/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/React-Server-Component-Internals/" />
   
   <meta name="description" content="什么是 React 服务器组件（RSC）？React 服务器组件是 React 的一项新特性，它允许服务端与客户端（浏览器）协同渲染 React 应用。简而言之，它将部分渲染工作移交给服务端，以提升整体性能。 React 元素树的典型构建流程为了更好地理解为什么需要将渲染工作移到服务端，让我们先看看">
   
@@ -26,34 +27,53 @@
   
   <meta name="author" content="Koh Hom">
   
-  <meta property="og:image" content="https://clean99.github.ioundefined">
-  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="React 服务器组件内部原理（源码解析）" />
+  <meta property="article:published_time" content="2024-04-10T10:51:00.000Z" />
+  <meta property="article:modified_time" content="2024-04-10T10:51:00.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Frontend" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="React" />
+  
+  
+  <meta property="og:title" content="React 服务器组件内部原理（源码解析） | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
   
   <meta property="og:description" content="什么是 React 服务器组件（RSC）？React 服务器组件是 React 的一项新特性，它允许服务端与客户端（浏览器）协同渲染 React 应用。简而言之，它将部分渲染工作移交给服务端，以提升整体性能。 React 元素树的典型构建流程为了更好地理解为什么需要将渲染工作移到服务端，让我们先看看">
   
   <meta property="og:url" content="https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="React 服务器组件内部原理（源码解析）">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="React 服务器组件内部原理（源码解析） | Koh Hom&#39;s Blog">
   
   <meta name="twitter:description" content="什么是 React 服务器组件（RSC）？React 服务器组件是 React 的一项新特性，它允许服务端与客户端（浏览器）协同渲染 React 应用。简而言之，它将部分渲染工作移交给服务端，以提升整体性能。 React 元素树的典型构建流程为了更好地理解为什么需要将渲染工作移到服务端，让我们先看看">
   
-  
-  <meta name="twitter:image" content="https://clean99.github.ioundefined">
-  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -141,30 +161,27 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
-  <!-- Language detection and redirect -->
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"React 服务器组件内部原理（源码解析）","datePublished":"2024-04-10T10:51:00.000Z","dateModified":"2024-04-10T10:51:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/","mainEntityOfPage":"https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/","inLanguage":"zh-CN","description":"什么是 React 服务器组件（RSC）？React 服务器组件是 React 的一项新特性，它允许服务端与客户端（浏览器）协同渲染 React 应用。简而言之，它将部分渲染工作移交给服务端，以提升整体性能。 React 元素树的典型构建流程为了更好地理解为什么需要将渲染工作移到服务端，让我们先看看客户端渲染是如何构建 React 元素树（JSX）的： 1234567891011121314151","keywords":["Frontend","Software Engineering","React"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"React 服务器组件内部原理（源码解析）","item":"https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
   <script>
   (function() {
     var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
     var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
     var current = isZh ? 'zh' : 'en';
-
-    if (!stored) {
-      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-      localStorage.setItem('preferredLang', stored);
-    }
-
     if (stored !== current) {
       var path = window.location.pathname;
-      var newPath;
-      if (stored === 'zh') {
-        newPath = '/zh' + path;
-      } else {
-        newPath = path.replace(/^\/zh(\/|$)/, '/');
-      }
-      if (newPath !== path) {
-        window.location.replace(newPath + window.location.search + window.location.hash);
-      }
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
     }
   })();
   </script>
@@ -239,17 +256,22 @@
 </div>
 
         <div class="trans">
-            <h2>React 服务器组件内部原理（源码解析）</h2>
-
-  
-  <p style="margin-bottom: 0.5rem;">
-    <a href="/2024/04/10/React-Server-Component-Internals/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
-      Read in English
-    </a>
-  </p>
-  
-
-  <h2 id="什么是-React-服务器组件（RSC）？"><a href="#什么是-React-服务器组件（RSC）？" class="headerlink" title="什么是 React 服务器组件（RSC）？"></a>什么是 React 服务器组件（RSC）？</h2><p>React 服务器组件是 React 的一项新特性，它允许服务端与客户端（浏览器）协同渲染 React 应用。简而言之，它将部分渲染工作移交给服务端，以提升整体性能。</p>
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">React 服务器组件内部原理（源码解析）</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/2024/04/10/React-Server-Component-Internals/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+          Read in English
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2024-04-10T10:51:00.000Z">
+      <meta itemprop="dateModified" content="2024-04-10T10:51:00.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <h2 id="什么是-React-服务器组件（RSC）？"><a href="#什么是-React-服务器组件（RSC）？" class="headerlink" title="什么是 React 服务器组件（RSC）？"></a>什么是 React 服务器组件（RSC）？</h2><p>React 服务器组件是 React 的一项新特性，它允许服务端与客户端（浏览器）协同渲染 React 应用。简而言之，它将部分渲染工作移交给服务端，以提升整体性能。</p>
 <h3 id="React-元素树的典型构建流程"><a href="#React-元素树的典型构建流程" class="headerlink" title="React 元素树的典型构建流程"></a>React 元素树的典型构建流程</h3><p>为了更好地理解为什么需要将渲染工作移到服务端，让我们先看看客户端渲染是如何构建 React 元素树（JSX）的：</p>
 <figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// App Component</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">App</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    <span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">ComponentA</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">      <span class="tag">&lt;<span class="name">ComponentB</span> /&gt;</span></span></span><br><span class="line"><span class="language-xml">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ComponentA</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ComponentA</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="language-xml"><span class="tag">&lt;<span class="name">h1</span> <span class="attr">onClick</span>=<span class="string">&#123;()</span> =&gt;</span> alert(&quot;cool!&quot;)&#125;&gt;Hello from Component A<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ComponentB</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ComponentB</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> data = <span class="keyword">await</span> <span class="title function_">fetchDataApi</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="language-xml"><span class="tag">&lt;<span class="name">div</span>&gt;</span>&#123;data&#125; fetched from Component B<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
@@ -354,7 +376,11 @@
 		var gitalk = new Gitalk(gitalkConfig);
 	    gitalk.render("gitalk-container");
 	    </script>
-  <p><a class="classtest-link" href="/tags/Frontend/" rel="tag">Frontend</a>, <a class="classtest-link" href="/tags/React/" rel="tag">React</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a> — Apr 10, 2024</p>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/Frontend/" rel="tag">Frontend</a>, <a class="classtest-link" href="/tags/React/" rel="tag">React</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a> — <time datetime="2024-04-10T10:51:00.000Z">Apr 10, 2024</time></p>
+    </footer>
+  </article>
   
 
 

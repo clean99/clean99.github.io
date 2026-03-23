@@ -11,13 +11,14 @@
   <meta charset="utf-8">
 
   
-  <title>相关文章 — code generation</title>
+  <title>相关文章 — code generation | Koh Hom&#39;s Blog</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/zh/tags/code-generation/">
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/code-generation/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/tags/code-generation/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/code-generation/" />
   
   <meta name="description" content="A software engineer from Chaoshan, China. Graduated from SCNU, interned at Ant Group &amp; ByteDance, now working at TikTok in Singapore. Writes about frontend, testing, software engineering, and more.">
   
@@ -27,33 +28,42 @@
   <meta name="author" content="Koh Hom">
   
   <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
-  
   <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
-  <meta property="og:type" content="article" />
-  <meta property="og:title" content="相关文章 — code generation" />
+  
+  <meta property="og:type" content="website" />
+  
+  <meta property="og:title" content="相关文章 — code generation | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
   
   <meta property="og:description" content="A software engineer from Chaoshan, China. Graduated from SCNU, interned at Ant Group &amp; ByteDance, now working at TikTok in Singapore. Writes about frontend, testing, software engineering, and more.">
   
   <meta property="og:url" content="https://clean99.github.io/zh/tags/code-generation/" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="相关文章 — code generation">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="相关文章 — code generation | Koh Hom&#39;s Blog">
   
   <meta name="twitter:description" content="A software engineer from Chaoshan, China. Graduated from SCNU, interned at Ant Group &amp; ByteDance, now working at TikTok in Singapore. Writes about frontend, testing, software engineering, and more.">
   
-  
   <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
-  
   <meta name="twitter:url" content="https://clean99.github.io/zh/tags/code-generation/" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -141,30 +151,26 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
-  <!-- Language detection and redirect -->
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Koh Hom's Blog | Frontend & Testing Blog","url":"https://clean99.github.io","description":"A software engineer from Chaoshan, China. Graduated from SCNU, interned at Ant Group & ByteDance, now working at TikTok in Singapore. Writes about frontend, testing, software engineering, and more.","inLanguage":["en","zh-CN"],"author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/","jobTitle":"Software Engineer","sameAs":["https://github.com/clean99","https://www.linkedin.com/in/hom-koh-42019a204","https://twitter.com/Clean993"]}}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
   <script>
   (function() {
     var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
     var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
     var current = isZh ? 'zh' : 'en';
-
-    if (!stored) {
-      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-      localStorage.setItem('preferredLang', stored);
-    }
-
     if (stored !== current) {
       var path = window.location.pathname;
-      var newPath;
-      if (stored === 'zh') {
-        newPath = '/zh' + path;
-      } else {
-        newPath = path.replace(/^\/zh(\/|$)/, '/');
-      }
-      if (newPath !== path) {
-        window.location.replace(newPath + window.location.search + window.location.hash);
-      }
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
     }
   })();
   </script>

@@ -11,13 +11,14 @@
   <meta charset="utf-8">
 
   
-  <title>How to Design GOOD Test Cases</title>
+  <title>How to Design GOOD Test Cases | Koh Hom&#39;s Blog</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/">
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
   
   <meta name="description" content="Testing for software is hard. Good test cases can help you increase maintainability and stability of your code, while bad test cases not only can not ">
   
@@ -26,34 +27,51 @@
   
   <meta name="author" content="Koh Hom">
   
-  <meta property="og:image" content="https://clean99.github.ioundefined">
-  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="How to Design GOOD Test Cases" />
+  <meta property="article:published_time" content="2024-04-10T10:47:43.000Z" />
+  <meta property="article:modified_time" content="2024-04-10T10:47:43.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="Testing" />
+  
+  
+  <meta property="og:title" content="How to Design GOOD Test Cases | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_CN" />
   
   <meta property="og:description" content="Testing for software is hard. Good test cases can help you increase maintainability and stability of your code, while bad test cases not only can not ">
   
   <meta property="og:url" content="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="How to Design GOOD Test Cases">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="How to Design GOOD Test Cases | Koh Hom&#39;s Blog">
   
   <meta name="twitter:description" content="Testing for software is hard. Good test cases can help you increase maintainability and stability of your code, while bad test cases not only can not ">
   
-  
-  <meta name="twitter:image" content="https://clean99.github.ioundefined">
-  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -141,30 +159,27 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
-  <!-- Language detection and redirect -->
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"How to Design GOOD Test Cases","datePublished":"2024-04-10T10:47:43.000Z","dateModified":"2024-04-10T10:47:43.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/","mainEntityOfPage":"https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/","inLanguage":"en","description":"Testing for software is hard. Good test cases can help you increase maintainability and stability of your code, while bad test cases not only can not benefit you, some things can even slow down your d","keywords":["Software Engineering","Testing"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"How to Design GOOD Test Cases","item":"https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
   <script>
   (function() {
     var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
     var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
     var current = isZh ? 'zh' : 'en';
-
-    if (!stored) {
-      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-      localStorage.setItem('preferredLang', stored);
-    }
-
     if (stored !== current) {
       var path = window.location.pathname;
-      var newPath;
-      if (stored === 'zh') {
-        newPath = '/zh' + path;
-      } else {
-        newPath = path.replace(/^\/zh(\/|$)/, '/');
-      }
-      if (newPath !== path) {
-        window.location.replace(newPath + window.location.search + window.location.hash);
-      }
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
     }
   })();
   </script>
@@ -239,17 +254,22 @@
 </div>
 
         <div class="trans">
-            <h2>How to Design GOOD Test Cases</h2>
-
-  
-  <p style="margin-bottom: 0.5rem;">
-    <a href="/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
-      阅读中文版
-    </a>
-  </p>
-  
-
-  <p>Testing for software is hard. Good test cases can help you increase maintainability and stability of your code, while bad test cases not only can not benefit you, some things can even slow down your development process.</p>
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">How to Design GOOD Test Cases</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
+          阅读中文版
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2024-04-10T10:47:43.000Z">
+      <meta itemprop="dateModified" content="2024-04-10T10:47:43.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <p>Testing for software is hard. Good test cases can help you increase maintainability and stability of your code, while bad test cases not only can not benefit you, some things can even slow down your development process.</p>
 <p>It is good to see many test cases written in our team now, but some of them are not really benefit our team and even become burden of the development. I think part of the reason is because we don’t have instructions for how to design good test cases that really help us out. So I’d like to build a basic framework about how to write test cases in UT and E2E.</p>
 <p>In order to understand the reason why frameworks are constructed that way, we need to learn generic knowledge of testing first. We will discuss this in a bit.</p>
 <h2 id="Why-do-We-Need-Tests"><a href="#Why-do-We-Need-Tests" class="headerlink" title="Why do We Need Tests?"></a>Why do We Need Tests?</h2><p>In order to write good test cases, we need to understand our goals. There are lots of reasons why we need tests when we develop software. Here is the most obvious one:</p>
@@ -357,7 +377,11 @@
 		var gitalk = new Gitalk(gitalkConfig);
 	    gitalk.render("gitalk-container");
 	    </script>
-  <p><a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/Testing/" rel="tag">Testing</a> — Apr 10, 2024</p>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/Testing/" rel="tag">Testing</a> — <time datetime="2024-04-10T10:47:43.000Z">Apr 10, 2024</time></p>
+    </footer>
+  </article>
   
 
 

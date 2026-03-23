@@ -1,0 +1,30 @@
+# Koh Hom's Blog
+
+> A software engineering blog by Koh Hom (许峰), focusing on frontend development, testing, React, and AI-assisted coding. Bilingual content in English and Chinese.
+
+## About the Author
+
+Koh Hom is a software engineer from Chaoshan, China. Graduated from South China Normal University (SCNU). Previously interned at Ant Group and ByteDance. Currently working at TikTok in Singapore.
+
+## Topics Covered
+
+- Frontend Development (React, Redux, Hooks, Server Components, Performance Optimization)
+- Software Testing (TDD, Test Case Design, React Testing, E2E Testing)
+- Software Engineering (SDLC, Agile, Code Complexity, Tailwind CSS Architecture)
+- AI & Code Generation (ChatGPT, GitHub Copilot, Modular Design with AI, Agent Skills)
+- Web Performance (Core Web Vitals, Browser Internals)
+- Computer Science Fundamentals (SICP, Data Abstraction)
+
+## Recent Posts
+
+- [Agent Skills: The Functional Blueprint for AI Agents](https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/)
+- [Vibe Coding VS Spec-Driven Coding](https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/)
+- [A Complete SEO Overhaul for My Hexo Blog](https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/)
+
+## Links
+
+- Blog: https://clean99.github.io
+- GitHub: https://github.com/clean99
+- LinkedIn: https://www.linkedin.com/in/hom-koh-42019a204
+- RSS Feed: https://clean99.github.io/atom.xml
+- Sitemap: https://clean99.github.io/sitemap.xml

@@ -11,13 +11,14 @@
   <meta charset="utf-8">
 
   
-  <title>使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践）</title>
+  <title>使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践） | Koh Hom&#39;s Blog</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/">
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/" />
   
   <meta name="description" content="本文将展示如何利用 error boundary 的最佳实践来构建一个健壮且容错的 React 应用，包括：何时使用 Error Boundary、构建带有错误处理和错误上报功能的 Error Boundary HOC。 核心概念容错性提高系统可靠性的一种常见做法是使系统具备容错性。这意味着即使用户">
   
@@ -26,34 +27,61 @@
   
   <meta name="author" content="Koh Hom">
   
-  <meta property="og:image" content="https://clean99.github.ioundefined">
-  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践）" />
+  <meta property="article:published_time" content="2024-05-06T08:45:11.000Z" />
+  <meta property="article:modified_time" content="2024-05-06T08:45:11.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="frontend" />
+  
+  <meta property="article:tag" content="react" />
+  
+  <meta property="article:tag" content="error-handling" />
+  
+  <meta property="article:tag" content="error-boundary" />
+  
+  <meta property="article:tag" content="fault-tolerance" />
+  
+  <meta property="article:tag" content="robustness" />
+  
+  <meta property="article:tag" content="reliability" />
+  
+  
+  <meta property="og:title" content="使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践） | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
   
   <meta property="og:description" content="本文将展示如何利用 error boundary 的最佳实践来构建一个健壮且容错的 React 应用，包括：何时使用 Error Boundary、构建带有错误处理和错误上报功能的 Error Boundary HOC。 核心概念容错性提高系统可靠性的一种常见做法是使系统具备容错性。这意味着即使用户">
   
   <meta property="og:url" content="https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践）">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践） | Koh Hom&#39;s Blog">
   
   <meta name="twitter:description" content="本文将展示如何利用 error boundary 的最佳实践来构建一个健壮且容错的 React 应用，包括：何时使用 Error Boundary、构建带有错误处理和错误上报功能的 Error Boundary HOC。 核心概念容错性提高系统可靠性的一种常见做法是使系统具备容错性。这意味着即使用户">
   
-  
-  <meta name="twitter:image" content="https://clean99.github.ioundefined">
-  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -141,30 +169,27 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
-  <!-- Language detection and redirect -->
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践）","datePublished":"2024-05-06T08:45:11.000Z","dateModified":"2024-05-06T08:45:11.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/","mainEntityOfPage":"https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/","inLanguage":"zh-CN","description":"本文将展示如何利用 error boundary 的最佳实践来构建一个健壮且容错的 React 应用，包括：何时使用 Error Boundary、构建带有错误处理和错误上报功能的 Error Boundary HOC。 核心概念容错性提高系统可靠性的一种常见做法是使系统具备容错性。这意味着即使用户、系统某些部分或上游服务产生错误，你的系统也必须保持弹性。 最小化错误影响使系统具备容错性的一种方式","keywords":["frontend","react","error-handling","error-boundary","fault-tolerance","robustness","reliability"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践）","item":"https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
   <script>
   (function() {
     var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
     var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
     var current = isZh ? 'zh' : 'en';
-
-    if (!stored) {
-      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-      localStorage.setItem('preferredLang', stored);
-    }
-
     if (stored !== current) {
       var path = window.location.pathname;
-      var newPath;
-      if (stored === 'zh') {
-        newPath = '/zh' + path;
-      } else {
-        newPath = path.replace(/^\/zh(\/|$)/, '/');
-      }
-      if (newPath !== path) {
-        window.location.replace(newPath + window.location.search + window.location.hash);
-      }
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
     }
   })();
   </script>
@@ -239,17 +264,22 @@
 </div>
 
         <div class="trans">
-            <h2>使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践）</h2>
-
-  
-  <p style="margin-bottom: 0.5rem;">
-    <a href="/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
-      Read in English
-    </a>
-  </p>
-  
-
-  <p>本文将展示如何利用 error boundary 的最佳实践来构建一个健壮且容错的 React 应用，包括：何时使用 Error Boundary、构建带有错误处理和错误上报功能的 Error Boundary HOC。</p>
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践）</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+          Read in English
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2024-05-06T08:45:11.000Z">
+      <meta itemprop="dateModified" content="2024-05-06T08:45:11.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <p>本文将展示如何利用 error boundary 的最佳实践来构建一个健壮且容错的 React 应用，包括：何时使用 Error Boundary、构建带有错误处理和错误上报功能的 Error Boundary HOC。</p>
 <h2 id="核心概念"><a href="#核心概念" class="headerlink" title="核心概念"></a>核心概念</h2><h3 id="容错性"><a href="#容错性" class="headerlink" title="容错性"></a>容错性</h3><p>提高系统可靠性的一种常见做法是使系统具备容错性。这意味着即使用户、系统某些部分或上游服务产生错误，你的系统也必须保持弹性。</p>
 <h3 id="最小化错误影响"><a href="#最小化错误影响" class="headerlink" title="最小化错误影响"></a>最小化错误影响</h3><p>使系统具备容错性的一种方式是最小化错误的影响范围。如果某个模块发生错误，我们不希望它影响到其他模块。</p>
 <h3 id="Error-Boundary"><a href="#Error-Boundary" class="headerlink" title="Error Boundary"></a>Error Boundary</h3><p>React 提供了 <code>&lt;ErrorBoundary /&gt;</code> 来处理组件抛出的错误。目前，大多数应用只在应用层级（最高层）使用它来捕获和处理错误。这意味着一旦应用中的任何组件抛出错误，整个应用都会崩溃。</p>
@@ -298,7 +328,11 @@
 		var gitalk = new Gitalk(gitalkConfig);
 	    gitalk.render("gitalk-container");
 	    </script>
-  <p><a class="classtest-link" href="/tags/error-boundary/" rel="tag">error-boundary</a>, <a class="classtest-link" href="/tags/error-handling/" rel="tag">error-handling</a>, <a class="classtest-link" href="/tags/fault-tolerance/" rel="tag">fault-tolerance</a>, <a class="classtest-link" href="/tags/frontend/" rel="tag">frontend</a>, <a class="classtest-link" href="/tags/react/" rel="tag">react</a>, <a class="classtest-link" href="/tags/reliability/" rel="tag">reliability</a>, <a class="classtest-link" href="/tags/robustness/" rel="tag">robustness</a> — May 6, 2024</p>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/error-boundary/" rel="tag">error-boundary</a>, <a class="classtest-link" href="/tags/error-handling/" rel="tag">error-handling</a>, <a class="classtest-link" href="/tags/fault-tolerance/" rel="tag">fault-tolerance</a>, <a class="classtest-link" href="/tags/frontend/" rel="tag">frontend</a>, <a class="classtest-link" href="/tags/react/" rel="tag">react</a>, <a class="classtest-link" href="/tags/reliability/" rel="tag">reliability</a>, <a class="classtest-link" href="/tags/robustness/" rel="tag">robustness</a> — <time datetime="2024-05-06T08:45:11.000Z">May 6, 2024</time></p>
+    </footer>
+  </article>
   
 
 

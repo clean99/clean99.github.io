@@ -11,13 +11,14 @@
   <meta charset="utf-8">
 
   
-  <title>在开发周期中应用自动化测试</title>
+  <title>在开发周期中应用自动化测试 | Koh Hom&#39;s Blog</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/">
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" />
   
   <meta name="description" content="背景测试是任何软件开发流程中的关键环节。确保应用程序按预期运行、没有缺陷，是向终端用户交付高质量产品的基本要求。本节将探讨测试在开发周期中的重要性，并重点介绍自动化测试流程的优势。 测试是生产流程不可或缺的一部分，务必牢记：你的软件最终一定会被测试，无论是由你、你的自动化测试脚本，还是终端用户来完成">
   
@@ -26,34 +27,55 @@
   
   <meta name="author" content="Koh Hom">
   
-  <meta property="og:image" content="https://clean99.github.ioundefined">
-  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="在开发周期中应用自动化测试" />
+  <meta property="article:published_time" content="2023-04-01T08:23:04.000Z" />
+  <meta property="article:modified_time" content="2023-04-01T08:23:04.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="testing" />
+  
+  <meta property="article:tag" content="software engineering" />
+  
+  <meta property="article:tag" content="sdlc" />
+  
+  <meta property="article:tag" content="agile" />
+  
+  
+  <meta property="og:title" content="在开发周期中应用自动化测试 | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
   
   <meta property="og:description" content="背景测试是任何软件开发流程中的关键环节。确保应用程序按预期运行、没有缺陷，是向终端用户交付高质量产品的基本要求。本节将探讨测试在开发周期中的重要性，并重点介绍自动化测试流程的优势。 测试是生产流程不可或缺的一部分，务必牢记：你的软件最终一定会被测试，无论是由你、你的自动化测试脚本，还是终端用户来完成">
   
   <meta property="og:url" content="https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="在开发周期中应用自动化测试">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="在开发周期中应用自动化测试 | Koh Hom&#39;s Blog">
   
   <meta name="twitter:description" content="背景测试是任何软件开发流程中的关键环节。确保应用程序按预期运行、没有缺陷，是向终端用户交付高质量产品的基本要求。本节将探讨测试在开发周期中的重要性，并重点介绍自动化测试流程的优势。 测试是生产流程不可或缺的一部分，务必牢记：你的软件最终一定会被测试，无论是由你、你的自动化测试脚本，还是终端用户来完成">
   
-  
-  <meta name="twitter:image" content="https://clean99.github.ioundefined">
-  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -141,30 +163,27 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
-  <!-- Language detection and redirect -->
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"在开发周期中应用自动化测试","datePublished":"2023-04-01T08:23:04.000Z","dateModified":"2023-04-01T08:23:04.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/","mainEntityOfPage":"https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/","inLanguage":"zh-CN","description":"背景测试是任何软件开发流程中的关键环节。确保应用程序按预期运行、没有缺陷，是向终端用户交付高质量产品的基本要求。本节将探讨测试在开发周期中的重要性，并重点介绍自动化测试流程的优势。 测试是生产流程不可或缺的一部分，务必牢记：你的软件最终一定会被测试，无论是由你、你的自动化测试脚本，还是终端用户来完成。疏于彻底测试产品，可能导致性能低下、出现错误，最终让客户不满。 大多数测试任务简单且重复，非常适合","keywords":["testing","software engineering","sdlc","agile"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"在开发周期中应用自动化测试","item":"https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
   <script>
   (function() {
     var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
     var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
     var current = isZh ? 'zh' : 'en';
-
-    if (!stored) {
-      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-      localStorage.setItem('preferredLang', stored);
-    }
-
     if (stored !== current) {
       var path = window.location.pathname;
-      var newPath;
-      if (stored === 'zh') {
-        newPath = '/zh' + path;
-      } else {
-        newPath = path.replace(/^\/zh(\/|$)/, '/');
-      }
-      if (newPath !== path) {
-        window.location.replace(newPath + window.location.search + window.location.hash);
-      }
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
     }
   })();
   </script>
@@ -239,17 +258,22 @@
 </div>
 
         <div class="trans">
-            <h2>在开发周期中应用自动化测试</h2>
-
-  
-  <p style="margin-bottom: 0.5rem;">
-    <a href="/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
-      Read in English
-    </a>
-  </p>
-  
-
-  <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>测试是任何软件开发流程中的关键环节。确保应用程序按预期运行、没有缺陷，是向终端用户交付高质量产品的基本要求。本节将探讨测试在开发周期中的重要性，并重点介绍自动化测试流程的优势。</p>
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">在开发周期中应用自动化测试</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+          Read in English
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2023-04-01T08:23:04.000Z">
+      <meta itemprop="dateModified" content="2023-04-01T08:23:04.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>测试是任何软件开发流程中的关键环节。确保应用程序按预期运行、没有缺陷，是向终端用户交付高质量产品的基本要求。本节将探讨测试在开发周期中的重要性，并重点介绍自动化测试流程的优势。</p>
 <p>测试是生产流程不可或缺的一部分，务必牢记：<strong>你的软件最终一定会被测试，无论是由你、你的自动化测试脚本，还是终端用户来完成</strong>。疏于彻底测试产品，可能导致性能低下、出现错误，最终让客户不满。</p>
 <p>大多数测试任务<strong>简单且重复</strong>，非常适合自动化。通过自动化测试流程，你可以节省宝贵的时间和资源、提升准确性，并<strong>降低人为错误的可能性（始终牢记：人类并不完美，会犯很多低级错误）</strong>。自动化测试还可以<strong>按需频繁运行</strong>，确保缺陷能被<strong>及时发现和处理</strong>。</p>
 <p>在整个开发周期中，应当实施各种类型的测试，以便尽早发现 Bug 和问题，使其更易于解决。通过结合单元测试、端到端（E2E）测试等不同测试技术，可以确保应用程序在开发的每个阶段都得到全面验证。接下来的章节将探讨标准开发周期，并讨论如何在这一框架内有效地应用自动化测试。</p>
@@ -320,7 +344,11 @@
 		var gitalk = new Gitalk(gitalkConfig);
 	    gitalk.render("gitalk-container");
 	    </script>
-  <p><a class="classtest-link" href="/tags/agile/" rel="tag">agile</a>, <a class="classtest-link" href="/tags/sdlc/" rel="tag">sdlc</a>, <a class="classtest-link" href="/tags/software-engineering/" rel="tag">software engineering</a>, <a class="classtest-link" href="/tags/testing/" rel="tag">testing</a> — Apr 1, 2023</p>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/agile/" rel="tag">agile</a>, <a class="classtest-link" href="/tags/sdlc/" rel="tag">sdlc</a>, <a class="classtest-link" href="/tags/software-engineering/" rel="tag">software engineering</a>, <a class="classtest-link" href="/tags/testing/" rel="tag">testing</a> — <time datetime="2023-04-01T08:23:04.000Z">Apr 1, 2023</time></p>
+    </footer>
+  </article>
   
 
 

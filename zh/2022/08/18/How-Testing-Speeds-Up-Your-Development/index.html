@@ -11,13 +11,14 @@
   <meta charset="utf-8">
 
   
-  <title>测试如何加速你的开发</title>
+  <title>测试如何加速你的开发 | Koh Hom&#39;s Blog</title>
   
-  <link rel="sitemap" href="https://clean99.github.iositemap.xml" />
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
   <link rel="canonical" href="https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/">
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/" />
   
   <meta name="description" content="作为前端开发者，我们大多数人都不喜欢写测试，因为”它会拖慢开发进度”。我以前也不写测试，我能理解你在为一个”快速迭代”的前端项目编写测试时的痛苦。但我确实想告诉你，在大多数情况下，测试可以加速你的开发，而不是拖慢它——除非你写的是错误的测试。我有一篇文章 Some Common Mistakes i">
   
@@ -26,34 +27,49 @@
   
   <meta name="author" content="Koh Hom">
   
-  <meta property="og:image" content="https://clean99.github.ioundefined">
-  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="测试如何加速你的开发" />
+  <meta property="article:published_time" content="2022-08-18T09:19:01.000Z" />
+  <meta property="article:modified_time" content="2022-08-18T09:19:01.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="testing" />
+  
+  
+  <meta property="og:title" content="测试如何加速你的开发 | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
   
   <meta property="og:description" content="作为前端开发者，我们大多数人都不喜欢写测试，因为”它会拖慢开发进度”。我以前也不写测试，我能理解你在为一个”快速迭代”的前端项目编写测试时的痛苦。但我确实想告诉你，在大多数情况下，测试可以加速你的开发，而不是拖慢它——除非你写的是错误的测试。我有一篇文章 Some Common Mistakes i">
   
   <meta property="og:url" content="https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="测试如何加速你的开发">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="测试如何加速你的开发 | Koh Hom&#39;s Blog">
   
   <meta name="twitter:description" content="作为前端开发者，我们大多数人都不喜欢写测试，因为”它会拖慢开发进度”。我以前也不写测试，我能理解你在为一个”快速迭代”的前端项目编写测试时的痛苦。但我确实想告诉你，在大多数情况下，测试可以加速你的开发，而不是拖慢它——除非你写的是错误的测试。我有一篇文章 Some Common Mistakes i">
   
-  
-  <meta name="twitter:image" content="https://clean99.github.ioundefined">
-  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -141,30 +157,27 @@
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
      crossorigin="anonymous"></script>
 
-  <!-- Language detection and redirect -->
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"测试如何加速你的开发","datePublished":"2022-08-18T09:19:01.000Z","dateModified":"2022-08-18T09:19:01.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/","mainEntityOfPage":"https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/","inLanguage":"zh-CN","description":"作为前端开发者，我们大多数人都不喜欢写测试，因为”它会拖慢开发进度”。我以前也不写测试，我能理解你在为一个”快速迭代”的前端项目编写测试时的痛苦。但我确实想告诉你，在大多数情况下，测试可以加速你的开发，而不是拖慢它——除非你写的是错误的测试。我有一篇文章 Some Common Mistakes in React Testing 展示了哪些做法会让你在开发过程中感到痛苦。而在这篇文章中，我想向你展","keywords":["testing"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"测试如何加速你的开发","item":"https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
   <script>
   (function() {
     var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
     var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
     var current = isZh ? 'zh' : 'en';
-
-    if (!stored) {
-      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-      localStorage.setItem('preferredLang', stored);
-    }
-
     if (stored !== current) {
       var path = window.location.pathname;
-      var newPath;
-      if (stored === 'zh') {
-        newPath = '/zh' + path;
-      } else {
-        newPath = path.replace(/^\/zh(\/|$)/, '/');
-      }
-      if (newPath !== path) {
-        window.location.replace(newPath + window.location.search + window.location.hash);
-      }
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
     }
   })();
   </script>
@@ -239,17 +252,22 @@
 </div>
 
         <div class="trans">
-            <h2>测试如何加速你的开发</h2>
-
-  
-  <p style="margin-bottom: 0.5rem;">
-    <a href="/2022/08/18/How-Testing-Speeds-Up-Your-Development/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
-      Read in English
-    </a>
-  </p>
-  
-
-  <p>作为前端开发者，我们大多数人都不喜欢写测试，因为”它会拖慢开发进度”。我以前也不写测试，我能理解你在为一个”快速迭代”的前端项目编写测试时的痛苦。但我确实想告诉你，在大多数情况下，测试可以加速你的开发，而不是拖慢它——除非你写的是错误的测试。我有一篇文章 <a href="/2022/07/24/Some-Common-Mistakes-in-React-Testing/" title="Some Common Mistakes in React Testing">Some Common Mistakes in React Testing</a> 展示了哪些做法会让你在开发过程中感到痛苦。而在这篇文章中，我想向你展示<strong>为什么正确的测试能加速你的开发。</strong></p>
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">测试如何加速你的开发</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/2022/08/18/How-Testing-Speeds-Up-Your-Development/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+          Read in English
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2022-08-18T09:19:01.000Z">
+      <meta itemprop="dateModified" content="2022-08-18T09:19:01.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <p>作为前端开发者，我们大多数人都不喜欢写测试，因为”它会拖慢开发进度”。我以前也不写测试，我能理解你在为一个”快速迭代”的前端项目编写测试时的痛苦。但我确实想告诉你，在大多数情况下，测试可以加速你的开发，而不是拖慢它——除非你写的是错误的测试。我有一篇文章 <a href="/2022/07/24/Some-Common-Mistakes-in-React-Testing/" title="Some Common Mistakes in React Testing">Some Common Mistakes in React Testing</a> 展示了哪些做法会让你在开发过程中感到痛苦。而在这篇文章中，我想向你展示<strong>为什么正确的测试能加速你的开发。</strong></p>
 <h2 id="什么是开发？"><a href="#什么是开发？" class="headerlink" title="什么是开发？"></a>什么是开发？</h2><p>我们是开发者，每天都在开发软件。但说真的，什么是开发？我们在日常工作中实际上做的是什么？<br />在《修改代码的艺术》一书中，作者认为开发的本质是行为变更。开发过程有四种类型：</p>
 <ol>
 <li>添加功能</li>
@@ -287,7 +305,11 @@
 		var gitalk = new Gitalk(gitalkConfig);
 	    gitalk.render("gitalk-container");
 	    </script>
-  <p><a class="classtest-link" href="/tags/testing/" rel="tag">testing</a> — Aug 18, 2022</p>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/testing/" rel="tag">testing</a> — <time datetime="2022-08-18T09:19:01.000Z">Aug 18, 2022</time></p>
+    </footer>
+  </article>
   
 
 
