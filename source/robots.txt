@@ -11,4 +11,20 @@ Disallow: /css/
 Disallow: /fonts/
 Disallow: /fancybox/
 
+# AI Crawlers - Welcome
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
 Sitemap: https://clean99.github.io/sitemap.xml

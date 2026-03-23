@@ -15,24 +15,28 @@
     config.author = ""
   }
 
-  var title = config.title;
+  var siteTitle = config.title.split('|')[0].trim();
+  var pageTitle;
   if (is_archive()){
-    title = __('archive.title') + ' - ' + config.author;
+    pageTitle = __('archive.title') + ' | ' + siteTitle;
   } else if (is_post()){
-    title = page.title;
+    pageTitle = page.title + ' | ' + siteTitle;
   } else if (is_page()){
-    title = page.title + ' - ' + config.author;
+    pageTitle = page.title + ' | ' + siteTitle;
   } else if (is_tag()){
-    title = __('tag.related_to') + ' ' + page.tag;
+    pageTitle = __('tag.related_to') + ' ' + page.tag + ' | ' + siteTitle;
+  } else {
+    pageTitle = config.title;
   }
   %>
-  <title><%= title %></title>
+  <title><%= pageTitle %></title>
   <% if (config.sitemap) { %>
-  <link rel="sitemap" href="<%-config.url + config.sitemap.path %>" />
+  <link rel="sitemap" href="<%-config.url + '/' + config.sitemap.path %>" />
   <% } %>
   <link rel="canonical" href="<%= url.replace(/index\.html$/, '') %>">
   <link rel="alternate" hreflang="<%= page_lang() === 'zh' ? 'en' : 'zh' %>" href="<%= config.url %><%= alternate_url() %>" />
   <link rel="alternate" hreflang="<%= page_lang() %>" href="<%= url.replace(/index\.html$/, '') %>" />
+  <link rel="alternate" hreflang="x-default" href="<%= page_lang() === 'en' ? url.replace(/index\.html$/, '') : config.url + alternate_url() %>" />
   <% if (is_page()){ %>
   <meta name="description" content="<%= page.description %>">
   <% } else if (page.content){ %>
@@ -44,14 +48,28 @@
   <meta name="keywords" content="<%= config.keywords %>">
   <% } %>
   <meta name="author" content="<%- config.author %>">
-  <% if (is_post() || is_page()) { %>
-  <meta property="og:image" content="<%-config.url + page.thumbnail %>">
-  <% } else { %>
-  <meta property="og:image" content="<%-config.url + theme.thumbnail %>">
-  <% } %>
+  <%
+  var ogImage = theme.thumbnail;
+  if ((is_post() || is_page()) && page.thumbnail) {
+    ogImage = page.thumbnail;
+  }
+  %>
+  <meta property="og:image" content="<%-config.url + ogImage %>">
   <meta property="og:site_name" content="<%= config.title %>" />
+  <% if (is_post()) { %>
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="<%= title %>" />
+  <meta property="article:published_time" content="<%= page.date.toISOString() %>" />
+  <meta property="article:modified_time" content="<%= (page.updated || page.date).toISOString() %>" />
+  <meta property="article:author" content="<%= config.author %>" />
+  <% if (page.tags && page.tags.length) { page.tags.forEach(function(tag) { %>
+  <meta property="article:tag" content="<%= tag.name %>" />
+  <% }); } %>
+  <% } else { %>
+  <meta property="og:type" content="website" />
+  <% } %>
+  <meta property="og:title" content="<%= pageTitle %>" />
+  <meta property="og:locale" content="<%= page_lang() === 'zh' ? 'zh_CN' : 'en_US' %>" />
+  <meta property="og:locale:alternate" content="<%= page_lang() === 'zh' ? 'en_US' : 'zh_CN' %>" />
   <% if (is_page()){ %>
   <meta property="og:description" content="<%= page.description %>">
   <% } else if (page.content){ %>
@@ -62,7 +80,9 @@
   <meta property="og:url" content="<%= url.replace(/index\.html$/, '') %>" />
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="<%= title %>">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="<%= pageTitle %>">
   <% if (is_page()){ %>
   <meta name="twitter:description" content="<%= page.description %>">
   <% } else if (page.content){ %>
@@ -70,21 +90,23 @@
   <% } else { %>
   <meta name="twitter:description" content="<%= config.description %>">
   <% } %>
-  <% if (is_post() || is_page()) { %>
-  <meta name="twitter:image" content="<%-config.url + page.thumbnail %>">
-  <% } else { %>
-  <meta name="twitter:image" content="<%-config.url + theme.thumbnail %>">
-  <% } %>
+  <meta name="twitter:image" content="<%-config.url + ogImage %>">
   <meta name="twitter:url" content="<%= url.replace(/index\.html$/, '') %>" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#<%= theme.tcolor %>">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
   <!-- Preload fonts
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="../fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="../fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="<%- url_for('/fonts/dm-serif-display-v4-latin-regular.woff2') %>" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="<%- url_for('/fonts/inter-v2-latin-regular.woff2') %>" as="font" type="font/woff2" crossorigin>
 
   <!-- CSS
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -112,30 +134,73 @@
 
   <%- partial('googleadds/headeradd') %>
 
-  <!-- Language detection and redirect -->
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <%
+  if (is_post()) {
+    var postDesc = strip_html(page.content).replace(/\s+/g, ' ').trim().substring(0, 200);
+    var blogPostingData = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": page.title,
+      "datePublished": page.date.toISOString(),
+      "dateModified": (page.updated || page.date).toISOString(),
+      "author": { "@type": "Person", "name": config.author, "url": config.url + "/About/" },
+      "publisher": { "@type": "Person", "name": config.author, "url": config.url },
+      "url": url.replace(/index\.html$/, ''),
+      "mainEntityOfPage": url.replace(/index\.html$/, ''),
+      "inLanguage": page_lang() === 'zh' ? 'zh-CN' : 'en',
+      "description": postDesc
+    };
+    if (page.tags && page.tags.length) {
+      blogPostingData.keywords = page.tags.map(function(t){ return t.name; });
+    }
+    var breadcrumbData = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": config.url },
+        { "@type": "ListItem", "position": 2, "name": page.title, "item": url.replace(/index\.html$/, '') }
+      ]
+    };
+  %>
+  <script type="application/ld+json"><%- JSON.stringify(blogPostingData) %></script>
+  <script type="application/ld+json"><%- JSON.stringify(breadcrumbData) %></script>
+  <%
+  } else {
+    var websiteData = {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": config.title,
+      "url": config.url,
+      "description": config.description,
+      "inLanguage": ["en", "zh-CN"],
+      "author": {
+        "@type": "Person",
+        "name": config.author,
+        "url": config.url + "/About/",
+        "jobTitle": "Software Engineer",
+        "sameAs": [theme.github, theme.linkedin, theme.twitter]
+      }
+    };
+  %>
+  <script type="application/ld+json"><%- JSON.stringify(websiteData) %></script>
+  <% } %>
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
   <script>
   (function() {
     var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
     var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
     var current = isZh ? 'zh' : 'en';
-
-    if (!stored) {
-      var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-      localStorage.setItem('preferredLang', stored);
-    }
-
     if (stored !== current) {
       var path = window.location.pathname;
-      var newPath;
-      if (stored === 'zh') {
-        newPath = '/zh' + path;
-      } else {
-        newPath = path.replace(/^\/zh(\/|$)/, '/');
-      }
-      if (newPath !== path) {
-        window.location.replace(newPath + window.location.search + window.location.hash);
-      }
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
     }
   })();
   </script>

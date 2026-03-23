@@ -1,13 +1,22 @@
-  <h2><%- page.title %></h2>
-
-  <% if (page.i18n_key) { %>
-  <p style="margin-bottom: 0.5rem;">
-    <a href="<%- alternate_url() %>" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', '<%= is_zh() ? 'en' : 'zh' %>')">
-      <%= __('post.lang_switch') %>
-    </a>
-  </p>
-  <% } %>
-
-  <%- page.content%>
-  <p><%- list_tags(page.tags, {class: 'classtest', show_count: false, style: false}) %> — <%- full_date(page.date, 'll') %></p>
+  <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline"><%- page.title %></h2>
+      <% if (page.i18n_key) { %>
+      <p style="margin-bottom: 0.5rem;">
+        <a href="<%- alternate_url() %>" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', '<%= is_zh() ? 'en' : 'zh' %>')">
+          <%= __('post.lang_switch') %>
+        </a>
+      </p>
+      <% } %>
+      <meta itemprop="author" content="<%= config.author %>">
+      <meta itemprop="datePublished" content="<%= page.date.toISOString() %>">
+      <meta itemprop="dateModified" content="<%= (page.updated || page.date).toISOString() %>">
+    </header>
+    <div itemprop="articleBody">
+      <%- page.content%>
+    </div>
+    <footer>
+      <p><%- list_tags(page.tags, {class: 'classtest', show_count: false, style: false}) %> — <time datetime="<%= page.date.toISOString() %>"><%- full_date(page.date, 'll') %></time></p>
+    </footer>
+  </article>
   <%- partial('partial/comments') %>

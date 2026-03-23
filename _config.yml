@@ -130,7 +130,7 @@ feed:
   path: atom.xml
   limit: 20
   content: true
-  content_limit: 200
+  content_limit: 500
   content_limit_delim: ' '
 
 # enable: 开启/关闭 推送
