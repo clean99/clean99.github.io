@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>Automated AI Performance Optimization With Harness and Goal-Driven Loops | Koh Hom&#39;s Blog</title>
+  
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/">
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/" />
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/" />
+  
+  <meta name="description" content="TL;DR: I built a performance optimization skill that lets an AI agent run a real optimization loop instead of merely suggesting patches. The key is a ">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
+  <meta property="og:type" content="article" />
+  <meta property="article:published_time" content="2026-05-16T04:30:31.000Z" />
+  <meta property="article:modified_time" content="2026-05-16T04:30:31.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Frontend" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="Web Performance" />
+  
+  <meta property="article:tag" content="AI" />
+  
+  
+  <meta property="og:title" content="Automated AI Performance Optimization With Harness and Goal-Driven Loops | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_CN" />
+  
+  <meta property="og:description" content="TL;DR: I built a performance optimization skill that lets an AI agent run a real optimization loop instead of merely suggesting patches. The key is a ">
+  
+  <meta property="og:url" content="https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="Automated AI Performance Optimization With Harness and Goal-Driven Loops | Koh Hom&#39;s Blog">
+  
+  <meta name="twitter:description" content="TL;DR: I built a performance optimization skill that lets an AI agent run a real optimization loop instead of merely suggesting patches. The key is a ">
+  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta name="twitter:url" content="https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Automated AI Performance Optimization With Harness and Goal-Driven Loops","datePublished":"2026-05-16T04:30:31.000Z","dateModified":"2026-05-16T04:30:31.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/","mainEntityOfPage":"https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/","inLanguage":"en","description":"TL;DR: I built a performance optimization skill that lets an AI agent run a real optimization loop instead of merely suggesting patches. The key is a measurable harness, a goal-driven loop, and a ledg","keywords":["Frontend","Software Engineering","Web Performance","AI"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Automated AI Performance Optimization With Harness and Goal-Driven Loops","item":"https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="six columns ml-1">
+    <h1 class="mt-2">
+      <a href="/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/">Home</a>
+        
+          
+          <a href="/Works" class="ml">Works</a>
+          
+        
+          
+          <a href="/About" class="ml">About</a>
+          
+        
+          
+          <a href="/Links" class="ml">Links</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">Email</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">Automated AI Performance Optimization With Harness and Goal-Driven Loops</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
+          阅读中文版
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2026-05-16T04:30:31.000Z">
+      <meta itemprop="dateModified" content="2026-05-16T04:30:31.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <blockquote>
+<p><strong>TL;DR</strong>: I built a performance optimization skill that lets an AI agent run a real optimization loop instead of merely suggesting patches. The key is a measurable harness, a goal-driven loop, and a ledger that records every baseline, change, strict comparison, and failed round. In one Workspace optimization run, strict profiles showed improvements such as Workstream <code>5089ms -&gt; 2519ms</code> and Report Center <code>10021ms -&gt; 6762ms</code>, but the most important first round was not a speedup at all: it was repairing the FMP measurement contract.</p>
+</blockquote>
+<h2 id="The-Real-Problem"><a href="#The-Real-Problem" class="headerlink" title="The Real Problem"></a>The Real Problem</h2><p>The target looked simple: improve Workspace FMP.</p>
+<p>The actual target was stricter:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th align="right">Goal</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Subapp FMP P90</td>
+<td align="right">2.5s</td>
+</tr>
+<tr>
+<td>Workspace shell FMP</td>
+<td align="right">1s</td>
+</tr>
+</tbody></table>
+<p>This is where normal AI coding is too weak. If you ask an agent to “make FMP faster,” it will happily suggest lazy loading, chunk splitting, prefetching, caching, and SDK deferral. Some of those ideas may be correct, but without a harness the agent is optimizing a story, not a system.</p>
+<p>So I designed the skill around a different contract:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">No strict measurement, no performance claim.</span><br></pre></td></tr></table></figure>
+
+<p><img src="/img/ai-performance-loop/architecture.svg" alt="AI performance optimization architecture"></p>
+<p><em>Figure: the skill architecture: goal, harness, capability layer, patch, deployment proof, and ledger. generated by gpt-image-2.</em></p>
+<p>The agent can write code, but code is only one step in the loop. The loop owns profiling, waterfall diagnosis, local verification, deployment, strict comparison, and documentation.</p>
+<h2 id="Harness-First-Optimization-Second"><a href="#Harness-First-Optimization-Second" class="headerlink" title="Harness First, Optimization Second"></a>Harness First, Optimization Second</h2><p>The first useful ledger entry was ugly. It said the production route did not emit valid final FMP reports for the tested subapps.</p>
+<p>Several routes ended with invalid or missing events:</p>
+<table>
+<thead>
+<tr>
+<th>Symptom</th>
+<th>Why it mattered</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>window.custom_performace</code> ended as <code>&#123;&#125;</code></td>
+<td>Subapps could not find the host start time</td>
+</tr>
+<tr>
+<td>Some routes emitted <code>not_access_from_url</code></td>
+<td>The subapp refused to report final FMP</td>
+</tr>
+<tr>
+<td>Some pages only had fallback marks like <code>reactSubAppInit</code></td>
+<td>Those marks were diagnostics, not business FMP</td>
+</tr>
+<tr>
+<td>Workstream list had no final list FMP event</td>
+<td>The page could open, but the harness had no authoritative cutoff</td>
+</tr>
+</tbody></table>
+<p>The root cause was not a slow chunk. It was a bad measurement data structure.</p>
+<p>The host wrote one kind of key, subapps read another, and one idle reset could erase the map. Worse, some subapps used <code>Object.keys(window.custom_performace).length === 1</code> as a route-origin detector. That is fragile: a timestamp map was being used both as data storage and as a state machine.</p>
+<p>The first fix was therefore measurement repair:</p>
+<ol>
+<li>Preserve and normalize the host FMP session.</li>
+<li>Write canonical app keys instead of route-shaped keys.</li>
+<li>Make direct-route source explicit.</li>
+<li>Let each subapp validate its own expected key.</li>
+<li>Add missing final FMP reporters, especially for Workstream list.</li>
+</ol>
+<p>This produced no user-visible speedup by itself. It made the later speedups trustworthy. That is the kind of work a performance loop must do, and the kind of work an unguarded agent tends to skip.</p>
+<h2 id="The-Goal-Driven-Loop"><a href="#The-Goal-Driven-Loop" class="headerlink" title="The Goal-Driven Loop"></a>The Goal-Driven Loop</h2><p>The skill runs one round at a time:</p>
+<p><img src="/img/ai-performance-loop/loop.svg" alt="Performance loop flow"></p>
+<p><em>Figure: one measured round, not one patch, is the unit of work. generated by gpt-image-2.</em></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">profile -&gt; waterfall -&gt; diagnose -&gt; fix -&gt; local verify -&gt; commit/push</span><br><span class="line">-&gt; deploy to swimlane -&gt; profile again -&gt; compare -&gt; document -&gt; repeat</span><br></pre></td></tr></table></figure>
+
+<p>Each strict profile uses the same kind of capture:</p>
+<ul>
+<li>authenticated route;</li>
+<li>target deployment lane headers;</li>
+<li>same route and final marker;</li>
+<li>CPU 4x slower;</li>
+<li>fast 4G network profile;</li>
+<li>disabled cache;</li>
+<li>Service Worker enabled when that matches the production path;</li>
+<li>runtime version proof.</li>
+</ul>
+<p>The verdict vocabulary is part of the system:</p>
+<table>
+<thead>
+<tr>
+<th>Verdict</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>strict win</td>
+<td>Same route, same marker, same throttling, better result</td>
+</tr>
+<tr>
+<td>directional</td>
+<td>Useful signal, but not a strict comparison</td>
+</tr>
+<tr>
+<td>measurement repair</td>
+<td>The harness was wrong; no speedup claim</td>
+</tr>
+<tr>
+<td>not a win</td>
+<td>Metric or user experience regressed</td>
+</tr>
+<tr>
+<td>not measured</td>
+<td>Code shipped, but no valid profiling comparison</td>
+</tr>
+</tbody></table>
+<p>This looks bureaucratic until you have a failed optimization. Then it becomes the difference between engineering and self-deception.</p>
+<h2 id="What-Changed-in-the-Successful-Run"><a href="#What-Changed-in-the-Successful-Run" class="headerlink" title="What Changed in the Successful Run"></a>What Changed in the Successful Run</h2><p>After the measurement contract was repaired, the loop could optimize real bottlenecks.</p>
+<p>One public-safe summary of the strict profile results:</p>
+<table>
+<thead>
+<tr>
+<th>App &#x2F; route class</th>
+<th align="right">Before FMP</th>
+<th align="right">After FMP</th>
+<th align="right">Delta</th>
+<th>Main reason</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Workstream</td>
+<td align="right">5089ms</td>
+<td align="right">2519ms</td>
+<td align="right">-2570ms &#x2F; -50.5%</td>
+<td>removed startup payload, warmed list API, moved notification&#x2F;DnD&#x2F;editor&#x2F;actions after final FMP</td>
+</tr>
+<tr>
+<td>Report Center</td>
+<td align="right">10021ms</td>
+<td align="right">6762ms</td>
+<td align="right">-3259ms &#x2F; -32.5%</td>
+<td>moved notification work after FMP and fixed prefetch body&#x2F;cache-key alignment</td>
+</tr>
+<tr>
+<td>Scheduling</td>
+<td align="right">10367ms</td>
+<td align="right">7630ms</td>
+<td align="right">-2737ms &#x2F; -26.4%</td>
+<td>waited for the real final marker and started init-dependent prefetch after core data was ready</td>
+</tr>
+<tr>
+<td>Audit Workbench</td>
+<td align="right">12610ms</td>
+<td align="right">10188ms</td>
+<td align="right">-2422ms &#x2F; -19.2%</td>
+<td>moved notification after FMP and shortened chunk, render, and query timing</td>
+</tr>
+</tbody></table>
+<p>There was also a weekly P90 view across modules. Some routes reached the 2.5s target, some got close, and some still missed it. That distinction matters. A serious performance system should report both the wins and the remaining gap.</p>
+<h2 id="Pattern-1-Post-FMP-Scheduling-Beats-Blind-Deferral"><a href="#Pattern-1-Post-FMP-Scheduling-Beats-Blind-Deferral" class="headerlink" title="Pattern 1: Post-FMP Scheduling Beats Blind Deferral"></a>Pattern 1: Post-FMP Scheduling Beats Blind Deferral</h2><p>The easy version of deferral is <code>setTimeout</code>. That is garbage. It is disconnected from the product’s real readiness.</p>
+<p>The useful version waits for a route-specific final first-screen mark:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">finalMarksForRoute</span>(<span class="params"><span class="attr">pathname</span>: <span class="built_in">string</span></span>): <span class="built_in">string</span>[] &#123;</span><br><span class="line">  <span class="keyword">if</span> (pathname.<span class="title function_">includes</span>(<span class="string">&#x27;/workspace/scheduling&#x27;</span>)) &#123;</span><br><span class="line">    <span class="keyword">return</span> [<span class="string">&#x27;scheduleManagementPageFirstRender&#x27;</span>];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (pathname.<span class="title function_">includes</span>(<span class="string">&#x27;/workspace/workstream&#x27;</span>)) &#123;</span><br><span class="line">    <span class="keyword">return</span> [</span><br><span class="line">      <span class="string">&#x27;Workstream List Page FMP Complete&#x27;</span>,</span><br><span class="line">      <span class="string">&#x27;Workstream Detail Page FMP Complete&#x27;</span>,</span><br><span class="line">    ];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> [<span class="string">&#x27;Report SubApp FMP&#x27;</span>, <span class="string">&#x27;Audit Workbench FMP&#x27;</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">scheduleAfterFirstScreen</span>(<span class="params"><span class="attr">task</span>: () =&gt; <span class="built_in">void</span>, <span class="attr">pathname</span>: <span class="built_in">string</span></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> marks = <span class="title function_">finalMarksForRoute</span>(pathname);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">performanceHasAnyMark</span>(marks)) &#123;</span><br><span class="line">    <span class="title function_">runWhenIdle</span>(task);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">observeMarks</span>(marks, <span class="function">() =&gt;</span> <span class="title function_">runWhenIdle</span>(task));</span><br><span class="line">  <span class="title function_">fallbackAfter</span>(<span class="number">5000</span>, <span class="function">() =&gt;</span> <span class="title function_">runWhenIdle</span>(task));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Notification work is a good example. The download bar itself was not always the parser blocker. The real cost was SDK&#x2F;auth&#x2F;callback&#x2F;API&#x2F;main-thread work competing before the final marker. Moving it after the route-specific FMP mark improved the measured path without removing user-facing UI.</p>
+<p><img src="/img/ai-performance-loop/workstream-waterfall.png" alt="Workstream FMP before and after waterfall"></p>
+<p><em>Figure: Workstream before&#x2F;after FMP waterfall; optional SDK&#x2F;actions move after the final marker. generated by gpt-image-2.</em></p>
+<h2 id="Pattern-2-Prefetch-Is-a-Contract-Not-a-Request"><a href="#Pattern-2-Prefetch-Is-a-Contract-Not-a-Request" class="headerlink" title="Pattern 2: Prefetch Is a Contract, Not a Request"></a>Pattern 2: Prefetch Is a Contract, Not a Request</h2><p>Report Center exposed the worst prefetch failure mode: the host fired a prefetch, but the consumer used a different body or cache key. The network request existed, the page still waited, and the “optimization” became extra traffic.</p>
+<p>The rule that came out of the ledger:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The cache key is the contract.</span><br></pre></td></tr></table></figure>
+
+<p>A valid prefetch must align:</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Must match</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>endpoint</td>
+<td>same URL</td>
+</tr>
+<tr>
+<td>method</td>
+<td>same method</td>
+</tr>
+<tr>
+<td>operation</td>
+<td>same GraphQL operation or REST identity</td>
+</tr>
+<tr>
+<td>body &#x2F; variables</td>
+<td>same request identity</td>
+</tr>
+<tr>
+<td>user context</td>
+<td>same tenant, agent, access-party, or equivalent scope</td>
+</tr>
+<tr>
+<td>consumer key</td>
+<td>same cache key</td>
+</tr>
+</tbody></table>
+<p>The consumer still needs a fallback. If metadata does not match, reject the warmed response and perform the normal request. Lost FMP benefit is acceptable. Wrong data is not.</p>
+<p><img src="/img/ai-performance-loop/report-center-waterfall.png" alt="Report Center FMP before and after waterfall"></p>
+<p><em>Figure: Report Center fixed a prefetch body&#x2F;cache-key mismatch and moved notification out of FMP. generated by gpt-image-2.</em></p>
+<h2 id="Pattern-3-Cache-Hits-Are-Real-Readiness-Signals"><a href="#Pattern-3-Cache-Hits-Are-Real-Readiness-Signals" class="headerlink" title="Pattern 3: Cache Hits Are Real Readiness Signals"></a>Pattern 3: Cache Hits Are Real Readiness Signals</h2><p>The system used two prefetch layers:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Trigger</th>
+<th>Suitable APIs</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTML inline prefetch</td>
+<td>raw navigation time</td>
+<td>route-deterministic APIs that do not need user&#x2F;core data</td>
+</tr>
+<tr>
+<td>core-data-ready prefetch</td>
+<td>immediately after <code>/workspace/api/init</code> exists</td>
+<td>first-screen APIs needing tenant, agent, or access-party context</td>
+</tr>
+</tbody></table>
+<p>The important detail: a Service Worker or memory cache hit for init data is still a valid readiness signal. If core data is available earlier, init-dependent prefetch should start earlier. Do not accidentally treat cached data as second-class.</p>
+<p>This is also where the goal-driven loop matters. Prefetch has real cost: bandwidth, backend pressure, cache memory, and wrong-data risk. The skill only accepts prefetch when the first-screen request is deterministic, safe, and consumed under the exact same key.</p>
+<p><img src="/img/ai-performance-loop/scheduling-waterfall.png" alt="Scheduling FMP before and after waterfall"></p>
+<p><em>Figure: Scheduling waits for the real final marker and starts core-data-dependent prefetch earlier. generated by gpt-image-2.</em></p>
+<h2 id="Pattern-4-Correctness-Guards-Are-Performance-Work"><a href="#Pattern-4-Correctness-Guards-Are-Performance-Work" class="headerlink" title="Pattern 4: Correctness Guards Are Performance Work"></a>Pattern 4: Correctness Guards Are Performance Work</h2><p>One intermediate Workstream optimization changed visible details: avatar, pinned section, loading style, table border, and unpin button styling. The ledger marked it as a correctness guard, not a performance win.</p>
+<p>That is the right call. A faster page with broken visible behavior is not an optimization.</p>
+<p>The final version preserved the UI while keeping non-first-screen work out of the FMP path. This sounds obvious, but it is exactly the sort of tradeoff an agent needs written into the skill. Otherwise it will happily optimize the chart and damage the product.</p>
+<p><img src="/img/ai-performance-loop/audit-workbench-waterfall.png" alt="Audit Workbench FMP before and after waterfall"></p>
+<p><em>Figure: Audit Workbench combined chunk, render, query, and notification improvements; the total delta is measured by strict profiles. generated by gpt-image-2.</em></p>
+<h2 id="The-Ledger-Is-the-Control-Plane"><a href="#The-Ledger-Is-the-Control-Plane" class="headerlink" title="The Ledger Is the Control Plane"></a>The Ledger Is the Control Plane</h2><p>The ledger is not a diary. It is the control plane for the loop.</p>
+<p><img src="/img/ai-performance-loop/ledger.svg" alt="Performance ledger example"></p>
+<p><em>Figure: ledger rows prevent fake progress from becoming accepted progress. generated by gpt-image-2.</em></p>
+<p>The best ledger rows were compact and harsh:</p>
+<table>
+<thead>
+<tr>
+<th>Ledger rule</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Previous valid strict profile becomes the next baseline</td>
+<td>No convenient comparisons</td>
+</tr>
+<tr>
+<td>Measurement repair is not a performance win</td>
+<td>Correct numbers before clever patches</td>
+</tr>
+<tr>
+<td>If current capture hits SSO, discard it</td>
+<td>Login-page FMP is not app FMP</td>
+</tr>
+<tr>
+<td>If shell-visible improves but post-visible jank worsens, label <code>not a win</code></td>
+<td>Do not move pain after visibility</td>
+</tr>
+<tr>
+<td>One bottleneck, one patch, one comparison</td>
+<td>Avoid stacked guesses</td>
+</tr>
+</tbody></table>
+<p>This is why the system is goal-driven rather than prompt-driven. The goal picks the metric. The harness decides what evidence is valid. The ledger decides whether the round can be accepted.</p>
+<h2 id="What-I-Would-Reuse-Elsewhere"><a href="#What-I-Would-Reuse-Elsewhere" class="headerlink" title="What I Would Reuse Elsewhere"></a>What I Would Reuse Elsewhere</h2><p>You do not need the same internal infrastructure to copy the design.</p>
+<p>The reusable structure is:</p>
+<ol>
+<li>Pick one user-visible metric.</li>
+<li>Build a repeatable harness for it.</li>
+<li>Define strict comparison rules before changing code.</li>
+<li>Make the previous valid profile the next baseline.</li>
+<li>Let the agent attack exactly one bottleneck per round.</li>
+<li>Treat measurement repair, regressions, and correctness fixes as first-class outcomes.</li>
+<li>Keep a ledger that records evidence, not activity.</li>
+</ol>
+<p>The technical details will change across products. The loop should not.</p>
+<p>The real result was not that AI wrote a clever optimization once. The result was that AI could run a measurable engineering process: observe, choose, change, deploy, compare, record, and continue.</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/AI/" rel="tag">AI</a>, <a class="classtest-link" href="/tags/Frontend/" rel="tag">Frontend</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/Web-Performance/" rel="tag">Web Performance</a> — <time datetime="2026-05-16T04:30:31.000Z">May 16, 2026</time></p>
+    </footer>
+  </article>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">Made with ❤ and
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        at <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+
+      <!-- Language switcher (globe icon) -->
+      <a class="ml-0 footer-link icon" href="/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/" onclick="localStorage.setItem('preferredLang', 'zh')" style="text-decoration: none" aria-label="阅读中文版" title="阅读中文版">
+        <svg class="svg-hov" width="18" role="img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><title>中文</title><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </a>
+
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>
