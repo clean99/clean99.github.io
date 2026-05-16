@@ -96,11 +96,23 @@ The verdict vocabulary is part of the system:
 
 This looks bureaucratic until you have a failed optimization. Then it becomes the difference between engineering and self-deception.
 
+Compressed into a minimal skill contract, I would keep only these rules:
+
+```text
+Run measured rounds until the goal is reached.
+One round = one bottleneck + one patch + one comparison.
+No comparable profile, no performance claim.
+Build, test, deploy, and smoke test are safety gates, not performance proof.
+If measurement is broken, repair measurement before optimizing.
+If visible behavior or post-visible jank regresses, mark not-a-win.
+Record every round in the ledger before starting the next one.
+```
+
 ## What Changed in the Successful Run
 
 After the measurement contract was repaired, the loop could optimize real bottlenecks.
 
-One public-safe summary of the strict profile results:
+One strict-profile summary:
 
 | App / route class | Before FMP | After FMP | Delta | Main reason |
 | --- | ---: | ---: | ---: | --- |
@@ -203,6 +215,15 @@ One intermediate Workstream optimization changed visible details: avatar, pinned
 That is the right call. A faster page with broken visible behavior is not an optimization.
 
 The final version preserved the UI while keeping non-first-screen work out of the FMP path. This sounds obvious, but it is exactly the sort of tradeoff an agent needs written into the skill. Otherwise it will happily optimize the chart and damage the product.
+
+Similar failed rounds became hard evidence in the ledger:
+
+| Attempt | Why it looked right | What the harness found | Verdict |
+| --- | --- | --- | --- |
+| Start first-screen prefetch earlier | One local marker moved earlier | Comparable profiles showed duplicate requests and no stable P90 improvement | Reverted |
+| Defer a heavy component | Initial JS cost dropped | First interaction paid the deferred cost and post-visible long tasks got worse | Reverted |
+| Reuse warmed cache | The second page felt faster | Stale first-screen data appeared under a different filter state | Reverted |
+| Batch render updates | Render count dropped | The target metric stayed inside measurement noise | Not a performance win |
 
 ![Audit Workbench FMP before and after waterfall](/img/ai-performance-loop/audit-workbench-waterfall.png)
 

@@ -97,11 +97,23 @@ Verdict 是系统的一部分：
 
 这看起来像流程洁癖。等你遇到一次失败优化，就知道这是工程和自我欺骗的分界线。
 
+如果把这个 loop 压成最小 skill contract，我只会保留这些规则：
+
+```text
+Run measured rounds until the goal is reached.
+One round = one bottleneck + one patch + one comparison.
+No comparable profile, no performance claim.
+Build, test, deploy, and smoke test are safety gates, not performance proof.
+If measurement is broken, repair measurement before optimizing.
+If visible behavior or post-visible jank regresses, mark not-a-win.
+Record every round in the ledger before starting the next one.
+```
+
 ## 成功落地时改了什么
 
 测量契约修复后，loop 才开始优化真实瓶颈。
 
-下面是脱敏后的 strict profile 摘要：
+下面是 strict profile 摘要：
 
 | App / route class | Before FMP | After FMP | Delta | Main reason |
 | --- | ---: | ---: | ---: | --- |
@@ -204,6 +216,15 @@ Consumer 仍然必须保留 fallback。如果 metadata 不匹配，就拒绝 war
 这是正确判断。一个更快但坏掉的页面，不叫优化。
 
 最终版本保留 UI，同时把非首屏工作移出 FMP path。这听起来很显然，但它必须写进 skill。否则 Agent 很容易优化图表，破坏产品。
+
+类似的失败 round 后来都变成了 ledger 里的 hard evidence：
+
+| 尝试 | 看起来为什么对 | Harness 发现什么 | 结论 |
+| --- | --- | --- | --- |
+| 更早触发首屏预取 | 本地一次 marker 提前 | 可比 profile 显示重复请求，P90 没有稳定改善 | 回滚 |
+| 延后加载重组件 | 初始 JS 成本下降 | 首次交互承接延后成本，可见后 long task 变差 | 回滚 |
+| 复用 warm cache | 第二页体感更快 | 不同筛选状态下出现陈旧首屏数据 | 回滚 |
+| 合并 render update | render 次数下降 | 目标指标仍在噪声区间 | 不算性能收益 |
 
 ![Audit Workbench FMP before and after waterfall](/img/ai-performance-loop/audit-workbench-waterfall.png)
 
