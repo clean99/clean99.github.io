@@ -11,7 +11,7 @@
   <meta charset="utf-8">
 
   
-  <title>一个公开版 Goal-Driven 性能优化 Skill PoC | Koh Hom&#39;s Blog</title>
+  <title>AI 性能优化需要 Harness，而不只是 Agent | Koh Hom&#39;s Blog</title>
   
   <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
@@ -20,7 +20,7 @@
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" />
   <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" />
   
-  <meta name="description" content="TL;DR: 这是我真实项目里性能优化 skill 的公开脱敏 PoC 版本。内部版本接了公司里的部署、日志、监控、文档和 profiling 系统；这份版本把这些都删掉，只保留读者能复用的核心：harness-first、goal-driven loop，以及每轮都记录 baseline、修改点、">
+  <meta name="description" content="TL;DR: AI 做性能优化，难点不是让 Agent 改代码，而是让每次修改都经过同一个闭环：profile、诊断、只改一个点、验证、对比、记录结果。Harness 的价值，就是把“Agent 做了一个看起来合理的修改”变成一组可验证的性能 claim。  很多性能自动化会死在一个很普通的问题上：">
   
   
   <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
@@ -44,20 +44,20 @@
   <meta property="article:tag" content="AI" />
   
   
-  <meta property="og:title" content="一个公开版 Goal-Driven 性能优化 Skill PoC | Koh Hom&#39;s Blog" />
+  <meta property="og:title" content="AI 性能优化需要 Harness，而不只是 Agent | Koh Hom&#39;s Blog" />
   <meta property="og:locale" content="zh_CN" />
   <meta property="og:locale:alternate" content="en_US" />
   
-  <meta property="og:description" content="TL;DR: 这是我真实项目里性能优化 skill 的公开脱敏 PoC 版本。内部版本接了公司里的部署、日志、监控、文档和 profiling 系统；这份版本把这些都删掉，只保留读者能复用的核心：harness-first、goal-driven loop，以及每轮都记录 baseline、修改点、">
+  <meta property="og:description" content="TL;DR: AI 做性能优化，难点不是让 Agent 改代码，而是让每次修改都经过同一个闭环：profile、诊断、只改一个点、验证、对比、记录结果。Harness 的价值，就是把“Agent 做了一个看起来合理的修改”变成一组可验证的性能 claim。  很多性能自动化会死在一个很普通的问题上：">
   
   <meta property="og:url" content="https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@Clean993">
   <meta name="twitter:creator" content="@Clean993">
-  <meta name="twitter:title" content="一个公开版 Goal-Driven 性能优化 Skill PoC | Koh Hom&#39;s Blog">
+  <meta name="twitter:title" content="AI 性能优化需要 Harness，而不只是 Agent | Koh Hom&#39;s Blog">
   
-  <meta name="twitter:description" content="TL;DR: 这是我真实项目里性能优化 skill 的公开脱敏 PoC 版本。内部版本接了公司里的部署、日志、监控、文档和 profiling 系统；这份版本把这些都删掉，只保留读者能复用的核心：harness-first、goal-driven loop，以及每轮都记录 baseline、修改点、">
+  <meta name="twitter:description" content="TL;DR: AI 做性能优化，难点不是让 Agent 改代码，而是让每次修改都经过同一个闭环：profile、诊断、只改一个点、验证、对比、记录结果。Harness 的价值，就是把“Agent 做了一个看起来合理的修改”变成一组可验证的性能 claim。  很多性能自动化会死在一个很普通的问题上：">
   
   <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" />
@@ -166,8 +166,8 @@
   <!-- JSON-LD Structured Data
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"一个公开版 Goal-Driven 性能优化 Skill PoC","datePublished":"2026-05-16T05:05:51.000Z","dateModified":"2026-05-16T05:05:51.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/","mainEntityOfPage":"https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/","inLanguage":"zh-CN","description":"TL;DR: 这是我真实项目里性能优化 skill 的公开脱敏 PoC 版本。内部版本接了公司里的部署、日志、监控、文档和 profiling 系统；这份版本把这些都删掉，只保留读者能复用的核心：harness-first、goal-driven loop，以及每轮都记录 baseline、修改点、严格对比和失败结果的 ledger。 这个 PoC 保留什么原始 skill 真正有价值的不是内部工","keywords":["Frontend","Software Engineering","Web Performance","AI"]}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"一个公开版 Goal-Driven 性能优化 Skill PoC","item":"https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/"}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"AI 性能优化需要 Harness，而不只是 Agent","datePublished":"2026-05-16T05:05:51.000Z","dateModified":"2026-05-16T05:05:51.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/","mainEntityOfPage":"https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/","inLanguage":"zh-CN","description":"TL;DR: AI 做性能优化，难点不是让 Agent 改代码，而是让每次修改都经过同一个闭环：profile、诊断、只改一个点、验证、对比、记录结果。Harness 的价值，就是把“Agent 做了一个看起来合理的修改”变成一组可验证的性能 claim。 很多性能自动化会死在一个很普通的问题上：AI 找到一段看起来可疑的代码，做了一个合理修改，测试全绿，然后宣布优化成功。 这不是性能优化。这只是","keywords":["Frontend","Software Engineering","Web Performance","AI"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"AI 性能优化需要 Harness，而不只是 Agent","item":"https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/"}]}</script>
   
 
   <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
@@ -260,7 +260,7 @@
         <div class="trans">
             <article itemscope itemtype="https://schema.org/BlogPosting">
     <header>
-      <h2 itemprop="headline">一个公开版 Goal-Driven 性能优化 Skill PoC</h2>
+      <h2 itemprop="headline">AI 性能优化需要 Harness，而不只是 Agent</h2>
       
       <p style="margin-bottom: 0.5rem;">
         <a href="/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
@@ -274,67 +274,70 @@
     </header>
     <div itemprop="articleBody">
       <blockquote>
-<p><strong>TL;DR</strong>: 这是我真实项目里性能优化 skill 的公开脱敏 PoC 版本。内部版本接了公司里的部署、日志、监控、文档和 profiling 系统；这份版本把这些都删掉，只保留读者能复用的核心：harness-first、goal-driven loop，以及每轮都记录 baseline、修改点、严格对比和失败结果的 ledger。</p>
+<p><strong>TL;DR</strong>: AI 做性能优化，难点不是让 Agent 改代码，而是让每次修改都经过同一个闭环：profile、诊断、只改一个点、验证、对比、记录结果。Harness 的价值，就是把“Agent 做了一个看起来合理的修改”变成一组可验证的性能 claim。</p>
 </blockquote>
-<h2 id="这个-PoC-保留什么"><a href="#这个-PoC-保留什么" class="headerlink" title="这个 PoC 保留什么"></a>这个 PoC 保留什么</h2><p>原始 skill 真正有价值的不是内部工具，而是工作形状。</p>
+<p>很多性能自动化会死在一个很普通的问题上：AI 找到一段看起来可疑的代码，做了一个合理修改，测试全绿，然后宣布优化成功。</p>
+<p>这不是性能优化。这只是带着体感的代码编辑。</p>
+<p>真正有用的设计要更严格：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">goal -&gt; harness -&gt; profile -&gt; bottleneck -&gt; patch</span><br><span class="line">-&gt; verify -&gt; compare -&gt; ledger -&gt; next bottleneck</span><br></pre></td></tr></table></figure>
+
+<p>Agent 可以在一轮里发挥创造力，但这一轮算不算数，必须由 harness 决定。</p>
+<h2 id="这个-Loop-由什么组成"><a href="#这个-Loop-由什么组成" class="headerlink" title="这个 Loop 由什么组成"></a>这个 Loop 由什么组成</h2><p>这个闭环有五个核心部件。</p>
 <table>
 <thead>
 <tr>
-<th>保留</th>
-<th>原因</th>
+<th>部件</th>
+<th>作用</th>
+<th>防住什么问题</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>一轮只打一个瓶颈</td>
-<td>防止叠猜测</td>
+<td>Goal</td>
+<td>定义指标和目标，比如“p90 FMP 下降 30%”</td>
+<td>无止境地局部打磨</td>
 </tr>
 <tr>
-<td>先修 harness，再优化</td>
-<td>错误测量会制造虚假胜利</td>
+<td>Harness</td>
+<td>在相同路由、状态、限速、marker 下抓可比 profile</td>
+<td>测量条件不同造成的虚假收益</td>
 </tr>
 <tr>
-<td>严格 before&#x2F;after 对比</td>
-<td>性能收益必须有可比数据</td>
+<td>Triage</td>
+<td>改代码前只选一个瓶颈</td>
+<td>连续叠猜测</td>
 </tr>
 <tr>
-<td>Negative optimization protocol</td>
-<td>失败 round 必须可回滚、可解释</td>
+<td>Patch</td>
+<td>一次只改一个点，并保留清晰回滚路径</td>
+<td>巨大且不可 review 的 diff</td>
 </tr>
 <tr>
 <td>Ledger</td>
-<td>loop 需要记忆，不是靠聊天记录</td>
+<td>记录 baseline、修改、证据、结论和下一个瓶颈</td>
+<td>聊天记录滚过去以后丢失推理过程</td>
 </tr>
 </tbody></table>
-<p>所有公司相关内容都应该删除：内部 URL、部署系统、工单系统、监控产品、内部追踪 ID、泳道名、仓库名、团队名、私有文档链接。一个好的公开版 skill，应该在读者只有 Playwright、Chrome DevTools Protocol、一个测试路由和一份 Markdown 文件时也能跑起来。</p>
-<h2 id="最小-Skill"><a href="#最小-Skill" class="headerlink" title="最小 Skill"></a>最小 Skill</h2><p>下面是公开 PoC。它故意比内部版本短。不能改变 Agent 行为的规则，不应该出现在这里。</p>
-<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">name: performance-optimization-loop</span><br><span class="line"><span class="section">description: Run goal-driven frontend performance optimization loops. Use when the user wants to improve FMP, LCP, INP, TTI, tab-switch latency, long tasks, network waterfalls, or any user-visible performance metric with repeated profiling and verified deltas.</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line"><span class="section"># Performance Optimization Loop</span></span><br><span class="line"></span><br><span class="line"><span class="section">## Core Rule</span></span><br><span class="line"></span><br><span class="line">Run a measured loop until the goal is reached, the user stops, or the next step is blocked.</span><br><span class="line"></span><br><span class="line">Expected loop:</span><br><span class="line"></span><br><span class="line"><span class="code">```text</span></span><br><span class="line"><span class="code">profile -&gt; waterfall -&gt; diagnose -&gt; fix -&gt; local verify</span></span><br><span class="line"><span class="code">-&gt; deploy or run in target environment -&gt; profile again</span></span><br><span class="line"><span class="code">-&gt; compare -&gt; document -&gt; repeat</span></span><br><span class="line"><span class="code">```</span></span><br><span class="line"></span><br><span class="line">Do not call a code change a performance win until a comparable profile proves it.</span><br><span class="line"></span><br><span class="line"><span class="section">## Required Inputs</span></span><br><span class="line"></span><br><span class="line">Accept partial inputs and infer safe defaults:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> target route or user flow;</span><br><span class="line"><span class="bullet">-</span> target metric, such as FMP, LCP, INP, TTI, tab-switch time, or long-task budget;</span><br><span class="line"><span class="bullet">-</span> goal, such as &quot;reduce p90 FMP by 30%&quot; or &quot;keep INP under 200ms&quot;;</span><br><span class="line"><span class="bullet">-</span> baseline profile, or permission to capture one;</span><br><span class="line"><span class="bullet">-</span> target environment, such as local, staging, or production-like test lane;</span><br><span class="line"><span class="bullet">-</span> profiling constraints.</span><br><span class="line"></span><br><span class="line">Default profiling constraints:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> same route and same final marker;</span><br><span class="line"><span class="bullet">-</span> authenticated state if the page requires login;</span><br><span class="line"><span class="bullet">-</span> browser cache disabled for cold-start comparisons;</span><br><span class="line"><span class="bullet">-</span> 4x CPU throttling for frontend startup work;</span><br><span class="line"><span class="bullet">-</span> network throttling suitable for the product&#x27;s users;</span><br><span class="line"><span class="bullet">-</span> finite capture window;</span><br><span class="line"><span class="bullet">-</span> raw profile saved locally;</span><br><span class="line"><span class="bullet">-</span> summary written to the ledger.</span><br><span class="line"></span><br><span class="line"><span class="section">## Round State</span></span><br><span class="line"></span><br><span class="line">Maintain this state after every round:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> current goal;</span><br><span class="line"><span class="bullet">-</span> route or flow;</span><br><span class="line"><span class="bullet">-</span> baseline metric and profile path;</span><br><span class="line"><span class="bullet">-</span> current metric and profile path;</span><br><span class="line"><span class="bullet">-</span> changed files or change summary;</span><br><span class="line"><span class="bullet">-</span> local checks;</span><br><span class="line"><span class="bullet">-</span> target environment proof;</span><br><span class="line"><span class="bullet">-</span> verdict: <span class="code">`strict win`</span>, <span class="code">`directional`</span>, <span class="code">`measurement repair`</span>, <span class="code">`not a win`</span>, or <span class="code">`not measured`</span>;</span><br><span class="line"><span class="bullet">-</span> next bottleneck.</span><br><span class="line"></span><br><span class="line"><span class="section">## Triage Order</span></span><br><span class="line"></span><br><span class="line">Before changing code, pick exactly one target using this order:</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> Correctness regression: visible breakage, wrong content, white screen, severe jank.</span><br><span class="line"><span class="bullet">2.</span> Measurement gap: missing marker, wrong route, login page capture, inconsistent throttling.</span><br><span class="line"><span class="bullet">3.</span> Negative prior round: worse metric, worse jank, missing comparison, or failed verification.</span><br><span class="line"><span class="bullet">4.</span> Frontend-owned bottleneck: network waterfall, main-thread task, render cost, bundle cost, or cache miss.</span><br><span class="line"></span><br><span class="line">If the measurement is broken, repair measurement before optimizing.</span><br><span class="line"></span><br><span class="line"><span class="section">## Strict Profiling Gate</span></span><br><span class="line"></span><br><span class="line">A strict comparison requires:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> same route or user flow;</span><br><span class="line"><span class="bullet">-</span> same metric and final marker;</span><br><span class="line"><span class="bullet">-</span> same login state;</span><br><span class="line"><span class="bullet">-</span> same cache policy;</span><br><span class="line"><span class="bullet">-</span> same CPU and network profile;</span><br><span class="line"><span class="bullet">-</span> same target environment class;</span><br><span class="line"><span class="bullet">-</span> same warmup policy.</span><br><span class="line"></span><br><span class="line">If any of those differ, label the result <span class="code">`directional`</span>, not <span class="code">`strict win`</span>.</span><br><span class="line"></span><br><span class="line">Never use these as performance proof:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> code inspection;</span><br><span class="line"><span class="bullet">-</span> build success;</span><br><span class="line"><span class="bullet">-</span> unit tests;</span><br><span class="line"><span class="bullet">-</span> deployment success;</span><br><span class="line"><span class="bullet">-</span> smoke tests;</span><br><span class="line"><span class="bullet">-</span> &quot;the change looks obviously faster.&quot;</span><br><span class="line"></span><br><span class="line">Those are safety gates. Profiling is the performance proof.</span><br><span class="line"></span><br><span class="line"><span class="section">## Diagnosis Rules</span></span><br><span class="line"></span><br><span class="line">Classify the bottleneck before fixing:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> measurement bug: marker missing, marker too early, wrong route, login page capture;</span><br><span class="line"><span class="bullet">-</span> network critical path: first-screen API starts late, duplicates, misses cache, or blocks render;</span><br><span class="line"><span class="bullet">-</span> main-thread work: long task, heavy evaluation, render, layout, or hydration;</span><br><span class="line"><span class="bullet">-</span> resource cost: large critical JS/CSS, unused startup code, expensive vendor chunk;</span><br><span class="line"><span class="bullet">-</span> cache/prefetch bug: warmed data not consumed, key mismatch, unsafe stale data;</span><br><span class="line"><span class="bullet">-</span> backend blocker: slow required endpoint with no safe frontend workaround.</span><br><span class="line"></span><br><span class="line">Choose the smallest safe frontend experiment. Do not optimize random large files.</span><br><span class="line"></span><br><span class="line"><span class="section">## Fix Rules</span></span><br><span class="line"></span><br><span class="line">For each code change:</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> State the bottleneck and evidence.</span><br><span class="line"><span class="bullet">2.</span> Make one focused patch.</span><br><span class="line"><span class="bullet">3.</span> Add or update focused tests when logic changed.</span><br><span class="line"><span class="bullet">4.</span> Run local checks.</span><br><span class="line"><span class="bullet">5.</span> Capture a new profile under comparable conditions.</span><br><span class="line"><span class="bullet">6.</span> Compare against the previous valid baseline.</span><br><span class="line"><span class="bullet">7.</span> Update the ledger.</span><br><span class="line"></span><br><span class="line"><span class="section">## Negative Optimization Protocol</span></span><br><span class="line"></span><br><span class="line">Performance work is allowed to fail. Hiding failure is not allowed.</span><br><span class="line"></span><br><span class="line">If a change improves one metric but worsens visible behavior, post-visible jank, long tasks, or the target metric, mark it <span class="code">`not a win`</span>.</span><br><span class="line"></span><br><span class="line">Then:</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> Record the attempted change.</span><br><span class="line"><span class="bullet">2.</span> Record the negative evidence.</span><br><span class="line"><span class="bullet">3.</span> Fix or revert before stacking another speculative optimization.</span><br><span class="line"><span class="bullet">4.</span> Re-profile after the fix or revert.</span><br><span class="line"><span class="bullet">5.</span> Update the ledger with the final verdict.</span><br><span class="line"></span><br><span class="line"><span class="section">## Ledger Template</span></span><br><span class="line"></span><br><span class="line">Append one section per round:</span><br><span class="line"></span><br><span class="line"><span class="code">```markdown</span></span><br><span class="line"><span class="code">## Round N: &lt;short goal&gt;</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Scope</span></span><br><span class="line"><span class="code">- Route/flow:</span></span><br><span class="line"><span class="code">- Metric:</span></span><br><span class="line"><span class="code">- Goal:</span></span><br><span class="line"><span class="code">- Environment:</span></span><br><span class="line"><span class="code">- Throttling:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Evidence Before Change</span></span><br><span class="line"><span class="code">- Baseline metric:</span></span><br><span class="line"><span class="code">- Top bottleneck:</span></span><br><span class="line"><span class="code">- Why this bottleneck is next:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Change</span></span><br><span class="line"><span class="code">- Patch:</span></span><br><span class="line"><span class="code">- Risk:</span></span><br><span class="line"><span class="code">- Rollback:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Verification</span></span><br><span class="line"><span class="code">- Local checks:</span></span><br><span class="line"><span class="code">- Target environment proof:</span></span><br><span class="line"><span class="code">- Correctness check:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Profile Comparison</span></span><br><span class="line"><span class="code">| Metric | Previous | Current | Delta | Verdict |</span></span><br><span class="line"><span class="code">| --- | ---: | ---: | ---: | --- |</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Waterfall Notes</span></span><br><span class="line"><span class="code">- Critical API:</span></span><br><span class="line"><span class="code">- Main-thread blocker:</span></span><br><span class="line"><span class="code">- Resource blocker:</span></span><br><span class="line"><span class="code">- Marker wait:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Next Round</span></span><br><span class="line"><span class="code">- Next bottleneck:</span></span><br><span class="line"><span class="code">- Why:</span></span><br><span class="line"><span class="code">```</span></span><br><span class="line"></span><br><span class="line"><span class="section">## Stop Conditions</span></span><br><span class="line"></span><br><span class="line">Stop and ask for input only when:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> the user says stop or changes scope;</span><br><span class="line"><span class="bullet">-</span> login or test data is required and no safe session exists;</span><br><span class="line"><span class="bullet">-</span> the next action would expose secrets;</span><br><span class="line"><span class="bullet">-</span> the next required change is destructive or production-affecting;</span><br><span class="line"><span class="bullet">-</span> the remaining bottleneck is proven outside frontend ownership with no safe experiment.</span><br></pre></td></tr></table></figure>
-
-<h2 id="为什么这些规则重要"><a href="#为什么这些规则重要" class="headerlink" title="为什么这些规则重要"></a>为什么这些规则重要</h2><p>关键设计不是“让 Agent 持续运行”。没有 harness 的持续运行，只会让 Agent 更长时间地自信犯错。</p>
-<p>关键设计是这句：</p>
+<p>最重要的规则很简单：</p>
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Evidence decides the next action.</span><br></pre></td></tr></table></figure>
 
-<p>它能防住大多数糟糕的性能自动化：</p>
-<ul>
-<li>防止 marker 没修好就开始优化。</li>
-<li>防止把部署成功当性能成功。</li>
-<li>防止连续叠五个猜测修改。</li>
-<li>防止用一个变好的数字掩盖回归。</li>
-<li>强制产出另一个工程师能 review 的 ledger。</li>
-</ul>
-<h2 id="Harness-抓住的失败-case"><a href="#Harness-抓住的失败-case" class="headerlink" title="Harness 抓住的失败 case"></a>Harness 抓住的失败 case</h2><p>最有价值的 ledger entry 不一定是成功。有些是已经回滚的修改：看代码很合理，甚至某次本地 profile 看起来更快，但在可比 profile 里失败了。</p>
+<p>如果 marker 错了，先修 marker。profile 不可比，就只能标成 directional。指标变好但可见行为变差，不算成功。</p>
+<h2 id="核心-Skill-片段"><a href="#核心-Skill-片段" class="headerlink" title="核心 Skill 片段"></a>核心 Skill 片段</h2><p>下面是我认为真正可复用的部分。具体工具并不重要：Playwright、Chrome DevTools Protocol、Lighthouse trace、WebPageTest 或自研 runner 都可以。关键是 harness 必须让 before&#x2F;after 对比可信。</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">name: performance-optimization-loop</span><br><span class="line"><span class="section">description: Run goal-driven frontend performance optimization loops for FMP, LCP, INP, TTI, tab-switch latency, long tasks, network waterfalls, or any user-visible metric with repeated profiling and verified deltas.</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line"><span class="section"># Performance Optimization Loop</span></span><br><span class="line"></span><br><span class="line"><span class="section">## Core Rule</span></span><br><span class="line"></span><br><span class="line">Run a measured loop until the goal is reached, the user stops, or the next step is blocked.</span><br><span class="line"></span><br><span class="line"><span class="code">```text</span></span><br><span class="line"><span class="code">profile -&gt; waterfall -&gt; diagnose -&gt; fix -&gt; local verify</span></span><br><span class="line"><span class="code">-&gt; target-environment profile -&gt; compare -&gt; document -&gt; repeat</span></span><br><span class="line"><span class="code">```</span></span><br><span class="line"></span><br><span class="line">Do not call a code change a performance win until a comparable profile proves it.</span><br><span class="line"></span><br><span class="line"><span class="section">## Inputs</span></span><br><span class="line"></span><br><span class="line">Accept partial inputs and infer safe defaults:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> target route or user flow;</span><br><span class="line"><span class="bullet">-</span> target metric;</span><br><span class="line"><span class="bullet">-</span> goal;</span><br><span class="line"><span class="bullet">-</span> baseline profile, or permission to capture one;</span><br><span class="line"><span class="bullet">-</span> target environment;</span><br><span class="line"><span class="bullet">-</span> profiling constraints.</span><br><span class="line"></span><br><span class="line">Default constraints:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> same route and same final marker;</span><br><span class="line"><span class="bullet">-</span> same authenticated state if login is required;</span><br><span class="line"><span class="bullet">-</span> same cache policy;</span><br><span class="line"><span class="bullet">-</span> same CPU and network profile;</span><br><span class="line"><span class="bullet">-</span> finite capture window;</span><br><span class="line"><span class="bullet">-</span> raw profile saved;</span><br><span class="line"><span class="bullet">-</span> summary written to the ledger.</span><br><span class="line"></span><br><span class="line"><span class="section">## Round State</span></span><br><span class="line"></span><br><span class="line">Maintain this state after every round:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> current goal;</span><br><span class="line"><span class="bullet">-</span> route or flow;</span><br><span class="line"><span class="bullet">-</span> baseline metric and profile path;</span><br><span class="line"><span class="bullet">-</span> current metric and profile path;</span><br><span class="line"><span class="bullet">-</span> change summary;</span><br><span class="line"><span class="bullet">-</span> local checks;</span><br><span class="line"><span class="bullet">-</span> target-environment proof;</span><br><span class="line"><span class="bullet">-</span> verdict: <span class="code">`strict win`</span>, <span class="code">`directional`</span>, <span class="code">`measurement repair`</span>, <span class="code">`not a win`</span>, or <span class="code">`not measured`</span>;</span><br><span class="line"><span class="bullet">-</span> next bottleneck.</span><br><span class="line"></span><br><span class="line"><span class="section">## Triage Order</span></span><br><span class="line"></span><br><span class="line">Before changing code, pick exactly one target:</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> Correctness regression: visible breakage, wrong content, white screen, severe jank.</span><br><span class="line"><span class="bullet">2.</span> Measurement gap: missing marker, wrong route, login capture, inconsistent throttling.</span><br><span class="line"><span class="bullet">3.</span> Negative prior round: worse metric, worse jank, missing comparison, or failed verification.</span><br><span class="line"><span class="bullet">4.</span> Frontend-owned bottleneck: network waterfall, main-thread task, render cost, bundle cost, or cache miss.</span><br><span class="line"></span><br><span class="line">If measurement is broken, repair measurement before optimizing.</span><br><span class="line"></span><br><span class="line"><span class="section">## Strict Profiling Gate</span></span><br><span class="line"></span><br><span class="line">A strict comparison requires:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> same route or user flow;</span><br><span class="line"><span class="bullet">-</span> same metric and final marker;</span><br><span class="line"><span class="bullet">-</span> same login state;</span><br><span class="line"><span class="bullet">-</span> same cache policy;</span><br><span class="line"><span class="bullet">-</span> same CPU and network profile;</span><br><span class="line"><span class="bullet">-</span> same target environment class;</span><br><span class="line"><span class="bullet">-</span> same warmup policy.</span><br><span class="line"></span><br><span class="line">If any of those differ, label the result <span class="code">`directional`</span>, not <span class="code">`strict win`</span>.</span><br><span class="line"></span><br><span class="line">Never use these as performance proof:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> code inspection;</span><br><span class="line"><span class="bullet">-</span> build success;</span><br><span class="line"><span class="bullet">-</span> unit tests;</span><br><span class="line"><span class="bullet">-</span> deployment success;</span><br><span class="line"><span class="bullet">-</span> smoke tests;</span><br><span class="line"><span class="bullet">-</span> &quot;the change looks obviously faster.&quot;</span><br><span class="line"></span><br><span class="line">Those are safety gates. Profiling is the performance proof.</span><br><span class="line"></span><br><span class="line"><span class="section">## Negative Optimization Protocol</span></span><br><span class="line"></span><br><span class="line">Performance work is allowed to fail. Hiding failure is not allowed.</span><br><span class="line"></span><br><span class="line">If a change improves one metric but worsens visible behavior, post-visible jank, long tasks, or the target metric, mark it <span class="code">`not a win`</span>.</span><br><span class="line"></span><br><span class="line">Then:</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> Record the attempted change.</span><br><span class="line"><span class="bullet">2.</span> Record the negative evidence.</span><br><span class="line"><span class="bullet">3.</span> Fix or revert before stacking another speculative optimization.</span><br><span class="line"><span class="bullet">4.</span> Re-profile after the fix or revert.</span><br><span class="line"><span class="bullet">5.</span> Update the ledger with the final verdict.</span><br></pre></td></tr></table></figure>
+
+<h2 id="失败-Case-才是重点"><a href="#失败-Case-才是重点" class="headerlink" title="失败 Case 才是重点"></a>失败 Case 才是重点</h2><p>Harness 最有价值的时候，不是证明一个优化成功，而是拒绝一个看起来很合理的优化。</p>
 <table>
 <thead>
 <tr>
 <th>尝试</th>
 <th>为什么看起来可行</th>
-<th>Harness 证据</th>
+<th>Harness 发现了什么</th>
 <th>结论</th>
 </tr>
 </thead>
 <tbody><tr>
 <td>更早触发首屏数据预取</td>
 <td>某次本地运行里 marker 提前了</td>
-<td>可比环境 profile 显示网络请求重复，p90 没有稳定改善</td>
+<td>可比 profile 显示网络请求重复，p90 没有稳定改善</td>
 <td>回滚</td>
 </tr>
 <tr>
@@ -352,55 +355,21 @@
 <tr>
 <td>把多次 render update 合成一次</td>
 <td>render 次数下降</td>
-<td>waterfall 不变，目标指标变化仍在噪声区间</td>
-<td>不算收益；除非代码更简单，否则回滚</td>
+<td>目标指标变化仍在噪声区间</td>
+<td>不算性能收益</td>
 </tr>
 </tbody></table>
-<p>这就是 harness 的价值。它把“理论上应该更快”变成可证伪的 claim。失败 round 不是浪费，只要 ledger 记录了尝试、证据和回滚结果。没有这个 loop，同一个坏点子两周后通常会换个变量名再出现。</p>
-<h2 id="我从内部版本删掉了什么"><a href="#我从内部版本删掉了什么" class="headerlink" title="我从内部版本删掉了什么"></a>我从内部版本删掉了什么</h2><p>内部版本包含大量 adapter。这些 adapter 在公司内部有用，但公开后没有价值。</p>
-<table>
-<thead>
-<tr>
-<th>删除内容</th>
-<th>公开替代</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>内部部署系统</td>
-<td>“deploy or run in target environment”</td>
-</tr>
-<tr>
-<td>公司监控和日志工具</td>
-<td>“profile path, console&#x2F;network evidence, request IDs if available”</td>
-</tr>
-<tr>
-<td>私有文档更新流程</td>
-<td>Markdown ledger</td>
-</tr>
-<tr>
-<td>具体业务路由名</td>
-<td>“target route or user flow”</td>
-</tr>
-<tr>
-<td>团队和流程名</td>
-<td>generic ownership labels</td>
-</tr>
-<tr>
-<td>私有 URL、token、header</td>
-<td>local&#x2F;staging&#x2F;prod-like environment proof</td>
-</tr>
-</tbody></table>
-<p>这才是正确抽象边界。Skill 应该定义 loop 和 proof rules。工具 adapter 应该放在私有 skill 或脚本里。</p>
-<h2 id="如何扩展它"><a href="#如何扩展它" class="headerlink" title="如何扩展它"></a>如何扩展它</h2><p>先手动跑通 PoC loop，再加 adapter：</p>
+<p>这些 round 不是浪费，它们正是这个 loop 存在的原因。没有 ledger，一个失败点子过段时间会换个变量名重新出现。有了 ledger，团队知道试过什么、为什么失败、最后怎么处理。</p>
+<h2 id="读者可以直接复用什么"><a href="#读者可以直接复用什么" class="headerlink" title="读者可以直接复用什么"></a>读者可以直接复用什么</h2><p>你不需要一个很大的平台才能复用这个模式。</p>
 <ol>
-<li>加一个脚本，为单个路由抓 profile。</li>
-<li>加一个 parser，提取目标指标和关键 waterfall 条目。</li>
-<li>加一个 ledger writer。</li>
-<li>加一个部署或 preview adapter。</li>
-<li>加用户流程回归检查。</li>
+<li>先选一个用户可感知指标和一个路由。</li>
+<li>优化前先让 profile 可复现。</li>
+<li>保存原始 profile，不只保存摘要。</li>
+<li>强制每一轮给出 verdict。</li>
+<li>把回滚过的修改也当成有价值的证据。</li>
 </ol>
-<p>不要一开始就集成所有工具。那会把一个简单 loop 做成没人能用的编排怪物。</p>
-<p>好的版本很无聊：一个指标、一个 harness、一个瓶颈、一个 patch、一个 comparison、一条 ledger entry。</p>
+<p>让 AI 真正适合性能优化，最快的方法不是给它更多自由，而是收窄自由：让它提出和实现实验，但让 harness 拥有最终解释权。</p>
+<p>好的性能自动化应该很无聊：一个指标、一个瓶颈、一个 patch、一次对比、一条 ledger entry。然后重复。</p>
 
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
