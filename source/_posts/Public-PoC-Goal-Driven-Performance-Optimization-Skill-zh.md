@@ -1,5 +1,5 @@
 ---
-title: "一个公开版 Goal-Driven 性能优化 Skill PoC"
+title: "AI 性能优化需要 Harness，而不只是 Agent"
 date: 2026-05-16 13:05:51
 tags: [AI, Software Engineering, Web Performance, Frontend]
 lang: zh
@@ -7,30 +7,49 @@ i18n_key: Public-PoC-Goal-Driven-Performance-Optimization-Skill
 permalink: zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/
 ---
 
-> **TL;DR**: 这是我真实项目里性能优化 skill 的公开脱敏 PoC 版本。内部版本接了公司里的部署、日志、监控、文档和 profiling 系统；这份版本把这些都删掉，只保留读者能复用的核心：harness-first、goal-driven loop，以及每轮都记录 baseline、修改点、严格对比和失败结果的 ledger。
+> **TL;DR**: AI 做性能优化，难点不是让 Agent 改代码，而是让每次修改都经过同一个闭环：profile、诊断、只改一个点、验证、对比、记录结果。Harness 的价值，就是把“Agent 做了一个看起来合理的修改”变成一组可验证的性能 claim。
 
-## 这个 PoC 保留什么
+很多性能自动化会死在一个很普通的问题上：AI 找到一段看起来可疑的代码，做了一个合理修改，测试全绿，然后宣布优化成功。
 
-原始 skill 真正有价值的不是内部工具，而是工作形状。
+这不是性能优化。这只是带着体感的代码编辑。
 
-| 保留 | 原因 |
-| --- | --- |
-| 一轮只打一个瓶颈 | 防止叠猜测 |
-| 先修 harness，再优化 | 错误测量会制造虚假胜利 |
-| 严格 before/after 对比 | 性能收益必须有可比数据 |
-| Negative optimization protocol | 失败 round 必须可回滚、可解释 |
-| Ledger | loop 需要记忆，不是靠聊天记录 |
+真正有用的设计要更严格：
 
-所有公司相关内容都应该删除：内部 URL、部署系统、工单系统、监控产品、内部追踪 ID、泳道名、仓库名、团队名、私有文档链接。一个好的公开版 skill，应该在读者只有 Playwright、Chrome DevTools Protocol、一个测试路由和一份 Markdown 文件时也能跑起来。
+```text
+goal -> harness -> profile -> bottleneck -> patch
+-> verify -> compare -> ledger -> next bottleneck
+```
 
-## 最小 Skill
+Agent 可以在一轮里发挥创造力，但这一轮算不算数，必须由 harness 决定。
 
-下面是公开 PoC。它故意比内部版本短。不能改变 Agent 行为的规则，不应该出现在这里。
+## 这个 Loop 由什么组成
+
+这个闭环有五个核心部件。
+
+| 部件 | 作用 | 防住什么问题 |
+| --- | --- | --- |
+| Goal | 定义指标和目标，比如“p90 FMP 下降 30%” | 无止境地局部打磨 |
+| Harness | 在相同路由、状态、限速、marker 下抓可比 profile | 测量条件不同造成的虚假收益 |
+| Triage | 改代码前只选一个瓶颈 | 连续叠猜测 |
+| Patch | 一次只改一个点，并保留清晰回滚路径 | 巨大且不可 review 的 diff |
+| Ledger | 记录 baseline、修改、证据、结论和下一个瓶颈 | 聊天记录滚过去以后丢失推理过程 |
+
+最重要的规则很简单：
+
+```text
+Evidence decides the next action.
+```
+
+如果 marker 错了，先修 marker。profile 不可比，就只能标成 directional。指标变好但可见行为变差，不算成功。
+
+## 核心 Skill 片段
+
+下面是我认为真正可复用的部分。具体工具并不重要：Playwright、Chrome DevTools Protocol、Lighthouse trace、WebPageTest 或自研 runner 都可以。关键是 harness 必须让 before/after 对比可信。
 
 ````markdown
 ---
 name: performance-optimization-loop
-description: Run goal-driven frontend performance optimization loops. Use when the user wants to improve FMP, LCP, INP, TTI, tab-switch latency, long tasks, network waterfalls, or any user-visible performance metric with repeated profiling and verified deltas.
+description: Run goal-driven frontend performance optimization loops for FMP, LCP, INP, TTI, tab-switch latency, long tasks, network waterfalls, or any user-visible metric with repeated profiling and verified deltas.
 ---
 
 # Performance Optimization Loop
@@ -39,36 +58,32 @@ description: Run goal-driven frontend performance optimization loops. Use when t
 
 Run a measured loop until the goal is reached, the user stops, or the next step is blocked.
 
-Expected loop:
-
 ```text
 profile -> waterfall -> diagnose -> fix -> local verify
--> deploy or run in target environment -> profile again
--> compare -> document -> repeat
+-> target-environment profile -> compare -> document -> repeat
 ```
 
 Do not call a code change a performance win until a comparable profile proves it.
 
-## Required Inputs
+## Inputs
 
 Accept partial inputs and infer safe defaults:
 
 - target route or user flow;
-- target metric, such as FMP, LCP, INP, TTI, tab-switch time, or long-task budget;
-- goal, such as "reduce p90 FMP by 30%" or "keep INP under 200ms";
+- target metric;
+- goal;
 - baseline profile, or permission to capture one;
-- target environment, such as local, staging, or production-like test lane;
+- target environment;
 - profiling constraints.
 
-Default profiling constraints:
+Default constraints:
 
 - same route and same final marker;
-- authenticated state if the page requires login;
-- browser cache disabled for cold-start comparisons;
-- 4x CPU throttling for frontend startup work;
-- network throttling suitable for the product's users;
+- same authenticated state if login is required;
+- same cache policy;
+- same CPU and network profile;
 - finite capture window;
-- raw profile saved locally;
+- raw profile saved;
 - summary written to the ledger.
 
 ## Round State
@@ -79,22 +94,22 @@ Maintain this state after every round:
 - route or flow;
 - baseline metric and profile path;
 - current metric and profile path;
-- changed files or change summary;
+- change summary;
 - local checks;
-- target environment proof;
+- target-environment proof;
 - verdict: `strict win`, `directional`, `measurement repair`, `not a win`, or `not measured`;
 - next bottleneck.
 
 ## Triage Order
 
-Before changing code, pick exactly one target using this order:
+Before changing code, pick exactly one target:
 
 1. Correctness regression: visible breakage, wrong content, white screen, severe jank.
-2. Measurement gap: missing marker, wrong route, login page capture, inconsistent throttling.
+2. Measurement gap: missing marker, wrong route, login capture, inconsistent throttling.
 3. Negative prior round: worse metric, worse jank, missing comparison, or failed verification.
 4. Frontend-owned bottleneck: network waterfall, main-thread task, render cost, bundle cost, or cache miss.
 
-If the measurement is broken, repair measurement before optimizing.
+If measurement is broken, repair measurement before optimizing.
 
 ## Strict Profiling Gate
 
@@ -121,31 +136,6 @@ Never use these as performance proof:
 
 Those are safety gates. Profiling is the performance proof.
 
-## Diagnosis Rules
-
-Classify the bottleneck before fixing:
-
-- measurement bug: marker missing, marker too early, wrong route, login page capture;
-- network critical path: first-screen API starts late, duplicates, misses cache, or blocks render;
-- main-thread work: long task, heavy evaluation, render, layout, or hydration;
-- resource cost: large critical JS/CSS, unused startup code, expensive vendor chunk;
-- cache/prefetch bug: warmed data not consumed, key mismatch, unsafe stale data;
-- backend blocker: slow required endpoint with no safe frontend workaround.
-
-Choose the smallest safe frontend experiment. Do not optimize random large files.
-
-## Fix Rules
-
-For each code change:
-
-1. State the bottleneck and evidence.
-2. Make one focused patch.
-3. Add or update focused tests when logic changed.
-4. Run local checks.
-5. Capture a new profile under comparable conditions.
-6. Compare against the previous valid baseline.
-7. Update the ledger.
-
 ## Negative Optimization Protocol
 
 Performance work is allowed to fail. Hiding failure is not allowed.
@@ -159,118 +149,31 @@ Then:
 3. Fix or revert before stacking another speculative optimization.
 4. Re-profile after the fix or revert.
 5. Update the ledger with the final verdict.
-
-## Ledger Template
-
-Append one section per round:
-
-```markdown
-## Round N: <short goal>
-
-### Scope
-- Route/flow:
-- Metric:
-- Goal:
-- Environment:
-- Throttling:
-
-### Evidence Before Change
-- Baseline metric:
-- Top bottleneck:
-- Why this bottleneck is next:
-
-### Change
-- Patch:
-- Risk:
-- Rollback:
-
-### Verification
-- Local checks:
-- Target environment proof:
-- Correctness check:
-
-### Profile Comparison
-| Metric | Previous | Current | Delta | Verdict |
-| --- | ---: | ---: | ---: | --- |
-
-### Waterfall Notes
-- Critical API:
-- Main-thread blocker:
-- Resource blocker:
-- Marker wait:
-
-### Next Round
-- Next bottleneck:
-- Why:
-```
-
-## Stop Conditions
-
-Stop and ask for input only when:
-
-- the user says stop or changes scope;
-- login or test data is required and no safe session exists;
-- the next action would expose secrets;
-- the next required change is destructive or production-affecting;
-- the remaining bottleneck is proven outside frontend ownership with no safe experiment.
 ````
 
-## 为什么这些规则重要
+## 失败 Case 才是重点
 
-关键设计不是“让 Agent 持续运行”。没有 harness 的持续运行，只会让 Agent 更长时间地自信犯错。
+Harness 最有价值的时候，不是证明一个优化成功，而是拒绝一个看起来很合理的优化。
 
-关键设计是这句：
-
-```text
-Evidence decides the next action.
-```
-
-它能防住大多数糟糕的性能自动化：
-
-- 防止 marker 没修好就开始优化。
-- 防止把部署成功当性能成功。
-- 防止连续叠五个猜测修改。
-- 防止用一个变好的数字掩盖回归。
-- 强制产出另一个工程师能 review 的 ledger。
-
-## Harness 抓住的失败 case
-
-最有价值的 ledger entry 不一定是成功。有些是已经回滚的修改：看代码很合理，甚至某次本地 profile 看起来更快，但在可比 profile 里失败了。
-
-| 尝试 | 为什么看起来可行 | Harness 证据 | 结论 |
+| 尝试 | 为什么看起来可行 | Harness 发现了什么 | 结论 |
 | --- | --- | --- | --- |
-| 更早触发首屏数据预取 | 某次本地运行里 marker 提前了 | 可比环境 profile 显示网络请求重复，p90 没有稳定改善 | 回滚 |
+| 更早触发首屏数据预取 | 某次本地运行里 marker 提前了 | 可比 profile 显示网络请求重复，p90 没有稳定改善 | 回滚 |
 | 延后加载一个重组件 bundle | 初始 JavaScript 成本下降 | 首次交互承接了延后成本，可见后 long task 变差 | 回滚 |
 | 跨导航复用 warm cache | 第二个页面体感更快 | 正确性检查发现不同筛选状态下首屏数据陈旧 | 回滚 |
-| 把多次 render update 合成一次 | render 次数下降 | waterfall 不变，目标指标变化仍在噪声区间 | 不算收益；除非代码更简单，否则回滚 |
+| 把多次 render update 合成一次 | render 次数下降 | 目标指标变化仍在噪声区间 | 不算性能收益 |
 
-这就是 harness 的价值。它把“理论上应该更快”变成可证伪的 claim。失败 round 不是浪费，只要 ledger 记录了尝试、证据和回滚结果。没有这个 loop，同一个坏点子两周后通常会换个变量名再出现。
+这些 round 不是浪费，它们正是这个 loop 存在的原因。没有 ledger，一个失败点子过段时间会换个变量名重新出现。有了 ledger，团队知道试过什么、为什么失败、最后怎么处理。
 
-## 我从内部版本删掉了什么
+## 读者可以直接复用什么
 
-内部版本包含大量 adapter。这些 adapter 在公司内部有用，但公开后没有价值。
+你不需要一个很大的平台才能复用这个模式。
 
-| 删除内容 | 公开替代 |
-| --- | --- |
-| 内部部署系统 | "deploy or run in target environment" |
-| 公司监控和日志工具 | "profile path, console/network evidence, request IDs if available" |
-| 私有文档更新流程 | Markdown ledger |
-| 具体业务路由名 | "target route or user flow" |
-| 团队和流程名 | generic ownership labels |
-| 私有 URL、token、header | local/staging/prod-like environment proof |
+1. 先选一个用户可感知指标和一个路由。
+2. 优化前先让 profile 可复现。
+3. 保存原始 profile，不只保存摘要。
+4. 强制每一轮给出 verdict。
+5. 把回滚过的修改也当成有价值的证据。
 
-这才是正确抽象边界。Skill 应该定义 loop 和 proof rules。工具 adapter 应该放在私有 skill 或脚本里。
+让 AI 真正适合性能优化，最快的方法不是给它更多自由，而是收窄自由：让它提出和实现实验，但让 harness 拥有最终解释权。
 
-## 如何扩展它
-
-先手动跑通 PoC loop，再加 adapter：
-
-1. 加一个脚本，为单个路由抓 profile。
-2. 加一个 parser，提取目标指标和关键 waterfall 条目。
-3. 加一个 ledger writer。
-4. 加一个部署或 preview adapter。
-5. 加用户流程回归检查。
-
-不要一开始就集成所有工具。那会把一个简单 loop 做成没人能用的编排怪物。
-
-好的版本很无聊：一个指标、一个 harness、一个瓶颈、一个 patch、一个 comparison、一条 ledger entry。
+好的性能自动化应该很无聊：一个指标、一个瓶颈、一个 patch、一次对比、一条 ledger entry。然后重复。

@@ -1,6 +1,6 @@
 ---
 name: blog-publishing-pipeline
-description: Create, optimize, review, and publish bilingual Hexo blog posts in this repository. Use when the user asks to write a blog post, process raw article notes, convert internal docs into a public-safe article, optimize an existing post, create Chinese/English paired posts, add images, or publish a post to the Hexo blog.
+description: Create, optimize, review, and publish bilingual Hexo blog posts in this repository. Use when the user asks to write a blog post, process raw article notes, convert source material into a reader-facing article, optimize an existing post, create Chinese/English paired posts, add images, or publish a post to the Hexo blog.
 ---
 
 # Blog Publishing Pipeline
@@ -59,6 +59,9 @@ permalink: zh/YYYY/MM/DD/Full-English-Title/
    - Keep design choices, evidence, tradeoffs, and reusable patterns.
    - Remove operational noise, raw logs, secret/internal identifiers, and details that do not help the reader.
    - For internal work, generalize sensitive project names unless the user explicitly wants them public.
+   - Do not narrate sanitization, redaction, or "what was removed" unless the article is specifically about that process.
+   - Convert source-material provenance into reader-facing substance: mechanism, evidence, failure modes, and reusable steps.
+   - Avoid titles and first-screen copy that say "public version", "sanitized", or "internal version"; readers care about the problem and the takeaway.
 4. Write the source-language post first:
    - Start with a 2-4 sentence `TL;DR`.
    - Use a clear intro, technical body, and conclusion.
@@ -77,6 +80,8 @@ permalink: zh/YYYY/MM/DD/Full-English-Title/
    - Valid YAML frontmatter.
    - No broken markdown tables or code fences.
    - No private tokens, cookies, raw log IDs, or unrelated internal details.
+   - The first viewport should explain the reader value, not the drafting or cleanup process.
+   - If adapting a skill/workflow, the article should teach the workflow's control loop and proof rules before showing long code blocks.
    - `npm run build` succeeds.
 8. Commit:
    - Stage only the article files, related image assets, and intentional skill/docs changes.
@@ -106,6 +111,7 @@ Good posts in this repo are not content dumps. A useful post should answer:
 - What failed or almost failed?
 - What can readers reuse in their own work?
 - What was the result, stated without overclaiming?
+- Why should a reader care in the first screen?
 
 When writing about performance optimization, keep the proof discipline strict:
 
