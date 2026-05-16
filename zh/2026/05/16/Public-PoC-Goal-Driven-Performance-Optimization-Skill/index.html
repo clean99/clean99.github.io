@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>一个公开版 Goal-Driven 性能优化 Skill PoC | Koh Hom&#39;s Blog</title>
+  
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/">
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" />
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" />
+  
+  <meta name="description" content="TL;DR: 这是我真实项目里性能优化 skill 的公开脱敏 PoC 版本。内部版本接了公司里的部署、日志、监控、文档和 profiling 系统；这份版本把这些都删掉，只保留读者能复用的核心：harness-first、goal-driven loop，以及每轮都记录 baseline、修改点、">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
+  <meta property="og:type" content="article" />
+  <meta property="article:published_time" content="2026-05-16T05:05:51.000Z" />
+  <meta property="article:modified_time" content="2026-05-16T05:05:51.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Frontend" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="Web Performance" />
+  
+  <meta property="article:tag" content="AI" />
+  
+  
+  <meta property="og:title" content="一个公开版 Goal-Driven 性能优化 Skill PoC | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
+  
+  <meta property="og:description" content="TL;DR: 这是我真实项目里性能优化 skill 的公开脱敏 PoC 版本。内部版本接了公司里的部署、日志、监控、文档和 profiling 系统；这份版本把这些都删掉，只保留读者能复用的核心：harness-first、goal-driven loop，以及每轮都记录 baseline、修改点、">
+  
+  <meta property="og:url" content="https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="一个公开版 Goal-Driven 性能优化 Skill PoC | Koh Hom&#39;s Blog">
+  
+  <meta name="twitter:description" content="TL;DR: 这是我真实项目里性能优化 skill 的公开脱敏 PoC 版本。内部版本接了公司里的部署、日志、监控、文档和 profiling 系统；这份版本把这些都删掉，只保留读者能复用的核心：harness-first、goal-driven loop，以及每轮都记录 baseline、修改点、">
+  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta name="twitter:url" content="https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"一个公开版 Goal-Driven 性能优化 Skill PoC","datePublished":"2026-05-16T05:05:51.000Z","dateModified":"2026-05-16T05:05:51.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/","mainEntityOfPage":"https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/","inLanguage":"zh-CN","description":"TL;DR: 这是我真实项目里性能优化 skill 的公开脱敏 PoC 版本。内部版本接了公司里的部署、日志、监控、文档和 profiling 系统；这份版本把这些都删掉，只保留读者能复用的核心：harness-first、goal-driven loop，以及每轮都记录 baseline、修改点、严格对比和失败结果的 ledger。 这个 PoC 保留什么原始 skill 真正有价值的不是内部工","keywords":["Frontend","Software Engineering","Web Performance","AI"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"一个公开版 Goal-Driven 性能优化 Skill PoC","item":"https://clean99.github.io/zh/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="six columns ml-1">
+    <h1 class="mt-2">
+      <a href="/zh/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/zh/">首页</a>
+        
+          
+          <a href="/zh/Works" class="ml">作品</a>
+          
+        
+          
+          <a href="/zh/About" class="ml">关于</a>
+          
+        
+          
+          <a href="/zh/Links" class="ml">友链</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">邮箱</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">一个公开版 Goal-Driven 性能优化 Skill PoC</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+          Read in English
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2026-05-16T05:05:51.000Z">
+      <meta itemprop="dateModified" content="2026-05-16T05:05:51.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <blockquote>
+<p><strong>TL;DR</strong>: 这是我真实项目里性能优化 skill 的公开脱敏 PoC 版本。内部版本接了公司里的部署、日志、监控、文档和 profiling 系统；这份版本把这些都删掉，只保留读者能复用的核心：harness-first、goal-driven loop，以及每轮都记录 baseline、修改点、严格对比和失败结果的 ledger。</p>
+</blockquote>
+<h2 id="这个-PoC-保留什么"><a href="#这个-PoC-保留什么" class="headerlink" title="这个 PoC 保留什么"></a>这个 PoC 保留什么</h2><p>原始 skill 真正有价值的不是内部工具，而是工作形状。</p>
+<table>
+<thead>
+<tr>
+<th>保留</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>一轮只打一个瓶颈</td>
+<td>防止叠猜测</td>
+</tr>
+<tr>
+<td>先修 harness，再优化</td>
+<td>错误测量会制造虚假胜利</td>
+</tr>
+<tr>
+<td>严格 before&#x2F;after 对比</td>
+<td>性能收益必须有可比数据</td>
+</tr>
+<tr>
+<td>Negative optimization protocol</td>
+<td>失败 round 必须可回滚、可解释</td>
+</tr>
+<tr>
+<td>Ledger</td>
+<td>loop 需要记忆，不是靠聊天记录</td>
+</tr>
+</tbody></table>
+<p>所有公司相关内容都应该删除：内部 URL、部署系统、工单系统、监控产品、内部追踪 ID、泳道名、仓库名、团队名、私有文档链接。一个好的公开版 skill，应该在读者只有 Playwright、Chrome DevTools Protocol、一个测试路由和一份 Markdown 文件时也能跑起来。</p>
+<h2 id="最小-Skill"><a href="#最小-Skill" class="headerlink" title="最小 Skill"></a>最小 Skill</h2><p>下面是公开 PoC。它故意比内部版本短。不能改变 Agent 行为的规则，不应该出现在这里。</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">name: performance-optimization-loop</span><br><span class="line"><span class="section">description: Run goal-driven frontend performance optimization loops. Use when the user wants to improve FMP, LCP, INP, TTI, tab-switch latency, long tasks, network waterfalls, or any user-visible performance metric with repeated profiling and verified deltas.</span></span><br><span class="line"><span class="section">---</span></span><br><span class="line"></span><br><span class="line"><span class="section"># Performance Optimization Loop</span></span><br><span class="line"></span><br><span class="line"><span class="section">## Core Rule</span></span><br><span class="line"></span><br><span class="line">Run a measured loop until the goal is reached, the user stops, or the next step is blocked.</span><br><span class="line"></span><br><span class="line">Expected loop:</span><br><span class="line"></span><br><span class="line"><span class="code">```text</span></span><br><span class="line"><span class="code">profile -&gt; waterfall -&gt; diagnose -&gt; fix -&gt; local verify</span></span><br><span class="line"><span class="code">-&gt; deploy or run in target environment -&gt; profile again</span></span><br><span class="line"><span class="code">-&gt; compare -&gt; document -&gt; repeat</span></span><br><span class="line"><span class="code">```</span></span><br><span class="line"></span><br><span class="line">Do not call a code change a performance win until a comparable profile proves it.</span><br><span class="line"></span><br><span class="line"><span class="section">## Required Inputs</span></span><br><span class="line"></span><br><span class="line">Accept partial inputs and infer safe defaults:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> target route or user flow;</span><br><span class="line"><span class="bullet">-</span> target metric, such as FMP, LCP, INP, TTI, tab-switch time, or long-task budget;</span><br><span class="line"><span class="bullet">-</span> goal, such as &quot;reduce p90 FMP by 30%&quot; or &quot;keep INP under 200ms&quot;;</span><br><span class="line"><span class="bullet">-</span> baseline profile, or permission to capture one;</span><br><span class="line"><span class="bullet">-</span> target environment, such as local, staging, or production-like test lane;</span><br><span class="line"><span class="bullet">-</span> profiling constraints.</span><br><span class="line"></span><br><span class="line">Default profiling constraints:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> same route and same final marker;</span><br><span class="line"><span class="bullet">-</span> authenticated state if the page requires login;</span><br><span class="line"><span class="bullet">-</span> browser cache disabled for cold-start comparisons;</span><br><span class="line"><span class="bullet">-</span> 4x CPU throttling for frontend startup work;</span><br><span class="line"><span class="bullet">-</span> network throttling suitable for the product&#x27;s users;</span><br><span class="line"><span class="bullet">-</span> finite capture window;</span><br><span class="line"><span class="bullet">-</span> raw profile saved locally;</span><br><span class="line"><span class="bullet">-</span> summary written to the ledger.</span><br><span class="line"></span><br><span class="line"><span class="section">## Round State</span></span><br><span class="line"></span><br><span class="line">Maintain this state after every round:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> current goal;</span><br><span class="line"><span class="bullet">-</span> route or flow;</span><br><span class="line"><span class="bullet">-</span> baseline metric and profile path;</span><br><span class="line"><span class="bullet">-</span> current metric and profile path;</span><br><span class="line"><span class="bullet">-</span> changed files or change summary;</span><br><span class="line"><span class="bullet">-</span> local checks;</span><br><span class="line"><span class="bullet">-</span> target environment proof;</span><br><span class="line"><span class="bullet">-</span> verdict: <span class="code">`strict win`</span>, <span class="code">`directional`</span>, <span class="code">`measurement repair`</span>, <span class="code">`not a win`</span>, or <span class="code">`not measured`</span>;</span><br><span class="line"><span class="bullet">-</span> next bottleneck.</span><br><span class="line"></span><br><span class="line"><span class="section">## Triage Order</span></span><br><span class="line"></span><br><span class="line">Before changing code, pick exactly one target using this order:</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> Correctness regression: visible breakage, wrong content, white screen, severe jank.</span><br><span class="line"><span class="bullet">2.</span> Measurement gap: missing marker, wrong route, login page capture, inconsistent throttling.</span><br><span class="line"><span class="bullet">3.</span> Negative prior round: worse metric, worse jank, missing comparison, or failed verification.</span><br><span class="line"><span class="bullet">4.</span> Frontend-owned bottleneck: network waterfall, main-thread task, render cost, bundle cost, or cache miss.</span><br><span class="line"></span><br><span class="line">If the measurement is broken, repair measurement before optimizing.</span><br><span class="line"></span><br><span class="line"><span class="section">## Strict Profiling Gate</span></span><br><span class="line"></span><br><span class="line">A strict comparison requires:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> same route or user flow;</span><br><span class="line"><span class="bullet">-</span> same metric and final marker;</span><br><span class="line"><span class="bullet">-</span> same login state;</span><br><span class="line"><span class="bullet">-</span> same cache policy;</span><br><span class="line"><span class="bullet">-</span> same CPU and network profile;</span><br><span class="line"><span class="bullet">-</span> same target environment class;</span><br><span class="line"><span class="bullet">-</span> same warmup policy.</span><br><span class="line"></span><br><span class="line">If any of those differ, label the result <span class="code">`directional`</span>, not <span class="code">`strict win`</span>.</span><br><span class="line"></span><br><span class="line">Never use these as performance proof:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> code inspection;</span><br><span class="line"><span class="bullet">-</span> build success;</span><br><span class="line"><span class="bullet">-</span> unit tests;</span><br><span class="line"><span class="bullet">-</span> deployment success;</span><br><span class="line"><span class="bullet">-</span> smoke tests;</span><br><span class="line"><span class="bullet">-</span> &quot;the change looks obviously faster.&quot;</span><br><span class="line"></span><br><span class="line">Those are safety gates. Profiling is the performance proof.</span><br><span class="line"></span><br><span class="line"><span class="section">## Diagnosis Rules</span></span><br><span class="line"></span><br><span class="line">Classify the bottleneck before fixing:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> measurement bug: marker missing, marker too early, wrong route, login page capture;</span><br><span class="line"><span class="bullet">-</span> network critical path: first-screen API starts late, duplicates, misses cache, or blocks render;</span><br><span class="line"><span class="bullet">-</span> main-thread work: long task, heavy evaluation, render, layout, or hydration;</span><br><span class="line"><span class="bullet">-</span> resource cost: large critical JS/CSS, unused startup code, expensive vendor chunk;</span><br><span class="line"><span class="bullet">-</span> cache/prefetch bug: warmed data not consumed, key mismatch, unsafe stale data;</span><br><span class="line"><span class="bullet">-</span> backend blocker: slow required endpoint with no safe frontend workaround.</span><br><span class="line"></span><br><span class="line">Choose the smallest safe frontend experiment. Do not optimize random large files.</span><br><span class="line"></span><br><span class="line"><span class="section">## Fix Rules</span></span><br><span class="line"></span><br><span class="line">For each code change:</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> State the bottleneck and evidence.</span><br><span class="line"><span class="bullet">2.</span> Make one focused patch.</span><br><span class="line"><span class="bullet">3.</span> Add or update focused tests when logic changed.</span><br><span class="line"><span class="bullet">4.</span> Run local checks.</span><br><span class="line"><span class="bullet">5.</span> Capture a new profile under comparable conditions.</span><br><span class="line"><span class="bullet">6.</span> Compare against the previous valid baseline.</span><br><span class="line"><span class="bullet">7.</span> Update the ledger.</span><br><span class="line"></span><br><span class="line"><span class="section">## Negative Optimization Protocol</span></span><br><span class="line"></span><br><span class="line">Performance work is allowed to fail. Hiding failure is not allowed.</span><br><span class="line"></span><br><span class="line">If a change improves one metric but worsens visible behavior, post-visible jank, long tasks, or the target metric, mark it <span class="code">`not a win`</span>.</span><br><span class="line"></span><br><span class="line">Then:</span><br><span class="line"></span><br><span class="line"><span class="bullet">1.</span> Record the attempted change.</span><br><span class="line"><span class="bullet">2.</span> Record the negative evidence.</span><br><span class="line"><span class="bullet">3.</span> Fix or revert before stacking another speculative optimization.</span><br><span class="line"><span class="bullet">4.</span> Re-profile after the fix or revert.</span><br><span class="line"><span class="bullet">5.</span> Update the ledger with the final verdict.</span><br><span class="line"></span><br><span class="line"><span class="section">## Ledger Template</span></span><br><span class="line"></span><br><span class="line">Append one section per round:</span><br><span class="line"></span><br><span class="line"><span class="code">```markdown</span></span><br><span class="line"><span class="code">## Round N: &lt;short goal&gt;</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Scope</span></span><br><span class="line"><span class="code">- Route/flow:</span></span><br><span class="line"><span class="code">- Metric:</span></span><br><span class="line"><span class="code">- Goal:</span></span><br><span class="line"><span class="code">- Environment:</span></span><br><span class="line"><span class="code">- Throttling:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Evidence Before Change</span></span><br><span class="line"><span class="code">- Baseline metric:</span></span><br><span class="line"><span class="code">- Top bottleneck:</span></span><br><span class="line"><span class="code">- Why this bottleneck is next:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Change</span></span><br><span class="line"><span class="code">- Patch:</span></span><br><span class="line"><span class="code">- Risk:</span></span><br><span class="line"><span class="code">- Rollback:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Verification</span></span><br><span class="line"><span class="code">- Local checks:</span></span><br><span class="line"><span class="code">- Target environment proof:</span></span><br><span class="line"><span class="code">- Correctness check:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Profile Comparison</span></span><br><span class="line"><span class="code">| Metric | Previous | Current | Delta | Verdict |</span></span><br><span class="line"><span class="code">| --- | ---: | ---: | ---: | --- |</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Waterfall Notes</span></span><br><span class="line"><span class="code">- Critical API:</span></span><br><span class="line"><span class="code">- Main-thread blocker:</span></span><br><span class="line"><span class="code">- Resource blocker:</span></span><br><span class="line"><span class="code">- Marker wait:</span></span><br><span class="line"><span class="code"></span></span><br><span class="line"><span class="code">### Next Round</span></span><br><span class="line"><span class="code">- Next bottleneck:</span></span><br><span class="line"><span class="code">- Why:</span></span><br><span class="line"><span class="code">```</span></span><br><span class="line"></span><br><span class="line"><span class="section">## Stop Conditions</span></span><br><span class="line"></span><br><span class="line">Stop and ask for input only when:</span><br><span class="line"></span><br><span class="line"><span class="bullet">-</span> the user says stop or changes scope;</span><br><span class="line"><span class="bullet">-</span> login or test data is required and no safe session exists;</span><br><span class="line"><span class="bullet">-</span> the next action would expose secrets;</span><br><span class="line"><span class="bullet">-</span> the next required change is destructive or production-affecting;</span><br><span class="line"><span class="bullet">-</span> the remaining bottleneck is proven outside frontend ownership with no safe experiment.</span><br></pre></td></tr></table></figure>
+
+<h2 id="为什么这些规则重要"><a href="#为什么这些规则重要" class="headerlink" title="为什么这些规则重要"></a>为什么这些规则重要</h2><p>关键设计不是“让 Agent 持续运行”。没有 harness 的持续运行，只会让 Agent 更长时间地自信犯错。</p>
+<p>关键设计是这句：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Evidence decides the next action.</span><br></pre></td></tr></table></figure>
+
+<p>它能防住大多数糟糕的性能自动化：</p>
+<ul>
+<li>防止 marker 没修好就开始优化。</li>
+<li>防止把部署成功当性能成功。</li>
+<li>防止连续叠五个猜测修改。</li>
+<li>防止用一个变好的数字掩盖回归。</li>
+<li>强制产出另一个工程师能 review 的 ledger。</li>
+</ul>
+<h2 id="Harness-抓住的失败-case"><a href="#Harness-抓住的失败-case" class="headerlink" title="Harness 抓住的失败 case"></a>Harness 抓住的失败 case</h2><p>最有价值的 ledger entry 不一定是成功。有些是已经回滚的修改：看代码很合理，甚至某次本地 profile 看起来更快，但在可比 profile 里失败了。</p>
+<table>
+<thead>
+<tr>
+<th>尝试</th>
+<th>为什么看起来可行</th>
+<th>Harness 证据</th>
+<th>结论</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>更早触发首屏数据预取</td>
+<td>某次本地运行里 marker 提前了</td>
+<td>可比环境 profile 显示网络请求重复，p90 没有稳定改善</td>
+<td>回滚</td>
+</tr>
+<tr>
+<td>延后加载一个重组件 bundle</td>
+<td>初始 JavaScript 成本下降</td>
+<td>首次交互承接了延后成本，可见后 long task 变差</td>
+<td>回滚</td>
+</tr>
+<tr>
+<td>跨导航复用 warm cache</td>
+<td>第二个页面体感更快</td>
+<td>正确性检查发现不同筛选状态下首屏数据陈旧</td>
+<td>回滚</td>
+</tr>
+<tr>
+<td>把多次 render update 合成一次</td>
+<td>render 次数下降</td>
+<td>waterfall 不变，目标指标变化仍在噪声区间</td>
+<td>不算收益；除非代码更简单，否则回滚</td>
+</tr>
+</tbody></table>
+<p>这就是 harness 的价值。它把“理论上应该更快”变成可证伪的 claim。失败 round 不是浪费，只要 ledger 记录了尝试、证据和回滚结果。没有这个 loop，同一个坏点子两周后通常会换个变量名再出现。</p>
+<h2 id="我从内部版本删掉了什么"><a href="#我从内部版本删掉了什么" class="headerlink" title="我从内部版本删掉了什么"></a>我从内部版本删掉了什么</h2><p>内部版本包含大量 adapter。这些 adapter 在公司内部有用，但公开后没有价值。</p>
+<table>
+<thead>
+<tr>
+<th>删除内容</th>
+<th>公开替代</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>内部部署系统</td>
+<td>“deploy or run in target environment”</td>
+</tr>
+<tr>
+<td>公司监控和日志工具</td>
+<td>“profile path, console&#x2F;network evidence, request IDs if available”</td>
+</tr>
+<tr>
+<td>私有文档更新流程</td>
+<td>Markdown ledger</td>
+</tr>
+<tr>
+<td>具体业务路由名</td>
+<td>“target route or user flow”</td>
+</tr>
+<tr>
+<td>团队和流程名</td>
+<td>generic ownership labels</td>
+</tr>
+<tr>
+<td>私有 URL、token、header</td>
+<td>local&#x2F;staging&#x2F;prod-like environment proof</td>
+</tr>
+</tbody></table>
+<p>这才是正确抽象边界。Skill 应该定义 loop 和 proof rules。工具 adapter 应该放在私有 skill 或脚本里。</p>
+<h2 id="如何扩展它"><a href="#如何扩展它" class="headerlink" title="如何扩展它"></a>如何扩展它</h2><p>先手动跑通 PoC loop，再加 adapter：</p>
+<ol>
+<li>加一个脚本，为单个路由抓 profile。</li>
+<li>加一个 parser，提取目标指标和关键 waterfall 条目。</li>
+<li>加一个 ledger writer。</li>
+<li>加一个部署或 preview adapter。</li>
+<li>加用户流程回归检查。</li>
+</ol>
+<p>不要一开始就集成所有工具。那会把一个简单 loop 做成没人能用的编排怪物。</p>
+<p>好的版本很无聊：一个指标、一个 harness、一个瓶颈、一个 patch、一个 comparison、一条 ledger entry。</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/AI/" rel="tag">AI</a>, <a class="classtest-link" href="/tags/Frontend/" rel="tag">Frontend</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/Web-Performance/" rel="tag">Web Performance</a> — <time datetime="2026-05-16T05:05:51.000Z">May 16, 2026</time></p>
+    </footer>
+  </article>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">用 ❤ 和
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        制作于 <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+
+      <!-- Language switcher (globe icon) -->
+      <a class="ml-0 footer-link icon" href="/2026/05/16/Public-PoC-Goal-Driven-Performance-Optimization-Skill/" onclick="localStorage.setItem('preferredLang', 'en')" style="text-decoration: none" aria-label="Read in English" title="Read in English">
+        <svg class="svg-hov" width="18" role="img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><title>English</title><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </a>
+
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>
