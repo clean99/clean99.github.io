@@ -104,6 +104,7 @@ export async function runScheduledGrowthLoop({
     statusPath,
     preflightPath,
     profileTextPath,
+    postTextDir,
     profileAuditPath,
     profileUpdatePath,
     automationReportPath,
@@ -164,6 +165,7 @@ export async function runScheduledGrowthLoop({
       publishConfirmation: automation.publishConfirmation,
       browserReadiness: automation.browserReadiness,
       engagement: automation.engagement,
+      manualPublishKits: automation.manualPublishKits,
       experimentPlan: {
         status: experimentPlan.status,
         experiments: experimentPlan.experiments.length,
@@ -232,9 +234,11 @@ Status: ${result.status}
 - Browser probe state: \`${result.paths.browserProbe}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
+- Manual publish kits: \`${result.paths.manualPublishKitIndex}\`
 - Engagement search status: ${result.automation.engagement?.searchStatus || 'unknown'}
 - Engagement status: ${result.automation.engagement?.status || 'unknown'}
 - Ready reply candidates: ${result.automation.engagement?.readyCandidates ?? 'unknown'}
+- Manual publish kits ready: ${result.automation.manualPublishKits?.readyKits ?? 'unknown'}/${result.automation.manualPublishKits?.totalSlots ?? 'unknown'}
 
 Blockers:
 

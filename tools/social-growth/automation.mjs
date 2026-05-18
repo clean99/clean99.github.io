@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 import { runDailyGrowthPlan } from './daily.mjs';
 import {
   buildDailyExecutionBrief,
@@ -53,6 +53,14 @@ import {
   buildPublishConfirmation,
   writePublishConfirmation,
 } from './publishConfirmation.mjs';
+import {
+  buildManualPublishKit,
+  buildManualPublishKitIndex,
+  manualPublishKitIndexPath,
+  manualPublishKitPath,
+  writeManualPublishKit,
+  writeManualPublishKitIndex,
+} from './manualPublishKit.mjs';
 
 const DEFAULT_QUEUE_PATH = 'data/social-growth/queue.json';
 const DEFAULT_PACKAGE_DIR = 'data/social-growth/packages';
@@ -64,6 +72,7 @@ const DEFAULT_METRICS_PATH = 'data/social-growth/posts.local.json';
 const DEFAULT_STATUS_PATH = 'data/social-growth/status.md';
 const DEFAULT_PREFLIGHT_PATH = 'data/social-growth/publish-preflight.md';
 const DEFAULT_PROFILE_TEXT_PATH = 'data/social-growth/profile.local.txt';
+const DEFAULT_POST_TEXT_DIR = 'data/social-growth/post-texts';
 const DEFAULT_PROFILE_AUDIT_PATH = 'data/social-growth/profile-audit.md';
 const DEFAULT_PROFILE_UPDATE_PATH = 'data/social-growth/profile-update.md';
 const DEFAULT_AUTOMATION_REPORT_PATH = 'data/social-growth/automation-run.md';
@@ -93,6 +102,7 @@ export async function runSafeAutomationCycle({
   statusPath = DEFAULT_STATUS_PATH,
   preflightPath = DEFAULT_PREFLIGHT_PATH,
   profileTextPath = DEFAULT_PROFILE_TEXT_PATH,
+  postTextDir = DEFAULT_POST_TEXT_DIR,
   profileAuditPath = DEFAULT_PROFILE_AUDIT_PATH,
   profileUpdatePath = DEFAULT_PROFILE_UPDATE_PATH,
   automationReportPath = DEFAULT_AUTOMATION_REPORT_PATH,
@@ -106,6 +116,8 @@ export async function runSafeAutomationCycle({
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
   engagementSearchPath = DEFAULT_ENGAGEMENT_SEARCH_PATH,
+  manualPublishKitDir,
+  manualPublishKitIndexOutPath,
   engagementLimit = 5,
   xSkillDir,
   xBunCommand,
@@ -288,6 +300,24 @@ export async function runSafeAutomationCycle({
     env,
   });
   await writeDailyExecutionBrief(dailyBrief, dailyBriefPath);
+  const manualPublishKits = await writeReadyManualPublishKits({
+    queue,
+    ledger,
+    dayReadiness: dailyBrief.dayReadiness,
+    now,
+    imageDir,
+    packageOutDir,
+    xSkillDir,
+    xBunCommand,
+    xProfileDir,
+    xProfileDirectory,
+    publishMode,
+    profileTextPath,
+    postTextDir,
+    outDir: manualPublishKitDir || join(dirname(dailyBriefPath), 'manual-publish-kits'),
+    indexPath: manualPublishKitIndexOutPath,
+    env,
+  });
 
   const result = {
     generatedAt,
@@ -323,6 +353,7 @@ export async function runSafeAutomationCycle({
       browserProbe: browserProbePath,
       engagementSearch: engagementSearchPath,
       engagementPlan: engagementPlanPath,
+      manualPublishKitIndex: manualPublishKits.indexPath,
       automationReport: automationReportPath,
     },
     engagement: {
@@ -343,6 +374,12 @@ export async function runSafeAutomationCycle({
       missingImages: imageBacklog.totals.missingImages,
       readyImages: imageBacklog.totals.readyImages,
       listedEntries: imageBacklog.totals.listedEntries,
+    },
+    manualPublishKits: {
+      status: manualPublishKits.index.status,
+      readyKits: manualPublishKits.entries.length,
+      totalSlots: manualPublishKits.index.totalSlots,
+      indexPath: manualPublishKits.indexPath,
     },
     boundary: 'No public X action was performed. Chrome publishing, media upload, profile edits, replies, likes, reposts, follows, and final publish clicks still require action-time confirmation.',
   };
@@ -392,6 +429,7 @@ Status: ${result.status}
 - Browser probe state: \`${result.paths.browserProbe}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
+- Manual publish kits: \`${result.paths.manualPublishKitIndex}\`
 
 ## Engagement
 
@@ -435,6 +473,12 @@ ${confirmationIssues}
 - Images ready: ${result.imageBacklog?.readyImages ?? 'unknown'}
 - Images missing: ${result.imageBacklog?.missingImages ?? 'unknown'}
 - Entries listed: ${result.imageBacklog?.listedEntries ?? 'unknown'}
+
+## Manual Publish Kits
+
+- Status: ${result.manualPublishKits?.status || 'unknown'}
+- Ready kits: ${result.manualPublishKits?.readyKits ?? 'unknown'}/${result.manualPublishKits?.totalSlots ?? 'unknown'}
+- Index: \`${result.manualPublishKits?.indexPath || 'not generated'}\`
 
 ## Local Blockers
 
@@ -498,4 +542,96 @@ function browserActionBlockers(browserReadiness) {
     !blocker.includes('Local publish preflight')
     && !blocker.includes('X publish prep')
   ));
+}
+
+async function writeReadyManualPublishKits({
+  queue,
+  ledger,
+  dayReadiness,
+  now,
+  imageDir,
+  packageOutDir,
+  xSkillDir,
+  xBunCommand,
+  xProfileDir,
+  xProfileDirectory,
+  publishMode,
+  profileTextPath,
+  postTextDir,
+  outDir,
+  indexPath,
+  env,
+} = {}) {
+  const entries = [];
+  const readySlots = (dayReadiness?.slots || [])
+    .filter((slot) => slot.preflightStatus === 'ready' && slot.xPrepStatus === 'ready');
+
+  for (const slot of readySlots) {
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger,
+      id: slot.id,
+      day: dayReadiness.day,
+      slot: slot.slot,
+      now,
+      imageDir,
+      packageOutDir,
+      ensurePackage: true,
+      env,
+    });
+    const xPublishPrep = await buildXPublishPrep(preflight, {
+      skillDir: xSkillDir,
+      bunCommand: xBunCommand,
+      profileDir: xProfileDir,
+      profileDirectory: xProfileDirectory,
+      publishMode: slot.publishMode || publishMode,
+    });
+    const confirmation = buildPublishConfirmation({
+      queue,
+      preflight,
+      xPublishPrep,
+      generatedAt: preflight.generatedAt,
+    });
+    const kit = buildManualPublishKit({
+      confirmation,
+      profileTextPath,
+      postTextDir,
+    });
+    const kitPath = manualPublishKitPath({
+      day: dayReadiness.day,
+      slot: slot.slot,
+      id: slot.id,
+      outDir,
+    });
+    await writeManualPublishKit(kit, kitPath);
+    entries.push({
+      slot: slot.slot,
+      time: slot.time,
+      id: slot.id,
+      status: kit.status,
+      path: kitPath,
+      imageAbsolutePath: kit.image.absolutePath,
+      recoveryCommand: kit.recoveryCommand,
+    });
+  }
+
+  const index = buildManualPublishKitIndex({
+    generatedAt: dayReadiness?.generatedAt || toIsoString(now),
+    day: dayReadiness?.day || 1,
+    date: dayReadiness?.date || '',
+    readySlots: dayReadiness?.readySlots || 0,
+    totalSlots: dayReadiness?.totalSlots || 0,
+    kits: entries,
+  });
+  const resolvedIndexPath = indexPath || manualPublishKitIndexPath({
+    day: index.day,
+    outDir,
+  });
+  await writeManualPublishKitIndex(index, resolvedIndexPath);
+
+  return {
+    index,
+    indexPath: resolvedIndexPath,
+    entries,
+  };
 }

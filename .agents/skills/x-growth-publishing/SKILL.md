@@ -74,6 +74,7 @@ It writes `data/social-growth/engagement-search.md` with read-only X search URLs
 It writes `data/social-growth/engagement-plan.md` from copied relevant thread opportunities when available; missing opportunities are a capture task, not an automation blocker.
 It writes `data/social-growth/experiment-plan.md` to turn the current Algorithm Lens into concrete hypotheses, candidate queue ids, edit focus, success metrics, and stop conditions for the next publish package.
 It writes `data/social-growth/daily-brief.md` as the single operator-facing action order across publish readiness, engagement, metrics, conversion funnel, and profile conversion.
+It writes `data/social-growth/manual-publish-kits/day<N>-ready-slots.md` plus one kit per ready slot so a logged-in normal Chrome profile can continue confirmed publishing when the CDP publishing profile is blocked.
 
 For day-level readiness across all publish slots, run:
 

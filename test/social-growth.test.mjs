@@ -1773,6 +1773,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       statusPath: join(outDir, 'status.md'),
       preflightPath: join(outDir, 'publish-preflight.md'),
       profileTextPath: join(outDir, 'profile.local.txt'),
+      postTextDir: join(outDir, 'post-texts'),
       profileAuditPath: join(outDir, 'profile-audit.md'),
       profileUpdatePath: join(outDir, 'profile-update.md'),
       automationReportPath: join(outDir, 'automation-run.md'),
@@ -1809,6 +1810,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
     const engagementSearch = await readFile(join(outDir, 'engagement-search.md'), 'utf8');
     const engagementPlan = await readFile(join(outDir, 'engagement-plan.md'), 'utf8');
+    const manualPublishKits = await readFile(join(outDir, 'manual-publish-kits/day1-ready-slots.md'), 'utf8');
 
     assert.equal(result.status, 'blocked_preflight');
     assert.match(result.blockers.join('\n'), /Image file is missing/);
@@ -1825,8 +1827,11 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.equal(result.paths.browserReadiness, join(outDir, 'browser-readiness.md'));
     assert.equal(result.paths.engagementSearch, join(outDir, 'engagement-search.md'));
     assert.equal(result.paths.engagementPlan, join(outDir, 'engagement-plan.md'));
+    assert.equal(result.paths.manualPublishKitIndex, join(outDir, 'manual-publish-kits/day1-ready-slots.md'));
     assert.equal(result.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.engagement.status, 'needs_opportunity_capture');
+    assert.equal(result.manualPublishKits.status, 'no_ready_slots');
+    assert.equal(result.manualPublishKits.readyKits, 0);
     assert.match(report, /No public X action was performed/);
     assert.match(report, /Daily brief/);
     assert.match(dailyBrief, /Daily X Growth Brief/);
@@ -1836,6 +1841,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(imageBacklog, /X Image Backlog/);
     assert.match(imageBacklog, /social:register-image/);
     assert.match(report, /Engagement plan/);
+    assert.match(report, /Manual publish kits/);
     assert.match(report, /Profile update package/);
     assert.match(report, /Profile Conversion/);
     assert.match(status, /Profile Conversion/);
@@ -1850,6 +1856,8 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(browserReadiness, /blocked_local_prep/);
     assert.match(engagementSearch, /X Engagement Search Plan/);
     assert.match(engagementPlan, /needs_opportunity_capture/);
+    assert.match(manualPublishKits, /Manual X Publish Kits/);
+    assert.match(manualPublishKits, /No ready manual publish kits/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -1943,6 +1951,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
     const browserReadiness = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
     const experimentPlan = await readFile(join(outDir, 'experiment-plan.md'), 'utf8');
+    const manualPublishKits = await readFile(join(outDir, 'manual-publish-kits/day1-ready-slots.md'), 'utf8');
 
     assert.equal(result.status, 'ready_for_browser_confirmation');
     assert.equal(result.automation.status, 'ready_for_browser_confirmation');
@@ -1953,12 +1962,15 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.automation.experimentPlan.status, 'ready');
     assert.equal(result.automation.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
+    assert.equal(result.automation.manualPublishKits.status, 'ready_for_manual_confirmation');
+    assert.equal(result.automation.manualPublishKits.readyKits, 1);
     assert.equal(result.selected.id, expectedQueue.items[0].id);
     assert.match(scheduledReport, /Scheduled X Growth Run/);
     assert.match(scheduledReport, /Daily brief/);
     assert.match(scheduledReport, /Image backlog/);
     assert.match(scheduledReport, /Engagement search/);
     assert.match(scheduledReport, /Engagement plan/);
+    assert.match(scheduledReport, /Manual publish kits ready: 1\/3/);
     assert.match(scheduledReport, /Publish confirmation/);
     assert.match(scheduledReport, /Browser readiness/);
     assert.match(scheduledReport, /Content review: pass/);
@@ -1970,6 +1982,9 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(funnelReport, /X Growth Funnel/);
     assert.match(imageBacklog, /Images missing: 2/);
     assert.match(browserReadiness, /X Browser Readiness/);
+    assert.match(manualPublishKits, /Manual X Publish Kits/);
+    assert.match(manualPublishKits, /Ready slots: 1\/3/);
+    assert.match(manualPublishKits, /post-publish-recovery/);
     assert.match(experimentPlan, /X Growth Experiment Plan/);
     assert.match(experimentPlan, new RegExp(`### exp-1: ${expectedQueue.items[0].id}`));
     assert.match(experimentPlan, /Selected aligned: yes/);
