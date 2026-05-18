@@ -17,7 +17,7 @@ export function buildGrowthRecommendations(ledger) {
   if (!posts.length) {
     recommendations.push({
       priority: 'P0',
-      action: 'Publish the first confirmed X Article + image post, then record metrics.',
+      action: 'Publish the first confirmed image-backed X post or thread, then record metrics.',
       reason: 'No post metrics are recorded, so there is no optimization signal yet.',
     });
   }
@@ -198,11 +198,11 @@ function lensForFunnelStatus(status) {
       stage: 'candidate_entry',
       diagnosis: 'There is no public post in the local ledger, so no recommender-facing signal exists yet.',
       metricToMove: 'published_posts',
-      contentRule: 'Ship one image-backed X Article package before optimizing templates.',
+      contentRule: 'Ship one image-backed X package before optimizing templates.',
       avoid: 'Do not spend the current slot on more meta-planning while the ledger has no post.',
       nextActions: [{
         priority: 'P0',
-        action: 'Publish one confirmed X Article + image post and mark the public URLs.',
+        action: 'Publish one confirmed image-backed X post or thread and mark the public URL.',
         reason: 'Candidate sourcing and ranking cannot start until there is a public artifact.',
       }],
     },
@@ -234,11 +234,11 @@ function lensForFunnelStatus(status) {
       stage: 'profile_handoff',
       diagnosis: 'Posts earn interactions but do not make readers inspect the account.',
       metricToMove: 'profile_click_per_interaction',
-      contentRule: 'Make the X Article and follow-up replies signal a repeatable account promise.',
+      contentRule: 'Make the primary post, thread replies, and follow-up replies signal a repeatable account promise.',
       avoid: 'Do not hide the account theme behind generic blog promotion.',
       nextActions: [{
         priority: 'P0',
-        action: 'Add a reason to follow inside the X Article and update the pinned-post handoff.',
+        action: 'Add a reason to follow inside the post/thread package and update the pinned-post handoff.',
         reason: 'Interactions without profile clicks do not move the follower goal.',
       }],
     },

@@ -136,7 +136,7 @@ function nextActionsFor(status, totals) {
   if (status === 'needs_published_posts') {
     return [{
       priority: 'P0',
-      action: 'Publish the first confirmed X Article + image-backed post and mark the URL.',
+      action: 'Publish the first confirmed image-backed X post or thread and mark the URL.',
       reason: 'No funnel exists until at least one public post is recorded.',
     }];
   }

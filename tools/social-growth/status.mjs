@@ -18,11 +18,14 @@ export async function buildGrowthStatus({
   imageDir = 'output/imagegen',
   packageOutDir = 'data/social-growth/packages',
   profileText = '',
+  publishMode = 'x_article',
+  xProfileDir,
   env = process.env,
   ensurePackage = false,
   preferReadyImage = false,
 } = {}) {
   const generatedAt = toIsoString(now);
+  const resolvedPublishMode = normalizePublishMode(publishMode);
   const validation = validateQueue(queue);
   const summary = ledger ? summarizeGrowthLedger(ledger) : null;
   const weeklyPlan = ledger
@@ -73,12 +76,15 @@ export async function buildGrowthStatus({
     summary,
     preflight,
     profileAudit,
+    publishMode: resolvedPublishMode,
+    xProfileDir,
     nextActions: nextActions({
       validation,
       weeklyPlan,
       preflight,
       profileAudit,
       recommendations,
+      publishMode: resolvedPublishMode,
       day,
       slot,
     }),
@@ -144,6 +150,7 @@ ${planWarnings}
 - Preferred image generator: ${preflight?.image?.preferredGenerator || 'imagegen built-in tool'}
 - OPENAI_API_KEY present: ${preflight?.image?.hasOpenAiKey ?? false}
 - OPENAI_API_KEY required for preferred path: ${preflight?.image?.keyRequired ?? false}
+- Publish mode: ${status.publishMode}
 
 Blockers:
 
@@ -186,10 +193,10 @@ npm run social:daily -- --limit 5 --package-limit 3 --lang zh
 npm run social:validate -- --queue data/social-growth/queue.json --format markdown
 npm run social:preflight -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot} --out data/social-growth/publish-preflight.md
 npm run social:image-brief -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}
-npm run social:x-prep -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot} --out data/social-growth/x-publish-prep.md
+npm run social:x-prep -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)} --out data/social-growth/x-publish-prep.md
 npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
 npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md
-${preflight?.browser?.recordCommand || 'npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>'}
+${recordCommand(status, preflight)}
 \`\`\`
 
 Public X actions still require action-time confirmation in Chrome.
@@ -229,6 +236,7 @@ function nextActions({
   preflight,
   profileAudit,
   recommendations,
+  publishMode,
   day,
   slot,
 }) {
@@ -239,7 +247,9 @@ function nextActions({
   } else {
     actions.push({
       priority: 'P0',
-      action: 'Prepare the X Article and image-backed short post in Chrome, stopping before every public action for confirmation.',
+      action: publishMode === 'thread_fallback'
+        ? 'Prepare the image-backed thread first post in Chrome, stopping before media upload and final publish confirmation.'
+        : 'Prepare the X Article and image-backed short post in Chrome, stopping before every public action for confirmation.',
       reason: 'Preflight has no blockers.',
     });
   }
@@ -330,6 +340,32 @@ function dedupeActions(actions) {
 function round(value) {
   if (value === undefined || value === null) return 'unknown';
   return Math.round(Number(value || 0) * 10) / 10;
+}
+
+function normalizePublishMode(value) {
+  const normalized = String(value || '').trim().toLowerCase().replace(/-/g, '_');
+  if (['thread', 'fallback', 'thread_fallback'].includes(normalized)) return 'thread_fallback';
+  return 'x_article';
+}
+
+function publishModeArgs(status) {
+  const args = [];
+  if (status.publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
+  if (status.xProfileDir) args.push(`--xProfileDir ${shellQuote(status.xProfileDir)}`);
+  return args.length ? ` ${args.join(' ')}` : '';
+}
+
+function recordCommand(status, preflight) {
+  if (status.publishMode === 'thread_fallback') {
+    const id = preflight?.selected?.id || '<queue-id>';
+    return `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${id} --url <x-thread-url>`;
+  }
+  return preflight?.browser?.recordCommand
+    || 'npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>';
+}
+
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, "'\\''")}'`;
 }
 
 function toIsoString(value) {

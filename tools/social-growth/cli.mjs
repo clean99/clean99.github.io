@@ -596,6 +596,8 @@ if (command === 'articles') {
     imageDir: args.imageDir || 'output/imagegen',
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     profileText,
+    publishMode: args.publishMode || args.articleMode,
+    xProfileDir: args.xProfileDir || args.profileDir,
     ensurePackage: args.ensurePackage === 'true',
     preferReadyImage: args.preferReadyImage === 'true',
   });
