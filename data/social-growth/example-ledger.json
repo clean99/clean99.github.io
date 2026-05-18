@@ -1,0 +1,32 @@
+{
+  "target": {
+    "startDate": "2026-05-18",
+    "endDate": "2026-05-25",
+    "followersIn7Days": 1000,
+    "baselineFollowers": 0
+  },
+  "snapshots": [
+    {
+      "date": "2026-05-18",
+      "followers": 0,
+      "posts": [
+        {
+          "id": "example-post",
+          "articleSlug": "Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops",
+          "variant": "sharp-take",
+          "url": "https://x.com/example/status/0000000000000000000",
+          "metrics": {
+            "replies": 0,
+            "reposts": 0,
+            "quotes": 0,
+            "likes": 0,
+            "bookmarks": 0,
+            "views": 0,
+            "profileClicks": 0,
+            "follows": 0
+          }
+        }
+      ]
+    }
+  ]
+}
