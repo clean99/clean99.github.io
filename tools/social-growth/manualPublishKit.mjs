@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 const DEFAULT_OUT_PATH = 'data/social-growth/manual-publish-kit.md';
 
@@ -31,6 +31,10 @@ export function buildManualPublishKit({
     blockers,
     account,
     selected: confirmation.selected,
+    image: {
+      path: confirmation.selected.imagePath || '',
+      absolutePath: confirmation.selected.imagePath ? resolve(confirmation.selected.imagePath) : '',
+    },
     publishMode: confirmation.publishMode,
     firstPost,
     remainingThreadPosts,
@@ -69,7 +73,8 @@ Status: ${kit.status}
 - Article slug: ${kit.selected.articleSlug}
 - Variant: ${kit.selected.variant}
 - Publish mode: ${kit.publishMode}
-- Image: \`${kit.selected.imagePath}\`
+- Image: \`${kit.image.path}\`
+- Absolute image path: \`${kit.image.absolutePath || 'missing'}\`
 - Blog URL: ${kit.selected.targetUrl}
 
 ## Local Blockers
@@ -80,7 +85,7 @@ ${blockers}
 
 1. Open X in a Chrome profile already logged in as \`${kit.account}\`.
 2. Create a post manually.
-3. Paste the first post below and attach the image path above.
+3. Paste the first post below and attach the absolute image path above.
 4. Stop before the final public publish click and confirm account/content.
 5. After the first post is public, copy its public status URL.
 6. Run the recovery command below.

@@ -3352,11 +3352,14 @@ test('manual publish kit condenses copy, recovery, and metrics targets without p
 
     assert.equal(kit.status, 'ready_for_manual_confirmation');
     assert.equal(kit.remainingThreadPosts.length, 2);
+    assert.equal(kit.image.absolutePath, imagePath);
     assert.match(kit.recoveryCommand, /social:post-publish-recovery/);
     assert.match(markdown, /Manual X Publish Kit/);
     assert.match(markdown, /Open X in a Chrome profile already logged in as `@Clean993`/);
     assert.match(markdown, /Stop before the final public publish click/);
     assert.match(markdown, /Image: `/);
+    assert.match(markdown, /Absolute image path: `/);
+    assert.match(markdown, /attach the absolute image path above/);
     assert.match(markdown, /Thread Post 2/);
     assert.match(markdown, /profile\.local\.txt/);
     assert.match(markdown, /post-texts/);
