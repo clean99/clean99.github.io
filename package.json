@@ -30,6 +30,7 @@
     "social:image-brief": "node tools/social-growth/cli.mjs image-brief",
     "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",
     "social:login-recovery": "node tools/social-growth/cli.mjs login-recovery",
+    "social:manual-publish-kit": "node tools/social-growth/cli.mjs manual-publish-kit",
     "social:mark-published": "node tools/social-growth/cli.mjs mark-published",
     "social:metrics-cycle": "node tools/social-growth/cli.mjs metrics-cycle",
     "social:metrics-template": "node tools/social-growth/cli.mjs metrics-template",

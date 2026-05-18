@@ -98,6 +98,11 @@ import {
   writePublishConfirmation,
 } from './publishConfirmation.mjs';
 import {
+  buildManualPublishKit,
+  formatManualPublishKitMarkdown,
+  writeManualPublishKit,
+} from './manualPublishKit.mjs';
+import {
   buildXTechnicalSharingBrief,
   writeXTechnicalSharingBrief,
 } from './xTechBrief.mjs';
@@ -896,6 +901,49 @@ if (command === 'articles') {
   } else {
     console.log(formatPublishConfirmationMarkdown(packet));
   }
+} else if (command === 'manual-publish-kit') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const preflight = await buildPublishPreflight({
+    queue,
+    ledger,
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    ensurePackage: args.ensurePackage !== 'false',
+    preferReadyImage: args.preferReadyImage !== 'false',
+  });
+  const prep = await buildXPublishPrep(preflight, {
+    skillDir: args.skillDir,
+    bunCommand: args.bunCommand,
+    articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
+    publishMode: args.publishMode || args.articleMode || 'thread_fallback',
+    profileDir: args.xProfileDir || args.profileDir,
+    profileDirectory: args.xProfileDirectory || args.profileDirectory,
+  });
+  const confirmation = buildPublishConfirmation({
+    queue,
+    preflight,
+    xPublishPrep: prep,
+    generatedAt: preflight.generatedAt,
+  });
+  const kit = buildManualPublishKit({
+    confirmation,
+    account: args.account || '@Clean993',
+    profileTextPath: args.profileText || 'data/social-growth/profile.local.txt',
+    postTextDir: args.postTextDir || 'data/social-growth/post-texts',
+  });
+  if (args.out) {
+    await writeManualPublishKit(kit, args.out);
+    console.log(`Wrote manual X publish kit to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(kit, null, 2));
+  } else {
+    console.log(formatManualPublishKitMarkdown(kit));
+  }
 } else if (command === 'register-image') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -1609,6 +1657,7 @@ function printHelp() {
   npm run social:image-backlog -- --day 1 --out data/social-growth/image-backlog.md
   npm run social:x-prep -- --day today --slot 1 --out data/social-growth/x-publish-prep.md
   npm run social:confirmation -- --day today --slot 1 --out data/social-growth/publish-confirmation.md
+  npm run social:manual-publish-kit -- --day today --slot 1 --out data/social-growth/manual-publish-kit.md
   npm run social:register-image -- --day today --slot 1 --source /path/to/generated.png
   npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out data/social-growth/thread-reply-handoff.md --id <queue-id> --url <x-post-url>
   npm run social:post-publish-recovery -- --day today --slot 1 --url <x-post-url>

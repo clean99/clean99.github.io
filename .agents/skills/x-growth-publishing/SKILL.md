@@ -193,6 +193,13 @@ npm run social:browser-readiness -- --day today --slot 1 --publishMode thread_fa
 ```
 
 Thread fallback mode prepares the first thread post with the generated image, lists the remaining thread replies, removes the `<x-article-url>` placeholder, and records only the public thread URL after confirmed publication.
+If CDP publishing remains blocked but a normal Chrome profile is logged into X, write the compact manual publish kit:
+
+```bash
+npm run social:manual-publish-kit -- --day today --slot 1 --publishMode thread_fallback --out data/social-growth/manual-publish-kit.md
+```
+
+This kit is local-only. It contains the first post, image path, remaining thread posts, the preferred `post-publish-recovery` command, and metrics copy targets. It is not permission to publish, upload media, reply, like, repost, follow, edit profile, or pin content.
 If the default `baoyu-post-to-x` browser opens without the expected X login, pass a persistent logged-in profile directory:
 
 ```bash

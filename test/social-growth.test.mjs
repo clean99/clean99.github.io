@@ -90,6 +90,10 @@ import {
   writePublishConfirmation,
 } from '../tools/social-growth/publishConfirmation.mjs';
 import {
+  buildManualPublishKit,
+  formatManualPublishKitMarkdown,
+} from '../tools/social-growth/manualPublishKit.mjs';
+import {
   buildProfileAudit,
   buildProfileUpdatePackage,
   formatProfileUpdatePackageMarkdown,
@@ -2952,6 +2956,77 @@ test('publish confirmation uses thread fallback when X Article is unavailable', 
     assert.match(markdown, /Intent reference: https:\/\/docs\.x\.com\/x-for-websites\/web-intents\/overview/);
     assert.match(markdown, /Replace THREAD_STATUS_ID with the numeric status id from <x-thread-url>/);
     assert.doesNotMatch(markdown, /replace `<x-article-url>`/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('manual publish kit condenses copy, recovery, and metrics targets without public actions', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-manual-kit-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    const imagePath = join(imageDir, `${queue.items[0].id}.png`);
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(imagePath, 'fake image');
+
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      id: queue.items[0].id,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+    const prep = await buildXPublishPrep(preflight, {
+      skillDir,
+      bunCommand: 'bun',
+      publishMode: 'thread_fallback',
+    });
+    const confirmation = buildPublishConfirmation({
+      queue,
+      preflight,
+      xPublishPrep: prep,
+    });
+    const kit = buildManualPublishKit({
+      confirmation,
+      profileTextPath: join(outDir, 'profile.local.txt'),
+      postTextDir: join(outDir, 'post-texts'),
+    });
+    const markdown = formatManualPublishKitMarkdown(kit);
+
+    assert.equal(kit.status, 'ready_for_manual_confirmation');
+    assert.equal(kit.remainingThreadPosts.length, 2);
+    assert.match(kit.recoveryCommand, /social:post-publish-recovery/);
+    assert.match(markdown, /Manual X Publish Kit/);
+    assert.match(markdown, /Open X in a Chrome profile already logged in as `@Clean993`/);
+    assert.match(markdown, /Stop before the final public publish click/);
+    assert.match(markdown, /Image: `/);
+    assert.match(markdown, /Thread Post 2/);
+    assert.match(markdown, /profile\.local\.txt/);
+    assert.match(markdown, /post-texts/);
+    assert.match(markdown, /Publishing, uploading media, replying/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
