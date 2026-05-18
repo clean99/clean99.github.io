@@ -5700,6 +5700,7 @@ test('post-publish recovery marks a manually published X URL and runs local metr
     const profileTextPath = join(outDir, 'profile.local.txt');
     const postTextDir = join(outDir, 'post-texts');
     const replyOutPath = join(outDir, 'thread-reply-handoff.md');
+    const launchWindowPath = join(outDir, 'launch-window.md');
     await writeJson(queuePath, queue);
     await writeJson(ledgerPath, createLedger({
       startDate: '2026-05-18',
@@ -5723,9 +5724,11 @@ test('post-publish recovery marks a manually published X URL and runs local metr
       '--recommendations-out', join(outDir, 'recommendations.md'),
       '--funnel-out', join(outDir, 'funnel.md'),
       '--reply-out', replyOutPath,
+      '--launch-window-out', launchWindowPath,
       '--day', '1',
       '--slot', '1',
       '--url', 'https://twitter.com/Clean993/status/1234567890123456789?s=20',
+      '--published-at', '2026-05-19T00:00:00.000Z',
       '--now', '2026-05-19T00:00:00.000Z',
     ], {
       cwd: process.cwd(),
@@ -5737,6 +5740,7 @@ test('post-publish recovery marks a manually published X URL and runs local metr
     const metrics = JSON.parse(await readFile(metricsPath, 'utf8'));
     const ledger = JSON.parse(await readFile(ledgerPath, 'utf8'));
     const replyHandoff = await readFile(replyOutPath, 'utf8');
+    const launchWindow = await readFile(launchWindowPath, 'utf8');
 
     assert.equal(payload.status, 'snapshotted');
     assert.equal(payload.selected.source, 'day_slot');
@@ -5745,6 +5749,8 @@ test('post-publish recovery marks a manually published X URL and runs local metr
     assert.equal(payload.publicActions.uploadedMedia, false);
     assert.equal(payload.publicActions.clickedSubmit, false);
     assert.equal(payload.metricsCycle.capture.skipped, true);
+    assert.equal(payload.launchWindow.status, 'ready_for_early_tracking');
+    assert.equal(payload.launchWindow.checkpoints, 4);
     assert.equal(updatedQueue.items[0].status, 'published');
     assert.equal(updatedQueue.items[0].xPostUrl, 'https://x.com/Clean993/status/1234567890123456789');
     assert.equal(metrics.followers, '33');
@@ -5752,6 +5758,9 @@ test('post-publish recovery marks a manually published X URL and runs local metr
     assert.equal(metrics.posts[0].metrics.follows, '3');
     assert.equal(ledger.snapshots[1].followers, 33);
     assert.match(replyHandoff, /in_reply_to=1234567890123456789/);
+    assert.match(launchWindow, /Status: ready_for_early_tracking/);
+    assert.match(launchWindow, /2026-05-19T00:15:00.000Z/);
+    assert.match(launchWindow, /browser-metrics-capture/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

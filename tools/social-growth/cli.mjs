@@ -1639,6 +1639,9 @@ async function runPostPublishRecovery(options = {}) {
   const replyOutPath = options.replyOut === 'false'
     ? null
     : (options.replyOut || 'data/social-growth/thread-reply-handoff.md');
+  const launchWindowPath = options.launchWindowOut === 'false'
+    ? null
+    : (options.launchWindowOut || 'data/social-growth/launch-window.md');
   const xPostUrl = normalizeXStatusUrl(requiredArg(options, 'url'));
   const queue = await readJson(queuePath);
   const selected = await selectRecoveryQueueItem({
@@ -1682,6 +1685,31 @@ async function runPostPublishRecovery(options = {}) {
   if (replyHandoff) {
     await writeThreadReplyHandoff(replyHandoff, replyOutPath);
   }
+  const launchWindow = launchWindowPath
+    ? buildLaunchWindowPlan({
+      queue: updatedQueue,
+      id: selected.id,
+      xPostUrl,
+      publishedAt,
+      generatedAt: publishedAt,
+      queuePath,
+      ledgerPath,
+      metricsPath: metricsPath || 'data/social-growth/posts.local.json',
+      profileTextPath: options.profileText || 'data/social-growth/profile.local.txt',
+      postTextDir: options.postTextDir || 'data/social-growth/post-texts',
+      replyOutPath: replyOutPath || 'data/social-growth/thread-reply-handoff.md',
+      cycleOutPath: options.cycleOut || 'data/social-growth/metrics-cycle.md',
+      growthReportPath: options.growthReportOut || 'data/social-growth/growth-report.md',
+      recommendationsPath: options.recommendationsOut || 'data/social-growth/recommendations.md',
+      funnelPath: options.funnelOut || 'data/social-growth/funnel.md',
+      account: options.account || '@Clean993',
+      xProfileDir: options.xProfileDir || options.profileDir,
+      xProfileDirectory: options.xProfileDirectory || options.profileDirectory,
+    })
+    : null;
+  if (launchWindow) {
+    await writeLaunchWindowPlan(launchWindow, launchWindowPath);
+  }
 
   const metricsCycle = options.metricsCycle === 'false'
     ? null
@@ -1719,6 +1747,13 @@ async function runPostPublishRecovery(options = {}) {
         path: replyOutPath,
         status: replyHandoff.status,
         statusId: replyHandoff.statusId,
+      }
+      : null,
+    launchWindow: launchWindow
+      ? {
+        path: launchWindowPath,
+        status: launchWindow.status,
+        checkpoints: launchWindow.checkpoints.length,
       }
       : null,
     metricsCycle,
