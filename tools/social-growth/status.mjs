@@ -184,6 +184,7 @@ npm run social:daily -- --limit 5 --package-limit 3 --lang zh
 npm run social:validate -- --queue data/social-growth/queue.json --format markdown
 npm run social:preflight -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot} --out data/social-growth/publish-preflight.md
 npm run social:image-brief -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}
+npm run social:x-prep -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot} --out data/social-growth/x-publish-prep.md
 ${preflight?.browser?.recordCommand || 'npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>'}
 \`\`\`
 
