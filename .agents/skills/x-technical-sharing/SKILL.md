@@ -9,6 +9,28 @@ Use this skill to turn real engineering work into X-native Chinese technical con
 
 This is the X version of `technical-sharing-doc`: keep its causality discipline, but change the packaging for X.
 
+## What Carries Over From `technical-sharing-doc`
+
+Carry over the engineering taste, not the long-form shape:
+
+- start from observable failure, not internal jargon;
+- keep problem, cause, mechanism, tradeoff, and evidence separate;
+- explain interfaces by caller intent;
+- show one reusable frame instead of a file tour;
+- make every claim falsifiable or clearly mark it as a hypothesis.
+
+Change the delivery:
+
+```text
+Long technical article -> X-native package
+observable failure     -> first-screen hook
+technical cause        -> first mechanism sentence
+architecture frame     -> X Article reusable framework
+tradeoff/evidence      -> X Article proof section + follow-up replies
+diagram                -> image 2 / gpt-image-2 scroll-stopper infographic
+blog URL               -> last line of the X Article only
+```
+
 ## Output Contract
 
 Default output is a copy override JSON that can be applied by:
@@ -28,6 +50,27 @@ Only change these fields:
 - `followUpReplies`
 
 Do not publish, upload images, reply, like, repost, follow, edit profile, or pin content.
+
+Return a complete JSON object by default:
+
+```json
+{
+  "id": "<queue-id>",
+  "source": "x-technical-sharing",
+  "contentStatus": "ready_for_validation",
+  "shortPost": "<Chinese X post, no raw blog URL>",
+  "xArticle": {
+    "title": "<Chinese X Article title>",
+    "body": "<Markdown body ending with 博客原文：<targetUrl>>"
+  },
+  "image": {
+    "alt": "<concise Chinese alt text>",
+    "prompt": "<English image 2 prompt>"
+  },
+  "threadFallback": ["<post 1>", "<post 2>", "<link post>"],
+  "followUpReplies": ["<substantive reply 1>", "<substantive reply 2>"]
+}
+```
 
 ## Source Reading
 
@@ -61,6 +104,18 @@ For X, compress it like this:
 - image prompt: one visual model of the mechanism;
 - replies: one extra failure mode or proof detail each.
 
+## X Packaging Model
+
+Do not try to summarize the blog. Package a path through the feed:
+
+1. `shortPost`: make a reader stop and understand the argument in two lines.
+2. `image`: turn the mechanism into a visual object worth opening.
+3. `X Article`: satisfy the click inside X before asking for the blog click.
+4. `followUpReplies`: add proof, caveat, or checklist; never bump.
+5. `blog link`: only after the X Article has delivered value.
+
+The short post must sell the X Article and image, not the external blog URL.
+
 Bad short post:
 
 ```text
@@ -81,7 +136,7 @@ Good short post:
 
 - Chinese by default.
 - 180-260 characters is the normal range.
-- First line must be a concrete claim, discovery, or case.
+- First line must be a concrete claim, discovery, or case; it must stand alone in the feed.
 - No raw blog URL.
 - One mechanism within the first two lines.
 - Mention the image or X Article naturally.
@@ -99,6 +154,27 @@ Allowed opening shapes:
 ```
 
 Use strong wording only when the next sentence gives a falsifiable mechanism.
+
+### Chinese X Style Adapter
+
+You may borrow structure from strong Chinese technical creators, not their identity or aggression:
+
+- `强判断`: one sharp claim, immediately backed by mechanism;
+- `反常识`: name the common wrong frame, then replace it;
+- `案例转折`: "我以为 X，后来发现根因是 Y";
+- `工具感`: give a compact checklist or decision frame.
+
+Never imitate personal attacks, political rage, slurs, or outrage bait. The account should read as technical, sharp, and useful.
+
+Remove AI-smelling filler:
+
+- `我写了一篇`;
+- `欢迎阅读`;
+- `希望对你有帮助`;
+- `用白话说`;
+- `这个问题很有意思`;
+- `我们可以看到`;
+- generic questions such as `你怎么看`.
 
 ## X Article Structure
 
@@ -137,6 +213,7 @@ Rules:
 - Prefer one reusable frame over many details.
 - Put the blog link only at the end under `博客原文：`.
 - Avoid theatrical phrases such as `最硬的部分`.
+- If evidence is missing, write `还需要用 <metric/test> 验证` instead of pretending it is proven.
 
 ## Image Prompt Rules
 
@@ -158,6 +235,8 @@ AI 性能优化，先别谈建议
 先把验证链路闭合
 ```
 
+When asked to generate the image, use the built-in `imagegen` skill directly. Do not require `OPENAI_API_KEY` for the preferred path. After generation, register the chosen image into the social-growth expected path with `social:register-image`.
+
 ## Follow-Up Replies
 
 Write 1-2 replies only when they add substance:
@@ -168,6 +247,18 @@ Write 1-2 replies only when they add substance:
 - one implementation constraint.
 
 No generic bumping, no mass replies, no unrelated thread hijacking.
+
+## Rewrite Pass
+
+Before returning the JSON, do this pass:
+
+- Does the first line say something a technical reader can agree or disagree with?
+- Is the mechanism visible before the first blank line?
+- Can the image be understood without the article?
+- Does the X Article separate problem and cause?
+- Does the blog URL appear only at the end of the X Article?
+- Are replies adding new substance rather than repeating the hook?
+- Would this still read naturally if a human technical lead posted it?
 
 ## Quality Gate
 

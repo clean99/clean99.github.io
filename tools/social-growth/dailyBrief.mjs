@@ -6,6 +6,7 @@ import {
   buildEngagementSearchPlan,
 } from './engagement.mjs';
 import { createMetricsTemplateFromQueue } from './ledger.mjs';
+import { buildGrowthFunnel } from './funnel.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
 import {
   buildMetricsReadiness,
@@ -64,12 +65,14 @@ export async function buildDailyExecutionBrief({
     generatedAt,
   });
   const summary = summarizeGrowthLedger(ledger);
+  const funnel = buildGrowthFunnel(ledger);
   const actionItems = buildActionItems({
     dayReadiness,
     engagementSearch,
     engagementPlan,
     metricsReadiness,
     profileAudit,
+    funnel,
     day,
   });
 
@@ -80,11 +83,13 @@ export async function buildDailyExecutionBrief({
       dayReadiness,
       metricsReadiness,
       profileAudit,
+      funnel,
     }),
     day: dayReadiness.day,
     date: dayReadiness.date,
     timezone: dayReadiness.timezone,
     summary,
+    funnel,
     dayReadiness,
     engagementSearch,
     engagementPlan,
@@ -167,6 +172,24 @@ Command:
 npm run social:metrics-cycle -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
 \`\`\`
 
+## Conversion Funnel
+
+- Status: ${brief.funnel.status}
+- Bottleneck: ${brief.funnel.bottleneck}
+- Views: ${brief.funnel.totals.views}
+- Interactions: ${brief.funnel.totals.interactions}
+- Profile clicks: ${brief.funnel.totals.profileClicks}
+- Follows: ${brief.funnel.totals.follows}
+- Interaction / view: ${formatPercent(brief.funnel.rates.interactionPerView)}
+- Profile click / view: ${formatPercent(brief.funnel.rates.profileClickPerView)}
+- Follow / profile click: ${formatPercent(brief.funnel.rates.followPerProfileClick)}
+
+Command:
+
+\`\`\`bash
+npm run social:funnel -- --ledger data/social-growth/ledger.json --format markdown
+\`\`\`
+
 ## Profile
 
 - Audit status: ${brief.profileAudit.status}
@@ -203,6 +226,7 @@ function buildActionItems({
   engagementPlan,
   metricsReadiness,
   profileAudit,
+  funnel,
   day,
 }) {
   const actions = [];
@@ -249,6 +273,13 @@ function buildActionItems({
       reason: `${metricsReadiness.postsWithAnyMetrics}/${metricsReadiness.totalPosts} published posts have any metrics and followersReady=${metricsReadiness.followersReady}.`,
     });
   }
+  if (funnel.status !== 'needs_published_posts' && funnel.status !== 'converting') {
+    actions.push({
+      priority: 'P1',
+      action: `Fix conversion funnel bottleneck: ${funnel.bottleneck}`,
+      reason: funnel.nextActions[0]?.reason || 'The follower funnel is not yet converting.',
+    });
+  }
   if (profileAudit.status === 'needs_work') {
     actions.push({
       priority: 'P2',
@@ -266,18 +297,23 @@ function buildActionItems({
   return actions;
 }
 
-function briefStatus({ dayReadiness, metricsReadiness, profileAudit }) {
+function briefStatus({ dayReadiness, metricsReadiness, profileAudit, funnel }) {
   if (dayReadiness.readySlots === 0) return 'needs_publish_readiness';
   if (!metricsReadiness.totalPosts) return 'ready_to_publish';
   if (!metricsReadiness.followersReady || metricsReadiness.postsWithAnyMetrics < metricsReadiness.totalPosts) {
     return 'needs_metrics_capture';
   }
   if (profileAudit.status === 'needs_work') return 'needs_profile_conversion';
+  if (funnel.status !== 'converting') return 'needs_funnel_optimization';
   return 'ready_for_next_iteration';
 }
 
 function round(value) {
   return Math.round(Number(value || 0) * 10) / 10;
+}
+
+function formatPercent(value) {
+  return `${Math.round(Number(value || 0) * 10000) / 100}%`;
 }
 
 function toIsoString(value) {

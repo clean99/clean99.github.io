@@ -12,6 +12,18 @@
       "prompt": "这段内容很 AI 味，帮我改成适合简中 X 技术读者的版本。",
       "expected_output": "借用中文 X 结构但不模仿攻击性语气；去掉泛泛元叙事；保留可验证机制和读者收益；给出可应用到 social:apply-copy 的字段。",
       "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "参考 technical-sharing-doc，把一篇长技术文章压成 X 的短帖、配图、X Article 和回复资产。",
+      "expected_output": "不是摘要博客，而是输出 X-native package：短帖首屏承载问题和机制，image 2 提示词承载视觉机制，X Article 在 X 内完成问题/原因/方案/验证，博客链接只放结尾。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "这篇还没有充分数据，帮我写 X Article 但不要夸大效果。",
+      "expected_output": "保留可复用框架，但把未验证部分写成待验证指标或测试；不能伪造数据；follow-up replies 补充验证口径和失败边界。",
+      "files": []
     }
   ]
 }

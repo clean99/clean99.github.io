@@ -30,11 +30,11 @@ The code can automate safe local work:
 - run a publish preflight that checks image readiness and the public-action confirmation boundary;
 - export an image brief with the exact image 2 / `gpt-image-2` prompt, built-in `imagegen` instructions, CLI fallback command, visual review checklist, expected output path, and register command;
 - write a single growth status dashboard that combines follower pace, queue coverage, publish preflight, blockers, and next commands;
-- write a daily execution brief that combines publish readiness, engagement search/capture, metrics capture, profile conversion, and action order;
+- write a daily execution brief that combines publish readiness, engagement search/capture, metrics capture, conversion funnel, profile conversion, and action order;
 - run the local daily preparation loop in one command;
 - run a safe Codex automation cycle that refreshes local artifacts, status, preflight, image brief, and profile audit without public X actions;
 - export and apply a JSON copy override so a separate writing skill can replace generated short-post, X Article, image prompt, fallback thread, and replies before preflight;
-- write an X technical sharing brief that packages the source article, current queue item, causality chain, growth feedback from the ledger, and copy override template for the `x-technical-sharing` skill;
+- write an X technical sharing brief that packages the source article, current queue item, causality chain, X-native writing frame, growth feedback from the ledger, and copy override template for the `x-technical-sharing` skill;
 - run a full dry-run cycle that simulates publication, metrics capture, ledger update, reporting, and recommendations in ignored local copies;
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
@@ -49,6 +49,7 @@ The code can automate safe local work:
 - initialize a one-week follower target ledger;
 - append follower and interaction snapshots;
 - calculate follower and interaction progress from snapshots;
+- diagnose the follower funnel from views to interactions, profile clicks, and follows;
 - generate reports.
 
 The code must not silently perform public social actions. Posting, replying, liking, reposting, following, or changing account state in Chrome is a public action from the user's account. The browser operator must stop at the action point and get confirmation before the final click.
@@ -80,6 +81,7 @@ Core records:
 - `PublishPreflight`: the selected package, expected image path, preferred built-in image generation handoff, CLI fallback command, blockers, and browser stop points.
 - `MetricsSnapshot`: date, follower count, per-post interactions.
 - `GrowthReport`: follower delta, target progress, interaction totals, top posts.
+- `GrowthFunnel`: views, interactions, profile clicks, follows, conversion rates, bottleneck, and next actions.
 
 ## Commands
 
@@ -191,7 +193,7 @@ Generate the complete writing brief for that skill:
 npm run social:x-tech-brief -- --day 1 --slot 1
 ```
 
-This writes `data/social-growth/x-tech-briefs/<queue-id>.md` and a matching copy override JSON under `data/social-growth/copy-overrides/`. The brief includes the source article, current generated copy, extracted source points, the problem/cause/mechanism chain, ledger-based growth feedback, and the exact fields the writing skill should replace.
+This writes `data/social-growth/x-tech-briefs/<queue-id>.md` and a matching copy override JSON under `data/social-growth/copy-overrides/`. The brief includes the source article, current generated copy, extracted source points, the problem/cause/mechanism chain, an X-native writing frame, ledger-based growth feedback, and the exact fields the writing skill should replace.
 The growth feedback section carries target pace, measured variant performance, measured article/topic performance, and recommendations. Use it to reuse mechanisms that create follows, profile clicks, bookmarks, replies, reposts, or quotes without duplicating the old wording.
 
 Apply the optimized copy back to the local queue:
@@ -340,6 +342,14 @@ npm run social:metrics-cycle -- --metrics data/social-growth/posts.local.json --
 ```
 
 This command creates or merges the metrics template from published queue items, parses copied visible X profile/post text, writes `data/social-growth/metrics-cycle.md`, writes a growth report, writes recommendations, and appends a ledger snapshot when the follower count is present. It is read-only with respect to X: it does not open Chrome or perform public account actions.
+
+Diagnose the conversion funnel:
+
+```bash
+npm run social:funnel -- --ledger data/social-growth/ledger.json --format markdown
+```
+
+This reports whether the current blocker is missing published posts, missing view data, weak interactions, weak profile handoff, or weak follow conversion. Use it before scaling more posts; a post with views but no profile clicks is a packaging problem, while profile clicks without follows is a profile/pinned-post problem.
 
 Audit the profile conversion surface from copied visible profile text:
 
@@ -500,8 +510,9 @@ Do not commit private analytics or account history.
 29. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
 30. Run `npm run social:snapshot` if you did not use `social:metrics-cycle`.
 31. Run `npm run social:report -- --format markdown`.
-32. Run `npm run social:recommend -- --format markdown`.
-33. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+32. Run `npm run social:funnel -- --format markdown`.
+33. Run `npm run social:recommend -- --format markdown`.
+34. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 For regular operation, replace steps 1-6 with:
 

@@ -34,6 +34,7 @@ export async function buildXTechnicalSharingBrief({
     now,
   });
   const article = findSourceArticle(articles, selected);
+  const frame = article ? articleFrame(article) : null;
   const template = buildCopyOverrideTemplate(selected, {
     source: 'x-technical-sharing',
     contentStatus: 'needs_x_technical_sharing',
@@ -47,7 +48,8 @@ export async function buildXTechnicalSharingBrief({
     skillPath,
     selected,
     article,
-    frame: article ? articleFrame(article) : null,
+    frame,
+    xNativeFrame: buildXNativeFrame(frame),
     keyPoints: article ? briefKeyPoints(article.text, 6) : [],
     growthFeedback: buildGrowthFeedback(ledger, selected),
     template,
@@ -114,6 +116,33 @@ ${steps}
 Extracted source points:
 
 ${keyPoints}
+
+## X Native Frame
+
+First-screen job:
+
+- ${brief.xNativeFrame.firstScreenJob}
+
+Opening options:
+
+${brief.xNativeFrame.openingOptions.map((item) => `- ${item}`).join('\n')}
+
+Image job:
+
+- Headline: ${brief.xNativeFrame.imageHeadline}
+- Promise: ${brief.xNativeFrame.imagePromise}
+
+X Article promise:
+
+- ${brief.xNativeFrame.articlePromise}
+
+Reply assets:
+
+${brief.xNativeFrame.replyAssets.map((item) => `- ${item}`).join('\n')}
+
+Anti-patterns to remove:
+
+${brief.xNativeFrame.antiPatterns.map((item) => `- ${item}`).join('\n')}
 
 ## Growth Feedback
 
@@ -196,6 +225,54 @@ function briefKeyPoints(text, limit) {
     .filter((point) => !/gpt-image/i.test(point))
     .filter((point) => !/图[：:]/u.test(point))
     .slice(0, limit);
+}
+
+function buildXNativeFrame(frame) {
+  if (!frame) {
+    return {
+      firstScreenJob: 'Turn the source into one concrete Chinese claim plus one falsifiable mechanism.',
+      openingOptions: [
+        '别把「主题」写成经验总结，先说清楚问题会怎么失败。',
+        '我发现真正有用的不是结论，而是可复用的判断顺序。',
+      ],
+      imageHeadline: '把机制画出来',
+      imagePromise: '让读者在移动端一眼看到问题、机制和证据。',
+      articlePromise: 'Inside X, finish the problem -> cause -> mechanism -> evidence chain before sending readers to the blog.',
+      replyAssets: [
+        'one failure mode the short post did not have room to explain',
+        'one checklist that helps readers reuse the frame',
+      ],
+      antiPatterns: [
+        '我写了一篇',
+        '欢迎阅读',
+        '用白话说',
+        '这个需求很直接',
+      ],
+    };
+  }
+
+  return {
+    firstScreenJob: `Make the reader feel why "${frame.falseFrame}" fails, then show "${frame.mechanism}" as the reusable mechanism.`,
+    openingOptions: [
+      `别把「${frame.topic}」做成${frame.falseFrame}。真正要看的是 ${frame.mechanism}。`,
+      `很多人把「${frame.topic}」想错了：问题不在${frame.falseFrame}，而在${frame.betterFrame}。`,
+      `我发现「${frame.topic}」最该先画成一张图：${frame.mechanism}。`,
+    ],
+    imageHeadline: `${frame.topic}：先看机制`,
+    imagePromise: `Use one mobile-readable diagram to show ${frame.mechanism}, not a decorative cover.`,
+    articlePromise: `Explain ${frame.failureMode} first, then separate cause, mechanism, tradeoff, and proof before the blog link.`,
+    replyAssets: [
+      `Failure mode: ${frame.failureMode}`,
+      `Checklist: ${frame.frameworkSteps.slice(0, 3).join(' / ')}`,
+    ],
+    antiPatterns: [
+      '我写了一篇',
+      '技术文章只有留下框架才有用',
+      '欢迎阅读',
+      '怎么看',
+      '点赞转发',
+    ],
+  };
 }
 
 function buildGrowthFeedback(ledger, selected) {

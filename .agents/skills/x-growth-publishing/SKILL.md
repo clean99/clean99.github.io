@@ -42,7 +42,7 @@ It also writes `data/social-growth/profile-update.md` when profile conversion ne
 It writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` commands that can prefill Chrome for the X Article and image-backed short post while preserving the final confirmation boundary.
 It writes `data/social-growth/engagement-search.md` with read-only X search URLs for finding relevant technical threads.
 It writes `data/social-growth/engagement-plan.md` from copied relevant thread opportunities when available; missing opportunities are a capture task, not an automation blocker.
-It writes `data/social-growth/daily-brief.md` as the single operator-facing action order across publish readiness, engagement, metrics, and profile conversion.
+It writes `data/social-growth/daily-brief.md` as the single operator-facing action order across publish readiness, engagement, metrics, conversion funnel, and profile conversion.
 
 For day-level readiness across all publish slots, run:
 
@@ -82,7 +82,7 @@ Prefer this handoff command because it writes both the JSON template and a sourc
 npm run social:x-tech-brief -- --day 1 --slot 1
 ```
 
-That brief also includes ledger-based growth feedback: target pace, measured variant performance, measured article/topic performance, and the next recommendations. Treat those signals as writing constraints before optimizing the next X copy.
+That brief also includes an X-native writing frame plus ledger-based growth feedback: target pace, measured variant performance, measured article/topic performance, and the next recommendations. Treat those signals as writing constraints before optimizing the next X copy.
 
 After the JSON is optimized, apply it locally:
 
@@ -257,11 +257,16 @@ For single-item control:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
-26. Generate the next optimization decision:
+26. Diagnose the conversion funnel:
+   ```bash
+   npm run social:funnel -- --ledger data/social-growth/ledger.json --format markdown
+   ```
+   This separates weak reach, weak interaction, weak profile handoff, and weak follow conversion. Fix the bottleneck before scaling more posts.
+27. Generate the next optimization decision:
    ```bash
    npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
    ```
-27. Regenerate the week-level plan after each queue or ledger update:
+28. Regenerate the week-level plan after each queue or ledger update:
    ```bash
    npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/weekly-plan.md
    ```
@@ -359,6 +364,7 @@ Post Score = follows*25 + reposts*8 + quotes*8 + replies*6 + bookmarks*5 + likes
 
 After every snapshot:
 
+- run `npm run social:funnel -- --ledger data/social-growth/ledger.json --format markdown`;
 - run `npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown`;
 - run `npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md` after profile text is captured;
 - double down on topics that create follows, replies, reposts, bookmarks, or profile clicks;

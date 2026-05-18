@@ -53,6 +53,7 @@ import {
 } from './imageBrief.mjs';
 import { runXGrowthDryRun } from './flowDryRun.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from './recommendations.mjs';
+import { buildGrowthFunnel, formatGrowthFunnelMarkdown } from './funnel.mjs';
 import {
   buildWeeklyExecutionPlan,
   formatWeeklyExecutionPlanMarkdown,
@@ -122,6 +123,14 @@ if (command === 'articles') {
     console.log(formatRecommendationsMarkdown(ledger));
   } else {
     console.log(JSON.stringify(buildGrowthRecommendations(ledger), null, 2));
+  }
+} else if (command === 'funnel') {
+  const ledgerPath = args.ledger || 'data/social-growth/ledger.json';
+  const ledger = await readJson(ledgerPath);
+  if (args.format === 'markdown') {
+    console.log(formatGrowthFunnelMarkdown(ledger));
+  } else {
+    console.log(JSON.stringify(buildGrowthFunnel(ledger), null, 2));
   }
 } else if (command === 'profile-audit') {
   const queue = args.queue === 'false' ? null : await readJson(args.queue || 'data/social-growth/queue.json');
@@ -796,6 +805,7 @@ function printHelp() {
   npm run social:report -- --ledger data/social-growth/example-ledger.json
   npm run social:report -- --ledger data/social-growth/example-ledger.json --format markdown
   npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
+  npm run social:funnel -- --ledger data/social-growth/ledger.json --format markdown
   npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
   npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md
   npm run social:validate -- --queue data/social-growth/queue.json --format markdown

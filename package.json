@@ -20,6 +20,7 @@
     "social:engagement": "node tools/social-growth/cli.mjs engagement-plan",
     "social:engagement-search": "node tools/social-growth/cli.mjs engagement-search",
     "social:flow-dry-run": "node tools/social-growth/cli.mjs flow-dry-run",
+    "social:funnel": "node tools/social-growth/cli.mjs funnel",
     "social:handoff": "node tools/social-growth/cli.mjs handoff",
     "social:image-brief": "node tools/social-growth/cli.mjs image-brief",
     "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",
