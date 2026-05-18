@@ -46,7 +46,7 @@ export function buildGrowthExperimentPlan({
         ? `npm run social:apply-copy -- --input data/social-growth/copy-overrides/${experiments[0].queueId}.json`
         : 'No candidate selected.',
       status: experiments[0]
-        ? 'npm run social:status -- --day 1 --slot 1 --publishMode thread_fallback --out data/social-growth/status.md'
+        ? 'npm run social:status -- --day today --slot 1 --publishMode thread_fallback --out data/social-growth/status.md'
         : 'No candidate selected.',
     },
     boundary: 'Local experiment planning only. Do not publish, upload media, reply, like, repost, follow, edit profile, or pin content without action-time confirmation.',

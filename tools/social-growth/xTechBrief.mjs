@@ -232,7 +232,7 @@ After rewriting:
 \`\`\`bash
 npm run social:apply-copy -- --input ${brief.output.templatePath}
 npm run social:validate -- --queue data/social-growth/queue.json --format markdown
-npm run social:flow-dry-run -- --day 1 --slot 1 --out data/social-growth/dry-run/flow-dry-run.md
+npm run social:flow-dry-run -- --day today --slot 1 --out data/social-growth/dry-run/flow-dry-run.md
 \`\`\`
 
 Boundary: this brief is local-only. Do not open Chrome or perform public X actions from it.

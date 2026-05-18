@@ -1589,29 +1589,29 @@ function printHelp() {
   npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:daily -- --limit 5 --package-limit 3
-  npm run social:automation -- --day 1 --slot 1
   npm run social:automation -- --day today --slot 1
-  npm run social:scheduled-run -- --day 1 --slot 1
+  npm run social:automation -- --day today --slot 1
+  npm run social:scheduled-run -- --day today --slot 1
   npm run social:x-profile-diagnostics -- --out data/social-growth/x-profile-diagnostics.md
-  npm run social:browser-readiness -- --day 1 --slot 1 --out data/social-growth/browser-readiness.md
+  npm run social:browser-readiness -- --day today --slot 1 --out data/social-growth/browser-readiness.md
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
   npm run social:daily-brief -- --day 1 --out data/social-growth/daily-brief.md
   npm run social:engagement-search -- --out data/social-growth/engagement-search.md
   npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md
-  npm run social:copy-template -- --day 1 --slot 1
-  npm run social:x-tech-brief -- --day 1 --slot 1
+  npm run social:copy-template -- --day today --slot 1
+  npm run social:x-tech-brief -- --day today --slot 1
   npm run social:apply-copy -- --input data/social-growth/copy-overrides/<queue-id>.json
-  npm run social:flow-dry-run -- --day 1 --slot 1 --out data/social-growth/dry-run/flow-dry-run.md
+  npm run social:flow-dry-run -- --day today --slot 1 --out data/social-growth/dry-run/flow-dry-run.md
   npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json
-  npm run social:status -- --day 1 --slot 1 --out data/social-growth/status.md
-  npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md
-  npm run social:image-brief -- --day 1 --slot 1
+  npm run social:status -- --day today --slot 1 --out data/social-growth/status.md
+  npm run social:preflight -- --day today --slot 1 --out data/social-growth/publish-preflight.md
+  npm run social:image-brief -- --day today --slot 1
   npm run social:image-backlog -- --day 1 --out data/social-growth/image-backlog.md
-  npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md
-  npm run social:confirmation -- --day 1 --slot 1 --out data/social-growth/publish-confirmation.md
-  npm run social:register-image -- --day 1 --slot 1 --source /path/to/generated.png
+  npm run social:x-prep -- --day today --slot 1 --out data/social-growth/x-publish-prep.md
+  npm run social:confirmation -- --day today --slot 1 --out data/social-growth/publish-confirmation.md
+  npm run social:register-image -- --day today --slot 1 --source /path/to/generated.png
   npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out data/social-growth/thread-reply-handoff.md --id <queue-id> --url <x-post-url>
-  npm run social:post-publish-recovery -- --day 1 --slot 1 --url <x-post-url>
+  npm run social:post-publish-recovery -- --day today --slot 1 --url <x-post-url>
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt
   npm run social:browser-metrics-capture -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --metrics data/social-growth/posts.local.json

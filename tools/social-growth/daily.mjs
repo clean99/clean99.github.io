@@ -184,7 +184,7 @@ ${formatValidationMarkdown(validation)}
 ## Next Browser Actions
 
 1. Generate the image from \`${firstPackage}/image-prompt.txt\`.
-2. Run \`npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md\` to prepare the \`baoyu-post-to-x\` Chrome handoff.
+2. Run \`npm run social:x-prep -- --day today --slot 1 --out data/social-growth/x-publish-prep.md\` to prepare the \`baoyu-post-to-x\` Chrome handoff.
 3. Prepare the X Article from \`${firstPackage}/x-article.md\`.
 4. Stop before the final public publish click and confirm account/content.
 5. After the X Article or thread is public, create the short post from \`${firstPackage}/short-post.txt\`, attach the image, and link to the X Article URL.
