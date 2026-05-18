@@ -349,7 +349,7 @@ function nextAction(result) {
     return 'Fix the media upload path before opening the final thread handoff; the first post needs the generated image attached.';
   }
   if (result.automation.browserReadiness?.status === 'needs_x_login') {
-    return `Read ${result.paths.profileDiagnostics || 'the X profile diagnostics report'} for normal Chrome profile candidates. If @Clean993 is already logged in there, rerun login-recovery with the listed --xProfileDir/--xProfileDirectory pair; otherwise log into the publishing Chrome profile and rerun browser readiness.`;
+    return `Read ${result.paths.profileDiagnostics || 'the X profile diagnostics report'} for normal Chrome profile candidates. If diagnostics says the normal Chrome profile dir is locked without CDP, close normal Chrome before rerunning login-recovery with the listed --xProfileDir/--xProfileDirectory pair; otherwise log into the publishing Chrome profile and rerun browser readiness.`;
   }
   if (result.automation.status === 'needs_copy_review') {
     return 'Run the X technical sharing brief and apply a copy override before opening Chrome for browser confirmation.';

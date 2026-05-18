@@ -2882,6 +2882,7 @@ test('x profile diagnostics lists Chrome profiles without public actions', async
     await writeFile(join(normalChromeDir, 'Profile 3', 'Preferences'), `${JSON.stringify({
       account_info: [{ email: 'clean993@example.com' }],
     })}\n`);
+    await writeFile(join(normalChromeDir, 'SingletonLock'), 'locked');
 
     const diagnostics = await buildXProfileDiagnostics({
       profileDir,
@@ -2900,9 +2901,12 @@ test('x profile diagnostics lists Chrome profiles without public actions', async
     assert.equal(diagnostics.profiles[1].accountHint, 'f***@example.com');
     assert.equal(diagnostics.alternateProfileDirs.length, 1);
     assert.equal(diagnostics.alternateProfileDirs[0].profiles[0].id, 'Profile 3');
+    assert.equal(diagnostics.alternateProfileDirs[0].profileDirState.status, 'locked_without_debug');
     assert.match(markdown, /--xProfileDirectory 'Profile 1'/);
     assert.match(markdown, /Alternate Chrome Profile Dirs/);
+    assert.match(markdown, /Profile dir state: locked_without_debug/);
     assert.match(markdown, /--xProfileDir .*normal-chrome.* --xProfileDirectory 'Profile 3'/);
+    assert.match(markdown, /close normal Chrome first/);
     assert.match(markdown, /Read-only diagnostics only/);
     assert.match(persisted, /X Profile Diagnostics/);
   } finally {

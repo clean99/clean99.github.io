@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, lstatSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -20,6 +20,7 @@ export async function buildXProfileDiagnostics({
     Number(debugPort) || null,
     ...discoverDebugPorts(resolvedProfileDir),
   ]);
+  const profileDirState = buildProfileDirState(resolvedProfileDir, ports);
   const liveBrowsers = [];
 
   for (const port of ports) {
@@ -40,6 +41,7 @@ export async function buildXProfileDiagnostics({
   return {
     generatedAt: toIsoString(generatedAt),
     profileDir: resolvedProfileDir,
+    profileDirState,
     profiles,
     alternateProfileDirs,
     liveBrowsers,
@@ -81,6 +83,8 @@ Generated at: ${diagnostics.generatedAt}
 ## Publishing User Data Dir
 
 \`${diagnostics.profileDir}\`
+
+${formatProfileDirState(diagnostics.profileDirState)}
 
 ## Chrome Profiles
 
@@ -132,6 +136,7 @@ async function readAlternateProfileDirs({
       Number(debugPort) || null,
       ...discoverDebugPorts(resolvedDir),
     ]);
+    const profileDirState = buildProfileDirState(resolvedDir, ports);
     const liveBrowsers = [];
     for (const port of ports) {
       const pages = await readXPages(port);
@@ -145,6 +150,7 @@ async function readAlternateProfileDirs({
     if (profiles.length || liveBrowsers.length) {
       alternates.push({
         profileDir: resolvedDir,
+        profileDirState,
         profiles,
         liveBrowsers,
       });
@@ -241,7 +247,12 @@ function buildRecommendations({ profiles, liveBrowsers, alternateProfileDirs = [
   for (const alternate of alternateProfileDirs) {
     if (!alternate.profiles.length) continue;
     const suggested = alternate.profiles.find((profile) => profile.isLastUsed) || alternate.profiles[0];
-    recommendations.push(`If @Clean993 is already logged into normal Chrome, rerun login-recovery with --xProfileDir ${shellQuote(alternate.profileDir)} --xProfileDirectory ${shellQuote(suggested.id)}, or choose the exact listed profile from that dir.`);
+    const command = `--xProfileDir ${shellQuote(alternate.profileDir)} --xProfileDirectory ${shellQuote(suggested.id)}`;
+    if (alternate.profileDirState?.status === 'locked_without_debug') {
+      recommendations.push(`Normal Chrome profile dir ${alternate.profileDir} is locked and has no CDP port. Do not run browser handoff against it while normal Chrome is open; close normal Chrome first, then rerun login-recovery with ${command}, or log into the publishing Chrome profile instead.`);
+    } else {
+      recommendations.push(`If @Clean993 is already logged into normal Chrome, rerun login-recovery with ${command}, or choose the exact listed profile from that dir.`);
+    }
   }
   return recommendations;
 }
@@ -259,10 +270,22 @@ function formatAlternateProfileDir(item) {
 
   return `### ${item.profileDir}
 
+${formatProfileDirState(item.profileDirState)}
+
 ${profiles}
 
 Live X pages:
 ${liveBrowsers}`;
+}
+
+function formatProfileDirState(state = {}) {
+  const lockFiles = state.lockFiles?.length ? state.lockFiles.join(', ') : 'none';
+  const debugPorts = state.debugPorts?.length ? state.debugPorts.join(', ') : 'none';
+  return [
+    `- Profile dir state: ${state.status || 'unknown'}`,
+    `- Lock files: ${lockFiles}`,
+    `- CDP debug ports: ${debugPorts}`,
+  ].join('\n');
 }
 
 function formatProfile(profile, { profileDir, includeProfileDir }) {
@@ -291,6 +314,31 @@ async function fetchJson(url) {
 
 function uniqueNumbers(values) {
   return [...new Set(values.filter((value) => Number.isInteger(value) && value > 0))];
+}
+
+function buildProfileDirState(profileDir, debugPorts = []) {
+  const lockFiles = ['SingletonLock', 'SingletonSocket']
+    .filter((file) => pathExistsOrSymlink(join(profileDir, file)));
+  const locked = lockFiles.length > 0;
+  const status = debugPorts.length
+    ? 'debuggable'
+    : locked ? 'locked_without_debug' : 'not_running_or_unlocked';
+
+  return {
+    status,
+    locked,
+    lockFiles,
+    debugPorts,
+  };
+}
+
+function pathExistsOrSymlink(filePath) {
+  try {
+    lstatSync(filePath);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function uniqueStrings(values) {
