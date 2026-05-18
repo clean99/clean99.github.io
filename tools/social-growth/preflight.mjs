@@ -50,9 +50,6 @@ export async function buildPublishPreflight({
   if (!imageReady) {
     blockers.push(`Image file is missing: ${imagePath}`);
   }
-  if (!imageReady && !hasOpenAiKey) {
-    blockers.push('OPENAI_API_KEY is missing, so the local gpt-image-2 CLI cannot generate the image.');
-  }
 
   return {
     generatedAt: toIsoString(now),
@@ -73,11 +70,17 @@ export async function buildPublishPreflight({
     },
     image: {
       model: selected.media?.model || 'gpt-image-2',
+      preferredGenerator: 'imagegen built-in tool',
       promptFile: join(packageDir, 'image-prompt.txt'),
       outputPath: imagePath,
       ready: imageReady,
       hasOpenAiKey,
-      keyRequired: !imageReady,
+      keyRequired: false,
+      cliFallbackKeyRequired: !imageReady,
+      builtInInstructions: builtInImagegenInstructions({
+        promptFile: join(packageDir, 'image-prompt.txt'),
+        outputPath: imagePath,
+      }),
       command: imageCommand({
         promptFile: join(packageDir, 'image-prompt.txt'),
         outputPath: imagePath,
@@ -122,11 +125,21 @@ ${blockers}
 ## Image
 
 - Model: ${preflight.image.model}
+- Preferred generator: ${preflight.image.preferredGenerator}
 - Prompt file: \`${preflight.image.promptFile}\`
 - Output path: \`${preflight.image.outputPath}\`
 - Image ready: ${preflight.image.ready}
 - OPENAI_API_KEY present: ${preflight.image.hasOpenAiKey}
-- OPENAI_API_KEY required now: ${preflight.image.keyRequired}
+- OPENAI_API_KEY required for preferred path: ${preflight.image.keyRequired}
+- OPENAI_API_KEY required for CLI fallback: ${preflight.image.cliFallbackKeyRequired}
+
+Preferred built-in imagegen path:
+
+\`\`\`text
+${preflight.image.builtInInstructions}
+\`\`\`
+
+CLI fallback only when explicitly requested:
 
 \`\`\`bash
 ${preflight.image.command}
@@ -198,6 +211,15 @@ async function fileExists(filePath) {
     if (error.code === 'ENOENT') return false;
     throw error;
   }
+}
+
+function builtInImagegenInstructions({ promptFile, outputPath }) {
+  return [
+    `Use the built-in imagegen skill with the prompt file: ${promptFile}`,
+    'Generate one 1536x1024 landscape editorial infographic with image 2 / gpt-image-2 quality.',
+    `After reviewing the output, copy or register the final PNG into: ${outputPath}`,
+    'Then rerun publish preflight before opening Chrome.',
+  ].join('\n');
 }
 
 function imageCommand({ promptFile, outputPath }) {

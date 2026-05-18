@@ -10,6 +10,12 @@ The repeatable workflow is also captured as a project skill:
 
 Use that skill for future requests about X posting, blog distribution, Chinese X growth, X Article creation, image-backed posts, follower tracking, or content optimization.
 
+## Skill Reuse
+
+- `imagegen`: primary image generation path for X post visuals. It uses the built-in image 2 / `gpt-image-2` capability and does not require `OPENAI_API_KEY`; the final PNG still needs to be copied or registered into `output/imagegen/<queue-id>.png`.
+- `baoyu-post-to-x`: useful Chrome/CDP helper for preparing X Articles and regular image posts. It can prefill content in real Chrome while preserving the final manual publish boundary.
+- `baoyu-danger-x-to-markdown`: useful only for consented research/archive workflows because it uses a reverse-engineered X API. It is not part of the default publishing or metrics path.
+
 ## Boundary
 
 The code can automate safe local work:
@@ -22,14 +28,14 @@ The code can automate safe local work:
 - export a publish package with image, X Article, short post, thread fallback, and checklist files;
 - validate each candidate against the X publishing quality gate before daily packages are exported;
 - run a publish preflight that checks image readiness and the public-action confirmation boundary;
-- export an image brief with the exact `gpt-image-2` prompt, visual review checklist, expected output path, and register command;
+- export an image brief with the exact image 2 / `gpt-image-2` prompt, built-in `imagegen` instructions, CLI fallback command, visual review checklist, expected output path, and register command;
 - write a single growth status dashboard that combines follower pace, queue coverage, publish preflight, blockers, and next commands;
 - run the local daily preparation loop in one command;
 - run a safe Codex automation cycle that refreshes local artifacts, status, preflight, image brief, and profile audit without public X actions;
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
 - audit the X profile's follower-conversion signals from copied visible profile text;
-- produce `gpt-image-2` image prompts for each candidate;
+- produce image 2 / `gpt-image-2` image prompts for each candidate;
 - produce an X Article draft before the blog link;
 - mark published X URLs back into the queue;
 - initialize a one-week follower target ledger;
@@ -63,7 +69,7 @@ Core records:
 - The X Article gate also rejects obvious extraction artifacts, including section-heading fragments glued to body text and Markdown table fragments inside bullets.
 - `PublishQueue`: local draft queue of candidates to hand to Chrome.
 - `WeeklyExecutionPlan`: seven-day posting and metrics-capture schedule tied to the follower target.
-- `PublishPreflight`: the selected package, expected image path, image generation command, blockers, and browser stop points.
+- `PublishPreflight`: the selected package, expected image path, preferred built-in image generation handoff, CLI fallback command, blockers, and browser stop points.
 - `MetricsSnapshot`: date, follower count, per-post interactions.
 - `GrowthReport`: follower delta, target progress, interaction totals, top posts.
 
@@ -109,7 +115,7 @@ This performs only local work:
 - writes `data/social-growth/status.md`;
 - writes `data/social-growth/automation-run.md`.
 
-It is the preferred recurring entry point. It still does not publish, upload media, reply, like, repost, follow, or edit the X profile. If the output says image generation is blocked, generate or register the PNG first, then rerun preflight before opening Chrome.
+It is the preferred recurring entry point. It still does not publish, upload media, reply, like, repost, follow, or edit the X profile. If the output says the image file is missing, generate it with built-in `imagegen` or register an existing PNG first, then rerun preflight before opening Chrome.
 
 Draft X candidates for one post:
 
@@ -174,7 +180,7 @@ Run a publish preflight for the next slot:
 npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md
 ```
 
-The preflight writes the selected queue id, package path, expected image path, `gpt-image-2` generation command, and browser stop points. It is allowed to create the local package, but it must not publish, upload, reply, like, repost, follow, or edit.
+The preflight writes the selected queue id, package path, expected image path, built-in `imagegen` handoff, CLI fallback command, and browser stop points. It is allowed to create the local package, but it must not publish, upload, reply, like, repost, follow, or edit.
 
 Write the consolidated local status dashboard:
 
@@ -190,15 +196,15 @@ Export the image generation and review handoff for the same slot:
 npm run social:image-brief -- --day 1 --slot 1
 ```
 
-This writes an ignored Markdown brief under `data/social-growth/image-briefs/`. It contains the short-post first screen, the X Article title, the exact image prompt, the `gpt-image-2` command, mobile-readability checks, and the command that registers an externally generated PNG back into the expected preflight path. Use it when the local image CLI is blocked by missing credentials or when the image needs human visual review before X upload.
+This writes an ignored Markdown brief under `data/social-growth/image-briefs/`. It contains the short-post first screen, the X Article title, the exact image prompt, the built-in `imagegen` instructions, the CLI fallback command, mobile-readability checks, and the command that registers a generated PNG back into the expected preflight path. Use it when the image is missing or needs visual review before X upload.
 
-If the image was generated outside the local CLI, register it into the expected path:
+If the image was generated by built-in `imagegen` or any other external path, register it into the expected path:
 
 ```bash
 npm run social:register-image -- --day 1 --slot 1 --source /absolute/path/to/generated.png
 ```
 
-After registering an image, run preflight again. `OPENAI_API_KEY` is required only when the image is still missing.
+After registering an image, run preflight again. `OPENAI_API_KEY` is not required for the preferred built-in `imagegen` path; it is only needed when the user explicitly requests the local CLI fallback.
 
 After a confirmed browser publish, write the public X post URL back to the queue:
 
@@ -351,7 +357,7 @@ Do not commit private analytics or account history.
 5. Run `npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md`.
 6. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
 7. Run `npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>`.
-8. Generate the image from `image-prompt.txt` with `gpt-image-2`.
+8. Generate the image from `image-prompt.txt` with built-in `imagegen`, then register the final selected PNG into the expected path.
 9. If the image was generated elsewhere, run `npm run social:register-image -- --day 1 --slot 1 --source /absolute/path/to/generated.png`.
 10. Re-run preflight and require `Status: ready`.
 11. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.

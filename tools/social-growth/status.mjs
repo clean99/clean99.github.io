@@ -139,7 +139,9 @@ ${planWarnings}
 - Package: \`${preflight?.selected?.packageDir || 'none'}\`
 - Image: \`${preflight?.image?.outputPath || 'none'}\`
 - Image ready: ${preflight?.image?.ready ?? false}
+- Preferred image generator: ${preflight?.image?.preferredGenerator || 'imagegen built-in tool'}
 - OPENAI_API_KEY present: ${preflight?.image?.hasOpenAiKey ?? false}
+- OPENAI_API_KEY required for preferred path: ${preflight?.image?.keyRequired ?? false}
 
 Blockers:
 
@@ -284,16 +286,8 @@ function preflightActions(preflight, { day, slot }) {
   if (blockers.some((blocker) => blocker.includes('Image file is missing'))) {
     actions.push({
       priority: 'P0',
-      action: `Generate the gpt-image-2 image or register an externally generated PNG for \`${selectedId}\`.`,
+      action: `Generate the image with built-in imagegen or register an externally generated PNG for \`${selectedId}\`.`,
       reason: `Selected slot Day ${day}, Slot ${slot} has no image at ${preflight.image?.outputPath || '<missing path>'}.`,
-    });
-  }
-
-  if (blockers.some((blocker) => blocker.includes('OPENAI_API_KEY is missing'))) {
-    actions.push({
-      priority: 'P0',
-      action: 'Provide OPENAI_API_KEY for local image generation, or use social:image-brief and social:register-image after external generation.',
-      reason: 'The local gpt-image-2 CLI cannot run without credentials when the image is missing.',
     });
   }
 

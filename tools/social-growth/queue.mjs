@@ -194,7 +194,7 @@ export function formatPublishChecklist(item) {
     '',
     '## Order',
     '',
-    '1. Generate the image from `image-prompt.txt` with `gpt-image-2`.',
+    '1. Generate the image from `image-prompt.txt` with built-in imagegen, then register the final PNG into the expected output path.',
     '2. Create the X Article from `x-article.md`.',
     '3. Stop before the final X Article publish click and confirm the account/content.',
     '4. Publish the X Article only after confirmation.',

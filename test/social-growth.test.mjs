@@ -877,10 +877,15 @@ test('publish preflight reports missing image and confirmation boundary', async 
     assert.equal(preflight.status, 'blocked');
     assert.equal(preflight.image.ready, false);
     assert.equal(preflight.image.hasOpenAiKey, false);
+    assert.equal(preflight.image.keyRequired, false);
+    assert.equal(preflight.image.cliFallbackKeyRequired, true);
     assert.ok(preflight.blockers.some((blocker) => blocker.includes('Image file is missing')));
+    assert.ok(preflight.blockers.every((blocker) => !blocker.includes('OPENAI_API_KEY')));
     assert.ok(preflight.browser.stopBefore.includes('final X Article publish click'));
     assert.match(markdown, /OPENAI_API_KEY present: false/);
-    assert.match(markdown, /OPENAI_API_KEY required now: true/);
+    assert.match(markdown, /OPENAI_API_KEY required for preferred path: false/);
+    assert.match(markdown, /OPENAI_API_KEY required for CLI fallback: true/);
+    assert.match(markdown, /Preferred built-in imagegen path/);
     assert.doesNotMatch(preflight.image.command, /\n\+/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
@@ -927,6 +932,8 @@ test('image brief exports prompt, visual checks, and register command', async ()
 
     assert.equal(brief.image.outputPath, preflight.image.outputPath);
     assert.match(brief.prompt, /Model: gpt-image-2/);
+    assert.match(markdown, /Generate With imagegen \(Preferred\)/);
+    assert.match(markdown, /CLI Fallback/);
     assert.match(markdown, /Visual Review Checklist/);
     assert.match(markdown, /social:register-image/);
     assert.match(markdown, /--source '\/tmp\/generated.png'/);
@@ -1109,7 +1116,7 @@ test('growth status summarizes blocker, pace, and next commands', async () => {
     assert.equal(status.weeklyPlan.missingSlots, 18);
     assert.equal(status.preflight.status, 'blocked');
     assert.equal(status.profileAudit.status, 'needs_work');
-    assert.ok(status.nextActions.some((item) => item.action.includes('Generate the gpt-image-2 image')));
+    assert.ok(status.nextActions.some((item) => item.action.includes('Generate the image with built-in imagegen')));
     assert.ok(status.nextActions.some((item) => item.action.includes('profile promise')));
     assert.match(markdown, /Follower delta: 0/);
     assert.match(markdown, /Profile Conversion/);
@@ -1222,7 +1229,7 @@ test('growth status is ready for browser confirmation when the selected image ex
   }
 });
 
-test('publish preflight is ready when image and key exist', async () => {
+test('publish preflight is ready when the generated image exists', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-preflight-ready-'));
   try {
     const queue = buildPublishQueue([
@@ -1264,6 +1271,8 @@ test('publish preflight is ready when image and key exist', async () => {
     assert.equal(preflight.blockers.length, 0);
     assert.equal(preflight.image.ready, true);
     assert.equal(preflight.image.hasOpenAiKey, true);
+    assert.equal(preflight.image.keyRequired, false);
+    assert.equal(preflight.image.cliFallbackKeyRequired, false);
     assert.match(preflight.browser.recordCommand, /social:mark-published/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
@@ -1322,6 +1331,7 @@ test('publish preflight is ready without key when a generated image is registere
     assert.equal(preflight.image.ready, true);
     assert.equal(preflight.image.hasOpenAiKey, false);
     assert.equal(preflight.image.keyRequired, false);
+    assert.equal(preflight.image.cliFallbackKeyRequired, false);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
