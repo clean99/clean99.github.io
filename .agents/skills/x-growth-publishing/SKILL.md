@@ -88,16 +88,20 @@ For single-item control:
    ```bash
    npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
    ```
-14. Fill `data/social-growth/posts.local.json` from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
-15. Record metrics twice per day:
+14. Capture read-only visible X text into the metrics template when available:
+   ```bash
+   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
+   ```
+15. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
+16. Record metrics twice per day:
    ```bash
    npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
    ```
-16. Review progress:
+17. Review progress:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
-17. Generate the next optimization decision:
+18. Generate the next optimization decision:
    ```bash
    npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
    ```

@@ -129,6 +129,12 @@ Create the metrics template from published queue items:
 npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
 ```
 
+Parse read-only visible text copied from X into the metrics template:
+
+```bash
+npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
+```
+
 Initialize a one-week follower ledger:
 
 ```bash
@@ -191,7 +197,9 @@ Use `data/social-growth/example-ledger.json` as the shape. Real local data shoul
 
 - `data/social-growth/ledger.json`
 - `data/social-growth/*.local.json`
+- `data/social-growth/*.local.txt`
 - `data/social-growth/queue.json`
+- `data/social-growth/post-texts/`
 - `data/social-growth/snapshots/`
 
 Do not commit private analytics or account history.
@@ -241,11 +249,12 @@ Do not commit private analytics or account history.
 12. Stop before each public reply and confirm the exact content and account.
 13. Mark the published URL with `npm run social:mark-published`.
 14. Run `npm run social:metrics-template`.
-15. Fill follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
-16. Run `npm run social:snapshot`.
-17. Run `npm run social:report -- --format markdown`.
-18. Run `npm run social:recommend -- --format markdown`.
-19. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+15. Use `npm run social:capture-metrics` when visible X text has been captured.
+16. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
+17. Run `npm run social:snapshot`.
+18. Run `npm run social:report -- --format markdown`.
+19. Run `npm run social:recommend -- --format markdown`.
+20. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 For regular operation, replace steps 1-4 with:
 

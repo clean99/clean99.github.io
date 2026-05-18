@@ -4,6 +4,12 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { articleFromMarkdown, addUtm, parseFrontmatter } from '../tools/social-growth/articles.mjs';
+import {
+  applyCapturedMetrics,
+  parseXPostMetrics,
+  parseXProfileMetrics,
+  updateMetricsTemplateFromText,
+} from '../tools/social-growth/capture.mjs';
 import { buildDistributionCandidates, buildXArticle, selectHashtags } from '../tools/social-growth/copy.mjs';
 import { runDailyGrowthPlan, selectPackageItems } from '../tools/social-growth/daily.mjs';
 import {
@@ -213,6 +219,95 @@ test('uses the latest post metrics per post instead of double-counting snapshots
   assert.equal(summary.topPosts[0].score, 27);
 });
 
+test('parses visible X profile and post metrics text', () => {
+  assert.deepEqual(parseXProfileMetrics('Clean993\n30 Following\n1.2K Followers'), {
+    followers: 1200,
+  });
+  assert.deepEqual(parseXProfileMetrics('Clean993\n30 正在关注\n35 位关注者'), {
+    followers: 35,
+  });
+
+  const postMetrics = parseXPostMetrics([
+    'Views',
+    '1.5K',
+    '12 Likes',
+    '3 Replies',
+    '2 Reposts',
+    '1 Quote',
+    '4 Bookmarks',
+    'Profile clicks',
+    '8',
+    'New follows',
+    '5',
+  ].join('\n'));
+
+  assert.equal(postMetrics.views, 1500);
+  assert.equal(postMetrics.likes, 12);
+  assert.equal(postMetrics.replies, 3);
+  assert.equal(postMetrics.reposts, 2);
+  assert.equal(postMetrics.quotes, 1);
+  assert.equal(postMetrics.bookmarks, 4);
+  assert.equal(postMetrics.profileClicks, 8);
+  assert.equal(postMetrics.follows, 5);
+});
+
+test('applies captured visible text to metrics template', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-capture-'));
+  try {
+    const template = {
+      version: 1,
+      date: '2026-05-19',
+      followers: '',
+      posts: [
+        {
+          id: 'post-1',
+          articleSlug: 'A',
+          variant: 'strong-thesis',
+          url: 'https://x.com/Clean993/status/1',
+          metrics: {
+            views: '',
+            likes: '',
+          },
+        },
+      ],
+    };
+    const updated = applyCapturedMetrics(template, {
+      profileText: 'Clean993\n36 Followers',
+      postTextsById: {
+        'post-1': 'Views\n1.2K\nLikes\n10\nReplies\n2',
+      },
+    });
+
+    assert.equal(updated.followers, '36');
+    assert.equal(updated.posts[0].metrics.views, '1200');
+    assert.equal(updated.posts[0].metrics.likes, '10');
+    assert.equal(updated.posts[0].metrics.replies, '2');
+
+    const metricsPath = join(outDir, 'posts.local.json');
+    const profileTextPath = join(outDir, 'profile.local.txt');
+    const postTextDir = join(outDir, 'post-texts');
+    await writeJson(metricsPath, template);
+    await import('node:fs/promises').then(async ({ mkdir, writeFile }) => {
+      await mkdir(postTextDir);
+      await writeFile(profileTextPath, 'Clean993\n37 Followers\n');
+      await writeFile(join(postTextDir, 'post-1.txt'), 'Views\n2K\nLikes\n20\n');
+    });
+
+    const result = await updateMetricsTemplateFromText({
+      metricsPath,
+      profileTextPath,
+      postTextDir,
+    });
+    const persisted = JSON.parse(await readFile(metricsPath, 'utf8'));
+
+    assert.equal(result.followers, '37');
+    assert.equal(persisted.posts[0].metrics.views, '2000');
+    assert.equal(persisted.posts[0].metrics.likes, '20');
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('frontmatter parser ignores inline comments outside quotes', () => {
   const parsed = parseFrontmatter(`---
 title: "A # quoted title"
@@ -369,6 +464,7 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
     assert.ok(report.includes('Package selection: article-diverse first'));
     assert.ok(report.includes('Stop before the final public publish click'));
     assert.ok(report.includes('Metrics Capture'));
+    assert.ok(report.includes('social:capture-metrics'));
     assert.ok(!shortPost.includes('https://clean99.github.io'));
   } finally {
     await rm(outDir, { recursive: true, force: true });

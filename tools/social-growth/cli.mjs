@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { loadArticles } from './articles.mjs';
+import { parseXPostMetrics, parseXProfileMetrics, updateMetricsTemplateFromText } from './capture.mjs';
 import { buildDistributionCandidates } from './copy.mjs';
 import { runDailyGrowthPlan } from './daily.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
@@ -118,6 +119,18 @@ if (command === 'articles') {
   const outPath = args.out || 'data/social-growth/posts.local.json';
   await writeJson(outPath, template);
   console.log(`Wrote metrics template for ${template.posts.length} published posts to ${outPath}`);
+} else if (command === 'capture-metrics') {
+  const result = await updateMetricsTemplateFromText({
+    metricsPath: args.metrics || 'data/social-growth/posts.local.json',
+    outPath: args.out || args.metrics || 'data/social-growth/posts.local.json',
+    profileTextPath: args.profileText,
+    postTextDir: args.postTextDir,
+  });
+  console.log(JSON.stringify(result, null, 2));
+} else if (command === 'parse-x-text') {
+  const text = await readText(requiredArg(args, 'input'));
+  const parsed = args.kind === 'post' ? parseXPostMetrics(text) : parseXProfileMetrics(text);
+  console.log(JSON.stringify(parsed, null, 2));
 } else if (command === 'mark-published') {
   const queuePath = args.queue || 'data/social-growth/queue.json';
   const queue = await readJson(queuePath);
@@ -206,6 +219,8 @@ function printHelp() {
   npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:daily -- --limit 5 --package-limit 3
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
+  npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt
+  npm run social:parse-x-text -- --kind profile --input data/social-growth/profile.local.txt
   npm run social:init-ledger -- --followers 1234 --out data/social-growth/ledger.json
   npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
   npm run social:report -- --ledger data/social-growth/example-ledger.json
@@ -219,4 +234,9 @@ function requiredArg(options, key) {
     throw new Error(`Missing required argument: --${key}`);
   }
   return options[key];
+}
+
+async function readText(filePath) {
+  const { readFile } = await import('node:fs/promises');
+  return readFile(filePath, 'utf8');
 }

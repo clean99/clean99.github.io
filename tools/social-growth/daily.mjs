@@ -128,6 +128,12 @@ ${packageItems.length ? packageItems.map((item) => `- ${item.id}`).join('\n') : 
 
 Fill \`${metricsPath}\` from X after confirmed posts are public.
 
+If you captured visible X text locally, parse it into the template:
+
+\`\`\`bash
+npm run social:capture-metrics -- --metrics ${metricsPath} --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
+\`\`\`
+
 Required follower field:
 
 - \`followers\`: current follower count for @Clean993.
