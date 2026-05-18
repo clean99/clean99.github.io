@@ -38,7 +38,7 @@ The code can automate safe local work:
 - run a full dry-run cycle that simulates publication, metrics capture, ledger update, reporting, and recommendations in ignored local copies;
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
-- run one post-publish metrics cycle that merges published posts, parses copied visible X text, updates the ledger when follower count is present, and writes the next recommendations;
+- run one post-publish metrics cycle that merges published posts, parses copied visible X text, updates the ledger when follower count is present, and writes growth report, funnel report, and next recommendations;
 - run one scheduled-safe loop that combines local publish preparation and read-only metrics parsing without browser actions;
 - generate a read-only X search plan for finding relevant Chinese technical threads before engagement capture;
 - build a selective engagement plan from copied visible X thread text, with substantive reply drafts and stop-before-reply boundaries;
@@ -91,6 +91,12 @@ List recent posts:
 npm run social:articles -- --limit 5
 ```
 
+By default, article loading uses clean tracked `source/_posts/*.md` files only. This keeps recurring automation from accidentally distributing untracked drafts, dirty local edits, or unrelated local post experiments. To include local untracked or dirty drafts deliberately, pass:
+
+```bash
+npm run social:articles -- --limit 5 --include-untracked true
+```
+
 Run the daily safe automation loop:
 
 ```bash
@@ -137,7 +143,7 @@ Run the scheduled-safe loop:
 npm run social:scheduled-run -- --day 1 --slot 1
 ```
 
-This combines `social:automation` and `social:metrics-cycle` into one recurring-safe local pass. It refreshes queue/packages/status/preflight/profile/image/X prep artifacts, parses copied visible X text when available, writes reports, and never opens Chrome or performs public X actions.
+This combines `social:automation` and `social:metrics-cycle` into one recurring-safe local pass. It refreshes queue/packages/status/preflight/profile/image/X prep artifacts, parses copied visible X text when available, writes growth, funnel, and recommendation reports, and never opens Chrome or performs public X actions.
 
 Generate the read-only engagement search plan:
 
@@ -221,6 +227,8 @@ Write a local publishing queue. Default language is Chinese:
 ```bash
 npm run social:queue -- --limit 3 --lang zh --out data/social-growth/queue.json
 ```
+
+Use `--include-untracked true` only when a local or dirty draft is intentionally ready for distribution.
 
 Prepare the exact text a browser executor should fill:
 
@@ -341,7 +349,7 @@ Run the full post-publish metrics cycle:
 npm run social:metrics-cycle -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
 ```
 
-This command creates or merges the metrics template from published queue items, parses copied visible X profile/post text, writes `data/social-growth/metrics-cycle.md`, writes a growth report, writes recommendations, and appends a ledger snapshot when the follower count is present. It is read-only with respect to X: it does not open Chrome or perform public account actions.
+This command creates or merges the metrics template from published queue items, parses copied visible X profile/post text, writes `data/social-growth/metrics-cycle.md`, writes a growth report, writes `data/social-growth/funnel.md`, writes recommendations, and appends a ledger snapshot when the follower count is present. It is read-only with respect to X: it does not open Chrome or perform public account actions.
 
 Diagnose the conversion funnel:
 

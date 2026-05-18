@@ -93,6 +93,7 @@ npm run social:apply-copy -- --input data/social-growth/copy-overrides/<queue-id
 Then rerun `social:validate` or `social:flow-dry-run`. Applying copy is local-only and must not open Chrome or publish.
 
 Automation is still local-only: it must not publish, upload media, reply, like, repost, follow, or edit the X profile. Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate. When the ledger exists, the daily command inside automation expands the queue enough to cover the default 7-day, 3-posts/day cadence, capped by available Chinese articles.
+Article loading defaults to clean tracked `source/_posts/*.md` files only. Do not include untracked or dirty local drafts in recurring automation unless the user explicitly passes `--include-untracked true`.
 
 If you only need the lower-level preparation step, run:
 
@@ -280,6 +281,7 @@ npm run social:scheduled-run -- --day 1 --slot 1
 ```
 
 This combines safe local publishing preparation with read-only metrics-cycle parsing and writes `data/social-growth/scheduled-run.md`.
+The scheduled run also writes `data/social-growth/funnel.md` so each recurring pass exposes the current views -> interactions -> profile clicks -> follows bottleneck before the next writing or publishing decision.
 
 For selective distribution into relevant technical conversations, capture copied visible X thread text into `data/social-growth/engagement-opportunities/*.txt`, then run:
 

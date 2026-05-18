@@ -98,11 +98,11 @@ const args = parseArgs(process.argv.slice(3));
 const DEFAULT_LANG = 'zh';
 
 if (command === 'articles') {
-  const articles = await loadArticles();
+  const articles = await loadCliArticles(args);
   const limit = Number(args.limit || 10);
   console.log(JSON.stringify(articles.slice(0, limit), null, 2));
 } else if (command === 'draft') {
-  const articles = await loadArticles();
+  const articles = await loadCliArticles(args);
   const article = selectArticle(articles, args);
   const candidates = buildDistributionCandidates(article, {
     campaign: args.campaign,
@@ -176,7 +176,7 @@ if (command === 'articles') {
     console.log(JSON.stringify(validation, null, 2));
   }
 } else if (command === 'plan') {
-  const articles = await loadArticles();
+  const articles = await loadCliArticles(args);
   const limit = Number(args.limit || 5);
   const lang = args.lang || DEFAULT_LANG;
   const plan = articles
@@ -195,7 +195,7 @@ if (command === 'articles') {
     );
   console.log(JSON.stringify(plan, null, 2));
 } else if (command === 'queue') {
-  const articles = await loadArticles();
+  const articles = await loadCliArticles(args);
   const queue = buildPublishQueue(articles, args);
   if (args.out) {
     await writeJson(args.out, queue);
@@ -215,7 +215,7 @@ if (command === 'articles') {
   });
   console.log(JSON.stringify(written, null, 2));
 } else if (command === 'daily') {
-  const articles = await loadArticles();
+  const articles = await loadCliArticles(args);
   const result = await runDailyGrowthPlan({
     articles,
     queuePath: args.queue || 'data/social-growth/queue.json',
@@ -236,7 +236,7 @@ if (command === 'articles') {
   });
   console.log(JSON.stringify(result, null, 2));
 } else if (command === 'automation') {
-  const articles = await loadArticles();
+  const articles = await loadCliArticles(args);
   const result = await runSafeAutomationCycle({
     articles,
     now: args.now ? new Date(args.now) : new Date(),
@@ -282,7 +282,7 @@ if (command === 'articles') {
     paths: result.paths,
   }, null, 2));
 } else if (command === 'scheduled-run') {
-  const articles = await loadArticles();
+  const articles = await loadCliArticles(args);
   const result = await runScheduledGrowthLoop({
     articles,
     now: args.now ? new Date(args.now) : new Date(),
@@ -305,6 +305,7 @@ if (command === 'articles') {
     metricsCyclePath: args.metricsCycleOut || 'data/social-growth/metrics-cycle.md',
     growthReportPath: args.growthReport || 'data/social-growth/growth-report.md',
     recommendationsPath: args.recommendations || 'data/social-growth/recommendations.md',
+    funnelPath: args.funnelOut || 'data/social-growth/funnel.md',
     scheduledReportPath: args.out || 'data/social-growth/scheduled-run.md',
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
     imageDir: args.imageDir || 'output/imagegen',
@@ -436,7 +437,7 @@ if (command === 'articles') {
     nextCommand: `npm run social:apply-copy -- --input ${outPath}`,
   }, null, 2));
 } else if (command === 'x-tech-brief') {
-  const articles = await loadArticles();
+  const articles = await loadCliArticles(args);
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
   const brief = await buildXTechnicalSharingBrief({
@@ -674,6 +675,7 @@ if (command === 'articles') {
     cycleReportPath: args.out || 'data/social-growth/metrics-cycle.md',
     growthReportPath: args.growthReport || 'data/social-growth/growth-report.md',
     recommendationsPath: args.recommendations || 'data/social-growth/recommendations.md',
+    funnelPath: args.funnelOut || 'data/social-growth/funnel.md',
     now: args.now ? new Date(args.now) : new Date(),
     snapshot: args.snapshot !== 'false',
   });
@@ -687,6 +689,7 @@ if (command === 'articles') {
       cycleReport: result.cycleReportPath,
       growthReport: result.growthReportPath,
       recommendations: result.recommendationsPath,
+      funnel: result.funnelPath,
     },
   }, null, 2));
 } else if (command === 'parse-x-text') {
@@ -752,6 +755,12 @@ function toCamelKey(key) {
   return key.replace(/-([a-z])/g, (_, char) => char.toUpperCase());
 }
 
+async function loadCliArticles(options = {}) {
+  return loadArticles({
+    includeUntracked: options.includeUntracked === 'true',
+  });
+}
+
 function selectArticle(articles, options) {
   const preferredLang = options.lang || DEFAULT_LANG;
 
@@ -774,6 +783,7 @@ function selectArticle(articles, options) {
 function printHelp() {
   console.log(`Usage:
   npm run social:articles -- --limit 5
+  npm run social:articles -- --limit 5 --include-untracked true
   npm run social:draft -- --slug Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops
   npm run social:plan -- --limit 3
   npm run social:queue -- --limit 3 --out data/social-growth/queue.json

@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { articleFromMarkdown, addUtm, parseFrontmatter } from '../tools/social-growth/articles.mjs';
+import { articleFromMarkdown, addUtm, loadArticles, parseFrontmatter } from '../tools/social-growth/articles.mjs';
 import { runSafeAutomationCycle } from '../tools/social-growth/automation.mjs';
 import {
   applyCapturedMetrics,
@@ -136,6 +137,59 @@ permalink: zh/2026/05/18/Hello-World/
   });
 
   assert.equal(article.url, 'https://clean99.github.io/zh/2026/05/18/Hello-World/');
+});
+
+test('article loader skips dirty and untracked posts unless explicitly included', async () => {
+  if (spawnSync('git', ['--version'], { encoding: 'utf8' }).status !== 0) return;
+
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-articles-'));
+  try {
+    const postsDir = join(outDir, 'source/_posts');
+    await mkdir(postsDir, { recursive: true });
+    const trackedPost = `---
+title: Tracked Post
+date: 2026-05-18 10:00:00
+tags: [AI]
+lang: zh
+i18n_key: Tracked-Post
+permalink: zh/2026/05/18/Tracked-Post/
+---
+
+Tracked body.
+`;
+    const untrackedPost = `---
+title: Untracked Draft
+date: 2026-05-19 10:00:00
+tags: [AI]
+lang: zh
+i18n_key: Untracked-Draft
+permalink: zh/2026/05/19/Untracked-Draft/
+---
+
+Draft body.
+`;
+    await writeFile(join(postsDir, 'Tracked-Post-zh.md'), trackedPost);
+    await writeFile(join(postsDir, 'Dirty-Post-zh.md'), trackedPost.replace(/Tracked Post/g, 'Dirty Post').replace(/Tracked-Post/g, 'Dirty-Post'));
+    await writeFile(join(postsDir, 'Untracked-Draft-zh.md'), untrackedPost);
+    assert.equal(spawnSync('git', ['init'], { cwd: outDir, encoding: 'utf8' }).status, 0);
+    assert.equal(spawnSync('git', ['add', 'source/_posts/Tracked-Post-zh.md', 'source/_posts/Dirty-Post-zh.md'], { cwd: outDir, encoding: 'utf8' }).status, 0);
+    assert.equal(spawnSync('git', [
+      '-c', 'user.name=Test User',
+      '-c', 'user.email=test@example.invalid',
+      'commit',
+      '-m',
+      'init',
+    ], { cwd: outDir, encoding: 'utf8' }).status, 0);
+    await writeFile(join(postsDir, 'Dirty-Post-zh.md'), trackedPost.replace(/Tracked Post/g, 'Dirty Post Updated').replace(/Tracked-Post/g, 'Dirty-Post'));
+
+    const trackedOnly = await loadArticles({ postsDir, gitCwd: outDir });
+    const withUntracked = await loadArticles({ postsDir, gitCwd: outDir, includeUntracked: true });
+
+    assert.deepEqual(trackedOnly.map((article) => article.slug), ['Tracked-Post']);
+    assert.deepEqual(withUntracked.map((article) => article.slug), ['Untracked-Draft', 'Dirty-Post', 'Tracked-Post']);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
 });
 
 test('adds stable UTM parameters', () => {
@@ -1276,6 +1330,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       metricsCyclePath: join(outDir, 'metrics-cycle.md'),
       growthReportPath: join(outDir, 'growth-report.md'),
       recommendationsPath: join(outDir, 'recommendations.md'),
+      funnelPath: join(outDir, 'funnel.md'),
       scheduledReportPath: join(outDir, 'scheduled-run.md'),
       imageBriefDir: join(outDir, 'image-briefs'),
       imageDir,
@@ -1295,6 +1350,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     });
     const scheduledReport = await readFile(join(outDir, 'scheduled-run.md'), 'utf8');
     const metricsReport = await readFile(join(outDir, 'metrics-cycle.md'), 'utf8');
+    const funnelReport = await readFile(join(outDir, 'funnel.md'), 'utf8');
 
     assert.equal(result.status, 'needs_candidates');
     assert.equal(result.automation.status, 'needs_candidates');
@@ -1306,8 +1362,10 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Daily brief/);
     assert.match(scheduledReport, /Engagement search/);
     assert.match(scheduledReport, /Engagement plan/);
+    assert.match(scheduledReport, /Funnel report/);
     assert.match(scheduledReport, /safe for recurring execution/);
     assert.match(metricsReport, /No browser publish/);
+    assert.match(funnelReport, /X Growth Funnel/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -2457,6 +2515,7 @@ test('post-publish metrics cycle captures text, snapshots ledger, and writes rep
       cycleReportPath: join(outDir, 'metrics-cycle.md'),
       growthReportPath: join(outDir, 'growth-report.md'),
       recommendationsPath: join(outDir, 'recommendations.md'),
+      funnelPath: join(outDir, 'funnel.md'),
       now: '2026-05-19T00:00:00.000Z',
     });
     const metrics = JSON.parse(await readFile(metricsPath, 'utf8'));
@@ -2464,6 +2523,7 @@ test('post-publish metrics cycle captures text, snapshots ledger, and writes rep
     const cycleReport = await readFile(join(outDir, 'metrics-cycle.md'), 'utf8');
     const growthReport = await readFile(join(outDir, 'growth-report.md'), 'utf8');
     const recommendations = await readFile(join(outDir, 'recommendations.md'), 'utf8');
+    const funnel = await readFile(join(outDir, 'funnel.md'), 'utf8');
 
     assert.equal(result.status, 'snapshotted');
     assert.equal(result.followers, '31');
@@ -2477,6 +2537,8 @@ test('post-publish metrics cycle captures text, snapshots ledger, and writes rep
     assert.match(cycleReport, /Read-only metrics parsing only/);
     assert.match(growthReport, /Follower delta: 1/);
     assert.match(recommendations, /Growth Recommendations/);
+    assert.match(funnel, /Status: converting/);
+    assert.match(cycleReport, /Funnel report/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

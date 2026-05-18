@@ -20,6 +20,7 @@ const DEFAULT_AUTOMATION_REPORT_PATH = 'data/social-growth/automation-run.md';
 const DEFAULT_METRICS_CYCLE_PATH = 'data/social-growth/metrics-cycle.md';
 const DEFAULT_GROWTH_REPORT_PATH = 'data/social-growth/growth-report.md';
 const DEFAULT_RECOMMENDATIONS_PATH = 'data/social-growth/recommendations.md';
+const DEFAULT_FUNNEL_PATH = 'data/social-growth/funnel.md';
 const DEFAULT_SCHEDULED_REPORT_PATH = 'data/social-growth/scheduled-run.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
@@ -50,6 +51,7 @@ export async function runScheduledGrowthLoop({
   metricsCyclePath = DEFAULT_METRICS_CYCLE_PATH,
   growthReportPath = DEFAULT_GROWTH_REPORT_PATH,
   recommendationsPath = DEFAULT_RECOMMENDATIONS_PATH,
+  funnelPath = DEFAULT_FUNNEL_PATH,
   scheduledReportPath = DEFAULT_SCHEDULED_REPORT_PATH,
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
   imageDir = DEFAULT_IMAGE_DIR,
@@ -109,6 +111,7 @@ export async function runScheduledGrowthLoop({
     cycleReportPath: metricsCyclePath,
     growthReportPath,
     recommendationsPath,
+    funnelPath,
     now,
     snapshot: true,
   });
@@ -132,6 +135,7 @@ export async function runScheduledGrowthLoop({
       metricsCycle: metricsCyclePath,
       growthReport: growthReportPath,
       recommendations: recommendationsPath,
+      funnel: funnelPath,
       scheduledReport: scheduledReportPath,
     },
     boundary: [
@@ -188,6 +192,7 @@ ${blockers}
 - Metrics cycle: \`${result.paths.metricsCycle}\`
 - Growth report: \`${result.paths.growthReport}\`
 - Recommendations: \`${result.paths.recommendations}\`
+- Funnel report: \`${result.paths.funnel}\`
 
 ## Next Action
 

@@ -1,4 +1,5 @@
 import { readdir, readFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
@@ -78,10 +79,16 @@ export function unquote(value) {
 export async function loadArticles({
   postsDir = path.join(process.cwd(), 'source/_posts'),
   siteUrl = 'https://clean99.github.io',
+  includeUntracked = false,
+  gitCwd = process.cwd(),
 } = {}) {
-  const files = (await readdir(postsDir))
+  const allFiles = (await readdir(postsDir))
     .filter((file) => file.endsWith('.md'))
     .sort();
+  const trackedFiles = includeUntracked ? null : cleanTrackedPostFiles({ postsDir, gitCwd });
+  const files = trackedFiles
+    ? allFiles.filter((file) => trackedFiles.has(file))
+    : allFiles;
 
   const articles = await Promise.all(
     files.map(async (file) => {
@@ -94,6 +101,51 @@ export async function loadArticles({
   return articles
     .filter((article) => article.title && article.date)
     .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+function cleanTrackedPostFiles({ postsDir, gitCwd }) {
+  const absoluteGitCwd = path.resolve(gitCwd);
+  const absolutePostsDir = path.resolve(postsDir);
+  const relativePostsDir = path.relative(absoluteGitCwd, absolutePostsDir);
+  if (relativePostsDir.startsWith('..')) return null;
+
+  const trackedResult = spawnSync('git', ['ls-files', '--', relativePostsDir || '.'], {
+    cwd: absoluteGitCwd,
+    encoding: 'utf8',
+  });
+  if (trackedResult.status !== 0) return null;
+
+  const dirtyFiles = dirtyPostFiles({ postsDir: absolutePostsDir, gitCwd: absoluteGitCwd, relativePostsDir });
+  const files = trackedResult.stdout
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((file) => path.relative(absolutePostsDir, path.resolve(absoluteGitCwd, file)))
+    .filter((file) => file && !file.startsWith('..') && !path.isAbsolute(file))
+    .filter((file) => file.endsWith('.md'))
+    .filter((file) => !dirtyFiles.has(file));
+
+  return new Set(files);
+}
+
+function dirtyPostFiles({ postsDir, gitCwd, relativePostsDir }) {
+  const result = spawnSync('git', ['status', '--porcelain', '--', relativePostsDir || '.'], {
+    cwd: gitCwd,
+    encoding: 'utf8',
+  });
+  if (result.status !== 0) return new Set();
+
+  const normalizedPostsDir = path.resolve(postsDir);
+  const dirty = new Set();
+  for (const line of result.stdout.split(/\r?\n/).filter(Boolean)) {
+    const rawPath = line.slice(3);
+    for (const filePath of rawPath.split(' -> ')) {
+      const relative = path.relative(normalizedPostsDir, path.resolve(gitCwd, filePath));
+      if (relative && !relative.startsWith('..') && !path.isAbsolute(relative) && relative.endsWith('.md')) {
+        dirty.add(relative);
+      }
+    }
+  }
+  return dirty;
 }
 
 export function articleFromMarkdown({ file, absolutePath = file, source, siteUrl }) {

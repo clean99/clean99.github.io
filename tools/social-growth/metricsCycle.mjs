@@ -9,6 +9,7 @@ import {
 } from './ledger.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
 import { formatRecommendationsMarkdown } from './recommendations.mjs';
+import { formatGrowthFunnelMarkdown } from './funnel.mjs';
 import { readJson, writeJson } from './queue.mjs';
 
 const DEFAULT_QUEUE_PATH = 'data/social-growth/queue.json';
@@ -19,6 +20,7 @@ const DEFAULT_POST_TEXT_DIR = 'data/social-growth/post-texts';
 const DEFAULT_CYCLE_REPORT_PATH = 'data/social-growth/metrics-cycle.md';
 const DEFAULT_GROWTH_REPORT_PATH = 'data/social-growth/growth-report.md';
 const DEFAULT_RECOMMENDATIONS_PATH = 'data/social-growth/recommendations.md';
+const DEFAULT_FUNNEL_PATH = 'data/social-growth/funnel.md';
 
 export async function runPostPublishMetricsCycle({
   queuePath = DEFAULT_QUEUE_PATH,
@@ -29,6 +31,7 @@ export async function runPostPublishMetricsCycle({
   cycleReportPath = DEFAULT_CYCLE_REPORT_PATH,
   growthReportPath = DEFAULT_GROWTH_REPORT_PATH,
   recommendationsPath = DEFAULT_RECOMMENDATIONS_PATH,
+  funnelPath = DEFAULT_FUNNEL_PATH,
   now = new Date(),
   snapshot = true,
 } = {}) {
@@ -71,6 +74,7 @@ export async function runPostPublishMetricsCycle({
     cycleReportPath,
     growthReportPath,
     recommendationsPath,
+    funnelPath,
     publishedPosts: metrics.posts.length,
     capturedPostTexts: Object.keys(postTextsById).length,
     followers: metrics.followers,
@@ -86,6 +90,7 @@ export async function runPostPublishMetricsCycle({
   await writeText(cycleReportPath, formatMetricsCycleMarkdown(result));
   await writeText(growthReportPath, formatMarkdownReport(nextLedger));
   await writeText(recommendationsPath, formatRecommendationsMarkdown(nextLedger));
+  await writeText(funnelPath, formatGrowthFunnelMarkdown(nextLedger));
 
   return result;
 }
@@ -176,6 +181,7 @@ ${missingLines}
 - Cycle report: \`${result.cycleReportPath}\`
 - Growth report: \`${result.growthReportPath}\`
 - Recommendations: \`${result.recommendationsPath}\`
+- Funnel report: \`${result.funnelPath}\`
 
 ## Next Action
 
