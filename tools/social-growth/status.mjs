@@ -20,6 +20,7 @@ export async function buildGrowthStatus({
   profileText = '',
   publishMode = 'x_article',
   xProfileDir,
+  browserReadiness = null,
   env = process.env,
   ensurePackage = false,
   preferReadyImage = false,
@@ -49,7 +50,13 @@ export async function buildGrowthStatus({
     generatedAt,
   });
   const recommendations = ledger ? buildGrowthRecommendations(ledger).recommendations : [];
-  const status = statusName({ validation, weeklyPlan, preflight });
+  const browserSummary = summarizeBrowserReadiness(browserReadiness);
+  const status = statusName({
+    validation,
+    weeklyPlan,
+    preflight,
+    browserReadiness: browserSummary,
+  });
 
   return {
     generatedAt,
@@ -75,6 +82,7 @@ export async function buildGrowthStatus({
     } : null,
     summary,
     preflight,
+    browserReadiness: browserSummary,
     profileAudit,
     publishMode: resolvedPublishMode,
     xProfileDir,
@@ -82,6 +90,7 @@ export async function buildGrowthStatus({
       validation,
       weeklyPlan,
       preflight,
+      browserReadiness: browserSummary,
       profileAudit,
       recommendations,
       publishMode: resolvedPublishMode,
@@ -94,9 +103,13 @@ export async function buildGrowthStatus({
 export function formatGrowthStatusMarkdown(status) {
   const summary = status.summary;
   const preflight = status.preflight;
+  const browserReadiness = status.browserReadiness || summarizeBrowserReadiness(null);
   const blockers = preflight?.blockers?.length
     ? preflight.blockers.map((blocker) => `- ${blocker}`).join('\n')
     : '- No preflight blockers.';
+  const browserBlockers = browserReadiness.blockers.length
+    ? browserReadiness.blockers.map((blocker) => `- ${blocker}`).join('\n')
+    : '- No browser blockers recorded in this status.';
   const actions = status.nextActions.length
     ? status.nextActions.map((item) => `- ${item.priority}: ${item.action}\n  Reason: ${item.reason}`).join('\n')
     : '- No next actions.';
@@ -155,6 +168,13 @@ ${planWarnings}
 Blockers:
 
 ${blockers}
+
+## Browser Readiness
+
+- Status: ${browserReadiness.status}
+- Blockers: ${browserReadiness.blockers.length}
+
+${browserBlockers}
 
 ## Profile Conversion
 
@@ -223,10 +243,16 @@ async function buildStatusPreflight(options) {
   }
 }
 
-function statusName({ validation, weeklyPlan, preflight }) {
+function statusName({
+  validation,
+  weeklyPlan,
+  preflight,
+  browserReadiness,
+}) {
   if (validation.status !== 'pass' && (!weeklyPlan || !weeklyPlan.candidates.availableValidatedDrafts)) return 'blocked_quality';
   if (!weeklyPlan) return 'blocked_no_ledger';
   if (preflight.status === 'blocked') return 'blocked_preflight';
+  if (blockingBrowserStatus(browserReadiness)) return browserReadiness.status;
   return 'ready_for_browser_confirmation';
 }
 
@@ -234,6 +260,7 @@ function nextActions({
   validation,
   weeklyPlan,
   preflight,
+  browserReadiness,
   profileAudit,
   recommendations,
   publishMode,
@@ -244,6 +271,12 @@ function nextActions({
 
   if (preflight.status === 'blocked') {
     actions.push(...preflightActions(preflight, { day, slot }));
+  } else if (blockingBrowserStatus(browserReadiness)) {
+    actions.push({
+      priority: 'P0',
+      action: `Fix browser readiness before preparing public X editors: ${browserReadiness.status}.`,
+      reason: browserReadiness.blockers.join(' ') || 'Browser readiness is blocking the selected publish slot.',
+    });
   } else {
     actions.push({
       priority: 'P0',
@@ -293,6 +326,21 @@ function nextActions({
   }
 
   return dedupeActions(actions);
+}
+
+function summarizeBrowserReadiness(browserReadiness) {
+  return {
+    status: browserReadiness?.status || 'not_checked',
+    blockers: [...(browserReadiness?.blockers || [])],
+  };
+}
+
+function blockingBrowserStatus(browserReadiness) {
+  if (!browserReadiness?.blockers?.length) return '';
+  if (browserReadiness.status === 'needs_browser_probe') return '';
+  if (browserReadiness.status === 'ready_for_browser_confirmation') return '';
+  if (browserReadiness.status === 'blocked_local_prep') return '';
+  return browserReadiness.status;
 }
 
 function preflightActions(preflight, { day, slot }) {

@@ -251,6 +251,7 @@ export async function runSafeAutomationCycle({
     profileText,
     publishMode,
     xProfileDir,
+    browserReadiness,
     env,
     ensurePackage: false,
     preferReadyImage,
