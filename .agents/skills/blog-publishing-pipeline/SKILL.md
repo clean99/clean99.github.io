@@ -76,6 +76,7 @@ permalink: zh/YYYY/MM/DD/Full-English-Title/
    - Use image files only when the post benefits from real visual evidence or generated illustrations.
    - For articles based on internal or domain-specific products, add an early audience-orientation visual before deep architecture, metrics, or implementation sections.
    - That visual should answer what the product or workflow looks like, who uses it, what action the user takes, where the technical mechanism appears, and why the later metrics matter.
+   - When a real product screenshot or UI reference is available, base the visual on its information architecture and interaction cues, then generalize labels and data for a public audience.
    - Prefer generic product mockups or scenario diagrams over internal screenshots; avoid internal names, URLs, secrets, and operational identifiers.
    - Verify referenced image files exist.
 7. Review before publishing:
