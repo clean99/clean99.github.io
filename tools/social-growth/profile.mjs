@@ -296,16 +296,18 @@ function buildProfileSuggestions({ themes }) {
   const primaryThemes = themes.length ? themes.slice(0, 4).join(' / ') : 'AI 工程化 / 前端性能 / React / 测试';
   return {
     displayName: 'Clean99 | AI 工程化 / 前端性能',
-    bio: `写 ${primaryThemes}。每篇尽量给清楚：问题、边界、指标、验证方法。`,
+    bio: `写 ${primaryThemes}。只发能复用的工程判断：问题、指标、验证、失败轮次。`,
     link: 'https://clean99.github.io',
     pinnedPost: [
-      '这里写工程里真实遇到的判断题。',
+      '这里不做技术新闻搬运。',
       '',
-      'AI Agent 怎么从 demo 变成流程；',
-      '前端性能、React、测试怎么用指标说话；',
-      '技术博客怎么写到能被搜到、被转发。',
+      '我会把真实工程问题拆成四件事：',
+      '问题到底是什么；',
+      '哪个指标能证明它；',
+      '改动有没有复验；',
+      '失败轮次留下了什么。',
       '',
-      '我不会每天追热点。更想把一篇长文压成能复用的框架：问题、边界、验证方法。',
+      '主要写 AI Agent 落地、前端性能、React、测试和技术博客增长。关注这里，应该能少踩一点“看起来很对但没证据”的坑。',
     ].join('\n'),
   };
 }
