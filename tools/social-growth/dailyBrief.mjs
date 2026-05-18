@@ -185,6 +185,7 @@ Command:
 \`\`\`bash
 ${brief.browserReadinessCommand || buildBrowserReadinessCommand({ day: brief.day, slot: 1 })}
 ${composeDraftResolutionCommand(brief)}
+${composeDraftStashCommand(brief)}
 \`\`\`
 
 ${manualPublishFallback}
@@ -301,6 +302,19 @@ function composeDraftResolutionCommand(brief) {
   const publishMode = brief.browserReadiness?.publishMode || selectedSlot(brief.dayReadiness, brief.selectedSlot)?.publishMode;
   if (publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
   args.push('--out data/social-growth/compose-draft-resolution.md');
+  return args.join(' ');
+}
+
+function composeDraftStashCommand(brief) {
+  if (!brief.browserReadiness?.blockers?.some((item) => item.includes('different draft'))) return '';
+  const args = [
+    'npm run social:compose-draft-stash --',
+    `--day ${Number(brief.day || 1)}`,
+    `--slot ${Number(brief.selectedSlot || 1)}`,
+  ];
+  const publishMode = brief.browserReadiness?.publishMode || selectedSlot(brief.dayReadiness, brief.selectedSlot)?.publishMode;
+  if (publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
+  args.push('--out-dir data/social-growth/compose-drafts');
   return args.join(' ');
 }
 

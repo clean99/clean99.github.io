@@ -4176,8 +4176,12 @@ test('status and daily brief CLIs block stored mismatched compose drafts', async
     assert.equal(persistedProbe.composeDraftText, 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路');
     assert.match(statusMarkdown, /Status: needs_compose_draft_resolution/);
     assert.match(statusMarkdown, /X compose already contains a different draft/);
+    assert.match(statusMarkdown, /compose-draft-resolution/);
+    assert.match(statusMarkdown, /compose-draft-stash/);
     assert.match(briefMarkdown, /Status: needs_compose_draft_resolution/);
     assert.match(briefMarkdown, /Resolve the existing X compose draft/);
+    assert.match(briefMarkdown, /social:compose-draft-resolution/);
+    assert.match(briefMarkdown, /social:compose-draft-stash/);
     assert.doesNotMatch(statusMarkdown, /Manual Publish Fallback/);
     assert.doesNotMatch(briefMarkdown, /Manual Publish Fallback/);
     assert.doesNotMatch(statusMarkdown, /Status: ready_for_browser_confirmation/);

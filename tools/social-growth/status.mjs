@@ -233,6 +233,7 @@ ${cliCommand('preflight', `--day ${status.selectedSlot.day} --slot ${status.sele
 ${cliCommand('image-brief', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}`)}
 ${cliCommand('x-prep', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)} --out data/social-growth/x-publish-prep.md`)}
 ${composeDraftResolutionCommand(status)}
+${composeDraftStashCommand(status)}
 ${manualPublishKitCommand(status, preflight)}
 ${postPublishRecoveryCommand(status, preflight)}
 ${cliCommand('profile-audit', '--profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md')}
@@ -566,6 +567,11 @@ function postPublishRecoveryCommand(status, preflight) {
 function composeDraftResolutionCommand(status) {
   if (!status.browserReadiness?.blockers?.some((item) => item.includes('different draft'))) return '';
   return cliCommand('compose-draft-resolution', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)} --out data/social-growth/compose-draft-resolution.md`);
+}
+
+function composeDraftStashCommand(status) {
+  if (!status.browserReadiness?.blockers?.some((item) => item.includes('different draft'))) return '';
+  return cliCommand('compose-draft-stash', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)} --out-dir data/social-growth/compose-drafts`);
 }
 
 function cliCommand(command, args = '') {
