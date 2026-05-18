@@ -447,6 +447,8 @@ Run this to open or attach the publishing Chrome profile at the X compose/login 
 ${cliCommand('login-recovery', browserArgs)}
 \`\`\`
 
+If the command still reports \`needs_x_login\`, read \`data/social-growth/login-handoff.md\` next. \`login-recovery\` refreshes that handoff with the current publishing profile, alternate normal Chrome profiles, and exact recovery commands.
+
 After logging in as @Clean993 in that Chrome window, rerun the same command. If you need the lower-level steps:
 
 \`\`\`bash

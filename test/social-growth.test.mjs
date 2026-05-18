@@ -4650,6 +4650,8 @@ test('status CLI reads stored browser probe before reporting readiness', async (
     assert.equal(result.status, 0, result.stderr || result.stdout);
     assert.match(markdown, /Status: needs_x_login/);
     assert.match(markdown, /X Login Recovery/);
+    assert.match(markdown, /data\/social-growth\/login-handoff\.md/);
+    assert.match(markdown, /login-recovery` refreshes that handoff/);
     assert.match(markdown, /Manual Publish Fallback/);
     assert.match(markdown, /cli\.mjs login-recovery --day 1 --slot 1 --publishMode thread_fallback --xProfileDirectory 'Profile 1'/);
     assert.match(markdown, /cli\.mjs manual-publish-kits --day 1 --publishMode thread_fallback/);
