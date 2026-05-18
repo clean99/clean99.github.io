@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { articleFromMarkdown, addUtm, parseFrontmatter } from '../tools/social-growth/articles.mjs';
 import { buildDistributionCandidates, buildXArticle, selectHashtags } from '../tools/social-growth/copy.mjs';
+import { runDailyGrowthPlan } from '../tools/social-growth/daily.mjs';
 import { appendSnapshot, createLedger, formatMarkdownReport } from '../tools/social-growth/ledger.mjs';
 import { parseCompactNumber, postScore, summarizeGrowthLedger } from '../tools/social-growth/metrics.mjs';
 import {
@@ -220,6 +221,51 @@ test('exports a browser publish package with image, article, and checklist artif
     const checklist = await readFile(join(written.packageDir, 'publish-checklist.md'), 'utf8');
     assert.ok(prompt.includes('1536x1024'));
     assert.ok(checklist.includes(item.id));
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('daily growth run writes queue, packages, and a browser-safe report', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-'));
+  try {
+    const result = await runDailyGrowthPlan({
+      articles: [
+        {
+          title: '有用的系统',
+          excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+          slug: 'Useful-Systems',
+          lang: 'zh',
+          tags: ['AI', 'Software Engineering'],
+          url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+        },
+      ],
+      now: '2026-05-18T00:00:00.000Z',
+      queuePath: join(outDir, 'queue.json'),
+      packageOutDir: join(outDir, 'packages'),
+      reportPath: join(outDir, 'daily-run.md'),
+      ledgerPath: join(outDir, 'missing-ledger.json'),
+      packageLimit: 2,
+      queueOptions: {
+        limit: 1,
+        lang: 'zh',
+        campaign: 'test',
+      },
+    });
+
+    assert.equal(result.queuedItems, 3);
+    assert.equal(result.packages.length, 2);
+    assert.equal(result.ledgerSummary, null);
+
+    const queue = JSON.parse(await readFile(join(outDir, 'queue.json'), 'utf8'));
+    const report = await readFile(join(outDir, 'daily-run.md'), 'utf8');
+    const shortPost = await readFile(join(result.packages[0].packageDir, 'short-post.txt'), 'utf8');
+
+    assert.equal(queue.items.length, 3);
+    assert.ok(report.includes('Daily X Growth Run'));
+    assert.ok(report.includes('Stop before the final public publish click'));
+    assert.ok(report.includes('npm run social:init-ledger'));
+    assert.ok(!shortPost.includes('https://clean99.github.io'));
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

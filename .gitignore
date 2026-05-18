@@ -10,6 +10,7 @@ tmp
 .claude/
 CLAUDE.md
 data/social-growth/*.local.json
+data/social-growth/daily-run.md
 data/social-growth/ledger.json
 data/social-growth/packages/
 data/social-growth/queue.json

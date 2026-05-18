@@ -20,6 +20,7 @@ The code can automate safe local work:
 - create and persist a browser publishing queue;
 - prepare exact handoff text for Chrome;
 - export a publish package with image, X Article, short post, thread fallback, and checklist files;
+- run the local daily preparation loop in one command;
 - produce `gpt-image-2` image prompts for each candidate;
 - produce an X Article draft before the blog link;
 - mark published X URLs back into the queue;
@@ -59,6 +60,18 @@ List recent posts:
 ```bash
 npm run social:articles -- --limit 5
 ```
+
+Run the daily safe automation loop:
+
+```bash
+npm run social:daily -- --limit 5 --package-limit 3 --lang zh
+```
+
+This writes:
+
+- `data/social-growth/queue.json`;
+- `data/social-growth/packages/<queue-id>/...`;
+- `data/social-growth/daily-run.md`.
 
 Draft X candidates for one post:
 
@@ -206,6 +219,14 @@ Do not commit private analytics or account history.
 13. Run `npm run social:snapshot`.
 14. Run `npm run social:report -- --format markdown`.
 15. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+
+For regular operation, replace steps 1-4 with:
+
+```bash
+npm run social:daily -- --limit 5 --package-limit 3 --lang zh
+```
+
+Then continue from image generation and browser confirmation.
 
 ## Chrome Integration Plan
 

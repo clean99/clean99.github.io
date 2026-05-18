@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { loadArticles } from './articles.mjs';
 import { buildDistributionCandidates } from './copy.mjs';
+import { runDailyGrowthPlan } from './daily.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
 import {
   buildPublishQueue,
@@ -80,6 +81,23 @@ if (command === 'articles') {
     outDir: args.out || 'data/social-growth/packages',
   });
   console.log(JSON.stringify(written, null, 2));
+} else if (command === 'daily') {
+  const articles = await loadArticles();
+  const result = await runDailyGrowthPlan({
+    articles,
+    queuePath: args.queue || 'data/social-growth/queue.json',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    reportPath: args.report || 'data/social-growth/daily-run.md',
+    ledgerPath: args.ledger || 'data/social-growth/ledger.json',
+    packageLimit: args.packageLimit || 3,
+    now: args.now ? new Date(args.now) : new Date(),
+    queueOptions: {
+      limit: args.limit || 5,
+      lang: args.lang || DEFAULT_LANG,
+      campaign: args.campaign,
+    },
+  });
+  console.log(JSON.stringify(result, null, 2));
 } else if (command === 'mark-published') {
   const queuePath = args.queue || 'data/social-growth/queue.json';
   const queue = await readJson(queuePath);
@@ -165,6 +183,7 @@ function printHelp() {
   npm run social:queue -- --limit 3 --out data/social-growth/queue.json
   npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
+  npm run social:daily -- --limit 5 --package-limit 3
   npm run social:init-ledger -- --followers 1234 --out data/social-growth/ledger.json
   npm run social:snapshot -- --ledger data/social-growth/ledger.json --date 2026-05-19 --followers 1300 --posts-file data/social-growth/posts.local.json
   npm run social:report -- --ledger data/social-growth/example-ledger.json

@@ -9,6 +9,7 @@
     "lint": "node tools/social-growth/lint.mjs",
     "server": "hexo server",
     "social:articles": "node tools/social-growth/cli.mjs articles",
+    "social:daily": "node tools/social-growth/cli.mjs daily",
     "social:draft": "node tools/social-growth/cli.mjs draft",
     "social:handoff": "node tools/social-growth/cli.mjs handoff",
     "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",

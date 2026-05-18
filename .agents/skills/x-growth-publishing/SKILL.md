@@ -24,6 +24,16 @@ Before writing copy, read `references/chinese-x-style.md` when the user asks to 
 
 ## Workflow
 
+For the normal daily loop, start with:
+
+```bash
+npm run social:daily -- --limit 5 --package-limit 3 --lang zh
+```
+
+This creates `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, and writes `data/social-growth/daily-run.md`.
+
+For single-item control:
+
 1. Read the target blog post from `source/_posts/`.
 2. Generate a queue item:
    ```bash
@@ -77,6 +87,8 @@ Before writing copy, read `references/chinese-x-style.md` when the user asks to 
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
+
+Use the daily command for scheduled automation. It is allowed to prepare local artifacts and reports, but it must not publish, reply, like, repost, follow, or upload media without action-time confirmation.
 
 ## Copy Rules
 
