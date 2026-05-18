@@ -5,9 +5,12 @@ import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 
 const DEFAULT_PROFILE_DIR = join(homedir(), 'Library/Application Support/baoyu-skills/chrome-profile');
+const DEFAULT_SYSTEM_CHROME_PROFILE_DIR = join(homedir(), 'Library/Application Support/Google/Chrome');
 
 export async function buildXProfileDiagnostics({
   profileDir = DEFAULT_PROFILE_DIR,
+  includeSystemChrome = false,
+  extraProfileDirs = [],
   debugPort = '',
   generatedAt = new Date(),
 } = {}) {
@@ -27,13 +30,20 @@ export async function buildXProfileDiagnostics({
       inferredLoginState: inferLoginState(pages),
     });
   }
+  const alternateProfileDirs = await readAlternateProfileDirs({
+    primaryProfileDir: resolvedProfileDir,
+    includeSystemChrome,
+    extraProfileDirs,
+    debugPort,
+  });
 
   return {
     generatedAt: toIsoString(generatedAt),
     profileDir: resolvedProfileDir,
     profiles,
+    alternateProfileDirs,
     liveBrowsers,
-    recommendations: buildRecommendations({ profiles, liveBrowsers }),
+    recommendations: buildRecommendations({ profiles, liveBrowsers, alternateProfileDirs }),
     publicActions: {
       typedText: false,
       uploadedMedia: false,
@@ -44,14 +54,14 @@ export async function buildXProfileDiagnostics({
 
 export function formatXProfileDiagnosticsMarkdown(diagnostics) {
   const profiles = diagnostics.profiles.length
-    ? diagnostics.profiles.map((profile) => [
-      `- ${profile.id}${profile.isLastUsed ? ' (last used)' : ''}`,
-      `  Name: ${profile.name || 'unknown'}`,
-      `  Signed-in Chrome profile: ${profile.hasChromeAccount ? 'yes' : 'no'}`,
-      `  Account hint: ${profile.accountHint || 'none'}`,
-      `  Use with: --xProfileDirectory ${shellQuote(profile.id)}`,
-    ].join('\n')).join('\n')
+    ? diagnostics.profiles.map((profile) => formatProfile(profile, {
+      profileDir: diagnostics.profileDir,
+      includeProfileDir: false,
+    })).join('\n')
     : '- No Chrome profiles found under the publishing profile dir.';
+  const alternateProfileDirs = diagnostics.alternateProfileDirs?.length
+    ? diagnostics.alternateProfileDirs.map(formatAlternateProfileDir).join('\n\n')
+    : '- No alternate Chrome profile dirs scanned. Pass --includeSystemChrome true or --extraProfileDir to inspect a normal Chrome profile dir.';
   const liveBrowsers = diagnostics.liveBrowsers.length
     ? diagnostics.liveBrowsers.map((browser) => {
       const pages = browser.xPages.length
@@ -76,6 +86,10 @@ Generated at: ${diagnostics.generatedAt}
 
 ${profiles}
 
+## Alternate Chrome Profile Dirs
+
+${alternateProfileDirs}
+
 ## Live X Pages
 
 ${liveBrowsers}
@@ -94,6 +108,50 @@ export async function writeXProfileDiagnostics(diagnostics, filePath = 'data/soc
   await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, `${formatXProfileDiagnosticsMarkdown(diagnostics).trimEnd()}\n`);
   return filePath;
+}
+
+async function readAlternateProfileDirs({
+  primaryProfileDir,
+  includeSystemChrome,
+  extraProfileDirs = [],
+  debugPort = '',
+}) {
+  const dirs = uniqueStrings([
+    ...(includeSystemChrome ? [DEFAULT_SYSTEM_CHROME_PROFILE_DIR] : []),
+    ...normalizeList(extraProfileDirs),
+  ]);
+  const alternates = [];
+
+  for (const dir of dirs) {
+    const resolvedDir = resolve(dir);
+    if (resolvedDir === primaryProfileDir) continue;
+    if (!existsSync(resolvedDir)) continue;
+
+    const profiles = await readChromeProfiles(resolvedDir);
+    const ports = uniqueNumbers([
+      Number(debugPort) || null,
+      ...discoverDebugPorts(resolvedDir),
+    ]);
+    const liveBrowsers = [];
+    for (const port of ports) {
+      const pages = await readXPages(port);
+      liveBrowsers.push({
+        port,
+        xPages: pages,
+        inferredLoginState: inferLoginState(pages),
+      });
+    }
+
+    if (profiles.length || liveBrowsers.length) {
+      alternates.push({
+        profileDir: resolvedDir,
+        profiles,
+        liveBrowsers,
+      });
+    }
+  }
+
+  return alternates;
 }
 
 async function readChromeProfiles(profileDir) {
@@ -161,7 +219,7 @@ function inferLoginState(pages) {
   return 'unknown';
 }
 
-function buildRecommendations({ profiles, liveBrowsers }) {
+function buildRecommendations({ profiles, liveBrowsers, alternateProfileDirs = [] }) {
   const recommendations = [];
   const lastUsed = profiles.find((profile) => profile.isLastUsed);
   const hasNonDefault = profiles.some((profile) => profile.id !== 'Default');
@@ -180,7 +238,45 @@ function buildRecommendations({ profiles, liveBrowsers }) {
   if (hasMaybeLoggedInLivePage) {
     recommendations.push('A live X page may already be logged in. Run login-recovery with the matching profile directory before preparing a public post.');
   }
+  for (const alternate of alternateProfileDirs) {
+    if (!alternate.profiles.length) continue;
+    const suggested = alternate.profiles.find((profile) => profile.isLastUsed) || alternate.profiles[0];
+    recommendations.push(`If @Clean993 is already logged into normal Chrome, rerun login-recovery with --xProfileDir ${shellQuote(alternate.profileDir)} --xProfileDirectory ${shellQuote(suggested.id)}, or choose the exact listed profile from that dir.`);
+  }
   return recommendations;
+}
+
+function formatAlternateProfileDir(item) {
+  const profiles = item.profiles.length
+    ? item.profiles.map((profile) => formatProfile(profile, {
+      profileDir: item.profileDir,
+      includeProfileDir: true,
+    })).join('\n')
+    : '- No Chrome profiles found.';
+  const liveBrowsers = item.liveBrowsers.length
+    ? item.liveBrowsers.map((browser) => `- Port ${browser.port}: ${browser.inferredLoginState}`).join('\n')
+    : '- No running Chrome debugging port found for this profile dir.';
+
+  return `### ${item.profileDir}
+
+${profiles}
+
+Live X pages:
+${liveBrowsers}`;
+}
+
+function formatProfile(profile, { profileDir, includeProfileDir }) {
+  const command = includeProfileDir
+    ? `--xProfileDir ${shellQuote(profileDir)} --xProfileDirectory ${shellQuote(profile.id)}`
+    : `--xProfileDirectory ${shellQuote(profile.id)}`;
+
+  return [
+    `- ${profile.id}${profile.isLastUsed ? ' (last used)' : ''}`,
+    `  Name: ${profile.name || 'unknown'}`,
+    `  Signed-in Chrome profile: ${profile.hasChromeAccount ? 'yes' : 'no'}`,
+    `  Account hint: ${profile.accountHint || 'none'}`,
+    `  Use with: ${command}`,
+  ].join('\n');
 }
 
 async function readJson(filePath) {
@@ -195,6 +291,16 @@ async function fetchJson(url) {
 
 function uniqueNumbers(values) {
   return [...new Set(values.filter((value) => Number.isInteger(value) && value > 0))];
+}
+
+function uniqueStrings(values) {
+  return [...new Set(values.map((value) => String(value || '').trim()).filter(Boolean))];
+}
+
+function normalizeList(value) {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+  return String(value).split(',').map((item) => item.trim()).filter(Boolean);
 }
 
 function maskEmail(value) {

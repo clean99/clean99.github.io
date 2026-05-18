@@ -339,6 +339,9 @@ if (command === 'articles') {
     publishConfirmationPath: args.confirmationOut || 'data/social-growth/publish-confirmation.md',
     browserReadinessPath: args.browserReadinessOut || 'data/social-growth/browser-readiness.md',
     browserProbePath: args.browserProbe || args.browserProbeOut || 'data/social-growth/browser-probe.local.json',
+    profileDiagnosticsPath: args.profileDiagnosticsOut || 'data/social-growth/x-profile-diagnostics.md',
+    profileDiagnosticsIncludeSystemChrome: args.includeSystemChrome !== 'false',
+    profileDiagnosticsExtraDirs: args.extraProfileDir || args.extraProfileDirs,
     engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
     engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
     engagementSearchPath: args.engagementSearchOut || 'data/social-growth/engagement-search.md',
@@ -368,6 +371,7 @@ if (command === 'articles') {
     blockers: result.blockers,
     profileConversion: result.profileConversion,
     browserReadiness: result.browserReadiness,
+    profileDiagnostics: result.profileDiagnostics,
     engagement: result.engagement,
     paths: result.paths,
   }, null, 2));
@@ -405,6 +409,9 @@ if (command === 'articles') {
     publishConfirmationPath: args.confirmationOut || 'data/social-growth/publish-confirmation.md',
     browserReadinessPath: args.browserReadinessOut || 'data/social-growth/browser-readiness.md',
     browserProbePath: args.browserProbe || args.browserProbeOut || 'data/social-growth/browser-probe.local.json',
+    profileDiagnosticsPath: args.profileDiagnosticsOut || 'data/social-growth/x-profile-diagnostics.md',
+    profileDiagnosticsIncludeSystemChrome: args.includeSystemChrome !== 'false',
+    profileDiagnosticsExtraDirs: args.extraProfileDir || args.extraProfileDirs,
     engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
     engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
     engagementSearchPath: args.engagementSearchOut || 'data/social-growth/engagement-search.md',
@@ -851,6 +858,8 @@ if (command === 'articles') {
 } else if (command === 'x-profile-diagnostics') {
   const diagnostics = await buildXProfileDiagnostics({
     profileDir: args.xProfileDir || args.profileDir,
+    includeSystemChrome: args.includeSystemChrome !== 'false',
+    extraProfileDirs: args.extraProfileDir || args.extraProfileDirs,
     debugPort: args.debugPort,
     generatedAt: args.now ? new Date(args.now) : new Date(),
   });

@@ -1798,9 +1798,23 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       followersIn7Days: 1000,
     }));
     const skillDir = join(outDir, 'baoyu-post-to-x');
+    const xProfileDir = join(outDir, 'chrome-profile');
     await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await mkdir(join(xProfileDir, 'Profile 1'), { recursive: true });
     await writeFile(join(skillDir, 'scripts/x-article.ts'), '// test script');
     await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await writeFile(join(xProfileDir, 'Local State'), `${JSON.stringify({
+      profile: {
+        last_used: 'Profile 1',
+        profiles_order: ['Profile 1'],
+        info_cache: {
+          'Profile 1': {
+            name: 'Clean993',
+            user_name: 'clean993@example.com',
+          },
+        },
+      },
+    })}\n`);
     await writeFile(join(outDir, 'profile.local.txt'), [
       'clean',
       '@Clean993',
@@ -1852,10 +1866,12 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
       browserReadinessPath: join(outDir, 'browser-readiness.md'),
       browserProbePath: join(outDir, 'browser-probe.local.json'),
+      profileDiagnosticsPath: join(outDir, 'x-profile-diagnostics.md'),
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
       xSkillDir: skillDir,
+      xProfileDir,
       xBunCommand: 'bun',
       packageLimit: 2,
       queueOptions: {
@@ -1875,6 +1891,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const xPrep = await readFile(join(outDir, 'x-publish-prep.md'), 'utf8');
     const confirmation = await readFile(join(outDir, 'publish-confirmation.md'), 'utf8');
     const browserReadiness = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
+    const profileDiagnostics = await readFile(join(outDir, 'x-profile-diagnostics.md'), 'utf8');
     const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
     const engagementSearch = await readFile(join(outDir, 'engagement-search.md'), 'utf8');
     const engagementCaptureTemplate = await readFile(join(outDir, 'engagement-opportunities/_capture-template.md'), 'utf8');
@@ -1894,11 +1911,14 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.equal(result.paths.xPublishPrep, join(outDir, 'x-publish-prep.md'));
     assert.equal(result.paths.publishConfirmation, join(outDir, 'publish-confirmation.md'));
     assert.equal(result.paths.browserReadiness, join(outDir, 'browser-readiness.md'));
+    assert.equal(result.paths.profileDiagnostics, join(outDir, 'x-profile-diagnostics.md'));
     assert.equal(result.paths.engagementSearch, join(outDir, 'engagement-search.md'));
     assert.equal(result.paths.engagementCaptureTemplate, join(outDir, 'engagement-opportunities/_capture-template.md'));
     assert.equal(result.paths.engagementPlan, join(outDir, 'engagement-plan.md'));
     assert.equal(result.paths.manualPublishKitIndex, join(outDir, 'manual-publish-kits/day1-ready-slots.md'));
     assert.equal(result.engagement.searchStatus, 'ready_for_read_only_search');
+    assert.equal(result.profileDiagnostics.status, 'generated');
+    assert.equal(result.profileDiagnostics.profiles, 1);
     assert.equal(result.engagement.captureTemplateStatus, 'ready_for_capture');
     assert.equal(result.engagement.captureTargets, result.engagement.searchQueries);
     assert.equal(result.engagement.status, 'needs_opportunity_capture');
@@ -1909,6 +1929,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(dailyBrief, /Daily X Growth Brief/);
     assert.match(report, /X publish prep/);
     assert.match(report, /Browser readiness/);
+    assert.match(report, /X profile diagnostics/);
     assert.match(report, /Image backlog/);
     assert.match(imageBacklog, /X Image Backlog/);
     assert.match(imageBacklog, /social:register-image/);
@@ -1930,6 +1951,8 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(confirmation, /Image-backed Short Post To Review/);
     assert.match(browserReadiness, /X Browser Readiness/);
     assert.match(browserReadiness, /blocked_local_prep/);
+    assert.match(profileDiagnostics, /X Profile Diagnostics/);
+    assert.match(profileDiagnostics, /--xProfileDirectory 'Profile 1'/);
     assert.match(engagementSearch, /X Engagement Search Plan/);
     assert.match(engagementCaptureTemplate, /X Engagement Capture Template/);
     assert.match(engagementCaptureTemplate, /Keep \/ Skip Gate/);
@@ -2842,9 +2865,27 @@ test('x profile diagnostics lists Chrome profiles without public actions', async
     await writeFile(join(profileDir, 'Profile 1', 'Preferences'), `${JSON.stringify({
       account_info: [{ email: 'felix@example.com' }],
     })}\n`);
+    const normalChromeDir = join(outDir, 'normal-chrome');
+    await mkdir(join(normalChromeDir, 'Profile 3'), { recursive: true });
+    await writeFile(join(normalChromeDir, 'Local State'), `${JSON.stringify({
+      profile: {
+        last_used: 'Profile 3',
+        profiles_order: ['Profile 3'],
+        info_cache: {
+          'Profile 3': {
+            name: 'Daily Chrome',
+            user_name: 'clean993@example.com',
+          },
+        },
+      },
+    }, null, 2)}\n`);
+    await writeFile(join(normalChromeDir, 'Profile 3', 'Preferences'), `${JSON.stringify({
+      account_info: [{ email: 'clean993@example.com' }],
+    })}\n`);
 
     const diagnostics = await buildXProfileDiagnostics({
       profileDir,
+      extraProfileDirs: [normalChromeDir],
       generatedAt: '2026-05-18T00:00:00.000Z',
     });
     const markdown = formatXProfileDiagnosticsMarkdown(diagnostics);
@@ -2857,7 +2898,11 @@ test('x profile diagnostics lists Chrome profiles without public actions', async
     assert.deepEqual(diagnostics.profiles.map((profile) => profile.id), ['Default', 'Profile 1']);
     assert.equal(diagnostics.profiles[1].isLastUsed, true);
     assert.equal(diagnostics.profiles[1].accountHint, 'f***@example.com');
+    assert.equal(diagnostics.alternateProfileDirs.length, 1);
+    assert.equal(diagnostics.alternateProfileDirs[0].profiles[0].id, 'Profile 3');
     assert.match(markdown, /--xProfileDirectory 'Profile 1'/);
+    assert.match(markdown, /Alternate Chrome Profile Dirs/);
+    assert.match(markdown, /--xProfileDir .*normal-chrome.* --xProfileDirectory 'Profile 3'/);
     assert.match(markdown, /Read-only diagnostics only/);
     assert.match(persisted, /X Profile Diagnostics/);
   } finally {

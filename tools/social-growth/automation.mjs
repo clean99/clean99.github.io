@@ -40,6 +40,10 @@ import {
   writeProfileUpdatePackage,
 } from './profile.mjs';
 import {
+  buildXProfileDiagnostics,
+  writeXProfileDiagnostics,
+} from './xProfileDiagnostics.mjs';
+import {
   buildGrowthStatus,
   writeGrowthStatus,
 } from './status.mjs';
@@ -118,6 +122,9 @@ export async function runSafeAutomationCycle({
   publishConfirmationPath = DEFAULT_PUBLISH_CONFIRMATION_PATH,
   browserReadinessPath = DEFAULT_BROWSER_READINESS_PATH,
   browserProbePath = DEFAULT_BROWSER_PROBE_PATH,
+  profileDiagnosticsPath = '',
+  profileDiagnosticsIncludeSystemChrome = false,
+  profileDiagnosticsExtraDirs = [],
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
   engagementCaptureTemplatePath = join(engagementOpportunityDir, '_capture-template.md'),
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
@@ -241,6 +248,15 @@ export async function runSafeAutomationCycle({
     generatedAt,
   });
   await writeBrowserReadiness(browserReadiness, browserReadinessPath);
+  const profileDiagnostics = profileDiagnosticsPath
+    ? await buildXProfileDiagnostics({
+      profileDir: xProfileDir,
+      includeSystemChrome: profileDiagnosticsIncludeSystemChrome,
+      extraProfileDirs: profileDiagnosticsExtraDirs,
+      generatedAt,
+    })
+    : null;
+  if (profileDiagnostics) await writeXProfileDiagnostics(profileDiagnostics, profileDiagnosticsPath);
   const publishConfirmation = buildPublishConfirmation({
     queue,
     preflight,
@@ -348,6 +364,7 @@ export async function runSafeAutomationCycle({
       status: browserReadiness.status,
       blockers: browserReadiness.blockers,
     },
+    profileDiagnostics: summarizeProfileDiagnostics(profileDiagnostics),
     paths: {
       queue: queuePath,
       dailyReport: dailyReportPath,
@@ -364,6 +381,7 @@ export async function runSafeAutomationCycle({
       publishConfirmation: publishConfirmationPath,
       browserReadiness: browserReadinessPath,
       browserProbe: browserProbePath,
+      profileDiagnostics: profileDiagnosticsPath || null,
       engagementSearch: engagementSearchPath,
       engagementCaptureTemplate: engagementCaptureTemplatePath,
       engagementPlan: engagementPlanPath,
@@ -445,6 +463,7 @@ Status: ${result.status}
 - Publish confirmation: \`${result.paths.publishConfirmation}\`
 - Browser readiness: \`${result.paths.browserReadiness}\`
 - Browser probe state: \`${result.paths.browserProbe}\`
+- X profile diagnostics: \`${result.paths.profileDiagnostics || 'not generated'}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement capture template: \`${result.paths.engagementCaptureTemplate}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
@@ -467,6 +486,13 @@ Status: ${result.status}
 - Issues: ${result.profileConversion?.failedChecks ?? 'unknown'}
 
 ${profileIssues}
+
+## X Profile Diagnostics
+
+- Status: ${result.profileDiagnostics?.status || 'unknown'}
+- Profiles in publishing dir: ${result.profileDiagnostics?.profiles ?? 'unknown'}
+- Alternate profile dirs: ${result.profileDiagnostics?.alternateProfileDirs ?? 'unknown'}
+- Recommendations: ${result.profileDiagnostics?.recommendations ?? 'unknown'}
 
 ## Publish Confirmation
 
@@ -545,6 +571,23 @@ function summarizePublishConfirmation(publishConfirmation) {
     status: publishConfirmation?.status || 'unknown',
     contentReviewStatus: publishConfirmation?.contentReview?.status || 'unknown',
     contentIssues: publishConfirmation?.contentReview?.issues || [],
+  };
+}
+
+function summarizeProfileDiagnostics(diagnostics) {
+  if (!diagnostics) {
+    return {
+      status: 'not_generated',
+      profiles: 0,
+      alternateProfileDirs: 0,
+      recommendations: 0,
+    };
+  }
+  return {
+    status: 'generated',
+    profiles: diagnostics.profiles.length,
+    alternateProfileDirs: diagnostics.alternateProfileDirs?.length || 0,
+    recommendations: diagnostics.recommendations.length,
   };
 }
 

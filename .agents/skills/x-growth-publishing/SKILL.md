@@ -252,7 +252,7 @@ Do not point this at a profile that is currently locked by another running Chrom
 If the user-data dir has multiple Chrome profiles, diagnose them before asking the user to log in again:
 
 ```bash
-npm run social:x-profile-diagnostics -- --out data/social-growth/x-profile-diagnostics.md
+npm run social:x-profile-diagnostics -- --includeSystemChrome true --out data/social-growth/x-profile-diagnostics.md
 ```
 
 Then make the intended Chrome profile explicit:
