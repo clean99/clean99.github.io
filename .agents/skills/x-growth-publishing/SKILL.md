@@ -179,7 +179,7 @@ npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-pre
 ```
 
 This command does not publish. It emits commands for the `x-article.ts` and `x-browser.ts` scripts and keeps the stop-before-final-click boundary explicit.
-It also emits a `--probe --json` project CDP command. Run that first when Chrome/X readiness is unknown: it opens or attaches the logged-in Chrome profile, checks whether the X compose editor and image file input are available, and does not type text, upload media, or click any public button.
+It also emits a `--probe --json --probe-out data/social-growth/browser-probe.local.json` project CDP command. Run that first when Chrome/X readiness is unknown: it opens or attaches the logged-in Chrome profile, records whether the X compose editor and image file input are available, and does not type text, upload media, or click any public button.
 If the account/browser probe shows `https://x.com/compose/articles` is unavailable, use the thread fallback mode instead of pretending X Article publishing works:
 
 ```bash

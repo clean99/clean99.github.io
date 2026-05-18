@@ -2376,6 +2376,8 @@ test('x publish prep bridges selected package to baoyu-post-to-x commands', asyn
     assert.match(prep.commands.probeBrowser, /x-browser-cdp\.mjs'/);
     assert.match(prep.commands.probeBrowser, /--probe --json/);
     assert.match(prep.commands.probeBrowser, /--profile '\/tmp\/x-profile'/);
+    assert.match(prep.commands.recordBrowserProbe, /--probe-out 'data\/social-growth\/browser-probe\.local\.json'/);
+    assert.match(prep.commands.recordBrowserProbe, /--account '@Clean993'/);
     assert.match(prep.commands.prepareShortPost, /x-browser-cdp\.mjs/);
     assert.match(prep.commands.prepareShortPost, /--image/);
     assert.match(prep.commands.prepareShortPost, /--profile '\/tmp\/x-profile'/);
@@ -2441,6 +2443,7 @@ test('x publish prep can fall back to an image-backed thread when X Article is u
     assert.match(prep.commands.prepareArticle, /X Article is unavailable/);
     assert.match(prep.commands.probeBrowser, /x-browser-cdp\.mjs'/);
     assert.match(prep.commands.probeBrowser, /--probe --json/);
+    assert.match(prep.commands.recordBrowserProbe, /--probe-out 'data\/social-growth\/browser-probe\.local\.json'/);
     assert.match(prep.commands.prepareShortPost, /x-browser-cdp\.mjs/);
     assert.match(prep.commands.prepareShortPost, /--image/);
     assert.match(prep.commands.prepareShortPost, /--profile '\/tmp\/x-profile'/);
@@ -2522,6 +2525,8 @@ test('project x browser cdp handoff exposes a non-publishing help command', () =
   assert.match(result.stdout, /Prepare an X post in Chrome through CDP/);
   assert.match(result.stdout, /--probe/);
   assert.match(result.stdout, /--json/);
+  assert.match(result.stdout, /--probe-out/);
+  assert.match(result.stdout, /--account/);
   assert.match(result.stdout, /stops before final publish/);
 });
 

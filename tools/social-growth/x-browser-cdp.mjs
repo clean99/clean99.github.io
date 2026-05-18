@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { homedir } from 'node:os';
-import { resolve, join } from 'node:path';
+import { dirname, resolve, join } from 'node:path';
 
 const X_COMPOSE_URL = 'https://x.com/compose/post';
 const DEFAULT_TIMEOUT_MS = 120_000;
+const DEFAULT_PROBE_TIMEOUT_MS = 30_000;
 const CHROME_CANDIDATES = [
   '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   '/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary',
@@ -24,6 +25,7 @@ async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) printUsage(0);
   if (options.probe) {
+    if (!options.timeoutProvided) options.timeoutMs = DEFAULT_PROBE_TIMEOUT_MS;
     await probeBrowser(options);
     return;
   }
@@ -79,6 +81,8 @@ async function probeBrowser({
   profileDir = defaultProfileDir(),
   chromePath = '',
   json = false,
+  probeOut = '',
+  expectedAccount = '',
 }) {
   const session = await connectCompose({ timeoutMs, profileDir, chromePath });
   const { cdp, chrome } = session;
@@ -116,6 +120,9 @@ async function probeBrowser({
       },
       blockers,
     };
+    if (probeOut) {
+      await writeProbeRecord(probeOut, browserProbeRecordFromResult(result, expectedAccount));
+    }
 
     if (json) {
       console.log(JSON.stringify(result, null, 2));
@@ -128,6 +135,50 @@ async function probeBrowser({
   }
 }
 
+async function writeProbeRecord(filePath, record) {
+  const previous = await readJsonFile(filePath);
+  const merged = dropEmpty({
+    ...previous,
+    ...record,
+  });
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${JSON.stringify(merged, null, 2)}\n`);
+}
+
+async function readJsonFile(filePath) {
+  try {
+    return JSON.parse(await readFile(filePath, 'utf8'));
+  } catch (error) {
+    if (error?.code === 'ENOENT') return {};
+    throw error;
+  }
+}
+
+function browserProbeRecordFromResult(result, expectedAccount) {
+  return {
+    ...(expectedAccount ? { expectedAccount } : {}),
+    observedAccount: result.observedAccount,
+    chromeRunning: 'yes',
+    loginState: result.editorReady
+      ? 'logged_in'
+      : result.loginPromptVisible ? 'logged_out' : 'unknown',
+    mediaUpload: result.fileInputReady
+      ? 'ready'
+      : result.editorReady ? 'blocked' : 'unknown',
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+function dropEmpty(input) {
+  const output = {};
+  for (const [key, value] of Object.entries(input)) {
+    if (value !== undefined && value !== null && String(value).trim() !== '') {
+      output[key] = value;
+    }
+  }
+  return output;
+}
+
 async function connectCompose({
   timeoutMs = DEFAULT_TIMEOUT_MS,
   profileDir = defaultProfileDir(),
@@ -135,7 +186,8 @@ async function connectCompose({
 }) {
   const resolvedProfileDir = profileDir || defaultProfileDir();
   await mkdir(resolvedProfileDir, { recursive: true });
-  const existingPort = await findExistingDebugPort(resolvedProfileDir);
+  const candidatePort = await findExistingDebugPort(resolvedProfileDir);
+  const existingPort = candidatePort && await isDebugPortAlive(candidatePort) ? candidatePort : null;
   const port = existingPort || await freePort();
   let chrome = null;
 
@@ -169,6 +221,11 @@ async function connectCompose({
     if (chrome) chrome.unref();
     throw error;
   }
+}
+
+async function isDebugPortAlive(port) {
+  const version = await fetchJson(`http://127.0.0.1:${port}/json/version`).catch(() => null);
+  return Boolean(version?.webSocketDebuggerUrl || version?.Browser);
 }
 
 async function uploadImage(cdp, imagePath) {
@@ -419,7 +476,10 @@ function parseArgs(args) {
     submit: false,
     probe: false,
     json: false,
+    probeOut: '',
+    expectedAccount: '',
     timeoutMs: DEFAULT_TIMEOUT_MS,
+    timeoutProvided: false,
     profileDir: '',
     chromePath: '',
     help: false,
@@ -434,6 +494,10 @@ function parseArgs(args) {
       options.probe = true;
     } else if (arg === '--json') {
       options.json = true;
+    } else if (arg === '--probe-out' && args[index + 1]) {
+      options.probeOut = args[++index];
+    } else if (arg === '--account' && args[index + 1]) {
+      options.expectedAccount = args[++index];
     } else if (arg === '--image' && args[index + 1]) {
       options.images.push(args[++index]);
     } else if (arg === '--submit') {
@@ -444,6 +508,7 @@ function parseArgs(args) {
       options.chromePath = args[++index];
     } else if (arg === '--timeout-ms' && args[index + 1]) {
       options.timeoutMs = Number(args[++index]) || DEFAULT_TIMEOUT_MS;
+      options.timeoutProvided = true;
     } else if (arg && !arg.startsWith('-')) {
       textParts.push(arg);
     } else {
@@ -481,6 +546,8 @@ Usage:
 Options:
   --probe              Check Chrome/X compose readiness without typing or uploading
   --json               Print probe result as JSON
+  --probe-out <path>   Write browser-readiness probe state JSON
+  --account <handle>   Expected X account handle for probe state
   --image <path>       Add image through file input; repeat for multiple images
   --profile <dir>      Chrome profile directory
   --chrome-path <path> Chrome executable path

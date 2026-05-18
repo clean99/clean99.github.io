@@ -4,6 +4,7 @@ import { homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const DEFAULT_OUT_PATH = 'data/social-growth/x-publish-prep.md';
+const DEFAULT_BROWSER_PROBE_PATH = 'data/social-growth/browser-probe.local.json';
 const DEFAULT_BROWSER_COMMAND = shellQuote(process.execPath);
 
 export async function buildXPublishPrep(preflight, {
@@ -14,6 +15,8 @@ export async function buildXPublishPrep(preflight, {
   articleUrlPlaceholder = '<x-article-url>',
   publishMode = 'x_article',
   profileDir,
+  browserProbePath = DEFAULT_BROWSER_PROBE_PATH,
+  expectedAccount = '@Clean993',
   runtimeResolver = resolveBunCommand,
 } = {}) {
   if (!preflight?.selected?.id) {
@@ -85,6 +88,7 @@ export async function buildXPublishPrep(preflight, {
     },
     commands: {
       probeBrowser: `${browserRuntime.command} ${shellQuote(scripts.regularPost)} --probe --json${profileArg}`,
+      recordBrowserProbe: `${browserRuntime.command} ${shellQuote(scripts.regularPost)} --probe --json --probe-out ${shellQuote(browserProbePath)} --account ${shellQuote(expectedAccount)}${profileArg}`,
       prepareArticle: resolvedPublishMode === 'x_article'
         ? `${articleCommand} ${shellQuote(scripts.article)} ${shellQuote(files.xArticle)} --cover ${shellQuote(files.image)}${profileArg}`
         : '# X Article is unavailable for this account. Use the thread fallback command below.',
@@ -145,10 +149,10 @@ ${blockers}
 
 ## Probe Browser Without Public Actions
 
-Run this before any publish handoff when login/editor/media-upload state is unknown. It opens or attaches Chrome, checks X compose readiness, and does not type text, upload media, or click a public button.
+Run this before any publish handoff when login/editor/media-upload state is unknown. It opens or attaches Chrome, checks X compose readiness, records the local probe state, and does not type text, upload media, or click a public button.
 
 \`\`\`bash
-${prep.commands.probeBrowser}
+${prep.commands.recordBrowserProbe}
 \`\`\`
 
 ## Prepare X Article
