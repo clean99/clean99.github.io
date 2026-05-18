@@ -10,7 +10,7 @@ permalink: zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Swit
 
 Tab system 引入后，工作台不再只有一个前台页面。用户可以同时打开多个 workstream、子应用和对象页，系统背后也会同时存在更多 route、runtime、iframe、SDK 和后台任务。性能问题因此不再是“某个页面慢”，而是三条用户路径分别要守住。
 
-![workspace tab system demo](/img/workspace-v2-tab-system/workspace-tab-system-demo.svg)
+![workspace tab system demo](/img/workspace-v2-tab-system/workspace-tab-system-demo.png)
 
 图 0：一个通用工作台里的 tab system 演示。性能问题之所以变复杂，是因为多个工作对象可以同时保持打开，但只有当前 tab 应该可交互并占用前台资源。
 

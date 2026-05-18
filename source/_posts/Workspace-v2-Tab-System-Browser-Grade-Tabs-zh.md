@@ -10,7 +10,7 @@ permalink: zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/
 
 Workspace v2 要把原来偏“单页面、单上下文”的工作台，改成可以同时承载多个工作流、多个子应用视图、多个工单对象的工作空间。对用户来说，这个体验更接近浏览器：我打开了几个工作流，切来切去状态还在；我刷新页面或者把链接发给别人，应该还能回到正确的业务页面；我在一个子应用里打开弹窗，不能盖到另一个 tab 上。
 
-![workspace tab system demo](/img/workspace-v2-tab-system/workspace-tab-system-demo.svg)
+![workspace tab system demo](/img/workspace-v2-tab-system/workspace-tab-system-demo.png)
 
 图 0：一个通用工作台里的 tab system 演示。用户可以同时打开多个工作对象，像浏览器一样切回；只有当前 tab 拥有 URL、弹层、事件和前台 CPU。
 

@@ -77,6 +77,7 @@ permalink: zh/YYYY/MM/DD/Full-English-Title/
    - For articles based on internal or domain-specific products, add an early audience-orientation visual before deep architecture, metrics, or implementation sections.
    - That visual should answer what the product or workflow looks like, who uses it, what action the user takes, where the technical mechanism appears, and why the later metrics matter.
    - When a real product screenshot or UI reference is available, base the visual on its information architecture and interaction cues, then generalize labels and data for a public audience.
+   - For reader-facing product mockups and article diagrams, use the `imagegen` skill to create a final raster image; do not hand-draw SVG/HTML/CSS substitutes unless the user explicitly asks for a code-native asset.
    - Prefer generic product mockups or scenario diagrams over internal screenshots; avoid internal names, URLs, secrets, and operational identifiers.
    - Verify referenced image files exist.
 7. Review before publishing:
