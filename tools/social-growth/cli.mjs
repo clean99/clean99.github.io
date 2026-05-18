@@ -5,6 +5,7 @@ import { buildDistributionCandidates } from './copy.mjs';
 import { runDailyGrowthPlan } from './daily.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from './recommendations.mjs';
+import { formatValidationMarkdown, validateQueue } from './validation.mjs';
 import {
   buildPublishQueue,
   findQueueItem,
@@ -52,6 +53,14 @@ if (command === 'articles') {
     console.log(formatRecommendationsMarkdown(ledger));
   } else {
     console.log(JSON.stringify(buildGrowthRecommendations(ledger), null, 2));
+  }
+} else if (command === 'validate') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const validation = validateQueue(queue);
+  if (args.format === 'markdown') {
+    console.log(formatValidationMarkdown(validation));
+  } else {
+    console.log(JSON.stringify(validation, null, 2));
   }
 } else if (command === 'plan') {
   const articles = await loadArticles();
@@ -226,6 +235,7 @@ function printHelp() {
   npm run social:report -- --ledger data/social-growth/example-ledger.json
   npm run social:report -- --ledger data/social-growth/example-ledger.json --format markdown
   npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
+  npm run social:validate -- --queue data/social-growth/queue.json --format markdown
 `);
 }
 

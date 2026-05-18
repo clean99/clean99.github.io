@@ -8,6 +8,8 @@ Sources checked on 2026-05-18:
 - `@lidangzzz` Rattibha profile: https://en.rattibha.com/lidangzzz
 - `@lidangzzz` Followin mirror: https://followin.io/zh-Hant/kol/4075583655
 - `@lidangzzz` example discussion mirror: https://pincong.rocks/article/84235
+- `@lxfater` SuperX profile sample and engagement snapshot: https://superx.so/creators/lxfater
+- `@lxfater` TwStalker public mirror sample: https://www6.twstalker.com/lxfater
 
 Do not imitate these creators' exact voice. Extract structure only.
 
@@ -17,11 +19,12 @@ Do not imitate these creators' exact voice. Extract structure only.
 
 Observed in `@lxfater` style technical posts:
 
-- Title states the useful discovery or measurable result.
-- First paragraph names the pain.
+- Title states the useful discovery or measurable result, often with a number, ranking, saved cost, or concrete artifact.
+- First paragraph names the pain in the reader's own words.
 - Middle section breaks the system into numbered steps.
 - Images are not decoration; they carry setup steps, architecture, or before/after proof.
 - Ending gives the reader the next action.
+- A strong post can link an X Article, but only after the short post has already sold the mechanism.
 
 Use when the blog post is about AI tools, workflows, debugging, performance, or engineering process.
 
@@ -48,6 +51,7 @@ Observed in `@lidangzzz` style posts:
 - The post moves quickly into a concrete case.
 - Lists are used to create argumentative momentum.
 - The conclusion tells the reader what to do or stop doing.
+- The useful part is the diagnostic frame. The toxic part is personal attack. Keep the first, drop the second.
 
 Use the structure, not the abusive tone. Avoid insults, slurs, personal attacks, and unsupported sweeping claims.
 
@@ -92,6 +96,10 @@ Use when there is a concrete project result:
 - Image job: explain structure faster than text.
 - X Article job: satisfy the click inside X before sending the reader to the blog.
 - Blog link job: archive and full detail, placed at the end of the X Article.
+- First screen order: claim or pain -> mechanism/proof -> image. Do not lead with the blog URL.
+- For technical posts, prefer "我发现/我以为/很多人把...想错了" only when the next sentence names the mechanism.
+- Use a number only when it is real: saved tokens, views, steps, weeks, files, test count, or measured improvement.
+- Replies should extend the technical frame. They are not a place to ask for likes or generic discussion.
 
 ## Do Not Use
 

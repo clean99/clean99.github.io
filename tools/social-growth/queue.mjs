@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { buildDistributionCandidates } from './copy.mjs';
+import { formatQueueItemValidation } from './validation.mjs';
 
 export function buildPublishQueue(articles, options = {}) {
   const createdAt = options.createdAt || new Date().toISOString();
@@ -91,6 +92,7 @@ export function buildPublishPackage(item) {
       'follow-up-replies.md': formatFollowUpReplies(handoff.followUpReplies),
       'short-post.txt': handoff.shortPost,
       'browser-handoff.json': JSON.stringify(handoff, null, 2),
+      'quality-gate.md': formatQueueItemValidation(item),
       'publish-checklist.md': formatPublishChecklist(item),
     },
   };

@@ -84,19 +84,19 @@ export function sharpTake(article) {
     return clamp(`别再让 AI 只“建议优化”了。\n\n真正有用的是让它跑一个可度量的工程闭环：baseline、修改、验证、复盘，一个都不能少。\n\n${takeaway}`, 220);
   }
 
-  return clamp(`A technical post is useful only when it leaves a reusable frame.\n\nI wrote about: ${takeaway}`, 220);
+  return clamp(`A technical post is useful only when it leaves a reusable frame.\n\nReusable frame: ${takeaway}`, 220);
 }
 
 export function researchUtility(article) {
-  return clamp('我把 AI 性能优化拆成了一张可复用流程图。\n\n真正有价值的不是 prompt，而是让 Agent 每一轮都留下：baseline、修改、验证、失败记录。\n\n图里是完整结构。', 220);
+  return clamp('我把 AI 性能优化拆成了一张可复用流程图。\n\n不是让 Agent 多写几段建议，而是让它每一轮都留下：baseline、修改、验证、失败记录。\n\n图里是完整结构。', 220);
 }
 
 export function strongThesis(article) {
-  return clamp('AI 写优化建议很便宜。\n\n贵的是证明它没胡说。\n\n我把这个问题做成了一套 Agent 跑得动的闭环：baseline -> change -> verify -> ledger。\n\n没有 ledger，所谓优化只是故事。', 220);
+  return clamp('AI 写优化建议很便宜。\n\n贵的是证明它没胡说。\n\n真正的分界线不是模型多聪明，而是有没有一套能跑起来的证据链：baseline -> change -> verify -> ledger。', 220);
 }
 
 export function caseStory(article) {
-  return clamp('我以为这篇是性能优化复盘。\n\n写完发现真正的问题更狠：AI 不是不能改代码，是我们经常没有证据判断它改得对不对。\n\n所以我把 measurement 和 ledger 做成了第一等公民。', 220);
+  return clamp('我以为这篇只是性能优化复盘。\n\n后来发现真正的问题更狠：AI 不是不能改代码，是我们经常没有证据判断它改得对不对。\n\n所以我把 measurement 和 ledger 做成了第一等公民。', 220);
 }
 
 export function usefulLesson(article) {
@@ -266,6 +266,7 @@ export function buildImageBrief(article, variant) {
       `Primary request: Create a polished editorial infographic for a technical Chinese audience about "${article.title}".`,
       `Core message: ${title}`,
       `Diagram text to include exactly: "${subtitle}"`,
+      'First-screen payload: one large Chinese headline, one concrete proof/mechanism label, no body paragraphs.',
       'Composition: one clear loop diagram with four labeled stages, a small ledger/checklist panel, and a performance waterfall hint; generous whitespace; high contrast; readable at mobile size.',
       'Style: modern engineering publication, clean vector-like bitmap illustration, precise lines, restrained color palette, no mascots, no stock-photo people.',
       `Variant emphasis: ${variantMessage}`,

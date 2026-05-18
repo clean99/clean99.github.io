@@ -10,7 +10,13 @@
     {
       "id": 2,
       "prompt": "这条推文看着没人想点，参考铁锤人、立党这类简中大 V 的结构，但不要模仿人身攻击风格，重写发 X 流程。",
-      "expected_output": "读取 chinese-x-style reference；产出强判断/调研工具/项目复盘三类结构；保持合规边界。",
+      "expected_output": "读取 chinese-x-style reference；产出强判断/调研工具/项目复盘三类结构；运行或要求运行 social:validate；保持合规边界。",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "检查今天的 X 发布包能不能发，别再出现短帖直接甩博客链接的问题。",
+      "expected_output": "运行 social:validate；失败时指出 raw blog URL、缺少首屏机制、X Article 链接位置或图片提示词问题；不进入公开发布。",
       "files": []
     },
     {

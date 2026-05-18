@@ -23,6 +23,7 @@
     "social:recommend": "node tools/social-growth/cli.mjs recommend",
     "social:report": "node tools/social-growth/cli.mjs report",
     "social:snapshot": "node tools/social-growth/cli.mjs snapshot",
+    "social:validate": "node tools/social-growth/cli.mjs validate",
     "test": "node --test test/social-growth.test.mjs"
   },
   "hexo": {

@@ -9,6 +9,7 @@ import {
   writeJson,
   writePublishPackage,
 } from './queue.mjs';
+import { formatValidationMarkdown, passingQueueItemIds, validateQueue } from './validation.mjs';
 
 export async function runDailyGrowthPlan({
   articles,
@@ -28,12 +29,14 @@ export async function runDailyGrowthPlan({
   });
   const existingQueue = await readOptionalJson(queuePath);
   const queue = existingQueue ? mergePublishQueues(existingQueue, nextQueue) : nextQueue;
+  const validation = validateQueue(queue);
   const packages = [];
 
   await writeJson(queuePath, queue);
 
   const packageItems = selectPackageItems(queue, {
     limit: Number(packageLimit || 3),
+    allowedIds: passingQueueItemIds(validation),
   });
 
   for (const item of packageItems) {
@@ -57,6 +60,7 @@ export async function runDailyGrowthPlan({
     metricsPath,
     metricsTemplate,
     packageItems,
+    validation,
   });
 
   await writeText(reportPath, report);
@@ -70,6 +74,12 @@ export async function runDailyGrowthPlan({
     metricsPath,
     metricPosts: metricsTemplate.posts.length,
     ledgerSummary: ledger ? summarizeGrowthLedger(ledger) : null,
+    validationSummary: {
+      status: validation.status,
+      passed: validation.passed,
+      failed: validation.failed,
+      warnings: validation.warnings,
+    },
   };
 }
 
@@ -84,6 +94,7 @@ export function formatDailyRunReport({
   metricsPath,
   metricsTemplate,
   packageItems,
+  validation,
 }) {
   const packageLines = packages.length
     ? packages.map((item, index) => `${index + 1}. ${item.id}: ${item.packageDir}`).join('\n')
@@ -106,6 +117,7 @@ Generated at: ${generatedAt}
 - Metrics template: \`${metricsPath}\`
 - Published posts waiting for metrics: ${metricsTemplate.posts.length}
 - Package selection: article-diverse first, then fallback variants if needed.
+- Quality gate: ${validation.passed}/${validation.total} passed, ${validation.warnings} warnings.
 
 ## Packages
 
@@ -114,6 +126,10 @@ ${packageLines}
 Selected queue ids:
 
 ${packageItems.length ? packageItems.map((item) => `- ${item.id}`).join('\n') : '- none'}
+
+## Quality Gate
+
+${formatValidationMarkdown(validation)}
 
 ## Next Browser Actions
 
@@ -158,7 +174,7 @@ export function draftItems(queue) {
   return (queue.items || []).filter((item) => item.status === 'draft');
 }
 
-export function selectPackageItems(queue, { limit = 3 } = {}) {
+export function selectPackageItems(queue, { limit = 3, allowedIds = null } = {}) {
   const maxItems = Number(limit || 3);
   const drafts = draftItems(queue);
   const publishedSlugs = new Set((queue.items || [])
@@ -167,18 +183,22 @@ export function selectPackageItems(queue, { limit = 3 } = {}) {
   const selected = [];
   const selectedIds = new Set();
 
-  for (const item of onePerArticle(drafts.filter((draft) => !publishedSlugs.has(draft.articleSlug)))) {
+  const eligibleDrafts = allowedIds
+    ? drafts.filter((draft) => allowedIds.has(draft.id))
+    : drafts;
+
+  for (const item of onePerArticle(eligibleDrafts.filter((draft) => !publishedSlugs.has(draft.articleSlug)))) {
     selectItem(item);
   }
 
   if (selected.length < maxItems) {
-    for (const item of onePerArticle(drafts.filter((draft) => publishedSlugs.has(draft.articleSlug)))) {
+    for (const item of onePerArticle(eligibleDrafts.filter((draft) => publishedSlugs.has(draft.articleSlug)))) {
       selectItem(item);
     }
   }
 
   if (selected.length < maxItems) {
-    for (const item of drafts) {
+    for (const item of eligibleDrafts) {
       selectItem(item);
     }
   }

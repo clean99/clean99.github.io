@@ -26,6 +26,7 @@ import {
   summarizeGrowthLedger,
 } from '../tools/social-growth/metrics.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from '../tools/social-growth/recommendations.mjs';
+import { validateQueue, validateQueueItem } from '../tools/social-growth/validation.mjs';
 import {
   buildPublishPackage,
   buildPublishQueue,
@@ -121,6 +122,7 @@ test('generates bounded X distribution candidates', () => {
   assert.equal(candidates[0].followUpReplies.length, 2);
   assert.ok(candidates[0].followUpReplies.every((reply) => reply.length <= 260));
   assert.ok(candidates[0].threadFallback[2].includes('https://clean99.github.io'));
+  assert.equal(validateQueueItem(candidates[0]).status, 'pass');
 });
 
 test('parses compact metrics and computes growth summary', () => {
@@ -378,18 +380,21 @@ test('exports a browser publish package with image, article, and checklist artif
   assert.ok(publishPackage.files['x-article.md'].includes('博客原文：'));
   assert.ok(!publishPackage.files['short-post.txt'].includes('https://clean99.github.io'));
   assert.ok(publishPackage.files['follow-up-replies.md'].includes('Reply 1'));
+  assert.ok(publishPackage.files['quality-gate.md'].includes('Status: pass'));
   assert.ok(publishPackage.files['publish-checklist.md'].includes('Stop before the final'));
 
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-package-'));
   try {
     const written = await writePublishPackage(item, { outDir });
-    assert.equal(written.files.length, 7);
+    assert.equal(written.files.length, 8);
     const prompt = await readFile(join(written.packageDir, 'image-prompt.txt'), 'utf8');
     const replies = await readFile(join(written.packageDir, 'follow-up-replies.md'), 'utf8');
     const checklist = await readFile(join(written.packageDir, 'publish-checklist.md'), 'utf8');
+    const qualityGate = await readFile(join(written.packageDir, 'quality-gate.md'), 'utf8');
     assert.ok(prompt.includes('1536x1024'));
     assert.ok(replies.includes('Reply 2'));
     assert.ok(checklist.includes(item.id));
+    assert.ok(qualityGate.includes(item.id));
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -449,6 +454,7 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
     assert.equal(result.packages.length, 2);
     assert.equal(result.metricPosts, 1);
     assert.equal(result.ledgerSummary, null);
+    assert.equal(result.validationSummary.status, 'pass');
 
     const queue = JSON.parse(await readFile(join(outDir, 'queue.json'), 'utf8'));
     const metricsTemplate = JSON.parse(await readFile(join(outDir, 'posts.local.json'), 'utf8'));
@@ -462,6 +468,8 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
     assert.equal(metricsTemplate.posts[0].metrics.views, '');
     assert.ok(report.includes('Daily X Growth Run'));
     assert.ok(report.includes('Package selection: article-diverse first'));
+    assert.ok(report.includes('X Publishing Quality Gate'));
+    assert.ok(report.includes('Quality gate: 3/3 passed'));
     assert.ok(report.includes('Stop before the final public publish click'));
     assert.ok(report.includes('Metrics Capture'));
     assert.ok(report.includes('social:capture-metrics'));
@@ -469,6 +477,33 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('quality gate rejects raw blog URLs and low-value X copy', () => {
+  const queue = buildPublishQueue([
+    {
+      title: '有用的系统',
+      excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+      slug: 'Useful-Systems',
+      lang: 'zh',
+      tags: ['AI'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  queue.items[0] = {
+    ...queue.items[0],
+    shortPost: `这篇文章很有用\nhttps://clean99.github.io/zh/2026/05/18/Useful-Systems/`,
+  };
+
+  const validation = validateQueue(queue);
+
+  assert.equal(validation.status, 'fail');
+  assert.equal(validation.failed, 1);
+  assert.ok(validation.items[0].errors.some((error) => error.includes('raw blog URLs')));
 });
 
 test('daily package selection prefers distinct articles before extra variants', () => {

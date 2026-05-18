@@ -32,7 +32,15 @@ npm run social:daily -- --limit 5 --package-limit 3 --lang zh
 
 This creates `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, and writes `data/social-growth/daily-run.md`.
 
-Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles.
+Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate.
+
+Before opening Chrome, check the queue:
+
+```bash
+npm run social:validate -- --queue data/social-growth/queue.json --format markdown
+```
+
+Do not publish candidates that fail validation. Fix the candidate first.
 
 For single-item control:
 
@@ -56,6 +64,7 @@ For single-item control:
    - `thread-fallback.md`;
    - `follow-up-replies.md`;
    - `browser-handoff.json`;
+   - `quality-gate.md`;
    - `publish-checklist.md`.
 5. Generate a `gpt-image-2` image from `image-prompt.txt`.
    - Preferred CLI when the user explicitly asks for image model control:
@@ -120,6 +129,7 @@ Short post:
 - image attached;
 - link to the X Article after it exists.
 - choose one structure from `references/chinese-x-style.md`: research utility, strong thesis, or case story.
+- pass `npm run social:validate` before browser publishing.
 
 Follow-up replies:
 
@@ -144,6 +154,14 @@ Image:
 - one clear visual metaphor or loop;
 - readable on mobile;
 - no fake UI, platform logos, watermarks, or tiny paragraphs.
+
+Quality gate:
+
+- reject raw blog URLs in the short post;
+- reject short posts that do not state a Chinese claim plus a concrete mechanism in the first screen;
+- require the X Article to carry the blog URL at the end under `博客原文：`;
+- require `gpt-image-2`, `1536x1024`, and mobile-readable image prompts;
+- reject low-value follow-up replies such as "怎么看", "点赞", "转发", or generic comment bait.
 
 ## Optimization Loop
 
