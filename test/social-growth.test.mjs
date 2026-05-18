@@ -1492,6 +1492,75 @@ test('daily execution brief surfaces browser blockers before ready publish slots
   }
 });
 
+test('daily execution brief lists manual fallback commands for every ready slot', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-brief-manual-all-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+      {
+        title: 'Vibe Coding VS Spec Driven Coding',
+        excerpt: '没有 spec，模型会把未确认的假设写进代码里。',
+        slug: 'Vibe-Coding-VS-Spec-Driven-Coding',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/vibe-vs-spec/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 2,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    const imageDir = join(outDir, 'images');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await Promise.all(queue.items.map((item) => (
+      writeFile(join(imageDir, `${item.id}.png`), 'fake image')
+    )));
+
+    const brief = await buildDailyExecutionBrief({
+      queue,
+      ledger,
+      day: 1,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      xSkillDir: skillDir,
+      xBunCommand: 'bun',
+      publishMode: 'thread_fallback',
+      browserReadiness: {
+        status: 'needs_x_login',
+        blockers: ['The Chrome profile used for publishing is not logged into X.'],
+      },
+      env: {},
+    });
+    const markdown = formatDailyExecutionBriefMarkdown(brief);
+
+    assert.equal(brief.manualPublishFallback.available, true);
+    assert.equal(brief.manualPublishFallback.items.length, brief.dayReadiness.readySlots);
+    assert.ok(brief.manualPublishFallback.items.length > 1);
+    assert.match(markdown, /manual-publish-kits\/day1-slot1-/);
+    assert.match(markdown, /manual-publish-kits\/day1-slot2-/);
+    assert.match(markdown, /post-publish-recovery/);
+    assert.match(markdown, /Generate manual publish kit\(s\) for/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('daily brief CLI reads stored browser probe before action order', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-brief-cli-probe-'));
   try {

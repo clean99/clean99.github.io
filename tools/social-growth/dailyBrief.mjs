@@ -345,24 +345,38 @@ function buildManualPublishFallback({
   const browserBlockers = blockingBrowserIssues(browserReadiness);
   const browserBlocked = browserBlockers.length > 0;
   const selected = selectedReadySlot(dayReadiness, slot);
+  const readySlots = dayReadiness.slots.filter((item) => item.preflightStatus === 'ready' && item.xPrepStatus === 'ready');
+  const items = readySlots.map((item) => {
+    const kitPath = manualPublishKitPath(dayReadiness.day, item);
+    return {
+      selected: item,
+      slotLabel: `day ${dayReadiness.day} slot ${item.slot}`,
+      kitPath,
+      kitCommand: manualPublishKitCommand(dayReadiness.day, item, kitPath),
+      recoveryCommand: postPublishRecoveryCommand(item),
+    };
+  });
+  const selectedItem = items.find((item) => item.selected.slot === selected?.slot) || items[0] || null;
   const base = {
     available: false,
     selected: selected || null,
     slotLabel: selected ? `day ${dayReadiness.day} slot ${selected.slot}` : '',
-    kitPath: 'data/social-growth/manual-publish-kit.md',
+    kitPath: selectedItem?.kitPath || 'data/social-growth/manual-publish-kit.md',
     kitCommand: '',
     recoveryCommand: '',
+    items: [],
     reason: '',
   };
   if (browserBlockers.some((item) => item.includes('different draft'))) return base;
-  if (!browserBlocked || !selected) return base;
+  if (!browserBlocked || !selectedItem) return base;
 
   return {
     ...base,
     available: true,
-    kitCommand: manualPublishKitCommand(dayReadiness.day, selected),
-    recoveryCommand: postPublishRecoveryCommand(selected),
-    reason: `${selected.id} is locally ready with an image; the blocker is the CDP publishing browser state, not the content package.`,
+    kitCommand: selectedItem.kitCommand,
+    recoveryCommand: selectedItem.recoveryCommand,
+    items,
+    reason: `${items.length} ready slot(s) are locally ready with images; the blocker is the CDP publishing browser state, not the content package.`,
   };
 }
 
@@ -374,8 +388,8 @@ function selectedReadySlot(dayReadiness, slot) {
     || null;
 }
 
-function manualPublishKitCommand(day, slot) {
-  return `npm run social:manual-publish-kit -- --day ${Number(day)} --slot ${slot.slot}${publishModeArg(slot.publishMode)} --id ${shellQuote(slot.id)} --out data/social-growth/manual-publish-kit.md`;
+function manualPublishKitCommand(day, slot, outPath = 'data/social-growth/manual-publish-kit.md') {
+  return `npm run social:manual-publish-kit -- --day ${Number(day)} --slot ${slot.slot}${publishModeArg(slot.publishMode)} --id ${shellQuote(slot.id)} --out ${outPath}`;
 }
 
 function postPublishRecoveryCommand(slot) {
@@ -387,20 +401,38 @@ function postPublishRecoveryCommand(slot) {
 
 function formatManualPublishFallback(fallback) {
   if (!fallback?.available) return '';
+  const commands = (fallback.items?.length ? fallback.items : [fallback])
+    .map((item) => {
+      const label = item.selected?.id
+        ? `${item.slotLabel}: ${item.selected.id}`
+        : item.slotLabel;
+      return `### ${label}
+
+\`\`\`bash
+${item.kitCommand}
+${item.recoveryCommand}
+\`\`\``;
+    })
+    .join('\n\n');
   return `## Manual Publish Fallback
 
 Use this if a normal Chrome profile is already logged into \`@Clean993\` while the CDP publishing profile is blocked. This is a local kit only; every publish, media upload, reply, like, repost, follow, profile edit, and pin still requires action-time confirmation in Chrome.
 
-\`\`\`bash
-${fallback.kitCommand}
-${fallback.recoveryCommand}
-\`\`\`
+${commands}
 
 `;
 }
 
+function manualPublishKitPath(day, slot) {
+  return `data/social-growth/manual-publish-kits/day${Number(day)}-slot${slot.slot}-${safePathSegment(slot.id)}.md`;
+}
+
 function publishModeArg(publishMode) {
   return publishMode === 'thread_fallback' ? ' --publishMode thread_fallback' : '';
+}
+
+function safePathSegment(value) {
+  return String(value).replace(/[^A-Za-z0-9._=-]+/g, '-');
 }
 
 function shellQuote(value) {
@@ -445,7 +477,7 @@ function buildActionItems({
     if (manualPublishFallback?.available) {
       actions.push({
         priority: 'P0',
-        action: `Generate the manual publish kit for ${manualPublishFallback.slotLabel}, publish from a logged-in normal Chrome profile with confirmation, then run post-publish-recovery.`,
+        action: `Generate manual publish kit(s) for ${manualPublishFallback.items.length || 1} ready slot(s), publish from a logged-in normal Chrome profile with confirmation, then run post-publish-recovery.`,
         reason: manualPublishFallback.reason,
       });
     }
