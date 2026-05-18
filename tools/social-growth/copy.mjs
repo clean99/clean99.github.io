@@ -14,6 +14,196 @@ const CHINESE_HASHTAGS = new Map([
   ['code generation', '代码生成'],
 ]);
 
+const DEFAULT_FRAME = {
+  topic: '工程判断',
+  falseFrame: '把经验写成零散建议',
+  betterFrame: '把判断标准、失败边界和复用步骤说清楚',
+  mechanism: 'problem -> criteria -> action -> evidence',
+  imageTitle: '可复用的工程判断框架',
+  diagramText: 'problem -> criteria -> action -> evidence',
+  coreClaim: '真正有用的技术文章应该留下可复用判断，而不是只记录一次经验。',
+  failureMode: '如果没有判断标准，读者只会得到一组无法迁移的经验碎片。',
+  readerPayoff: '带走一个可以复用到自己项目里的判断框架',
+  frameworkSteps: [
+    '先说清楚真正的问题是什么。',
+    '把判断标准压成少数几个可验证条件。',
+    '给出能复用的执行顺序。',
+    '记录哪些做法看起来对、实际会失败。',
+    '最后再把完整原文作为归档。',
+  ],
+};
+
+const ARTICLE_FRAMES = [
+  {
+    pattern: /SEO|搜索|crawler|sitemap|博客全面改造/i,
+    frame: {
+      topic: '技术博客 SEO',
+      falseFrame: '照着清单补 meta 标签',
+      betterFrame: '理解搜索引擎如何读取、归类和信任页面',
+      mechanism: 'crawl -> understand -> trust -> distribute',
+      imageTitle: '技术博客 SEO 闭环',
+      diagramText: 'crawl -> understand -> trust -> distribute',
+      coreClaim: 'SEO 不是标签清单，而是让搜索引擎稳定理解你的页面价值。',
+      failureMode: '只补标签不改信息结构，搜索引擎仍然不知道该把页面分发给谁。',
+      readerPayoff: '从第一性原理理解博客 SEO 改造',
+      frameworkSteps: [
+        '保证页面能被稳定抓取。',
+        '让标题、摘要和结构表达同一个主题。',
+        '用链接和 sitemap 帮搜索引擎发现内容。',
+        '用结构化数据降低理解成本。',
+        '持续观察索引和点击反馈。',
+      ],
+    },
+  },
+  {
+    pattern: /vibe|spec|OpenSpec|spec-driven|coding/i,
+    frame: {
+      topic: 'AI Coding 工作流',
+      falseFrame: '让模型凭感觉一路补代码',
+      betterFrame: '先把意图、边界和验收标准固定下来',
+      mechanism: 'idea -> spec -> implementation -> verification',
+      imageTitle: 'Spec-Driven AI Coding',
+      diagramText: 'idea -> spec -> implementation -> verification',
+      coreClaim: 'Vibe Coding 适合探索，Spec-Driven Coding 才适合把复杂改动落地。',
+      failureMode: '没有 spec，模型会把未确认的假设写进代码里。',
+      readerPayoff: '知道什么时候该探索，什么时候必须上规格和验收',
+      frameworkSteps: [
+        '先判断任务是探索还是交付。',
+        '把用户目标写成明确规格。',
+        '列出边界、非目标和验收标准。',
+        '再让模型实现。',
+        '最后用测试和 review 关掉假设。',
+      ],
+    },
+  },
+  {
+    pattern: /React Performance|React 性能|render|memo|rerender/i,
+    frame: {
+      topic: 'React 性能优化',
+      falseFrame: '看到慢就先 memo 或拆组件',
+      betterFrame: '先定位 render、网络和交互成本真正落在哪一层',
+      mechanism: 'measure -> isolate -> optimize -> verify',
+      imageTitle: 'React 性能诊断闭环',
+      diagramText: 'measure -> isolate -> optimize -> verify',
+      coreClaim: 'React 性能优化的关键不是 API 技巧，而是先证明瓶颈在哪里。',
+      failureMode: '没有 profile 的 memo 很容易把复杂度加进去，却没有真实收益。',
+      readerPayoff: '把 React 性能问题拆成可验证的诊断路径',
+      frameworkSteps: [
+        '先用 profile 找出真正的慢点。',
+        '区分 render、network、bundle 和 interaction 成本。',
+        '只针对一个瓶颈做修改。',
+        '用同一场景复测。',
+        '没有复测收益就不要保留复杂优化。',
+      ],
+    },
+  },
+  {
+    pattern: /Server Component|RSC|React Server Component|服务器组件/i,
+    frame: {
+      topic: 'React Server Component',
+      falseFrame: '把它当成另一种 SSR 写法',
+      betterFrame: '理解 server/client 边界如何改变数据流和打包模型',
+      mechanism: 'server tree -> client boundary -> payload -> hydration',
+      imageTitle: 'React Server Component 边界',
+      diagramText: 'server tree -> client boundary -> payload -> hydration',
+      coreClaim: 'RSC 的核心不是“服务端渲染更多东西”，而是重新划分组件、数据和 bundle 的边界。',
+      failureMode: '如果不理解边界，RSC 很容易被用成更复杂的 SSR。',
+      readerPayoff: '看清 RSC 为什么会改变 React 应用结构',
+      frameworkSteps: [
+        '先分清哪些组件只能在 server 侧运行。',
+        '识别 client boundary 带来的交互和 bundle 成本。',
+        '理解 payload 如何把 server tree 交给客户端。',
+        '避免把 client-only 状态误塞进 server 组件。',
+        '用数据流而不是渲染口号理解 RSC。',
+      ],
+    },
+  },
+  {
+    pattern: /Error Boundary|错误边界|容错/i,
+    frame: {
+      topic: 'React 容错',
+      falseFrame: '写一个 fallback UI 就结束',
+      betterFrame: '把崩溃隔离、错误上报和恢复路径都设计进去',
+      mechanism: 'isolate -> report -> recover',
+      imageTitle: 'React 容错边界',
+      diagramText: 'isolate -> report -> recover',
+      coreClaim: 'Error Boundary 的重点不是兜底 UI，而是控制失败范围并保留恢复路径。',
+      failureMode: '只显示 fallback 会隐藏真正的故障，也无法帮助用户继续操作。',
+      readerPayoff: '把 React 崩溃从整页事故变成局部可恢复问题',
+      frameworkSteps: [
+        '按业务风险划分错误边界。',
+        '给用户一个可理解的 fallback。',
+        '把错误上下文上报出去。',
+        '设计重试、刷新或降级路径。',
+        '避免用边界吞掉应该修复的问题。',
+      ],
+    },
+  },
+  {
+    pattern: /testing|测试|TDD|coverage|用例/i,
+    frame: {
+      topic: '前端测试',
+      falseFrame: '追求覆盖率或者盯着实现细节测',
+      betterFrame: '用行为用例保护重构空间',
+      mechanism: 'behavior -> signal -> regression',
+      imageTitle: '前端测试信心闭环',
+      diagramText: 'behavior -> signal -> regression',
+      coreClaim: '好的前端测试不奖励覆盖率，而是给重构留下信心。',
+      failureMode: '测试实现细节会制造假阴性，覆盖率也可能给出假安全感。',
+      readerPayoff: '写出更少但更有信心的测试',
+      frameworkSteps: [
+        '先写用户能观察到的行为。',
+        '避免断言内部状态和实现细节。',
+        '隔离每个测试用例。',
+        '只在关键路径上追求回归保护。',
+        '把失败测试当成需求反馈。',
+      ],
+    },
+  },
+  {
+    pattern: /性能|FMP|performance|harness|ledger|优化/i,
+    frame: {
+      topic: 'AI 性能优化',
+      falseFrame: '让模型多给几条优化建议',
+      betterFrame: '让每一轮修改都能被同一个 harness 复验',
+      mechanism: 'baseline -> change -> verify -> ledger',
+      imageTitle: '可度量的 AI 工程闭环',
+      diagramText: 'baseline -> change -> verify -> ledger',
+      coreClaim: '没有可重复 measurement，AI 优化就是在讲故事。',
+      failureMode: 'measurement 错了，任何性能收益都不能算数。',
+      readerPayoff: '判断 AI 优化到底有没有胡说',
+      frameworkSteps: [
+        '定义一个用户可感知指标。',
+        '为这个指标搭一个可重复 harness。',
+        '每轮只攻击一个瓶颈。',
+        '修改后和同一 baseline 做严格对比。',
+        '没有可比数据，就不要声明收益。',
+      ],
+    },
+  },
+  {
+    pattern: /skill|agent skills?|prompt|函数式蓝图/i,
+    frame: {
+      topic: 'Agent Skill 设计',
+      falseFrame: '把一堆提示词塞进上下文',
+      betterFrame: '把能力做成有输入、输出和验收标准的工具单元',
+      mechanism: 'context -> contract -> execution -> eval',
+      imageTitle: 'Agent Skill 能力单元',
+      diagramText: 'context -> contract -> execution -> eval',
+      coreClaim: 'Skill 的价值不是多一段提示词，而是把可复用能力变成稳定契约。',
+      failureMode: '没有契约的 Skill 只是长提示词，越堆越难复用。',
+      readerPayoff: '把零散 AI 经验沉淀成可执行能力',
+      frameworkSteps: [
+        '先定义 Skill 要接收什么上下文。',
+        '写清楚它必须产出什么结果。',
+        '把执行步骤限制在少数明确动作里。',
+        '用 eval 或 checklist 检查结果。',
+        '把失败案例回流进 Skill。',
+      ],
+    },
+  },
+];
+
 export function buildDistributionCandidates(article, options = {}) {
   const campaign = options.campaign || DEFAULT_CAMPAIGN;
   const variants = ['strong-thesis', 'research-utility', 'case-story'];
@@ -81,29 +271,33 @@ export function buildThread(article) {
 export function sharpTake(article) {
   const takeaway = clamp(sentence(article.excerpt), 130);
   if (article.lang === 'zh') {
-    return clamp(`别再让 AI 只“建议优化”了。\n\n真正有用的是让它跑一个可度量的工程闭环：baseline、修改、验证、复盘，一个都不能少。\n\n${takeaway}`, 220);
+    return strongThesis(article);
   }
 
   return clamp(`A technical post is useful only when it leaves a reusable frame.\n\nReusable frame: ${takeaway}`, 220);
 }
 
 export function researchUtility(article) {
-  return clamp('我把 AI 性能优化拆成了一张可复用流程图。\n\n不是让 Agent 多写几段建议，而是让它每一轮都留下：baseline、修改、验证、失败记录。\n\n图里是完整结构。', 220);
+  const frame = articleFrame(article);
+  return clamp(`我把「${frame.topic}」拆成了一张可复用流程图。\n\n问题不是 ${frame.falseFrame}，而是 ${frame.betterFrame}。\n\n核心步骤：${compactSteps(frame.frameworkSteps, 3)}\n\n图里是完整结构。`, 220);
 }
 
 export function strongThesis(article) {
-  return clamp('AI 写优化建议很便宜。\n\n贵的是证明它没胡说。\n\n真正的分界线不是模型多聪明，而是有没有一套能跑起来的证据链：baseline -> change -> verify -> ledger。', 220);
+  const frame = articleFrame(article);
+  return clamp(`很多人把「${frame.topic}」想错了。\n\n真正的问题不是 ${frame.falseFrame}，而是 ${frame.betterFrame}。\n\n我把它压成一个判断框架：${frame.mechanism}。`, 220);
 }
 
 export function caseStory(article) {
-  return clamp('我以为这篇只是性能优化复盘。\n\n后来发现真正的问题更狠：AI 不是不能改代码，是我们经常没有证据判断它改得对不对。\n\n所以我把 measurement 和 ledger 做成了第一等公民。', 220);
+  const frame = articleFrame(article);
+  return clamp(`我一开始以为「${frame.topic}」的问题是 ${frame.falseFrame}。\n\n后来发现真正的瓶颈是 ${frame.betterFrame}。\n\n这件事给我的教训：${frame.mechanism}。`, 220);
 }
 
 export function usefulLesson(article) {
   const title = clamp(article.title, 96);
   const takeaway = clamp(sentence(article.excerpt), 130);
   if (article.lang === 'zh') {
-    return clamp(`我把这篇文章压成一个可复用结论：\n\n没有可重复 measurement，AI 优化就是在讲故事。\n\n主题：${title}\n${takeaway}`, 220);
+    const frame = articleFrame(article);
+    return clamp(`我把这篇文章压成一个可复用结论：\n\n${frame.coreClaim}\n\n主题：${title}\n${takeaway}`, 220);
   }
 
   return clamp(`I compressed this post into one practical lesson: ${takeaway}\n\nTopic: ${title}`, 220);
@@ -148,33 +342,29 @@ export function buildXArticle(article, targetUrl) {
 export function buildChineseXArticleBody(article, targetUrl) {
   const takeaway = articleTakeaway(article);
   const points = extractKeyPoints(article.text, 5);
+  const frame = articleFrame(article);
 
   return [
-    '这篇文章不是想证明“AI 很聪明”，而是讨论一个更现实的问题：怎样让 AI Agent 做出来的优化可以被验证，而不是只停留在建议层面。',
+    `这篇文章讨论的不是“${frame.falseFrame}”，而是一个更实际的问题：${frame.betterFrame}。`,
     '',
-    '我的核心判断：没有可重复 measurement，AI 优化就是在讲故事。',
+    `我的核心判断：${frame.coreClaim}`,
     '',
     '## 关键结论',
     '',
     ...dedupePoints([
       clamp(takeaway, 120),
-      '如果 measurement 是错的，任何性能收益都不能算数。',
-      '每一轮优化都应该只有一个瓶颈、一个修改、一次可比验证。',
-      'ledger 不是流水账，而是防止 AI 把猜测包装成进展的控制面。',
+      frame.failureMode,
+      `读者应该带走的是：${frame.readerPayoff}。`,
       ...points,
     ]).slice(0, 5).map((point) => `- ${point}`),
     '',
     '## 可复用框架',
     '',
-    '1. 先定义一个用户可感知的指标。',
-    '2. 为这个指标搭一个可重复 harness。',
-    '3. 每轮只攻击一个瓶颈。',
-    '4. 修改之后必须和同一 baseline 做严格对比。',
-    '5. 没有可比数据，就不要声明收益。',
+    ...frame.frameworkSteps.map((step, index) => `${index + 1}. ${step}`),
     '',
     '## 为什么值得读原文',
     '',
-    '原文里有完整的 case、失败 round、ledger 规则和性能优化闭环。如果你也在用 AI 做工程提效，真正要关心的不是 prompt 多漂亮，而是系统有没有能力证明自己没有胡说。',
+    `原文围绕《${article.title}》展开，有完整背景、判断过程和可复用步骤。短帖只能给出框架，原文适合用来核对细节、边界和实际例子。`,
     '',
     `博客原文：${targetUrl}`,
   ].join('\n');
@@ -182,7 +372,7 @@ export function buildChineseXArticleBody(article, targetUrl) {
 
 export function articleTakeaway(article) {
   if (article.lang === 'zh') {
-    return '核心不是让 Agent 提建议，而是让它在可验证的闭环里跑完 baseline、修改、验证和记录。';
+    return articleFrame(article).coreClaim;
   }
 
   return clamp(sentence(article.excerpt), 120);
@@ -191,10 +381,11 @@ export function articleTakeaway(article) {
 export function buildThreadFallback(article, targetUrl) {
   const title = clamp(article.title, 96);
   if (article.lang === 'zh') {
+    const frame = articleFrame(article);
     return [
-      clampPost(`${title}\n\n很多人把 AI 编程想错了。真正的分界线不是模型多聪明，而是有没有 measurement 和 ledger。`),
-      clampPost('可复用框架：\n\n1. 先定义用户可感知指标\n2. 搭可重复 harness\n3. 每轮只改一个瓶颈\n4. 和同一 baseline 对比\n5. 没有可比数据，不声明收益'),
-      linkPost('完整过程和失败 round：', targetUrl),
+      clampPost(`${title}\n\n很多人把「${frame.topic}」想错了。真正的问题不是 ${frame.falseFrame}，而是 ${frame.betterFrame}。`),
+      clampPost(`可复用框架：\n\n${numberedSteps(frame.frameworkSteps, 5)}`),
+      linkPost('完整过程和框架：', targetUrl),
     ];
   }
 
@@ -213,15 +404,16 @@ export function buildFollowUpReplies(article, variant) {
     ];
   }
 
+  const frame = articleFrame(article);
   const variantReply = {
-    'research-utility': '图里最重要的不是流程箭头，而是 ledger。它强迫每一轮优化回答：这次改了什么、和哪个 baseline 比、失败 round 有没有被记录。',
-    'strong-thesis': '我判断 AI 工程提效是否靠谱，只看一个东西：它能不能留下可复验的证据链。没有 baseline 和 replay，模型越自信越危险。',
-    'case-story': '这个 case 的教训是：先别急着让 Agent 改代码。先把 measurement 固定住，否则你连“变快了”还是“测歪了”都分不清。',
-  }[variant] || '真正要复用的是 measurement -> change -> verify -> ledger 这个闭环，而不是某个 prompt。';
+    'research-utility': `图里最重要的不是流程箭头，而是这条机制：${frame.mechanism}。它把「${frame.topic}」从经验变成了可复用步骤。`,
+    'strong-thesis': `我判断「${frame.topic}」是否靠谱，只看一件事：有没有把“${frame.betterFrame}”落实成可检查的步骤。`,
+    'case-story': `这个 case 的教训是：先别急着套方案。先识别是不是还停在“${frame.falseFrame}”，否则后面动作都会跑偏。`,
+  }[variant] || `真正要复用的是 ${frame.mechanism} 这个框架，而不是某个固定说法。`;
 
   return [
     clampPost(variantReply),
-    clampPost('如果你要把这个方法搬到自己的项目，先问三个问题：\n\n1. 用户能感知的指标是什么？\n2. harness 能不能重复跑？\n3. 每轮失败有没有被记录？'),
+    clampPost(`如果你要把这个方法搬到自己的项目，先问三个问题：\n\n1. 你现在是不是还在${frame.falseFrame}？\n2. ${frame.betterFrame} 有没有证据？\n3. 下一步能不能按 ${frame.mechanism} 跑？`),
   ];
 }
 
@@ -246,8 +438,9 @@ export function buildEnglishXArticleBody(article, targetUrl) {
 
 export function buildImageBrief(article, variant) {
   const isChinese = article.lang === 'zh';
-  const title = isChinese ? '可度量的 AI 工程闭环' : 'Measurable AI Engineering Loop';
-  const subtitle = isChinese ? 'baseline -> change -> verify -> ledger' : 'baseline -> change -> verify -> ledger';
+  const frame = isChinese ? articleFrame(article) : null;
+  const title = isChinese ? frame.imageTitle : 'Measurable AI Engineering Loop';
+  const subtitle = isChinese ? frame.diagramText : 'baseline -> change -> verify -> ledger';
   const variantMessage = {
     'research-utility': '像工具调研贴一样，让读者一眼看到步骤和收益',
     'strong-thesis': '像强判断观点贴一样，突出一句可争议但可证明的结论',
@@ -258,7 +451,7 @@ export function buildImageBrief(article, variant) {
     size: '1536x1024',
     quality: 'medium',
     alt: isChinese
-      ? `${article.title} 的配图：AI Agent 在可度量工程闭环中工作`
+      ? `${article.title} 的配图：${frame.imageTitle}`
       : `Visual for ${article.title}: AI agent working inside a measured engineering loop`,
     prompt: [
       'Use case: infographic-diagram',
@@ -273,6 +466,17 @@ export function buildImageBrief(article, variant) {
       'Constraints: no brand logos, no platform logos, no fake UI, no watermark, no tiny unreadable paragraphs.',
     ].join('\n'),
   };
+}
+
+export function articleFrame(article) {
+  if (article.lang !== 'zh') return DEFAULT_FRAME;
+  const haystack = [
+    article.title,
+    article.excerpt,
+    ...(article.tags || []),
+  ].join(' ');
+  const match = ARTICLE_FRAMES.find((item) => item.pattern.test(haystack));
+  return match ? match.frame : DEFAULT_FRAME;
 }
 
 export function extractKeyPoints(text, limit = 5) {
@@ -298,6 +502,14 @@ export function dedupePoints(points) {
     result.push(normalized);
   }
   return result;
+}
+
+function compactSteps(steps, limit = 3) {
+  return steps.slice(0, limit).map((step) => step.replace(/[。.]$/u, '')).join(' / ');
+}
+
+function numberedSteps(steps, limit = 5) {
+  return steps.slice(0, limit).map((step, index) => `${index + 1}. ${step}`).join('\n');
 }
 
 export function sentence(text) {

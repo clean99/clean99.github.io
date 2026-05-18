@@ -32,7 +32,7 @@ npm run social:daily -- --limit 5 --package-limit 3 --lang zh
 
 This creates `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, writes `data/social-growth/daily-run.md`, and writes `data/social-growth/weekly-plan.md` when the ledger exists.
 
-Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate.
+Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate. When the ledger exists, the daily command expands the queue enough to cover the default 7-day, 3-posts/day cadence, capped by available Chinese articles.
 
 Before opening Chrome, check the queue:
 
@@ -49,6 +49,7 @@ npm run social:week -- --queue data/social-growth/queue.json --ledger data/socia
 ```
 
 Use `data/social-growth/weekly-plan.md` as the day-level schedule. It maps validated candidates to publish slots, metric capture times, and the follower pace required for the `+1000` target.
+Before browser work, the healthy default state is `21/21 passed` and `Unfilled slots: 0`. If the quality gate fails, fix copy generation or reduce scope before posting.
 
 For single-item control:
 
@@ -171,9 +172,16 @@ Quality gate:
 
 - reject raw blog URLs in the short post;
 - reject short posts that do not state a Chinese claim plus a concrete mechanism in the first screen;
+- reject duplicated short posts across different articles;
 - require the X Article to carry the blog URL at the end under `博客原文：`;
 - require `gpt-image-2`, `1536x1024`, and mobile-readable image prompts;
 - reject low-value follow-up replies such as "怎么看", "点赞", "转发", or generic comment bait.
+
+Article-specific frames:
+
+- do not reuse the same AI/performance frame for every article;
+- infer a topic frame from the title, excerpt, and tags, for example Agent Skill, Spec-Driven Coding, SEO, Error Boundary, React performance, React Server Component, or testing;
+- if no specific frame matches, use the generic engineering-judgment frame and let the duplicate-post quality gate catch overuse.
 
 ## Optimization Loop
 

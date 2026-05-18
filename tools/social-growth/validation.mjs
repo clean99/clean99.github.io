@@ -38,7 +38,12 @@ const VARIANT_PATTERNS = {
 };
 
 export function validateQueue(queue) {
-  const items = (queue?.items || []).map((item) => validateQueueItem(item));
+  const sourceItems = queue?.items || [];
+  const items = sourceItems.map((item) => validateQueueItem(item));
+  validateQueueWideRules(sourceItems, items);
+  for (const item of items) {
+    item.status = item.errors.length ? 'fail' : 'pass';
+  }
   const passed = items.filter((item) => item.status === 'pass').length;
   const failed = items.length - passed;
   const warnings = items.reduce((total, item) => total + item.warnings.length, 0);
@@ -104,6 +109,7 @@ export function formatValidationMarkdown(validation) {
     '',
     '- Short post sells the idea without raw blog URLs.',
     '- First screen contains a Chinese claim plus a concrete mechanism.',
+    '- Queue does not reuse the same short post across different articles.',
     '- X Article carries the blog link at the end.',
     '- Image prompt uses gpt-image-2 and is readable as an X image.',
     '- Follow-up replies add substance instead of engagement bait.',
@@ -112,6 +118,26 @@ export function formatValidationMarkdown(validation) {
     '',
     itemLines.length ? itemLines.join('\n') : '- No queue items.',
   ].join('\n');
+}
+
+function validateQueueWideRules(queueItems, validationItems) {
+  const validationById = new Map(validationItems.map((item) => [item.id, item]));
+  const seenShortPosts = new Map();
+
+  for (const item of queueItems) {
+    const key = normalizeShortPostForDuplicateCheck(item.shortPost);
+    if (!key) continue;
+
+    const existing = seenShortPosts.get(key);
+    if (existing && existing.articleSlug !== item.articleSlug) {
+      const currentValidation = validationById.get(item.id);
+      const existingValidation = validationById.get(existing.id);
+      currentValidation?.errors.push(`shortPost duplicates ${existing.id} from another article`);
+      existingValidation?.errors.push(`shortPost duplicates ${item.id} from another article`);
+      continue;
+    }
+    seenShortPosts.set(key, item);
+  }
 }
 
 export function formatQueueItemValidation(item) {
@@ -240,4 +266,11 @@ function hanChars(text) {
 
 function firstLine(text) {
   return String(text || '').split(/\n/)[0].trim();
+}
+
+function normalizeShortPostForDuplicateCheck(text) {
+  return String(text || '')
+    .replace(/#[\p{Script=Han}A-Za-z0-9_]+/gu, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }

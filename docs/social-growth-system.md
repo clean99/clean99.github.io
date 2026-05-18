@@ -53,8 +53,8 @@ flowchart LR
 Core records:
 
 - `Article`: parsed from `source/_posts/*.md`.
-- `DistributionCandidate`: one article, one X variant, one UTM URL, a Chinese short post, an X Article draft, and an image prompt. The short post does not include the blog URL.
-- `QualityGate`: deterministic checks for raw blog URLs, weak first-screen structure, X Article link placement, image prompt requirements, and low-value follow-up replies.
+- `DistributionCandidate`: one article, one X variant, one UTM URL, a Chinese short post, an X Article draft, and an image prompt. The short post does not include the blog URL, and Chinese copy is generated from an article-specific topic frame.
+- `QualityGate`: deterministic checks for raw blog URLs, weak first-screen structure, duplicated short posts across articles, X Article link placement, image prompt requirements, and low-value follow-up replies.
 - `PublishQueue`: local draft queue of candidates to hand to Chrome.
 - `WeeklyExecutionPlan`: seven-day posting and metrics-capture schedule tied to the follower target.
 - `MetricsSnapshot`: date, follower count, per-post interactions.
@@ -84,6 +84,7 @@ This writes:
 
 The daily exporter prefers one strong variant per article before exporting extra variants from the same article. This avoids spending a day's slots on three near-duplicate posts.
 It exports only items that pass the local quality gate.
+When a ledger exists, the daily command expands the article limit as needed to cover the default 7-day, 3-posts/day cadence, capped by available Chinese articles.
 
 Draft X candidates for one post:
 
@@ -140,7 +141,7 @@ Generate the week-level operating plan:
 npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json
 ```
 
-This plan maps validated queue candidates to seven days of publish slots, keeps the pace visible, and warns when the queue does not contain enough validated candidates to sustain the 2-4 posts/day target.
+This plan maps validated queue candidates to seven days of publish slots, keeps the pace visible, and warns when the queue does not contain enough validated candidates to sustain the 2-4 posts/day target. The expected healthy state before browser work is `21/21 passed` with `Unfilled slots: 0` for the default cadence.
 
 After a confirmed browser publish, write the public X post URL back to the queue:
 

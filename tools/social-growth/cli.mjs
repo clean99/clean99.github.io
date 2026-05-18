@@ -117,6 +117,8 @@ if (command === 'articles') {
     ledgerPath: args.ledger || 'data/social-growth/ledger.json',
     metricsPath: args.metrics || 'data/social-growth/posts.local.json',
     packageLimit: args.packageLimit || 3,
+    weeklyDays: args.days || 7,
+    weeklyPostsPerDay: args.postsPerDay || 3,
     now: args.now ? new Date(args.now) : new Date(),
     queueOptions: {
       limit: args.limit || 5,

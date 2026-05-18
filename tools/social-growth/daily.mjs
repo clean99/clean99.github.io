@@ -23,10 +23,18 @@ export async function runDailyGrowthPlan({
   metricsPath = 'data/social-growth/posts.local.json',
   queueOptions = {},
   packageLimit = 3,
+  weeklyDays = 7,
+  weeklyPostsPerDay = 3,
 } = {}) {
   const generatedAt = toIsoString(now);
+  const ledger = await readOptionalJson(ledgerPath);
+  const effectiveQueueOptions = expandQueueOptionsForWeeklyCoverage(articles, queueOptions, {
+    ledger,
+    weeklyDays,
+    weeklyPostsPerDay,
+  });
   const nextQueue = buildPublishQueue(articles, {
-    ...queueOptions,
+    ...effectiveQueueOptions,
     createdAt: generatedAt,
   });
   const existingQueue = await readOptionalJson(queuePath);
@@ -45,11 +53,12 @@ export async function runDailyGrowthPlan({
     packages.push(await writePublishPackage(item, { outDir: packageOutDir }));
   }
 
-  const ledger = await readOptionalJson(ledgerPath);
   const weeklyPlan = ledger ? buildWeeklyExecutionPlan({
     queue,
     ledger,
     now,
+    days: weeklyDays,
+    postsPerDay: weeklyPostsPerDay,
   }) : null;
   if (weeklyPlan) {
     await writeWeeklyExecutionPlan(weeklyPlan, weeklyPlanPath);
@@ -98,6 +107,26 @@ export async function runDailyGrowthPlan({
       missingSlots: weeklyPlan.candidates.missingSlots,
       remainingFollowers: weeklyPlan.target.remainingFollowers,
     } : null,
+  };
+}
+
+export function expandQueueOptionsForWeeklyCoverage(articles, options = {}, {
+  ledger = null,
+  weeklyDays = 7,
+  weeklyPostsPerDay = 3,
+  variantsPerArticle = 3,
+} = {}) {
+  if (!ledger) return options;
+
+  const requestedLimit = Number(options.limit || 5);
+  const requiredSlots = Number(weeklyDays || 7) * Number(weeklyPostsPerDay || 3);
+  const requiredArticles = Math.ceil(requiredSlots / variantsPerArticle);
+  const lang = options.lang || 'zh';
+  const availableArticles = articles.filter((article) => !lang || article.lang === lang).length;
+
+  return {
+    ...options,
+    limit: Math.min(Math.max(requestedLimit, requiredArticles), availableArticles),
   };
 }
 

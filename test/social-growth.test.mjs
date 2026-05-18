@@ -11,7 +11,7 @@ import {
   updateMetricsTemplateFromText,
 } from '../tools/social-growth/capture.mjs';
 import { buildDistributionCandidates, buildXArticle, selectHashtags } from '../tools/social-growth/copy.mjs';
-import { runDailyGrowthPlan, selectPackageItems } from '../tools/social-growth/daily.mjs';
+import { expandQueueOptionsForWeeklyCoverage, runDailyGrowthPlan, selectPackageItems } from '../tools/social-growth/daily.mjs';
 import {
   appendSnapshot,
   createLedger,
@@ -359,6 +359,39 @@ test('builds publish queue and composes handoff posts without losing the URL', (
   assert.equal(updated.items[0].xPostUrl, 'https://x.com/Clean993/status/1');
 });
 
+test('generates article-specific Chinese X copy instead of repeating one template', () => {
+  const queue = buildPublishQueue([
+    {
+      title: 'Agent Skills 探索实录 — AI Agent 时代的函数式蓝图',
+      excerpt: '本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践。',
+      slug: 'Agent-Skills',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering'],
+      url: 'https://clean99.github.io/zh/agent-skills/',
+    },
+    {
+      title: '从第一性原理理解 SEO —— 一次博客全面改造的深度复盘',
+      excerpt: '大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件。',
+      slug: 'SEO-Overhaul',
+      lang: 'zh',
+      tags: ['Frontend', 'Software Engineering'],
+      url: 'https://clean99.github.io/zh/seo/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 2,
+  });
+  const strongPosts = queue.items.filter((item) => item.variant === 'strong-thesis');
+
+  assert.match(strongPosts[0].shortPost, /Agent Skill/);
+  assert.match(strongPosts[1].shortPost, /技术博客 SEO/);
+  assert.notEqual(strongPosts[0].shortPost, strongPosts[1].shortPost);
+  assert.match(strongPosts[0].xArticle.body, /Skill 的价值不是多一段提示词/);
+  assert.match(strongPosts[1].xArticle.body, /SEO 不是标签清单/);
+  assert.equal(validateQueue(queue).status, 'pass');
+});
+
 test('exports a browser publish package with image, article, and checklist artifacts', async () => {
   const queue = buildPublishQueue([
     {
@@ -486,16 +519,16 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
 test('weekly execution plan schedules only validated draft candidates', () => {
   const queue = buildPublishQueue([
     {
-      title: '第一篇',
-      excerpt: '第一篇文章解释一个可复用的工程判断框架。',
+      title: 'Agent Skills 探索实录 — AI Agent 时代的函数式蓝图',
+      excerpt: '本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践。',
       slug: 'First-Post',
       lang: 'zh',
       tags: ['AI'],
       url: 'https://clean99.github.io/zh/2026/05/18/First-Post/',
     },
     {
-      title: '第二篇',
-      excerpt: '第二篇文章解释一个可复用的工程判断框架。',
+      title: '从第一性原理理解 SEO —— 一次博客全面改造的深度复盘',
+      excerpt: '大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件。',
       slug: 'Second-Post',
       lang: 'zh',
       tags: ['Software Engineering'],
@@ -530,6 +563,63 @@ test('weekly execution plan schedules only validated draft candidates', () => {
   assert.equal(plan.candidates.missingSlots, 9);
   assert.match(formatWeeklyExecutionPlanMarkdown(plan), /Weekly X Growth Execution Plan/);
   assert.match(formatWeeklyExecutionPlanMarkdown(plan), /Need 9 more validated candidates/);
+});
+
+test('quality gate rejects duplicated short posts across different articles', () => {
+  const queue = buildPublishQueue([
+    {
+      title: '第一篇',
+      excerpt: '第一篇文章解释一个可复用的工程判断框架。',
+      slug: 'First-Post',
+      lang: 'zh',
+      tags: ['AI'],
+      url: 'https://clean99.github.io/zh/2026/05/18/First-Post/',
+    },
+    {
+      title: '第二篇',
+      excerpt: '第二篇文章解释一个可复用的工程判断框架。',
+      slug: 'Second-Post',
+      lang: 'zh',
+      tags: ['AI'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Second-Post/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 2,
+  });
+
+  const validation = validateQueue(queue);
+
+  assert.equal(validation.status, 'fail');
+  assert.ok(validation.items.some((item) => item.errors.some((error) => error.includes('duplicates'))));
+});
+
+test('daily queue options expand to cover the weekly cadence when a ledger exists', () => {
+  const articles = Array.from({ length: 10 }, (_, index) => ({
+    title: `第 ${index + 1} 篇`,
+    excerpt: '一篇中文文章。',
+    slug: `Post-${index + 1}`,
+    lang: 'zh',
+    tags: ['AI'],
+    url: `https://clean99.github.io/zh/post-${index + 1}/`,
+  }));
+  const ledger = createLedger({
+    startDate: '2026-05-18',
+    baselineFollowers: 30,
+    followersIn7Days: 1000,
+  });
+
+  const expanded = expandQueueOptionsForWeeklyCoverage(articles, {
+    limit: 5,
+    lang: 'zh',
+  }, {
+    ledger,
+    weeklyDays: 7,
+    weeklyPostsPerDay: 3,
+  });
+
+  assert.equal(expanded.limit, 7);
 });
 
 test('daily growth run writes a weekly execution plan when a ledger exists', async () => {
