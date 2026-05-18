@@ -20,6 +20,7 @@ export async function buildGrowthStatus({
   profileText = '',
   env = process.env,
   ensurePackage = false,
+  preferReadyImage = false,
 } = {}) {
   const generatedAt = toIsoString(now);
   const validation = validateQueue(queue);
@@ -37,6 +38,7 @@ export async function buildGrowthStatus({
     packageOutDir,
     env,
     ensurePackage,
+    preferReadyImage,
   });
   const profileAudit = await buildProfileAudit({
     profileText,
@@ -215,7 +217,7 @@ async function buildStatusPreflight(options) {
 }
 
 function statusName({ validation, weeklyPlan, preflight }) {
-  if (validation.status !== 'pass') return 'blocked_quality';
+  if (validation.status !== 'pass' && (!weeklyPlan || !weeklyPlan.candidates.availableValidatedDrafts)) return 'blocked_quality';
   if (!weeklyPlan) return 'blocked_no_ledger';
   if (preflight.status === 'blocked') return 'blocked_preflight';
   if (weeklyPlan.candidates.missingSlots > 0) return 'needs_candidates';

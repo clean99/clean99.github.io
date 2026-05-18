@@ -1,4 +1,4 @@
-import { access, copyFile, mkdir, writeFile } from 'node:fs/promises';
+import { access, copyFile, mkdir, readdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { buildWeeklyExecutionPlan, packageDirForItem } from './schedule.mjs';
 import {
@@ -22,11 +22,12 @@ export async function buildPublishPreflight({
   packageOutDir = DEFAULT_PACKAGE_DIR,
   env = process.env,
   ensurePackage = true,
+  preferReadyImage = false,
 } = {}) {
   const plan = buildWeeklyExecutionPlan({ queue, ledger, now });
   const selected = id
     ? findQueueItem(queue, id)
-    : selectSlotItem(plan, { day, slot });
+    : await selectSlotItem(plan, { day, slot, imageDir, preferReadyImage });
   const validation = validateQueueItem(selected);
   const queueValidation = validateQueue(queue);
   const queueValidationItem = queueValidation.items.find((item) => item.id === selected.id);
@@ -36,8 +37,9 @@ export async function buildPublishPreflight({
     await writePublishPackage(selected, { outDir: packageOutDir });
   }
 
-  const imagePath = join(imageDir, `${safePathSegment(selected.id)}.png`);
-  const imageReady = await fileExists(imagePath);
+  const image = await resolveImagePath(imageDir, selected.id);
+  const imagePath = image.path;
+  const imageReady = image.ready;
   const hasOpenAiKey = Boolean(env.OPENAI_API_KEY);
   const blockers = [];
 
@@ -79,11 +81,11 @@ export async function buildPublishPreflight({
       cliFallbackKeyRequired: !imageReady,
       builtInInstructions: builtInImagegenInstructions({
         promptFile: join(packageDir, 'image-prompt.txt'),
-        outputPath: imagePath,
+        outputPath: canonicalImagePath(imageDir, selected.id),
       }),
       command: imageCommand({
         promptFile: join(packageDir, 'image-prompt.txt'),
-        outputPath: imagePath,
+        outputPath: canonicalImagePath(imageDir, selected.id),
       }),
     },
     browser: {
@@ -175,7 +177,7 @@ export async function registerPublishImage({
   const plan = buildWeeklyExecutionPlan({ queue, ledger, now });
   const selected = id
     ? findQueueItem(queue, id)
-    : selectSlotItem(plan, { day, slot });
+    : await selectSlotItem(plan, { day, slot, imageDir, preferReadyImage: false });
   const outputPath = join(imageDir, `${safePathSegment(selected.id)}.png`);
 
   await mkdir(dirname(outputPath), { recursive: true });
@@ -194,13 +196,59 @@ export async function writePublishPreflight(preflight, filePath) {
   return filePath;
 }
 
-function selectSlotItem(plan, { day, slot }) {
+async function selectSlotItem(plan, { day, slot, imageDir, preferReadyImage }) {
   const planDay = plan.days[Number(day) - 1];
   const publishSlot = planDay?.publishSlots?.[Number(slot) - 1];
   if (!publishSlot?.item) {
     throw new Error(`No publish slot found for day ${day}, slot ${slot}`);
   }
+  if (preferReadyImage) {
+    const readyItem = await firstReadyItemFrom(plan, {
+      day: Number(day),
+      slot: Number(slot),
+      imageDir,
+    });
+    if (readyItem) return readyItem;
+  }
   return publishSlot.item;
+}
+
+async function firstReadyItemFrom(plan, { day, slot, imageDir }) {
+  for (const planDay of plan.days.slice(Math.max(0, day - 1))) {
+    const startSlot = planDay.day === day ? Math.max(0, slot - 1) : 0;
+    for (const publishSlot of planDay.publishSlots.slice(startSlot)) {
+      const image = await resolveImagePath(imageDir, publishSlot.item.id);
+      if (image.ready) return publishSlot.item;
+    }
+  }
+  return null;
+}
+
+async function resolveImagePath(imageDir, id) {
+  const canonical = canonicalImagePath(imageDir, id);
+  if (await fileExists(canonical)) {
+    return { path: canonical, ready: true };
+  }
+  const legacy = await findLegacyImagePath(imageDir, id);
+  if (legacy) return { path: legacy, ready: true };
+  return { path: canonical, ready: false };
+}
+
+async function findLegacyImagePath(imageDir, id) {
+  try {
+    const prefix = `${safePathSegment(id)}__`;
+    const files = (await readdir(imageDir))
+      .filter((file) => file.startsWith(prefix) && file.endsWith('.png'))
+      .sort();
+    return files.length ? join(imageDir, files[0]) : null;
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
+function canonicalImagePath(imageDir, id) {
+  return join(imageDir, `${safePathSegment(id)}.png`);
 }
 
 async function fileExists(filePath) {

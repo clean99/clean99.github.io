@@ -511,6 +511,7 @@ test('builds publish queue and composes handoff posts without losing the URL', (
 
   assert.equal(queue.items.length, 3);
   assert.equal(queue.items[0].status, 'draft');
+  assert.equal(queue.items[0].id, 'Useful-Systems__zh__strong-thesis');
   const composed = composePublishPosts(queue.items[0]);
   assert.equal(composed.length, 1);
   assert.ok(!composed[0].includes('https://clean99.github.io/zh/2026/05/18/Useful-Systems/'));
@@ -526,6 +527,37 @@ test('builds publish queue and composes handoff posts without losing the URL', (
   });
   assert.equal(updated.items[0].status, 'published');
   assert.equal(updated.items[0].xPostUrl, 'https://x.com/Clean993/status/1');
+});
+
+test('queue ids stay stable when newer articles are inserted', () => {
+  const baseArticle = {
+    title: 'Agent Skills 探索实录 — AI Agent 时代的函数式蓝图',
+    excerpt: '本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践。',
+    slug: 'Agent-Skills',
+    lang: 'zh',
+    tags: ['AI', 'Software Engineering'],
+    url: 'https://clean99.github.io/zh/agent-skills/',
+  };
+  const insertedArticle = {
+    title: 'Workspace v2 Tab System',
+    excerpt: '把浏览器级 Tab 体验搬进 Workspace。',
+    slug: 'Workspace-v2-Tab-System',
+    lang: 'zh',
+    tags: ['Frontend', 'Software Engineering'],
+    url: 'https://clean99.github.io/zh/workspace-v2/',
+  };
+  const firstQueue = buildPublishQueue([baseArticle], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  const secondQueue = buildPublishQueue([insertedArticle, baseArticle], {
+    campaign: 'test',
+    createdAt: '2026-05-19T00:00:00.000Z',
+    limit: 2,
+  });
+
+  assert.ok(secondQueue.items.some((item) => item.id === firstQueue.items[0].id));
 });
 
 test('generates article-specific Chinese X copy instead of repeating one template', () => {
@@ -2175,6 +2207,61 @@ test('publish preflight is ready when the generated image exists', async () => {
   }
 });
 
+test('publish preflight can prefer a later ready image and legacy image name', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-preflight-ready-prefer-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Workspace v2 Tab System',
+        excerpt: '把浏览器级 Tab 体验搬进 Workspace。',
+        slug: 'Workspace-v2-Tab-System',
+        lang: 'zh',
+        tags: ['Frontend', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/workspace-v2/',
+      },
+      {
+        title: 'Agent Skills 探索实录 — AI Agent 时代的函数式蓝图',
+        excerpt: '本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 2,
+    });
+    const readyItem = queue.items.find((item) => item.articleSlug === 'Agent-Skills' && item.variant === 'strong-thesis');
+    const imageDir = join(outDir, 'images');
+    const legacyImage = join(imageDir, `${readyItem.id}__03.png`);
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(legacyImage, 'fake image');
+
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      day: 1,
+      slot: 1,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      preferReadyImage: true,
+      env: {},
+    });
+
+    assert.equal(preflight.status, 'ready');
+    assert.equal(preflight.selected.id, readyItem.id);
+    assert.equal(preflight.image.outputPath, legacyImage);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('publish preflight is ready without key when a generated image is registered', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-preflight-register-'));
   try {
@@ -2659,11 +2746,16 @@ test('merges daily queues without losing published URLs', () => {
       url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
     },
   ];
-  const existingQueue = markQueueItemPublished(buildPublishQueue(articles, {
+  const legacyQueue = buildPublishQueue(articles, {
     campaign: 'old',
     createdAt: '2026-05-18T00:00:00.000Z',
     limit: 1,
-  }), {
+  });
+  legacyQueue.items[0] = {
+    ...legacyQueue.items[0],
+    id: 'Useful-Systems__zh__strong-thesis__00',
+  };
+  const existingQueue = markQueueItemPublished(legacyQueue, {
     id: 'Useful-Systems__zh__strong-thesis__00',
     xPostUrl: 'https://x.com/Clean993/status/1',
     publishedAt: '2026-05-18T01:00:00.000Z',
@@ -2677,6 +2769,7 @@ test('merges daily queues without losing published URLs', () => {
   const merged = mergePublishQueues(existingQueue, nextQueue);
 
   assert.equal(merged.items[0].status, 'published');
+  assert.equal(merged.items[0].id, 'Useful-Systems__zh__strong-thesis');
   assert.equal(merged.items[0].xPostUrl, 'https://x.com/Clean993/status/1');
   assert.ok(merged.items[0].targetUrl.includes('utm_campaign=new'));
 });

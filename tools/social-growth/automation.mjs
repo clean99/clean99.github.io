@@ -85,6 +85,7 @@ export async function runSafeAutomationCycle({
   engagementLimit = 5,
   xSkillDir,
   xBunCommand,
+  preferReadyImage = false,
   packageLimit = 3,
   weeklyDays = 7,
   weeklyPostsPerDay = 3,
@@ -136,6 +137,7 @@ export async function runSafeAutomationCycle({
     packageOutDir,
     env,
     ensurePackage: true,
+    preferReadyImage,
   });
   await writePublishPreflight(preflight, preflightPath);
 
@@ -178,6 +180,7 @@ export async function runSafeAutomationCycle({
     profileText,
     env,
     ensurePackage: false,
+    preferReadyImage,
   });
   await writeGrowthStatus(status, statusPath);
 

@@ -264,6 +264,7 @@ if (command === 'articles') {
     engagementLimit: args.engagementLimit || 5,
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
+    preferReadyImage: args.preferReadyImage === 'true',
     packageLimit: args.packageLimit || 3,
     weeklyDays: args.days || 7,
     weeklyPostsPerDay: args.postsPerDay || 3,
@@ -316,6 +317,7 @@ if (command === 'articles') {
     engagementLimit: args.engagementLimit || 5,
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
+    preferReadyImage: args.preferReadyImage !== 'false',
     packageLimit: args.packageLimit || 3,
     weeklyDays: args.days || 7,
     weeklyPostsPerDay: args.postsPerDay || 3,
@@ -548,6 +550,7 @@ if (command === 'articles') {
     imageDir: args.imageDir || 'output/imagegen',
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     ensurePackage: args.ensurePackage !== 'false',
+    preferReadyImage: args.preferReadyImage === 'true',
   });
   if (args.out) {
     await writePublishPreflight(preflight, args.out);
@@ -571,6 +574,7 @@ if (command === 'articles') {
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     profileText,
     ensurePackage: args.ensurePackage === 'true',
+    preferReadyImage: args.preferReadyImage === 'true',
   });
   if (args.out) {
     await writeGrowthStatus(status, args.out);
@@ -593,6 +597,7 @@ if (command === 'articles') {
     imageDir: args.imageDir || 'output/imagegen',
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     ensurePackage: args.ensurePackage !== 'false',
+    preferReadyImage: args.preferReadyImage === 'true',
   });
   const brief = await buildImageBrief(preflight, {
     sourcePlaceholder: args.source || '/absolute/path/to/generated.png',
@@ -620,6 +625,7 @@ if (command === 'articles') {
     imageDir: args.imageDir || 'output/imagegen',
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     ensurePackage: args.ensurePackage !== 'false',
+    preferReadyImage: args.preferReadyImage === 'true',
   });
   const prep = await buildXPublishPrep(preflight, {
     skillDir: args.skillDir,

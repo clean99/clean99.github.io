@@ -74,6 +74,7 @@ Core records:
 
 - `Article`: parsed from `source/_posts/*.md`.
 - `DistributionCandidate`: one article, one X variant, one UTM URL, a Chinese short post, an X Article draft, and an image prompt. The short post does not include the blog URL, and Chinese copy is generated from an article-specific topic frame.
+- `PublishQueue` ids are stable on `articleSlug + lang + variant`; they do not include global queue order, so adding a newer article does not orphan an already prepared image or package.
 - `QualityGate`: deterministic checks for raw blog URLs, AI-smelling meta copy, weak first-screen structure, duplicated short posts across articles, X Article link placement, image prompt requirements, and low-value follow-up replies.
 - The X Article gate also rejects obvious extraction artifacts, including section-heading fragments glued to body text and Markdown table fragments inside bullets.
 - `PublishQueue`: local draft queue of candidates to hand to Chrome.
@@ -143,7 +144,7 @@ Run the scheduled-safe loop:
 npm run social:scheduled-run -- --day 1 --slot 1
 ```
 
-This combines `social:automation` and `social:metrics-cycle` into one recurring-safe local pass. It refreshes queue/packages/status/preflight/profile/image/X prep artifacts, parses copied visible X text when available, writes growth, funnel, and recommendation reports, and never opens Chrome or performs public X actions.
+This combines `social:automation` and `social:metrics-cycle` into one recurring-safe local pass. It refreshes queue/packages/status/preflight/profile/image/X prep artifacts, prefers the next candidate that already has a prepared image, parses copied visible X text when available, writes growth, funnel, and recommendation reports, and never opens Chrome or performs public X actions.
 
 Generate the read-only engagement search plan:
 

@@ -47,11 +47,11 @@ export function queueItemFromCandidate(candidate, { createdAt, index = 0 } = {})
 }
 
 export function stableQueueId(candidate, index = 0) {
+  void index;
   return [
     candidate.articleSlug,
     candidate.lang,
     candidate.variant,
-    String(index).padStart(2, '0'),
   ].join('__');
 }
 
@@ -117,8 +117,12 @@ export async function writePublishPackage(item, { outDir = 'data/social-growth/p
 
 export function mergePublishQueues(existingQueue, nextQueue) {
   const existingById = new Map((existingQueue?.items || []).map((item) => [item.id, item]));
+  const existingByIdentity = new Map((existingQueue?.items || []).map((item) => [queueIdentityKey(item), item]));
   const nextIds = new Set((nextQueue?.items || []).map((item) => item.id));
-  const mergedItems = (nextQueue?.items || []).map((item) => mergeQueueItem(existingById.get(item.id), item));
+  const mergedItems = (nextQueue?.items || []).map((item) => mergeQueueItem(
+    existingById.get(item.id) || existingByIdentity.get(queueIdentityKey(item)),
+    item,
+  ));
   const orphanPublishedItems = (existingQueue?.items || [])
     .filter((item) => !nextIds.has(item.id))
     .filter((item) => item.status === 'published' || item.xPostUrl || item.xArticleUrl);
@@ -130,6 +134,15 @@ export function mergePublishQueues(existingQueue, nextQueue) {
       ...orphanPublishedItems,
     ],
   };
+}
+
+function queueIdentityKey(item = {}) {
+  return [
+    item.articleSlug,
+    item.lang,
+    item.variant,
+    item.channel || 'x',
+  ].join('__');
 }
 
 export function mergeQueueItem(existingItem, nextItem) {

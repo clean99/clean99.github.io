@@ -94,6 +94,7 @@ Then rerun `social:validate` or `social:flow-dry-run`. Applying copy is local-on
 
 Automation is still local-only: it must not publish, upload media, reply, like, repost, follow, or edit the X profile. Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate. When the ledger exists, the daily command inside automation expands the queue enough to cover the default 7-day, 3-posts/day cadence, capped by available Chinese articles.
 Article loading defaults to clean tracked `source/_posts/*.md` files only. Do not include untracked or dirty local drafts in recurring automation unless the user explicitly passes `--include-untracked true`.
+Queue ids are stable by article slug, language, and variant. Scheduled runs prefer a later slot with a prepared image over the literal first slot when that prevents a local image-readiness blocker.
 
 If you only need the lower-level preparation step, run:
 
