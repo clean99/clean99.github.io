@@ -19,6 +19,10 @@ import {
 import {
   buildBrowserReadiness,
   formatBrowserReadinessMarkdown,
+  hasBrowserProbeValues,
+  mergeBrowserProbe,
+  readBrowserProbe,
+  writeBrowserProbe,
   writeBrowserReadiness,
 } from './browserReadiness.mjs';
 import {
@@ -276,6 +280,7 @@ if (command === 'articles') {
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
     publishConfirmationPath: args.confirmationOut || 'data/social-growth/publish-confirmation.md',
     browserReadinessPath: args.browserReadinessOut || 'data/social-growth/browser-readiness.md',
+    browserProbePath: args.browserProbe || args.browserProbeOut || 'data/social-growth/browser-probe.local.json',
     engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
     engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
     engagementSearchPath: args.engagementSearchOut || 'data/social-growth/engagement-search.md',
@@ -337,6 +342,7 @@ if (command === 'articles') {
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
     publishConfirmationPath: args.confirmationOut || 'data/social-growth/publish-confirmation.md',
     browserReadinessPath: args.browserReadinessOut || 'data/social-growth/browser-readiness.md',
+    browserProbePath: args.browserProbe || args.browserProbeOut || 'data/social-growth/browser-probe.local.json',
     engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
     engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
     engagementSearchPath: args.engagementSearchOut || 'data/social-growth/engagement-search.md',
@@ -724,10 +730,18 @@ if (command === 'articles') {
     publishMode: args.publishMode || args.articleMode,
     profileDir: args.xProfileDir || args.profileDir,
   });
+  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
+  const storedProbe = await readBrowserProbe(probePath);
+  const inputProbe = browserProbeFromArgs(args);
+  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
+  if (hasBrowserProbeValues(inputProbe)) effectiveProbe.generatedAt = preflight.generatedAt;
+  if (args.writeProbe !== 'false' && hasBrowserProbeValues(effectiveProbe)) {
+    await writeBrowserProbe(effectiveProbe, probePath);
+  }
   const readiness = buildBrowserReadiness({
     preflight,
     xPrep: prep,
-    ...browserProbeFromArgs(args),
+    ...effectiveProbe,
     profileDir: args.xProfileDir || args.profileDir,
     generatedAt: preflight.generatedAt,
   });
@@ -897,17 +911,17 @@ function toCamelKey(key) {
 }
 
 function browserProbeFromArgs(options = {}) {
-  return {
-    expectedAccount: options.account || '@Clean993',
-    observedAccount: options.observedAccount,
-    chromeRunning: options.chromeRunning,
-    extensionInstalled: options.extensionInstalled,
-    nativeHost: options.nativeHost,
-    extensionPipe: options.extensionPipe,
-    loginState: options.loginState,
-    articleAvailable: options.articleAvailable,
-    mediaUpload: options.mediaUpload,
-  };
+  const probe = {};
+  if (options.account !== undefined) probe.expectedAccount = options.account;
+  if (options.observedAccount !== undefined) probe.observedAccount = options.observedAccount;
+  if (options.chromeRunning !== undefined) probe.chromeRunning = options.chromeRunning;
+  if (options.extensionInstalled !== undefined) probe.extensionInstalled = options.extensionInstalled;
+  if (options.nativeHost !== undefined) probe.nativeHost = options.nativeHost;
+  if (options.extensionPipe !== undefined) probe.extensionPipe = options.extensionPipe;
+  if (options.loginState !== undefined) probe.loginState = options.loginState;
+  if (options.articleAvailable !== undefined) probe.articleAvailable = options.articleAvailable;
+  if (options.mediaUpload !== undefined) probe.mediaUpload = options.mediaUpload;
+  return probe;
 }
 
 async function loadCliArticles(options = {}) {

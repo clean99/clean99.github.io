@@ -24,7 +24,9 @@ import { expandQueueOptionsForWeeklyCoverage, runDailyGrowthPlan, selectPackageI
 import {
   buildBrowserReadiness,
   formatBrowserReadinessMarkdown,
+  readBrowserProbe,
   writeBrowserReadiness,
+  writeBrowserProbe,
 } from '../tools/social-growth/browserReadiness.mjs';
 import {
   buildDailyExecutionBrief,
@@ -1355,6 +1357,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
       publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
       browserReadinessPath: join(outDir, 'browser-readiness.md'),
+      browserProbePath: join(outDir, 'browser-probe.local.json'),
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
@@ -1494,6 +1497,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
       publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
       browserReadinessPath: join(outDir, 'browser-readiness.md'),
+      browserProbePath: join(outDir, 'browser-probe.local.json'),
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
@@ -1542,7 +1546,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
   }
 });
 
-test('scheduled growth loop preserves browser probe blockers in the run status', async () => {
+test('scheduled growth loop reads browser probe file into the run status', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-scheduled-browser-'));
   try {
     const articles = [
@@ -1579,6 +1583,17 @@ test('scheduled growth loop preserves browser probe blockers in the run status',
       'Pinned',
       '30 Followers',
     ].join('\n'));
+    const browserProbePath = join(outDir, 'browser-probe.local.json');
+    await writeBrowserProbe({
+      observedAccount: '@Clean993',
+      chromeRunning: 'yes',
+      extensionInstalled: 'yes',
+      nativeHost: 'yes',
+      extensionPipe: 'closed',
+      articleAvailable: 'no',
+      mediaUpload: 'blocked',
+      generatedAt: '2026-05-18T00:00:00.000Z',
+    }, browserProbePath);
 
     const result = await runScheduledGrowthLoop({
       articles,
@@ -1608,21 +1623,13 @@ test('scheduled growth loop preserves browser probe blockers in the run status',
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
       publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
       browserReadinessPath: join(outDir, 'browser-readiness.md'),
+      browserProbePath,
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
       xSkillDir: skillDir,
       xBunCommand: 'bun',
       publishMode: 'thread_fallback',
-      browserProbe: {
-        observedAccount: '@Clean993',
-        chromeRunning: 'yes',
-        extensionInstalled: 'yes',
-        nativeHost: 'yes',
-        extensionPipe: 'closed',
-        articleAvailable: 'no',
-        mediaUpload: 'blocked',
-      },
       queueOptions: {
         limit: 1,
         lang: 'zh',
@@ -1633,6 +1640,7 @@ test('scheduled growth loop preserves browser probe blockers in the run status',
     });
     const scheduledReport = await readFile(join(outDir, 'scheduled-run.md'), 'utf8');
     const readinessReport = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
+    const persistedProbe = await readBrowserProbe(browserProbePath);
 
     assert.equal(result.status, 'needs_chrome_extension_reconnect');
     assert.equal(result.automation.status, 'needs_chrome_extension_reconnect');
@@ -1643,6 +1651,9 @@ test('scheduled growth loop preserves browser probe blockers in the run status',
     assert.match(scheduledReport, /Confirm opening a fresh Chrome window/);
     assert.match(readinessReport, /Extension pipe: closed/);
     assert.match(readinessReport, /Media upload is blocked/);
+    assert.equal(result.paths.browserProbe, browserProbePath);
+    assert.equal(persistedProbe.extensionPipe, 'closed');
+    assert.equal(persistedProbe.mediaUpload, 'blocked');
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

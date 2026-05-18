@@ -45,6 +45,7 @@ It also writes `data/social-growth/profile-update.md` when profile conversion ne
 It writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` commands that can prefill Chrome for the X Article and image-backed short post while preserving the final confirmation boundary.
 It writes `data/social-growth/publish-confirmation.md` with the exact X Article, image-backed short post, follow-up replies, fallback thread, browser prep commands, and public-action stop points for action-time review.
 It writes `data/social-growth/browser-readiness.md` as the browser probe handoff: selected package, expected account, Chrome/profile signals, extension/native-host status, X Article availability, media upload status, blockers, and next actions.
+It also reads and updates `data/social-growth/browser-probe.local.json` when browser signals are provided, so recurring safe automation keeps the last known Chrome blocker instead of reverting to unknown.
 It writes `data/social-growth/engagement-search.md` with read-only X search URLs for finding relevant technical threads.
 It writes `data/social-growth/engagement-plan.md` from copied relevant thread opportunities when available; missing opportunities are a capture task, not an automation blocker.
 It writes `data/social-growth/daily-brief.md` as the single operator-facing action order across publish readiness, engagement, metrics, conversion funnel, and profile conversion.
@@ -202,7 +203,7 @@ npm run social:browser-readiness -- --day 1 --slot 1 --publishMode thread_fallba
   --out data/social-growth/browser-readiness.md
 ```
 
-If the Chrome extension native pipe is `closed`, ask for confirmation before opening a fresh Chrome window for reconnect. A readiness report is not permission to publish, upload, reply, like, repost, follow, edit, pin, or click any final public X button.
+This also persists the probe to `data/social-growth/browser-probe.local.json` by default. Future `scheduled-run` executions read that local file automatically. If the Chrome extension native pipe is `closed`, ask for confirmation before opening a fresh Chrome window for reconnect. A readiness report is not permission to publish, upload, reply, like, repost, follow, edit, pin, or click any final public X button.
 
 For single-item control:
 

@@ -7,6 +7,10 @@ import {
 } from './dailyBrief.mjs';
 import {
   buildBrowserReadiness,
+  hasBrowserProbeValues,
+  mergeBrowserProbe,
+  readBrowserProbe,
+  writeBrowserProbe,
   writeBrowserReadiness,
 } from './browserReadiness.mjs';
 import {
@@ -69,6 +73,7 @@ const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
 const DEFAULT_PUBLISH_CONFIRMATION_PATH = 'data/social-growth/publish-confirmation.md';
 const DEFAULT_BROWSER_READINESS_PATH = 'data/social-growth/browser-readiness.md';
+const DEFAULT_BROWSER_PROBE_PATH = 'data/social-growth/browser-probe.local.json';
 const DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
 const DEFAULT_ENGAGEMENT_PLAN_PATH = 'data/social-growth/engagement-plan.md';
 const DEFAULT_ENGAGEMENT_SEARCH_PATH = 'data/social-growth/engagement-search.md';
@@ -97,6 +102,7 @@ export async function runSafeAutomationCycle({
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
   publishConfirmationPath = DEFAULT_PUBLISH_CONFIRMATION_PATH,
   browserReadinessPath = DEFAULT_BROWSER_READINESS_PATH,
+  browserProbePath = DEFAULT_BROWSER_PROBE_PATH,
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
   engagementSearchPath = DEFAULT_ENGAGEMENT_SEARCH_PATH,
@@ -189,18 +195,24 @@ export async function runSafeAutomationCycle({
     publishMode,
   });
   await writeXPublishPrep(xPublishPrep, xPublishPrepPath);
+  const storedBrowserProbe = await readBrowserProbe(browserProbePath);
+  const effectiveBrowserProbe = mergeBrowserProbe(storedBrowserProbe, browserProbe);
+  if (hasBrowserProbeValues(browserProbe)) effectiveBrowserProbe.generatedAt = generatedAt;
+  if (hasBrowserProbeValues(browserProbe) || hasBrowserProbeValues(storedBrowserProbe)) {
+    await writeBrowserProbe(effectiveBrowserProbe, browserProbePath);
+  }
   const browserReadiness = buildBrowserReadiness({
     preflight,
     xPrep: xPublishPrep,
-    expectedAccount: browserProbe.expectedAccount,
-    observedAccount: browserProbe.observedAccount,
-    chromeRunning: browserProbe.chromeRunning,
-    extensionInstalled: browserProbe.extensionInstalled,
-    nativeHost: browserProbe.nativeHost,
-    extensionPipe: browserProbe.extensionPipe,
-    loginState: browserProbe.loginState,
-    articleAvailable: browserProbe.articleAvailable,
-    mediaUpload: browserProbe.mediaUpload,
+    expectedAccount: effectiveBrowserProbe.expectedAccount,
+    observedAccount: effectiveBrowserProbe.observedAccount,
+    chromeRunning: effectiveBrowserProbe.chromeRunning,
+    extensionInstalled: effectiveBrowserProbe.extensionInstalled,
+    nativeHost: effectiveBrowserProbe.nativeHost,
+    extensionPipe: effectiveBrowserProbe.extensionPipe,
+    loginState: effectiveBrowserProbe.loginState,
+    articleAvailable: effectiveBrowserProbe.articleAvailable,
+    mediaUpload: effectiveBrowserProbe.mediaUpload,
     profileDir: xProfileDir,
     generatedAt,
   });
@@ -299,6 +311,7 @@ export async function runSafeAutomationCycle({
       xPublishPrep: xPublishPrepPath,
       publishConfirmation: publishConfirmationPath,
       browserReadiness: browserReadinessPath,
+      browserProbe: browserProbePath,
       engagementSearch: engagementSearchPath,
       engagementPlan: engagementPlanPath,
       automationReport: automationReportPath,
@@ -367,6 +380,7 @@ Status: ${result.status}
 - X publish prep: \`${result.paths.xPublishPrep}\`
 - Publish confirmation: \`${result.paths.publishConfirmation}\`
 - Browser readiness: \`${result.paths.browserReadiness}\`
+- Browser probe state: \`${result.paths.browserProbe}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
 

@@ -1,8 +1,21 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 
 const DEFAULT_OUT_PATH = 'data/social-growth/browser-readiness.md';
+const DEFAULT_PROBE_PATH = 'data/social-growth/browser-probe.local.json';
 const UNKNOWN = 'unknown';
+const PROBE_FIELDS = [
+  'expectedAccount',
+  'observedAccount',
+  'chromeRunning',
+  'extensionInstalled',
+  'nativeHost',
+  'extensionPipe',
+  'loginState',
+  'articleAvailable',
+  'mediaUpload',
+  'generatedAt',
+];
 
 export function buildBrowserReadiness({
   preflight,
@@ -148,6 +161,40 @@ export async function writeBrowserReadiness(readiness, filePath = DEFAULT_OUT_PA
   return filePath;
 }
 
+export async function readBrowserProbe(filePath = DEFAULT_PROBE_PATH) {
+  try {
+    return normalizeBrowserProbe(JSON.parse(await readFile(filePath, 'utf8')));
+  } catch (error) {
+    if (error?.code === 'ENOENT') return {};
+    throw error;
+  }
+}
+
+export async function writeBrowserProbe(probe, filePath = DEFAULT_PROBE_PATH) {
+  const normalized = normalizeBrowserProbe({
+    ...probe,
+    generatedAt: probe?.generatedAt || new Date().toISOString(),
+  });
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${JSON.stringify(normalized, null, 2)}\n`);
+  return filePath;
+}
+
+export function mergeBrowserProbe(...probes) {
+  const merged = {};
+  for (const probe of probes) {
+    const normalized = normalizeBrowserProbe(probe || {});
+    for (const field of PROBE_FIELDS) {
+      if (hasValue(normalized[field])) merged[field] = normalized[field];
+    }
+  }
+  return merged;
+}
+
+export function hasBrowserProbeValues(probe = {}) {
+  return PROBE_FIELDS.some((field) => field !== 'generatedAt' && hasValue(probe[field]));
+}
+
 function readinessStatus({ blockers, signals, observedAccount, publishMode }) {
   if (!blockers.length) {
     const unknowns = Object.values(signals).filter((value) => value === UNKNOWN).length;
@@ -229,6 +276,21 @@ function normalizeSignal(value) {
   if (['blocked', 'permission_blocked'].includes(normalized)) return 'blocked';
   if (['logged_out', 'logout'].includes(normalized)) return 'logged_out';
   return UNKNOWN;
+}
+
+function normalizeBrowserProbe(probe = {}) {
+  const normalized = {};
+  if (hasValue(probe.expectedAccount)) normalized.expectedAccount = String(probe.expectedAccount).trim();
+  if (hasValue(probe.observedAccount)) normalized.observedAccount = String(probe.observedAccount).trim();
+  for (const field of ['chromeRunning', 'extensionInstalled', 'nativeHost', 'extensionPipe', 'loginState', 'articleAvailable', 'mediaUpload']) {
+    if (hasValue(probe[field])) normalized[field] = normalizeSignal(probe[field]);
+  }
+  if (hasValue(probe.generatedAt)) normalized.generatedAt = toIsoString(probe.generatedAt);
+  return normalized;
+}
+
+function hasValue(value) {
+  return value !== undefined && value !== null && String(value).trim() !== '';
 }
 
 function sameAccount(left, right) {
