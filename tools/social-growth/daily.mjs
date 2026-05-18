@@ -32,7 +32,11 @@ export async function runDailyGrowthPlan({
 
   await writeJson(queuePath, queue);
 
-  for (const item of draftItems(queue).slice(0, Number(packageLimit || 3))) {
+  const packageItems = selectPackageItems(queue, {
+    limit: Number(packageLimit || 3),
+  });
+
+  for (const item of packageItems) {
     packages.push(await writePublishPackage(item, { outDir: packageOutDir }));
   }
 
@@ -52,6 +56,7 @@ export async function runDailyGrowthPlan({
     ledgerPath,
     metricsPath,
     metricsTemplate,
+    packageItems,
   });
 
   await writeText(reportPath, report);
@@ -78,6 +83,7 @@ export function formatDailyRunReport({
   ledgerPath,
   metricsPath,
   metricsTemplate,
+  packageItems,
 }) {
   const packageLines = packages.length
     ? packages.map((item, index) => `${index + 1}. ${item.id}: ${item.packageDir}`).join('\n')
@@ -99,10 +105,15 @@ Generated at: ${generatedAt}
 - Publish packages directory: \`${packageOutDir}\`
 - Metrics template: \`${metricsPath}\`
 - Published posts waiting for metrics: ${metricsTemplate.posts.length}
+- Package selection: article-diverse first, then fallback variants if needed.
 
 ## Packages
 
 ${packageLines}
+
+Selected queue ids:
+
+${packageItems.length ? packageItems.map((item) => `- ${item.id}`).join('\n') : '- none'}
 
 ## Next Browser Actions
 
@@ -139,6 +150,64 @@ ${ledgerSection}
 
 export function draftItems(queue) {
   return (queue.items || []).filter((item) => item.status === 'draft');
+}
+
+export function selectPackageItems(queue, { limit = 3 } = {}) {
+  const maxItems = Number(limit || 3);
+  const drafts = draftItems(queue);
+  const publishedSlugs = new Set((queue.items || [])
+    .filter((item) => item.status === 'published' || item.xPostUrl)
+    .map((item) => item.articleSlug));
+  const selected = [];
+  const selectedIds = new Set();
+
+  for (const item of onePerArticle(drafts.filter((draft) => !publishedSlugs.has(draft.articleSlug)))) {
+    selectItem(item);
+  }
+
+  if (selected.length < maxItems) {
+    for (const item of onePerArticle(drafts.filter((draft) => publishedSlugs.has(draft.articleSlug)))) {
+      selectItem(item);
+    }
+  }
+
+  if (selected.length < maxItems) {
+    for (const item of drafts) {
+      selectItem(item);
+    }
+  }
+
+  return selected;
+
+  function selectItem(item) {
+    if (!item || selectedIds.has(item.id) || selected.length >= maxItems) return;
+    selected.push(item);
+    selectedIds.add(item.id);
+  }
+}
+
+export function onePerArticle(items) {
+  const grouped = new Map();
+  for (const item of items) {
+    const group = grouped.get(item.articleSlug) || [];
+    group.push(item);
+    grouped.set(item.articleSlug, group);
+  }
+
+  return [...grouped.values()].map((group) => bestVariant(group));
+}
+
+export function bestVariant(items) {
+  const priority = new Map([
+    ['strong-thesis', 0],
+    ['research-utility', 1],
+    ['case-story', 2],
+  ]);
+
+  return [...items].sort((a, b) => (
+    (priority.get(a.variant) ?? 99) - (priority.get(b.variant) ?? 99)
+    || String(a.id).localeCompare(String(b.id))
+  ))[0];
 }
 
 async function readOptionalJson(filePath) {

@@ -75,6 +75,8 @@ This writes:
 - `data/social-growth/posts.local.json`;
 - `data/social-growth/daily-run.md`.
 
+The daily exporter prefers one strong variant per article before exporting extra variants from the same article. This avoids spending a day's slots on three near-duplicate posts.
+
 Draft X candidates for one post:
 
 ```bash
@@ -220,7 +222,7 @@ Do not commit private analytics or account history.
 ## First-Week Loop
 
 1. Generate a queue with `npm run social:queue -- --limit 5 --out data/social-growth/queue.json`.
-2. Pick 2-4 strong queue items for the day.
+2. Pick 2-4 strong queue items for the day, preferring distinct articles before extra variants.
 3. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
 4. Run `npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>`.
 5. Generate the image from `image-prompt.txt` with `gpt-image-2`.

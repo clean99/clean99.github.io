@@ -32,6 +32,8 @@ npm run social:daily -- --limit 5 --package-limit 3 --lang zh
 
 This creates `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, and writes `data/social-growth/daily-run.md`.
 
+Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles.
+
 For single-item control:
 
 1. Read the target blog post from `source/_posts/`.

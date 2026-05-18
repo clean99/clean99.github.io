@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { articleFromMarkdown, addUtm, parseFrontmatter } from '../tools/social-growth/articles.mjs';
 import { buildDistributionCandidates, buildXArticle, selectHashtags } from '../tools/social-growth/copy.mjs';
-import { runDailyGrowthPlan } from '../tools/social-growth/daily.mjs';
+import { runDailyGrowthPlan, selectPackageItems } from '../tools/social-growth/daily.mjs';
 import {
   appendSnapshot,
   createLedger,
@@ -305,12 +305,52 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
     assert.equal(metricsTemplate.posts.length, 1);
     assert.equal(metricsTemplate.posts[0].metrics.views, '');
     assert.ok(report.includes('Daily X Growth Run'));
+    assert.ok(report.includes('Package selection: article-diverse first'));
     assert.ok(report.includes('Stop before the final public publish click'));
     assert.ok(report.includes('Metrics Capture'));
     assert.ok(!shortPost.includes('https://clean99.github.io'));
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('daily package selection prefers distinct articles before extra variants', () => {
+  const articles = [
+    {
+      title: '第一篇',
+      excerpt: '第一篇文章解释一个可复用的工程判断框架。',
+      slug: 'First-Post',
+      lang: 'zh',
+      tags: ['AI'],
+      url: 'https://clean99.github.io/zh/2026/05/18/First-Post/',
+    },
+    {
+      title: '第二篇',
+      excerpt: '第二篇文章解释一个可复用的工程判断框架。',
+      slug: 'Second-Post',
+      lang: 'zh',
+      tags: ['Software Engineering'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Second-Post/',
+    },
+    {
+      title: '第三篇',
+      excerpt: '第三篇文章解释一个可复用的工程判断框架。',
+      slug: 'Third-Post',
+      lang: 'zh',
+      tags: ['Web Performance'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Third-Post/',
+    },
+  ];
+  const queue = buildPublishQueue(articles, {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 3,
+  });
+
+  const selected = selectPackageItems(queue, { limit: 3 });
+
+  assert.deepEqual(selected.map((item) => item.articleSlug), ['First-Post', 'Second-Post', 'Third-Post']);
+  assert.deepEqual(selected.map((item) => item.variant), ['strong-thesis', 'strong-thesis', 'strong-thesis']);
 });
 
 test('metrics template includes only published posts and snapshot can read it', async () => {
