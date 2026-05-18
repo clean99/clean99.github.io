@@ -4,6 +4,8 @@ import { findQueueItem } from './queue.mjs';
 
 const DEFAULT_OUT_PATH = 'data/social-growth/publish-confirmation.md';
 const ARTICLE_URL_PLACEHOLDER = '<x-article-url>';
+const THREAD_URL_PLACEHOLDER = '<x-thread-url>';
+const THREAD_STATUS_ID_PLACEHOLDER = '<x-thread-status-id>';
 const X_ARTICLE_META_PATTERNS = [
   /本文从/u,
   /本文记录/u,
@@ -63,8 +65,12 @@ export function buildPublishConfirmation({
     commands: {
       prepareArticle: xPublishPrep?.commands?.prepareArticle || '',
       prepareShortPost: xPublishPrep?.commands?.prepareShortPost || '',
+      prepareThreadReplies: publishMode === 'thread_fallback'
+        ? threadReplyIntents(item.threadFallback || [])
+        : [],
+      prepareFollowUpReplies: followUpReplyIntents(item.followUpReplies || []),
       recordPublished: publishMode === 'thread_fallback'
-        ? `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${item.id} --url <x-thread-url>`
+        ? `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${item.id} --url ${THREAD_URL_PLACEHOLDER}`
         : (preflight.browser?.recordCommand || `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${item.id} --url <x-post-url> --article-url <x-article-url>`),
     },
     stopBefore: [
@@ -89,6 +95,14 @@ export function formatPublishConfirmationMarkdown(packet) {
   const threadFallback = packet.content.threadFallback.length
     ? packet.content.threadFallback.map((post, index) => `### Thread Post ${index + 1}\n\n${post}`).join('\n\n')
     : '- No fallback thread prepared.';
+  const threadReplyCommands = formatReplyIntentCommands(
+    packet.commands.prepareThreadReplies || [],
+    'No thread reply intent links generated.',
+  );
+  const followUpReplyCommands = formatReplyIntentCommands(
+    packet.commands.prepareFollowUpReplies || [],
+    'No follow-up reply intent links generated.',
+  );
 
   return `# X Publish Confirmation Packet
 
@@ -163,6 +177,14 @@ Prepare ${packet.publishMode === 'thread_fallback' ? 'thread first post' : 'imag
 ${packet.commands.prepareShortPost || '# No short-post command generated.'}
 \`\`\`
 
+Prepare remaining thread posts after the first post is public:
+
+${threadReplyCommands}
+
+Prepare optional follow-up replies after the thread is complete:
+
+${followUpReplyCommands}
+
 ## After Confirmed Publication
 
 Record the public URLs:
@@ -227,6 +249,45 @@ export async function writePublishConfirmation(packet, filePath = DEFAULT_OUT_PA
 
 function imagePostWithArticlePlaceholder(shortPost, articleUrlPlaceholder) {
   return `${shortPost.trim()}\n\n${articleUrlPlaceholder}`.trim();
+}
+
+function threadReplyIntents(posts = []) {
+  return posts.slice(1).map((text, index) => replyIntent({
+    label: `Thread post ${index + 2}`,
+    text,
+  }));
+}
+
+function followUpReplyIntents(replies = []) {
+  return replies.map((text, index) => replyIntent({
+    label: `Follow-up reply ${index + 1}`,
+    text,
+  }));
+}
+
+function replyIntent({ label, text }) {
+  const encodedText = encodeURIComponent(text);
+  return {
+    label,
+    text,
+    url: `https://x.com/intent/tweet?in_reply_to=${THREAD_STATUS_ID_PLACEHOLDER}&text=${encodedText}`,
+    note: `Replace ${THREAD_STATUS_ID_PLACEHOLDER} with the status id from ${THREAD_URL_PLACEHOLDER}; stop before the final public Reply click.`,
+  };
+}
+
+function formatReplyIntentCommands(items, emptyText) {
+  if (!items.length) return `- ${emptyText}`;
+
+  return items.map((item) => `### ${item.label}
+
+- Open: ${item.url}
+- Note: ${item.note}
+
+Text:
+
+\`\`\`text
+${item.text}
+\`\`\``).join('\n\n');
 }
 
 function reviewContent(item) {

@@ -2709,8 +2709,14 @@ test('publish confirmation uses thread fallback when X Article is unavailable', 
     assert.doesNotMatch(packet.content.imagePost, /<x-article-url>/);
     assert.match(packet.content.imagePost, /工作台一上 Tab/);
     assert.match(packet.commands.recordPublished, /<x-thread-url>/);
+    assert.equal(packet.commands.prepareThreadReplies.length, 2);
+    assert.match(packet.commands.prepareThreadReplies[0].url, /https:\/\/x\.com\/intent\/tweet\?in_reply_to=<x-thread-status-id>&text=/);
+    assert.match(decodeURIComponent(packet.commands.prepareThreadReplies[1].url), /完整过程/);
+    assert.equal(packet.commands.prepareFollowUpReplies.length, 2);
     assert.match(markdown, /X Article Status/);
     assert.match(markdown, /Image-backed Thread First Post To Review/);
+    assert.match(markdown, /Prepare remaining thread posts after the first post is public/);
+    assert.match(markdown, /Replace <x-thread-status-id> with the status id from <x-thread-url>/);
     assert.doesNotMatch(markdown, /replace `<x-article-url>`/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
