@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>Workspace V2 Tab System Performance: First Load, Hot Switch, and Background Pressure | Koh Hom&#39;s Blog</title>
+  
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/">
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
+  
+  <meta name="description" content="Background And GoalsAfter the tab system was introduced, Workspace no longer had only one foreground page. Users can keep multiple workstreams, subapp">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
+  <meta property="og:type" content="article" />
+  <meta property="article:published_time" content="2026-05-18T08:31:00.000Z" />
+  <meta property="article:modified_time" content="2026-05-18T08:31:00.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Frontend" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="Web Performance" />
+  
+  <meta property="article:tag" content="React" />
+  
+  
+  <meta property="og:title" content="Workspace V2 Tab System Performance: First Load, Hot Switch, and Background Pressure | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_CN" />
+  
+  <meta property="og:description" content="Background And GoalsAfter the tab system was introduced, Workspace no longer had only one foreground page. Users can keep multiple workstreams, subapp">
+  
+  <meta property="og:url" content="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="Workspace V2 Tab System Performance: First Load, Hot Switch, and Background Pressure | Koh Hom&#39;s Blog">
+  
+  <meta name="twitter:description" content="Background And GoalsAfter the tab system was introduced, Workspace no longer had only one foreground page. Users can keep multiple workstreams, subapp">
+  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta name="twitter:url" content="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Workspace V2 Tab System Performance: First Load, Hot Switch, and Background Pressure","datePublished":"2026-05-18T08:31:00.000Z","dateModified":"2026-05-18T08:31:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/","mainEntityOfPage":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/","inLanguage":"en","description":"Background And GoalsAfter the tab system was introduced, Workspace no longer had only one foreground page. Users can keep multiple workstreams, subapps, and objects open, while the host may keep more ","keywords":["Frontend","Software Engineering","Web Performance","React"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Workspace V2 Tab System Performance: First Load, Hot Switch, and Background Pressure","item":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="six columns ml-1">
+    <h1 class="mt-2">
+      <a href="/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/">Home</a>
+        
+          
+          <a href="/Works" class="ml">Works</a>
+          
+        
+          
+          <a href="/About" class="ml">About</a>
+          
+        
+          
+          <a href="/Links" class="ml">Links</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">Email</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">Workspace V2 Tab System Performance: First Load, Hot Switch, and Background Pressure</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
+          阅读中文版
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2026-05-18T08:31:00.000Z">
+      <meta itemprop="dateModified" content="2026-05-18T08:31:00.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <h2 id="Background-And-Goals"><a href="#Background-And-Goals" class="headerlink" title="Background And Goals"></a>Background And Goals</h2><p>After the tab system was introduced, Workspace no longer had only one foreground page. Users can keep multiple workstreams, subapps, and objects open, while the host may keep more routes, runtimes, iframes, SDKs, and background tasks alive. Performance is therefore no longer one question of “is this page slow?” It is three separate user paths.</p>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Problem</th>
+<th>Metric And Acceptance Standard</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>First Load &#x2F; FMP</td>
+<td>When users enter Workspace or a subapp for the first time, they only need the current page, but network and main-thread budget may be spent on future paths, non-current subapps, or low-priority SDKs.</td>
+<td>route FMP, critical-resource waterfall, first-screen APIs. A win must show a blocker moving earlier, disappearing, or shrinking, and final FMP must improve.</td>
+</tr>
+<tr>
+<td>Hot Tab Switch</td>
+<td>When users click an already-open tab, the frame may be visible but still not clickable, or visible work may be blocked by long tasks.</td>
+<td>tab switch v3, post-visible blocking, long task. Shell-visible alone is not enough.</td>
+</tr>
+<tr>
+<td>Background Pressure</td>
+<td>Hidden tabs, prewarm jobs, SDKs, WebSocket, analytics, and monitoring tasks may steal main-thread time while the user switches tabs.</td>
+<td>long task, frame gap, foreground lease, C02 stress gate. Background work must yield to the foreground tab.</td>
+</tr>
+</tbody></table>
+<p>Business goals and technical constraints:</p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Engineering Constraint</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Users can keep multiple workstreams, subapps, and objects open.</td>
+<td>First load, hot switch, and background tasks must not become obviously slower because more runtimes exist.</td>
+</tr>
+<tr>
+<td>Tab switching should feel close to a browser.</td>
+<td>We cannot reload every tab to save memory, and we cannot keep every runtime alive to make switching fast.</td>
+</tr>
+<tr>
+<td>Refresh, sharing, multiple windows, and subapp SDK behavior must remain correct.</td>
+<td>Performance work must not break tab state recovery, business URLs, cross-window sync, or subapp open intent.</td>
+</tr>
+<tr>
+<td>Performance claims must be credible.</td>
+<td>preview FMP, strict tab switch, and local stress gates must be measured separately.</td>
+</tr>
+</tbody></table>
+<p>Optimization principle:</p>
+<blockquote>
+<p>First identify the user path. Then decide whether a resource should start earlier, move later, stay warm, or be cancelled. Every accepted win must show the blocker moving, disappearing, shrinking, or moving after the visible path.</p>
+</blockquote>
+<p><img src="/img/workspace-v2-tab-system-performance/performance-map.png" alt="performance map"></p>
+<p><em>Figure P1: Performance optimization map. The map separates first-screen critical path, hot tab switch, and background pressure, and also lists false wins that were rejected.</em></p>
+<h2 id="Results"><a href="#Results" class="headerlink" title="Results"></a>Results</h2><table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Problem</th>
+<th>Before</th>
+<th>After</th>
+<th>Delta</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Scheduling</td>
+<td>Route chunks were discovered too late and overlapped the final FMP window.</td>
+<td>route FMP <code>14773ms</code></td>
+<td><code>11926ms</code></td>
+<td><code>-2847ms / -19.3%</code></td>
+<td>strict preview waterfall; route chunks changed from late discovery to route-aware preload</td>
+</tr>
+<tr>
+<td>Official Forecast</td>
+<td>Route-critical CSS was discovered near the end of the path.</td>
+<td>route FMP <code>14271ms</code></td>
+<td><code>11612ms</code></td>
+<td><code>-2659ms / -18.6%</code></td>
+<td>strict preview waterfall; CSS moved from around 13.8s to around 1.9s</td>
+</tr>
+<tr>
+<td>Workspace FMP cleanup</td>
+<td>Host uploader started before FMP on every measured main route.</td>
+<td>pre-FMP count <code>7/7 routes</code></td>
+<td><code>0/7 routes</code></td>
+<td>main run improved on 6&#x2F;7 paths, average about <code>-1037ms</code></td>
+<td>strict FMP loop; cleanup pattern evidence</td>
+</tr>
+<tr>
+<td>Seto entry fanout</td>
+<td>Non-current Seto entry competed with the current route.</td>
+<td>affected routes <code>5</code></td>
+<td><code>0</code></td>
+<td>average about <code>-366ms</code> vs previous accepted run</td>
+<td>strict FMP loop; non-current Seto entry moved after FMP</td>
+</tr>
+<tr>
+<td>Cold tab switch</td>
+<td>The target runtime and view were loaded only after click.</td>
+<td>p95 duration <code>1829.8ms</code></td>
+<td><code>812.3ms</code></td>
+<td><code>-55.6%</code></td>
+<td>strict tab-switch probe; idle prewarm</td>
+</tr>
+<tr>
+<td>Cold tab switch</td>
+<td>Frame was visible, but users were still blocked.</td>
+<td>p95 post-visible blocking <code>1193.7ms</code></td>
+<td><code>8.7ms</code></td>
+<td><code>-99.3%</code></td>
+<td>strict tab-switch probe; blocking moved from after click to before click</td>
+</tr>
+<tr>
+<td>Spike control</td>
+<td>Hidden prewarm and background SDK work stole foreground CPU.</td>
+<td>A1 p95 duration <code>1700.1ms</code></td>
+<td><code>703.1ms</code></td>
+<td><code>-58.6%</code></td>
+<td>strict tab-switch probe; hidden prewarm paused during switch</td>
+</tr>
+<tr>
+<td>Background pressure</td>
+<td>Background SDKs could become future tab-switch jank sources.</td>
+<td>max long task present risk</td>
+<td>max post-visible long task &#x3D; 0</td>
+<td>guardrail, not preview-environment main win</td>
+<td>local C02 stress gate; Notification&#x2F;WebSocket&#x2F;Tea&#x2F;Slardar moved into scheduler</td>
+</tr>
+</tbody></table>
+<p>Two guardrails:</p>
+<ol>
+<li>Strict preview FMP, strict tab switch, and local C02 gate are not combined into one total number.</li>
+<li>Moving resources is not a win by itself. We only keep a change when the user metric improves and the diagram explains why.</li>
+</ol>
+<h2 id="Measurement-Contract"><a href="#Measurement-Contract" class="headerlink" title="Measurement Contract"></a>Measurement Contract</h2><p>Strict FMP comparisons used the same setup:</p>
+<ul>
+<li>authenticated preview environment;</li>
+<li>target preview-lane headers;</li>
+<li>browser cache disabled;</li>
+<li>CPU 4x throttle;</li>
+<li>4G network throttle;</li>
+<li>same route set and same final FMP marker semantics;</li>
+<li>failed experiments kept in the record and excluded from wins.</li>
+</ul>
+<p>Tab switch uses v3 metrics instead of only “how long after click until the frame appears.”</p>
+<table>
+<thead>
+<tr>
+<th>v3 Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>inputDelayMs</code></td>
+<td>From user input to React handler start; captures main-thread queueing.</td>
+</tr>
+<tr>
+<td><code>shellVisibleMs</code></td>
+<td>From handler start to focused hot frame visible.</td>
+</tr>
+<tr>
+<td><code>interactiveReadyMs</code></td>
+<td>Target tab can respond to interaction.</td>
+</tr>
+<tr>
+<td><code>postVisibleBlockingMs</code></td>
+<td>Time after frame is visible while the user is still blocked.</td>
+</tr>
+<tr>
+<td><code>postVisibleJankMs</code></td>
+<td>Frame gap &#x2F; long task after visibility.</td>
+</tr>
+<tr>
+<td><code>settledReadyMs</code></td>
+<td>Time to a 500ms quiet window; compatible with old duration but with clearer semantics.</td>
+</tr>
+</tbody></table>
+<p>The most important measurement repair was separating visible from interactive. Old metrics could report tens of milliseconds while strict probe still found hundreds or thousands of milliseconds of post-visible long task. After this repair, only changes that reduce post-visible blocking or final FMP are accepted.</p>
+<h2 id="Measurement-amp-Gates-Harness-And-E2E-Coverage"><a href="#Measurement-amp-Gates-Harness-And-E2E-Coverage" class="headerlink" title="Measurement &amp; Gates: Harness And E2E Coverage"></a>Measurement &amp; Gates: Harness And E2E Coverage</h2><p>These wins did not come from one manual run. We split validation into three harnesses, each answering one question.</p>
+<table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>How It Runs</th>
+<th>What It Captures</th>
+<th>What It Accepts Or Rejects</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Strict preview FMP profiler</td>
+<td>Authenticated CDP Chrome; target preview route; target preview-lane headers; cache disabled; CPU 4x; 4G; every run starts from clean root-tab; 30s capture</td>
+<td>route FMP, subapp load-start, critical-resource waterfall, pre-FMP resource count</td>
+<td>A route win must improve previous&#x2F;current delta for the same marker and have a waterfall explanation. Cleaner resource counts with worse FMP are rejected.</td>
+</tr>
+<tr>
+<td>Strict tab-switch probe</td>
+<td>CDP drives real tab activation; samples cover Workstream native, Workstream Seto&#x2F;Supervisor, and other opened tabs; v3 starts from real input timestamp and waits for visible stable frame &#x2F; quiet window</td>
+<td><code>inputDelayMs</code>, <code>shellVisibleMs</code>, <code>interactiveReadyMs</code>, <code>postVisibleBlockingMs</code>, <code>postVisibleJankMs</code>, frame gap, long task</td>
+<td>Frame visible alone is not accepted. p95&#x2F;max, post-visible blocking, and worst samples must improve across repeated strict profiles.</td>
+</tr>
+<tr>
+<td>Local stress gate</td>
+<td>Workspace tab-switch stress spec; mocked backend + real browser; 20 opened tabs, 5 hot workstream caches, overlay containment, background SDK&#x2F;prewarm tasks</td>
+<td>hot switch summary, post-visible blocking, long task, warm-pool count, cache miss, overlay hit-test</td>
+<td>Regression gate, not preview-environment main win. It requires no new post-visible long task, bounded warm pool, and no hidden tab &#x2F; overlay stealing foreground interaction.</td>
+</tr>
+</tbody></table>
+<p>E2E cases protect correctness while performance changes move work around. Mock-off integration connects through preview-lane routing to the real backend instead of mistaking mock data for preview evidence.</p>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>What It Verifies</th>
+<th>Regression It Prevents</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Cold&#x2F;hot switch</td>
+<td>Starts from a workstream and records readiness, post-visible blocking, and long task</td>
+<td>Idle prewarm or warm-pool changes cannot push loading to after the page becomes visible.</td>
+</tr>
+<tr>
+<td>Stress switch</td>
+<td>20-tab &#x2F; 5-hot-workstream stress switching plus overlay containment</td>
+<td>Hot switch cannot rely on unlimited keep-alive; background tabs, cache eviction, and overlays cannot affect foreground.</td>
+</tr>
+<tr>
+<td>Preview routing</td>
+<td>Mock-off works; preview routing reaches the workspace backend</td>
+<td>If environment is wrong, FMP &#x2F; tab-switch numbers do not enter the conclusion.</td>
+</tr>
+<tr>
+<td>Tab backend contract</td>
+<td><code>tab/list/add/remove/pin/unpin/reorder</code> and invalid payloads</td>
+<td>React Query &#x2F; optimistic mutation optimizations cannot create dirty tab lists, duplicate tabs, or wrong order.</td>
+</tr>
+<tr>
+<td>Refresh recovery</td>
+<td>Refresh recovers the business URL and per-tab session state shape is valid</td>
+<td>Per-tab URL persistence and cache changes cannot break refresh, sharing, or recovery.</td>
+</tr>
+<tr>
+<td><code>T-BCH-C01, C03</code></td>
+<td>Window B syncs through BroadcastChannel after Window A adds or removes a tab</td>
+<td>Multi-window cannot rely only on local React state.</td>
+</tr>
+<tr>
+<td>Subapp open intents</td>
+<td>Subapp open requests, legacy navigation, dedupe, invalid payload, origin reject, and bus-v2 behavior</td>
+<td>SDK bridge latency, merge, or refactor cannot lose, duplicate, or escalate subapp intent.</td>
+</tr>
+<tr>
+<td><code>T-LFC-C01</code></td>
+<td>Focus switch emits <code>TAB_BLURRED</code> before <code>TAB_FOCUSED</code></td>
+<td>Background tabs must actually enter background; otherwise polling, WebSocket, and prewarm continue stealing CPU.</td>
+</tr>
+</tbody></table>
+<h2 id="What-Changed-Optimization-Map"><a href="#What-Changed-Optimization-Map" class="headerlink" title="What Changed: Optimization Map"></a>What Changed: Optimization Map</h2><p>This table is not a commit list. It is an index for the rest of the article. Each row follows the same chain: problem, blocker&#x2F;cause, solution, evidence, and guardrail.</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Problem</th>
+<th>Blocker &#x2F; Cause</th>
+<th>Solution</th>
+<th>Evidence &#x2F; Impact</th>
+<th>Guardrail</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Measurement contract</td>
+<td>Old tab switch duration looked fast while users could still see an unclickable page. FMP experiments could also treat lower resource count as a false win.</td>
+<td>Shell visible and interactive were mixed; local gate, preview FMP, and strict switch had different meanings.</td>
+<td>FMP uses final first-screen marker; tab switch v3 measures input, visible, interactive, and post-visible blocking; C02 is only a regression gate.</td>
+<td>Later wins can point to blocker movement or reduced post-visible blocking.</td>
+<td>Measurement repair itself is not counted as a performance win.</td>
+</tr>
+<tr>
+<td>Critical-path reduction</td>
+<td>Current page was not visible yet, but network and CPU were serving future paths.</td>
+<td>Workstream list, host uploader, AIS, and non-current Seto entry fanout entered pre-FMP.</td>
+<td>Keep only current-route first-screen work before FMP; schedule low-priority SDK and non-current runtime work after first-screen ready.</td>
+<td><code>/workspace/api/workstream/list</code> moved out of pre-FMP on 6&#x2F;7 root-subapp paths; host uploader <code>7/7 -&gt; 0/7</code>; Seto fanout affected routes <code>5 -&gt; 0</code>.</td>
+<td>Only defer work that is not part of current first screen; if FMP gets worse, revert.</td>
+</tr>
+<tr>
+<td>Route-critical early start</td>
+<td>Real first-screen route resources were discovered too late.</td>
+<td>Scheduling chunks appeared at <code>6785ms-15464ms</code>; Official Forecast CSS appeared at <code>13789ms-14988ms</code>.</td>
+<td>Route-aware early discovery for Scheduling chunks and Official Forecast CSS.</td>
+<td>Scheduling FMP <code>14773ms -&gt; 11926ms</code>; Official Forecast FMP <code>14271ms -&gt; 11612ms</code>.</td>
+<td>Preload only resources proven to block first screen.</td>
+</tr>
+<tr>
+<td>Runtime cache</td>
+<td>Users want a tab to be immediately usable after switching back, but not every runtime can stay alive.</td>
+<td>Cold switch loaded runtime, restored view, and waited for iframe&#x2F;subapp ready after click.</td>
+<td>Split opened tabs, hot runtime, and view cache; WarmPool keeps recent working set; IdlePrewarm prepares likely targets after first screen.</td>
+<td>cold switch p95 <code>1829.8ms -&gt; 812.3ms</code>; post-visible blocking <code>1193.7ms -&gt; 8.7ms</code>.</td>
+<td>Hot is not opened. Seto sandbox is heavier and prewarms more conservatively.</td>
+</tr>
+<tr>
+<td>Main-thread scheduling</td>
+<td>Hidden prewarm or SDK init stole foreground main thread during switch.</td>
+<td>An async import may be safe at check time, but foreground state can change before the bundle finishes loading.</td>
+<td>Foreground-aware scheduler; re-check before import, after import, before init, before render&#x2F;open.</td>
+<td>A1 p95 <code>1700.1ms -&gt; 703.1ms</code>; C02 gate max post-visible long task &#x3D; 0.</td>
+<td>Notification&#x2F;WebSocket&#x2F;Tea&#x2F;Slardar are guardrails, not preview FMP wins.</td>
+</tr>
+<tr>
+<td>Reject false wins</td>
+<td>Cleaner waterfall or faster shell-visible does not mean users are faster.</td>
+<td>Resource counts, shell visible, and local memo experiments can produce attractive but wrong numbers.</td>
+<td>Treat resource movement as a hypothesis; reject if strict profile gets worse.</td>
+<td>Swimlane chunk average FMP <code>+1217ms</code> reverted; all-hot strict p95 reached <code>1792.0ms</code> with <code>517ms</code> post-visible long task.</td>
+<td>User metric first, causality second; resource shape is only an explanation.</td>
+</tr>
+</tbody></table>
+<h2 id="Category-1-First-Load-x2F-FMP"><a href="#Category-1-First-Load-x2F-FMP" class="headerlink" title="Category 1: First Load &#x2F; FMP"></a>Category 1: First Load &#x2F; FMP</h2><h3 id="1-Remove-Work-That-Does-Not-Belong-To-The-Current-First-Screen"><a href="#1-Remove-Work-That-Does-Not-Belong-To-The-Current-First-Screen" class="headerlink" title="1. Remove Work That Does Not Belong To The Current First Screen"></a>1. Remove Work That Does Not Belong To The Current First Screen</h3><p>Problem: while the user waits for the current route’s first screen, network and main-thread time can be spent on future paths or low-priority SDKs. The solution is not a fixed sleep. It is route-specific first-screen readiness: only work that is not part of the current first screen can move after FMP.</p>
+<p><img src="/img/workspace-v2-tab-system-performance/critical-path-cleanup.png" alt="critical path cleanup"></p>
+<p><em>Figure P2: Critical-path cleanup waterfall. This is a strict FMP-loop pattern chart. It explains how host uploader moved from 7&#x2F;7 pre-FMP routes to 0&#x2F;7, and non-current Seto entry fanout moved from 5 affected routes to 0. The example route is illustrative; exact route deltas are covered by Scheduling and Official Forecast.</em></p>
+<table>
+<thead>
+<tr>
+<th>Change</th>
+<th>Pre-FMP Blocker</th>
+<th>Movement</th>
+<th>Impact Scope</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Remove pre-FMP <code>/workspace/api/workstream/list</code> refresh</td>
+<td>Root-subapp first screen did not need Workstream list, but it entered the waterfall.</td>
+<td>6&#x2F;7 root-subapp paths no longer had it pre-FMP.</td>
+<td>Main run improved on 4&#x2F;7 paths, average about <code>-1051ms</code>.</td>
+</tr>
+<tr>
+<td>Defer AIS &#x2F; uploader</td>
+<td>host-owned <code>lib-uploader</code> appeared pre-FMP on 7&#x2F;7 paths.</td>
+<td><code>7/7 -&gt; 0/7</code></td>
+<td>6&#x2F;7 main paths improved, average about <code>-1037ms</code>.</td>
+</tr>
+<tr>
+<td>Defer non-current Seto entry fanout</td>
+<td>app <code>10218</code> manifest and <code>static/js/entry.*</code> competed with the current route.</td>
+<td>affected routes <code>5 -&gt; 0</code></td>
+<td>average about <code>-366ms</code> vs previous accepted run.</td>
+</tr>
+</tbody></table>
+<p>Implementation sketch:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Mounted after route first-screen ready.</span></span><br><span class="line"><span class="comment">// Only schedule work that does not belong to the current first screen.</span></span><br><span class="line"><span class="title function_">afterFirstScreenReady</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="title function_">scheduleLowPrioritySdkInit</span>();</span><br><span class="line">  <span class="title function_">scheduleUploaderInit</span>();</span><br><span class="line">  <span class="title function_">scheduleNonCurrentSetoPreload</span>();</span><br><span class="line">&#125;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>The key is that we defer non-current work, not all work.</p>
+<h3 id="2-Scheduling-Route-Chunks-Moved-From-Late-Discovery-To-Early-Discovery"><a href="#2-Scheduling-Route-Chunks-Moved-From-Late-Discovery-To-Early-Discovery" class="headerlink" title="2. Scheduling: Route Chunks Moved From Late Discovery To Early Discovery"></a>2. Scheduling: Route Chunks Moved From Late Discovery To Early Discovery</h3><p>Problem: Scheduling route chunks were discovered at <code>6785ms-15464ms</code>, overlapping the final FMP window. The root cause was not simply slow network; the browser learned too late that these chunks were required for the current first screen.</p>
+<p>Scheduling FMP moved from <code>14773ms</code> to <code>11926ms</code>, a <code>-2847ms / -19.3%</code> improvement.</p>
+<p><img src="/img/workspace-v2-tab-system-performance/scheduling-route-chunks.png" alt="scheduling route chunks"></p>
+<p><em>Figure P3: Scheduling route chunks waterfall. Before, route chunks were discovered at <code>6785ms-15464ms</code> and covered the FMP window. After, matching chunks started as link resources at <code>1928ms-1961ms</code>.</em></p>
+<p>Code strategy:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Mounted after route resolver identifies the Scheduling route.</span></span><br><span class="line"><span class="comment">// Preload only chunks needed by this first screen, not the whole route family.</span></span><br><span class="line"><span class="keyword">if</span> (<span class="title function_">currentRouteMatches</span>(<span class="string">&#x27;/scheduling/schedule&#x27;</span>)) &#123;</span><br><span class="line">  <span class="title function_">preloadRouteChunks</span>([</span><br><span class="line">    <span class="string">&#x27;schedule route chunk&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;schedule view panel chunk&#x27;</span>,</span><br><span class="line">  ]);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// This still waits for core data; do not prefetch dependent data too early.</span></span><br><span class="line">  <span class="title function_">prefetchScheduleViewPanelAfterCoreData</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Why it works:</p>
+<ul>
+<li>route chunks and first-screen data do not have to be fully serial;</li>
+<li>early route chunk discovery lets code loading run in parallel with shell&#x2F;data;</li>
+<li>the remaining FMP window is Seto runtime, data, and render, not late code discovery.</li>
+</ul>
+<h3 id="3-Official-Forecast-Route-Critical-CSS-Cannot-Wait-Until-The-End"><a href="#3-Official-Forecast-Route-Critical-CSS-Cannot-Wait-Until-The-End" class="headerlink" title="3. Official Forecast: Route-Critical CSS Cannot Wait Until The End"></a>3. Official Forecast: Route-Critical CSS Cannot Wait Until The End</h3><p>Problem: Official Forecast CSS appeared at <code>13789ms-14988ms</code>, so the final marker waited for late stylesheet discovery. The solution is not “preload everything”; it is only to start the stylesheet that stabilizes the first screen.</p>
+<p>Official Forecast FMP moved from <code>14271ms</code> to <code>11612ms</code>, a <code>-2659ms / -18.6%</code> improvement.</p>
+<p><img src="/img/workspace-v2-tab-system-performance/official-forecast-css.png" alt="official forecast css"></p>
+<p><em>Figure P4: Official Forecast CSS waterfall. Before, CSS appeared at <code>13789ms-14988ms</code>. After, CSS started at <code>1872ms-2632ms</code> and ran in parallel with route code&#x2F;data.</em></p>
+<p>Code strategy:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Only when Official Forecast route matches.</span></span><br><span class="line"><span class="comment">// This CSS affects first-screen stability, so it is route-critical.</span></span><br><span class="line"><span class="keyword">if</span> (<span class="title function_">currentRouteMatches</span>(<span class="string">&#x27;/scheduling/official_forecast&#x27;</span>)) &#123;</span><br><span class="line">  <span class="title function_">preloadStylesheet</span>(<span class="string">&#x27;official forecast critical css&#x27;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Why it works:</p>
+<ul>
+<li>this is not generic “add more preload”;</li>
+<li>the CSS directly affects final first-screen stability;</li>
+<li>moving it away from the final wait window removes a late FMP blocker.</li>
+</ul>
+<h3 id="4-Counterexample-Swimlane-Chunk-Was-Not-A-Win"><a href="#4-Counterexample-Swimlane-Chunk-Was-Not-A-Win" class="headerlink" title="4. Counterexample: Swimlane Chunk Was Not A Win"></a>4. Counterexample: Swimlane Chunk Was Not A Win</h3><p>One experiment moved the Swimlane chunk out of pre-FMP. The waterfall looked cleaner: pre-FMP count <code>7/7 -&gt; 0/7</code>. Strict runs showed average FMP got worse by <code>+1217ms</code>, and load-start also regressed, so the change was reverted.</p>
+<p>This counterexample matters because performance optimization is not waterfall beautification. Fewer resources with slower users is a failure.</p>
+<h2 id="Category-2-Hot-Tab-Switch"><a href="#Category-2-Hot-Tab-Switch" class="headerlink" title="Category 2: Hot Tab Switch"></a>Category 2: Hot Tab Switch</h2><p>The hot-switch target is not “the frame appears.” It is “the user can operate after seeing the frame.” That is why v3 measures post-visible blocking.</p>
+<p><img src="/img/workspace-v2-tab-system-performance/hot-tab-switch-causality.png" alt="hot tab switch causality"></p>
+<p><em>Figure P5: Hot tab switch causality. Before, the cold runtime loaded after click, and the frame still had <code>1193.7ms</code> blocking after becoming visible. After, idle prewarm moved the main preparation work before click, reducing post-visible blocking to <code>8.7ms</code>.</em></p>
+<h3 id="1-Idle-Prewarm"><a href="#1-Idle-Prewarm" class="headerlink" title="1. Idle Prewarm"></a>1. Idle Prewarm</h3><p>Problem: cold switch loaded runtime, restored view, and waited for iframe&#x2F;subapp ready after the user clicked. The frame could appear first, but long tasks still blocked interaction. The solution is to prepare likely return targets during idle windows after first screen.</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Before</th>
+<th>After</th>
+<th>Delta</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cold switch p95 duration</td>
+<td><code>1829.8ms</code></td>
+<td><code>812.3ms</code></td>
+<td><code>-55.6%</code></td>
+</tr>
+<tr>
+<td>visibleToReady p95</td>
+<td><code>1693.7ms</code></td>
+<td><code>508.7ms</code></td>
+<td><code>-70.0%</code></td>
+</tr>
+<tr>
+<td>postVisibleBlocking p95</td>
+<td><code>1193.7ms</code></td>
+<td><code>8.7ms</code></td>
+<td><code>-99.3%</code></td>
+</tr>
+<tr>
+<td>max post-visible long task</td>
+<td><code>692ms</code></td>
+<td><code>73ms</code></td>
+<td>significantly lower</td>
+</tr>
+</tbody></table>
+<p>Implementation sketch:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Mounted after first-screen ready.</span></span><br><span class="line"><span class="comment">// Native runtime is lighter, so it can enter the queue earlier.</span></span><br><span class="line"><span class="comment">// Seto sandbox is heavier and needs a more conservative delay.</span></span><br><span class="line"><span class="title function_">afterFirstScreenReady</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="title function_">queuePrewarm</span>(nativeTabs, &#123; <span class="attr">delay</span>: <span class="number">1000</span> &#125;);</span><br><span class="line">  <span class="title function_">queuePrewarm</span>(setoTabs, &#123; <span class="attr">delay</span>: <span class="number">3000</span>, <span class="attr">primeLifecycle</span>: <span class="literal">true</span> &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Why it works:</p>
+<ul>
+<li>part of runtime loading, initialization, and lifecycle priming happens before click;</li>
+<li>click no longer puts large subapp loading and long tasks after visibility;</li>
+<li>prewarm only runs after first screen, so it does not steal FMP budget.</li>
+</ul>
+<h3 id="2-Runtime-Aware-Prewarm"><a href="#2-Runtime-Aware-Prewarm" class="headerlink" title="2. Runtime-Aware Prewarm"></a>2. Runtime-Aware Prewarm</h3><p>The tradeoff is explicit: prewarming every runtime immediately is simple, but Seto sandbox is heavier and can turn a background optimization into foreground pressure. The final policy warms native runtimes earlier and Seto runtimes more carefully.</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>p95 duration</th>
+<th>visibleToReady</th>
+<th>postVisibleBlocking</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>immediate cold baseline</td>
+<td><code>1853.8ms</code></td>
+<td><code>1657.7ms</code></td>
+<td><code>1157.7ms</code></td>
+</tr>
+<tr>
+<td>runtime-aware early switch</td>
+<td><code>1285.3ms</code></td>
+<td><code>1029.8ms</code></td>
+<td><code>529.8ms</code></td>
+</tr>
+<tr>
+<td>delta</td>
+<td><code>-30.7%</code></td>
+<td><code>-37.9%</code></td>
+<td><code>-54.2%</code></td>
+</tr>
+</tbody></table>
+<p>Warm pool and idle prewarm must consider runtime type, foreground pressure, and whether a switch is settling. “Preload earlier” is not automatically good.</p>
+<h3 id="3-Pause-Hidden-Prewarm-To-Remove-Foreground-Spikes"><a href="#3-Pause-Hidden-Prewarm-To-Remove-Foreground-Spikes" class="headerlink" title="3. Pause Hidden Prewarm To Remove Foreground Spikes"></a>3. Pause Hidden Prewarm To Remove Foreground Spikes</h3><p>Problem: while the user switched to Supervisor, hidden&#x2F;background Audit Workbench, xlsx, Slardar, and related work competed on the main thread. The solution is a foreground lease: while the foreground tab is switching or not settled, background tasks must yield.</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Every hidden prewarm and background SDK task checks before running.</span></span><br><span class="line"><span class="comment">// Async import must re-check after loading because foreground state can change.</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">shouldRunBackgroundTask</span>(<span class="params">tabId</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">foregroundTabHasLease</span>() &amp;&amp; tabId !== focusedTabId) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">tabSwitchIsSettling</span>()) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Impact:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Spike Before</th>
+<th>After</th>
+<th>Delta</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>p95 duration</td>
+<td><code>1700.1ms</code></td>
+<td><code>703.1ms</code></td>
+<td><code>-58.6%</code></td>
+</tr>
+<tr>
+<td>shell visible</td>
+<td><code>1199ms</code></td>
+<td><code>194ms</code></td>
+<td><code>-83.8%</code></td>
+</tr>
+<tr>
+<td>interactive</td>
+<td><code>1250ms</code></td>
+<td><code>194ms</code></td>
+<td><code>-84.5%</code></td>
+</tr>
+</tbody></table>
+<p>This proves the scheduling rule: prewarm that steals from the current tab is a negative optimization.</p>
+<h2 id="Category-3-Background-Pressure"><a href="#Category-3-Background-Pressure" class="headerlink" title="Category 3: Background Pressure"></a>Category 3: Background Pressure</h2><p>Problem: hidden tabs can still be alive, and SDKs such as Notification, WebSocket, Tea, Slardar, visit, storage health, and AIS can create future tab-switch long tasks if they run like a normal single-page app. The solution is a foreground-aware scheduler.</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Background work cannot run directly. It goes through one arbiter.</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">scheduleWorkspaceBackgroundTask</span>(<span class="params">task, options</span>) &#123;</span><br><span class="line">  <span class="title function_">requestIdleCallback</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_">shouldDeferWorkspaceBackgroundTask</span>(options.<span class="property">tabId</span>)) &#123;</span><br><span class="line">      <span class="title function_">retryLater</span>();</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="title function_">task</span>();</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Async tasks must re-check around import &#x2F; loader:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">safeLoadSdk</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">shouldDefer</span>()) <span class="keyword">return</span> <span class="title function_">retryLater</span>();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> sdk = <span class="keyword">await</span> <span class="title function_">importSdk</span>();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Import can take hundreds of milliseconds.</span></span><br><span class="line">  <span class="comment">// By the time it returns, the foreground tab may be switching.</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">shouldDefer</span>()) <span class="keyword">return</span> <span class="title function_">retryLater</span>();</span><br><span class="line"></span><br><span class="line">  sdk.<span class="title function_">init</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Background Task</th>
+<th>Change</th>
+<th>Evidence Scope</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MF preload</td>
+<td>Re-check foreground state before and after <code>getEntries</code>.</td>
+<td>Local C02: p95 visual about <code>31.2ms</code>, postVisibleBlocking about <code>7.8ms</code>, max long task &#x3D; 0.</td>
+</tr>
+<tr>
+<td>Notification SDK</td>
+<td><code>lib-kefu-notify</code> about <code>657.2KB gzip</code>; re-check before&#x2F;after import&#x2F;open&#x2F;render.</td>
+<td>Local C02: postVisibleBlocking about <code>7.1ms</code>, max long task &#x3D; 0.</td>
+</tr>
+<tr>
+<td>WebSocket</td>
+<td>Import, init, and register enter scheduler.</td>
+<td>Local C02: visual <code>42.1ms -&gt; 36.6ms</code>, about <code>-13.1%</code>.</td>
+</tr>
+<tr>
+<td>Tea</td>
+<td>Flush queue in slices and yield to foreground.</td>
+<td>Local C02: visual <code>31.5ms -&gt; 29.5ms</code>, about <code>-6.3%</code>.</td>
+</tr>
+<tr>
+<td>Slardar &#x2F; visit &#x2F; storage health &#x2F; AIS</td>
+<td>after first screen, idle, foreground-aware.</td>
+<td>Guardrail; not claimed as preview-environment main win.</td>
+</tr>
+</tbody></table>
+<p>These changes prevent future SDK work from becoming a tab-switch jank source. They are the stability base, not inflated FMP wins.</p>
+<h2 id="Rejected-Optimizations"><a href="#Rejected-Optimizations" class="headerlink" title="Rejected Optimizations"></a>Rejected Optimizations</h2><table>
+<thead>
+<tr>
+<th>Experiment</th>
+<th>Why It Looked Reasonable</th>
+<th>Why It Was Rejected</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Move Swimlane chunk out of pre-FMP</td>
+<td>Cleaner waterfall and lower pre-FMP count</td>
+<td>Average FMP regressed by <code>+1217ms</code>; user metric got worse; reverted.</td>
+</tr>
+<tr>
+<td>Full optimistic focus &#x2F; all-hot activation</td>
+<td>Frame could theoretically become visible faster</td>
+<td>strict p95 reached <code>1792.0ms</code> and produced <code>517ms</code> post-visible long task; reverted.</td>
+</tr>
+<tr>
+<td>Broad Seto prewarm &#x2F; hidden layout-visible</td>
+<td>Hoped to finish sandbox work earlier</td>
+<td>Easy to steal foreground CPU; unstable benefit; not used as the main policy.</td>
+</tr>
+<tr>
+<td>Small component memo &#x2F; local cache experiments</td>
+<td>Looked like they would reduce render</td>
+<td>Local p95 got worse or strict benefit was missing; not kept.</td>
+</tr>
+<tr>
+<td>Old tab switch duration only</td>
+<td>Could produce numbers in tens of milliseconds</td>
+<td>Missed input queue and post-visible blocking; metric itself was not trustworthy.</td>
+</tr>
+</tbody></table>
+<h2 id="Engineering-Review-Lens"><a href="#Engineering-Review-Lens" class="headerlink" title="Engineering Review Lens"></a>Engineering Review Lens</h2><ol>
+<li><strong>Split by path first.</strong> FMP, tab switch, and background pressure are different problems and need different measurements.</li>
+<li><strong>Assign resource ownership.</strong> Current first-screen resources move earlier; non-current first-screen work moves later; future resources can only run through idle prewarm.</li>
+<li><strong>Draw causality before writing the conclusion.</strong> The chart must show the blocker moving, disappearing, shrinking, or moving after FMP.</li>
+<li><strong>Accept failures.</strong> If a resource moves but FMP gets worse, revert it.</li>
+<li><strong>Keep local gates and preview wins separate.</strong> C02 is a regression gate, not an online&#x2F;preview win.</li>
+</ol>
+<p>The tab system performance gains do not come from one trick. They come from three mechanisms working together:</p>
+<ul>
+<li>the first-screen critical path keeps only current-route required work;</li>
+<li>hot switching uses bounded runtime cache plus idle prewarm;</li>
+<li>background work yields to the foreground scheduler.</li>
+</ul>
+<p>This mechanism matters more than any single optimization. Workspace will keep adding more subapps, SDKs, and runtimes. Without path classification and resource arbitration, more tabs would make the system progressively less predictable.</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/Frontend/" rel="tag">Frontend</a>, <a class="classtest-link" href="/tags/React/" rel="tag">React</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/Web-Performance/" rel="tag">Web Performance</a> — <time datetime="2026-05-18T08:31:00.000Z">May 18, 2026</time></p>
+    </footer>
+  </article>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">Made with ❤ and
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        at <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+
+      <!-- Language switcher (globe icon) -->
+      <a class="ml-0 footer-link icon" href="/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" onclick="localStorage.setItem('preferredLang', 'zh')" style="text-decoration: none" aria-label="阅读中文版" title="阅读中文版">
+        <svg class="svg-hov" width="18" role="img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><title>中文</title><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </a>
+
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>

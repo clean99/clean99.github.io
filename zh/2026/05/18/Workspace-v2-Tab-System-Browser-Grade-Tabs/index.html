@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>Workspace V2 Tab System：把浏览器标签页能力带进单页工作台 | Koh Hom&#39;s Blog</title>
+  
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/">
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
+  
+  <meta name="description" content="背景和目标Workspace v2 要把原来偏“单页面、单上下文”的工作台，改成可以同时承载多个工作流、多个子应用视图、多个工单对象的工作空间。对用户来说，这个体验更接近浏览器：我打开了几个工作流，切来切去状态还在；我刷新页面或者把链接发给别人，应该还能回到正确的业务页面；我在一个子应用里打开弹窗，">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
+  <meta property="og:type" content="article" />
+  <meta property="article:published_time" content="2026-05-18T08:30:00.000Z" />
+  <meta property="article:modified_time" content="2026-05-18T08:30:00.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Frontend" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="React" />
+  
+  
+  <meta property="og:title" content="Workspace V2 Tab System：把浏览器标签页能力带进单页工作台 | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
+  
+  <meta property="og:description" content="背景和目标Workspace v2 要把原来偏“单页面、单上下文”的工作台，改成可以同时承载多个工作流、多个子应用视图、多个工单对象的工作空间。对用户来说，这个体验更接近浏览器：我打开了几个工作流，切来切去状态还在；我刷新页面或者把链接发给别人，应该还能回到正确的业务页面；我在一个子应用里打开弹窗，">
+  
+  <meta property="og:url" content="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="Workspace V2 Tab System：把浏览器标签页能力带进单页工作台 | Koh Hom&#39;s Blog">
+  
+  <meta name="twitter:description" content="背景和目标Workspace v2 要把原来偏“单页面、单上下文”的工作台，改成可以同时承载多个工作流、多个子应用视图、多个工单对象的工作空间。对用户来说，这个体验更接近浏览器：我打开了几个工作流，切来切去状态还在；我刷新页面或者把链接发给别人，应该还能回到正确的业务页面；我在一个子应用里打开弹窗，">
+  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta name="twitter:url" content="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Workspace V2 Tab System：把浏览器标签页能力带进单页工作台","datePublished":"2026-05-18T08:30:00.000Z","dateModified":"2026-05-18T08:30:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","mainEntityOfPage":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","inLanguage":"zh-CN","description":"背景和目标Workspace v2 要把原来偏“单页面、单上下文”的工作台，改成可以同时承载多个工作流、多个子应用视图、多个工单对象的工作空间。对用户来说，这个体验更接近浏览器：我打开了几个工作流，切来切去状态还在；我刷新页面或者把链接发给别人，应该还能回到正确的业务页面；我在一个子应用里打开弹窗，不能盖到另一个 tab 上。 业务目标： 业务目标 用户看到的体验 多任务并行 同时打开多个 wor","keywords":["Frontend","Software Engineering","React"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Workspace V2 Tab System：把浏览器标签页能力带进单页工作台","item":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="six columns ml-1">
+    <h1 class="mt-2">
+      <a href="/zh/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/zh/">首页</a>
+        
+          
+          <a href="/zh/Works" class="ml">作品</a>
+          
+        
+          
+          <a href="/zh/About" class="ml">关于</a>
+          
+        
+          
+          <a href="/zh/Links" class="ml">友链</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">邮箱</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">Workspace V2 Tab System：把浏览器标签页能力带进单页工作台</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+          Read in English
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2026-05-18T08:30:00.000Z">
+      <meta itemprop="dateModified" content="2026-05-18T08:30:00.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <h2 id="背景和目标"><a href="#背景和目标" class="headerlink" title="背景和目标"></a>背景和目标</h2><p>Workspace v2 要把原来偏“单页面、单上下文”的工作台，改成可以同时承载多个工作流、多个子应用视图、多个工单对象的工作空间。对用户来说，这个体验更接近浏览器：我打开了几个工作流，切来切去状态还在；我刷新页面或者把链接发给别人，应该还能回到正确的业务页面；我在一个子应用里打开弹窗，不能盖到另一个 tab 上。</p>
+<p>业务目标：</p>
+<table>
+<thead>
+<tr>
+<th>业务目标</th>
+<th>用户看到的体验</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>多任务并行</td>
+<td>同时打开多个 workstream &#x2F; subapp &#x2F; ticket，不需要反复回到首页找入口</td>
+</tr>
+<tr>
+<td>上下文不丢</td>
+<td>切回之前打开过的 tab，表格筛选、iframe 内状态、Workstream 内部 view 尽量保留</td>
+</tr>
+<tr>
+<td>链接仍然可靠</td>
+<td>刷新、复制链接、外部 deep link 都能恢复到合理 tab</td>
+</tr>
+<tr>
+<td>子应用无感接入</td>
+<td>子应用继续表达“我要打开某个页面”，不需要理解宿主 tab 内部实现</td>
+</tr>
+<tr>
+<td>体验接近浏览器</td>
+<td>切换快，后台 tab 不抢当前 tab 的资源</td>
+</tr>
+</tbody></table>
+<p>技术目标：</p>
+<table>
+<thead>
+<tr>
+<th>用户期望</th>
+<th>工程上必须解决的问题</th>
+<th>如果没解决，实际后果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>打开多个 workstream</td>
+<td>持久化 opened tabs、顺序、pin 状态</td>
+<td>刷新后 tab 丢失，或者不同窗口看到的 tab 不一致</td>
+</tr>
+<tr>
+<td>切回来状态还在</td>
+<td>保留有限数量的 DOM &#x2F; iframe runtime</td>
+<td>每次切换都重新加载，筛选、滚动、iframe 内状态丢失</td>
+</tr>
+<tr>
+<td>URL 可刷新、可分享</td>
+<td>从浏览器 URL 找回对应 tab；tab 激活时同步业务 URL</td>
+<td>复制链接打开后变成“没有 tab 归属的页面”，或者地址栏指向错误 tab</td>
+</tr>
+<tr>
+<td>多窗口同时使用</td>
+<td>窗口之间同步 tab list 变化</td>
+<td>一个窗口关闭 tab，另一个窗口仍显示旧 tab</td>
+</tr>
+<tr>
+<td>子应用能打开页面</td>
+<td>SDK &#x2F; event bus 只表达意图，由宿主决定打开方式</td>
+<td>业务方直接改宿主状态，tab 行为分散到各子应用里</td>
+</tr>
+<tr>
+<td>hidden tab 不影响当前 tab</td>
+<td>history、DOM、overlay、event、focus 都按 tab 隔离</td>
+<td>隐藏 iframe 改掉当前 URL；弹窗出现在另一个 tab；后台应用抢 CPU</td>
+</tr>
+<tr>
+<td>切换不卡</td>
+<td>首屏、热切换、后台任务分别测量和调度</td>
+<td>页面已经显示但点击无响应，旧指标还误报“只用了几十毫秒”</td>
+</tr>
+</tbody></table>
+<p><img src="/img/workspace-v2-tab-system/architecture-goals.png" alt="architecture goals"></p>
+<p>图 A1：从产品目标到工程约束。它把“用户想要的浏览器级体验”拆成具体技术问题，也把失败后果写出来。</p>
+<p>我们最终的设计原则是：</p>
+<blockquote>
+<p>用真实业务 URL 判断页面应该落到哪个 tab，用服务端状态记录 tab 是否打开，用有限热池保留最近工作的 runtime，用宿主边界隔离子应用的 history、DOM、overlay 和事件。</p>
+</blockquote>
+<p>核心是：</p>
+<ol>
+<li><strong>怎么判断两个入口是不是同一个 tab。</strong> 例如同一个 workstream 应该复用一个 tab，具体内部 view 通过 URL&#x2F;subPath 保留。</li>
+<li><strong>谁拥有当前页面的运行时权力。</strong> 当前 focused tab 才能写浏览器 URL、显示 overlay、接收 focus event、占用前台 CPU。</li>
+</ol>
+<h2 id="架构分层"><a href="#架构分层" class="headerlink" title="架构分层"></a>架构分层</h2><p><img src="/img/workspace-v2-tab-system/architecture-layers.png" alt="architecture layers"></p>
+<p>图 A2：Tab system 的最终分层。Isolation 和 Observability 是两件事：Isolation 是运行时边界，负责阻止 hidden runtime 改当前 tab 的 URL、弹层和事件；Observability 是横切能力，负责定位哪里慢、哪里被拦、哪里异常。</p>
+<p>这套架构可以按七类职责理解：</p>
+<table>
+<thead>
+<tr>
+<th>职责</th>
+<th>用户能感知的问题</th>
+<th>核心机制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Intent Interface</td>
+<td>同一个业务对象从菜单、子应用按钮、URL 打开时，不应该有时重复开 tab、有时只在当前 tab 里跳转</td>
+<td>所有入口先归一成打开意图；宿主统一决定新窗口、吸收当前 tab、聚焦已有 tab，还是新增 tab</td>
+</tr>
+<tr>
+<td>URL and Tab Ownership</td>
+<td>用户刷新或分享链接后，应该回到同一个业务页面，而不是丢到一个没有 tab 归属的页面</td>
+<td>地址栏始终保留业务 URL；宿主从 URL 解析业务对象，再判断它属于哪个 tab</td>
+</tr>
+<tr>
+<td>Persistent Tab State</td>
+<td>刷新后 tab 不该消失；两个浏览器窗口看到的 tab list 不该互相分裂</td>
+<td>服务端保存 opened tabs 事实；前端做乐观更新；mutation 成功后通知其它窗口失效重拉</td>
+</tr>
+<tr>
+<td>Runtime Cache</td>
+<td>切回最近 tab 要快，但打开很多 tab 后当前页面不能变卡、内存不能无上限上涨</td>
+<td>opened tabs 记录用户语义；hot runtime pool 只保留最近工作集；淘汰 runtime 不删除 tab</td>
+</tr>
+<tr>
+<td>Isolation Boundary</td>
+<td>切到 tab B 后，tab A 不能改地址栏、弹窗盖到 B、或在后台刷新抢资源</td>
+<td>history、window.parent、document&#x2F;body、overlay、focus event 都按当前 owner 过滤</td>
+</tr>
+<tr>
+<td>Rendered Runtimes</td>
+<td>用户只看到一个当前 tab，点击、弹层、URL 写入也必须属于这个 tab</td>
+<td>每个 hot runtime 放进稳定容器；只有 focused owner 可见、可点、可接收前台事件</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>首屏慢、切换卡、弹层串 tab、URL 写错时，必须能定位是哪一层出问题</td>
+<td>FMP 看首屏；tab switch v3 看切换；long task 看可见后卡顿；scope drop 看越界写入；stress gate 看回归</td>
+</tr>
+</tbody></table>
+<h2 id="第一层：Intent-Interface"><a href="#第一层：Intent-Interface" class="headerlink" title="第一层：Intent Interface"></a>第一层：Intent Interface</h2><h3 id="问题场景"><a href="#问题场景" class="headerlink" title="问题场景"></a>问题场景</h3><p>用户打开同一个业务对象的入口很多：左侧菜单、tab 点击、子应用内部按钮、MF event、iframe <code>postMessage</code>、复制来的业务 URL。用户期望很简单：同一个对象不要重复开多个 tab；已经打开的 tab 应该被聚焦；在子应用 root 里打开同应用 view 时，能在当前 tab 内继续导航。</p>
+<p>如果每个入口自己决定怎么打开，就会出现用户能直接看到的问题：从菜单打开会复用 tab，从子应用按钮打开却新开重复 tab；从分享链接进入能恢复，从 SDK 进入却丢掉上次 view；超过 tab 上限时有的入口会拦住，有的入口绕过上限。背后的原因才是接口散落：有的子应用改 React state，有的发路由，有的自己调 BFF。</p>
+<h3 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h3><p>我们把子应用能力收口成 intent：业务方只表达“我要打开什么”，宿主决定“怎么打开”。</p>
+<table>
+<thead>
+<tr>
+<th>来源</th>
+<th>输入</th>
+<th>宿主决策</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>用户点击 tab</td>
+<td>tab row id</td>
+<td>读保存的 tab URL，激活 runtime，写 browser URL</td>
+</tr>
+<tr>
+<td>React 子应用 SDK</td>
+<td><code>openWorkstreamTab</code>、<code>openSubappViewTab</code>、<code>openSubApp</code></td>
+<td>归一化 payload，查找已有 tab，必要时新增</td>
+</tr>
+<tr>
+<td>MF event bus</td>
+<td><code>TAB_OPEN_REQUEST</code>、<code>NAVIGATE_TO_URL</code></td>
+<td>聚焦已有 tab、吸收到当前 tab、打开新 tab 或新浏览器窗口</td>
+</tr>
+<tr>
+<td>Seto iframe</td>
+<td><code>window.postMessage</code> envelope</td>
+<td>校验 origin 和 payload，再转成宿主 event bus 事件</td>
+</tr>
+</tbody></table>
+<p>简化后的伪代码：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 子应用只发意图，不碰宿主内部状态</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">openSubappView</span>(<span class="params">viewType, viewId</span>) &#123;</span><br><span class="line">  <span class="title function_">emit</span>(<span class="string">&#x27;TAB_OPEN_REQUEST&#x27;</span>, &#123; <span class="attr">itemType</span>: <span class="string">&#x27;SUBAPP_VIEW&#x27;</span>, viewType, viewId &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 宿主统一处理</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">handleTabOpenRequest</span>(<span class="params">raw</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> input = <span class="title function_">normalizeAndValidate</span>(raw);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (raw.<span class="property">openInNewBrowserTab</span>) &#123;</span><br><span class="line">    <span class="variable language_">window</span>.<span class="title function_">open</span>(<span class="title function_">buildBusinessUrl</span>(input));</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// existing：目标业务对象已经有自己的 tab。</span></span><br><span class="line">  <span class="comment">// 例子：用户要打开 view A，而 view A 的独立 tab 已经在 tab list 里。</span></span><br><span class="line">  <span class="keyword">const</span> existing = <span class="title function_">findExistingTab</span>(tabs, input);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// absorbing：当前 focused tab 是一个可承载内部 view 的 carrier。</span></span><br><span class="line">  <span class="comment">// 例子：用户正在某个 SubApp root / SubApp view 里打开同属一个 app 的 sibling view；</span></span><br><span class="line">  <span class="comment">// 这时更像“在当前 app tab 内导航”，不是“打开一个全新工作上下文”。</span></span><br><span class="line">  <span class="keyword">const</span> absorbing = <span class="title function_">findFocusedTabThatCanAbsorb</span>(input);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 这两个概念不是重叠的：</span></span><br><span class="line">  <span class="comment">// - existing 处理“目标是否已经有 tab”；</span></span><br><span class="line">  <span class="comment">// - absorbing 处理“当前 tab 是否可以直接承接这次导航”。</span></span><br><span class="line">  <span class="comment">//</span></span><br><span class="line">  <span class="comment">// 如果当前是 subapp root，并且目标已有精确 tab，优先跳已有 tab；</span></span><br><span class="line">  <span class="comment">// 否则会优先吸收到当前 carrier，避免在同一个子应用里频繁开重复 runtime。</span></span><br><span class="line">  <span class="keyword">if</span> (existing &amp;&amp; absorbing?.<span class="property">kind</span> === <span class="string">&#x27;subapp-root&#x27;</span>) &#123;</span><br><span class="line">    <span class="title function_">focusTab</span>(existing.<span class="property">id</span>, <span class="title function_">savedUrlOrDefault</span>(existing));</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (absorbing) &#123;</span><br><span class="line">    <span class="title function_">navigateInsideTab</span>(absorbing.<span class="property">id</span>, <span class="title function_">buildPath</span>(input));</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (existing) &#123;</span><br><span class="line">    <span class="title function_">focusTab</span>(existing.<span class="property">id</span>, <span class="title function_">savedUrlOrDefault</span>(existing));</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">addTabWithCapacityControl</span>(input);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这一层同时解释了为什么“Interface”不应该单独放到后面：它就是入口层。SDK &#x2F; event bus 的作用是把复杂性挡在宿主里面。</p>
+<h3 id="难点"><a href="#难点" class="headerlink" title="难点"></a>难点</h3><p>难点不是发一个事件，而是 <strong>用户从任何入口做同一件事，结果都必须一致</strong>。用户点击、SDK、postMessage、直接 URL 恢复，最后都要落到同一套 find &#x2F; absorb &#x2F; add &#x2F; focus &#x2F; capacity 控制上。否则用户看到的就是重复 tab、错误聚焦、上限绕过和返回路径不一致。</p>
+<h2 id="第二层：URL-and-Tab-Ownership"><a href="#第二层：URL-and-Tab-Ownership" class="headerlink" title="第二层：URL and Tab Ownership"></a>第二层：URL and Tab Ownership</h2><h3 id="问题场景-1"><a href="#问题场景-1" class="headerlink" title="问题场景"></a>问题场景</h3><p>浏览器地址栏只有一个，但工作台内部可能同时保活多个 tab runtime。我们不能把 URL 改成 <code>/tabs/:id</code>。根本原因不是“难看”，而是它会把链接从业务语义变成用户私有会话语义：</p>
+<table>
+<thead>
+<tr>
+<th>URL 形态</th>
+<th>用户复制给别人后发生什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/tabs/abc123</code></td>
+<td>只说明“我的 tab list 里有一个 id&#x3D;abc123 的 tab”。别人没有这个 tab id，也不知道它对应哪个 workstream &#x2F; ticket &#x2F; view</td>
+</tr>
+<tr>
+<td><code>/workspace/workstream/123/schedule/456</code></td>
+<td>链接本身包含业务对象。刷新、收藏、IM 分享、外部系统 deep link 都能恢复到同一个业务页面</td>
+</tr>
+</tbody></table>
+<p>所以 <code>/tabs/:id</code> 虽然让宿主实现更简单，但会牺牲刷新、分享和跨端恢复能力。对工作台这种协作产品来说，这是不可接受的。</p>
+<p>所以我们保留真实业务 URL，例如：</p>
+<ul>
+<li><code>/workspace/workstream/:id/...</code></li>
+<li><code>/workspace/scheduling/schedule/view/:viewId</code></li>
+<li><code>/workspace/audit_workbench/ticket/custom_view/:viewId</code></li>
+</ul>
+<p>同时，宿主内部用这些 URL 推导“这个页面属于哪个 tab”。更具体地说，就是从 URL 里抽出一组业务字段，用它判断两个入口是否应该复用同一个 tab。</p>
+<table>
+<thead>
+<tr>
+<th>Tab 类型</th>
+<th>判定是否同一个 tab 的字段</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Workstream</td>
+<td><code>workstreamId</code></td>
+<td>内部 view 变化不一定开新 runtime，而是作为这个 Workstream tab 的路径</td>
+</tr>
+<tr>
+<td>SubApp root</td>
+<td><code>subAppType</code></td>
+<td>子应用根入口是稳定 tab</td>
+</tr>
+<tr>
+<td>SubApp view</td>
+<td><code>viewType + viewId</code></td>
+<td>具体业务视图可以独立打开，也可能被当前 subapp tab 吸收</td>
+</tr>
+<tr>
+<td>Ticket</td>
+<td><code>ticketId + viewType</code></td>
+<td>工单对象适合作为独立 tab</td>
+</tr>
+<tr>
+<td>Non-tab route</td>
+<td>不进入 tab list</td>
+<td>Home、notification、unknown route 不污染 tab lifecycle</td>
+</tr>
+</tbody></table>
+<p><img src="/img/workspace-v2-tab-system/url-tab-sync.png" alt="url tab sync"></p>
+<p>图 A3：URL 和 tab 的双向同步。重点是：浏览器地址栏仍然是业务 URL，宿主在内部把它映射到 tab。</p>
+<h3 id="Browser-URL-gt-Tab"><a href="#Browser-URL-gt-Tab" class="headerlink" title="Browser URL -&gt; Tab"></a>Browser URL -&gt; Tab</h3><p>这条链路处理刷新、复制链接、外部 deep link。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">onRouteChanged</span>(<span class="params">location</span>) &#123;</span><br><span class="line">  <span class="comment">// 浏览器地址栏变化后，先把业务 URL 解析成“它是否属于某个 tab”。</span></span><br><span class="line">  <span class="comment">// appList 用来识别不同子应用的业务路由。</span></span><br><span class="line">  <span class="keyword">const</span> resolved = <span class="title function_">resolveTabFromUrl</span>(location.<span class="property">pathname</span>, appList);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (resolved.<span class="property">kind</span> !== <span class="string">&#x27;tab&#x27;</span>) &#123;</span><br><span class="line">    <span class="comment">// Home、redirect、standalone fallback 这类页面不是工作 tab。</span></span><br><span class="line">    <span class="comment">// 它们走普通路由渲染，不创建 tab row，也不进入 hot runtime pool。</span></span><br><span class="line">    <span class="title function_">renderSingleOutlet</span>();</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 如果服务端 opened tabs 里已经有这个业务对象，只需要聚焦它。</span></span><br><span class="line">  <span class="comment">// 这里不能新增，否则刷新一次就可能多一个重复 tab。</span></span><br><span class="line">  <span class="keyword">const</span> matched = <span class="title function_">findOpenedTab</span>(tabs, resolved.<span class="property">input</span>);</span><br><span class="line">  <span class="keyword">if</span> (matched) &#123;</span><br><span class="line">    <span class="title function_">focusRuntime</span>(matched.<span class="property">id</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// direct URL recovery:</span></span><br><span class="line">  <span class="comment">// 用户打开的是一个业务 URL，但 BFF 里还没有对应 tab。</span></span><br><span class="line">  <span class="comment">// 宿主要补开 tab，否则页面会变成“没有 tab 行归属”的孤儿页面。</span></span><br><span class="line">  <span class="title function_">addTab</span>(<span class="title function_">toAddWorkspaceTabRequest</span>(resolved.<span class="property">input</span>));</span><br><span class="line">  <span class="title function_">focusRuntimeWhenReady</span>(resolved.<span class="property">input</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="Tab-gt-Browser-URL"><a href="#Tab-gt-Browser-URL" class="headerlink" title="Tab -&gt; Browser URL"></a>Tab -&gt; Browser URL</h3><p>这条链路处理用户点击 tab。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">activateTab</span>(<span class="params">tab</span>) &#123;</span><br><span class="line">  <span class="comment">// 每个 tab 都记住自己上一次停留的业务 URL。</span></span><br><span class="line">  <span class="comment">// 例如用户在 Workstream tab 内切到了某个 view，下次点回这个 tab 应该回到那个 view，</span></span><br><span class="line">  <span class="comment">// 而不是永远回到 Workstream 默认页。</span></span><br><span class="line">  <span class="keyword">const</span> path = <span class="title function_">loadSavedTabUrl</span>(tab.<span class="property">id</span>) ?? <span class="title function_">buildDefaultBusinessUrl</span>(tab);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 从点击开始计时。后面会分别记录 frame visible、interactive、settled，</span></span><br><span class="line">  <span class="comment">// 防止“页面显示了但还不能点”的时间被旧指标漏掉。</span></span><br><span class="line">  <span class="title function_">startTabSwitchMetric</span>(&#123; <span class="attr">toId</span>: tab.<span class="property">id</span>, <span class="attr">targetPath</span>: path &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 告诉 Seto / iframe 的 history scope：</span></span><br><span class="line">  <span class="comment">// 接下来这次 URL 写入属于目标 tab，而不是某个 hidden runtime 的越界写入。</span></span><br><span class="line">  <span class="title function_">prepareScopedNavigation</span>(&#123; <span class="attr">targetTabId</span>: tab.<span class="property">id</span>, <span class="attr">url</span>: path &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="title function_">navigate</span>(path, &#123;</span><br><span class="line">    <span class="comment">// React Router 只看到一个全局 history。</span></span><br><span class="line">    <span class="comment">// 这里把目标 tab id 写进 history.state，后续 popstate / hashchange / Seto history</span></span><br><span class="line">    <span class="comment">// 才能判断这次导航应该投递给哪个 runtime。</span></span><br><span class="line">    <span class="attr">state</span>: &#123; <span class="attr">workspaceTargetTabId</span>: tab.<span class="property">id</span> &#125;,</span><br><span class="line"></span><br><span class="line">    <span class="comment">// tab 激活是用户输入的直接结果，必须尽快让 focused frame 和 URL 对齐。</span></span><br><span class="line">    <span class="attr">flushSync</span>: <span class="literal">true</span>,</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="Window-gt-Window"><a href="#Window-gt-Window" class="headerlink" title="Window -&gt; Window"></a>Window -&gt; Window</h3><p>多个浏览器窗口不能共享 React state，所以同步的是“事实”，不是组件状态。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">onTabMutationSuccess</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="comment">// 本窗口的缓存先失效。</span></span><br><span class="line">  queryClient.<span class="title function_">invalidateQueries</span>(<span class="variable constant_">WORKSPACE_TABS_KEY</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 其它窗口没有共享 React state，只能收到一个“事实变了”的通知后自己重拉。</span></span><br><span class="line">  broadcastChannel.<span class="title function_">postMessage</span>(&#123; <span class="attr">type</span>: <span class="string">&#x27;TABS_INVALIDATED&#x27;</span> &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">onOtherWindowInvalidated</span>(<span class="params"></span>) &#123;</span><br><span class="line">  queryClient.<span class="title function_">invalidateQueries</span>(<span class="variable constant_">WORKSPACE_TABS_KEY</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="难点-1"><a href="#难点-1" class="headerlink" title="难点"></a>难点</h3><p>这层最大的难点是 <strong>URL 既是用户契约，也是 runtime 定位输入</strong>。用户看到的必须是业务 URL；宿主内部又必须知道这次 URL 变化属于哪个 tab。我们通过 URL resolver + activation state 同时满足这两个约束。</p>
+<h2 id="第三层：Persistent-Tab-State"><a href="#第三层：Persistent-Tab-State" class="headerlink" title="第三层：Persistent Tab State"></a>第三层：Persistent Tab State</h2><h3 id="问题场景-2"><a href="#问题场景-2" class="headerlink" title="问题场景"></a>问题场景</h3><p>用户能感知到的目标是：刷新后刚才打开的 tab 还在；点“打开”后 tab row 立刻出现；在窗口 A pin &#x2F; close &#x2F; reorder 后，窗口 B 不会继续显示旧状态。</p>
+<p>如果 tab list 只放在前端内存里，刷新后所有 tab 都会消失；如果每次 mutation 都等服务端返回，用户点击后 tab row 会慢半拍；如果多窗口不通知，A 已经关掉的 tab，B 里还会显示成可点击。</p>
+<h3 id="解决方案-1"><a href="#解决方案-1" class="headerlink" title="解决方案"></a>解决方案</h3><p>持久状态由 BFF 和 React Query 共同处理：</p>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>负责什么</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BFF tab controller</td>
+<td><code>list/add/remove/pin/unpin/reorder</code>，合并 opened tabs 和 pinned tabs</td>
+</tr>
+<tr>
+<td>React Query</td>
+<td>单一 tab list cache key；staleTime；focus refetch</td>
+</tr>
+<tr>
+<td>optimistic mutation</td>
+<td>新增 tab 时先插临时 tab，服务端返回后替换</td>
+</tr>
+<tr>
+<td>BroadcastChannel</td>
+<td>mutation 后通知其它窗口失效并 refetch</td>
+</tr>
+</tbody></table>
+<p><img src="/img/workspace-v2-tab-system/persistent-tab-state.png" alt="persistent tab state"></p>
+<p>图 A3.5：Persistent tab state 的模块关系。React Query 让当前窗口先快起来，BFF 保存最终事实，BroadcastChannel 只通知其它窗口“事实变了”，其它窗口再自己从 BFF 拉最新 tab list。</p>
+<p>伪代码：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">addWorkspaceTab</span>(<span class="params">input</span>) &#123;</span><br><span class="line">  queryClient.<span class="title function_">setQueryData</span>(<span class="variable constant_">WORKSPACE_TABS_KEY</span>, <span class="function"><span class="params">tabs</span> =&gt;</span> [</span><br><span class="line">    ...tabs,</span><br><span class="line">    <span class="title function_">makeTempLockedTab</span>(input),</span><br><span class="line">  ]);</span><br><span class="line"></span><br><span class="line">  <span class="title function_">post</span>(<span class="string">&#x27;/workspace/api/tab/add&#x27;</span>, input)</span><br><span class="line">    .<span class="title function_">then</span>(<span class="function"><span class="params">serverTab</span> =&gt;</span> <span class="title function_">replaceTempTab</span>(serverTab))</span><br><span class="line">    .<span class="title function_">finally</span>(<span class="function">() =&gt;</span> <span class="title function_">broadcastTabsInvalidated</span>());</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="难点-2"><a href="#难点-2" class="headerlink" title="难点"></a>难点</h3><p>这里的难点是 <strong>既要快，又要以服务端事实为准</strong>。Optimistic UI 只能改善交互延迟，不能绕开 BFF。最终 tab id、pin 状态、跨窗口一致性都必须回到服务端 tab list。</p>
+<h2 id="第四层：Runtime-Cache"><a href="#第四层：Runtime-Cache" class="headerlink" title="第四层：Runtime Cache"></a>第四层：Runtime Cache</h2><h3 id="问题场景-3"><a href="#问题场景-3" class="headerlink" title="问题场景"></a>问题场景</h3><p>用户打开很多 tab 后，有两个相互冲突的感受：切回最近几个 tab 应该很快，表格滚动位置、iframe 状态、内部 view 都最好还在；但如果所有 tab 都热运行，当前 tab 会变卡，后台 iframe 会继续跑任务，浏览器内存也会一路上涨。</p>
+<p>因此 cache 不能只说“keep alive”。它有三种完全不同的职责。</p>
+<p><img src="/img/workspace-v2-tab-system/runtime-cache-layers.jpg" alt="runtime cache layers"></p>
+<p>图 A4：Runtime cache 的三层职责。Opened tabs 是持久化事实；Hot runtime pool 是有限热运行资源；Scoped view cache 是 Workstream runtime 内部的局部保活。Idle prewarm 是后台准备策略，不是无限后台加载。</p>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>回答的问题</th>
+<th>生命周期</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Opened Tabs</td>
+<td>这个 tab 是否存在</td>
+<td>BFF 持久化；最多 20 个 opened tabs；pin 不计入 cap</td>
+</tr>
+<tr>
+<td>Hot Runtime Pool</td>
+<td>切回时能不能马上显示</td>
+<td>最多 5 个 hot frames；保留 DOM 或 Seto sandbox；LRU demote</td>
+</tr>
+<tr>
+<td>Cold Tab</td>
+<td>tab 存在但 runtime 不热</td>
+<td>保留 tab row 和 URL；聚焦时重建 runtime</td>
+</tr>
+<tr>
+<td>Scoped View Cache</td>
+<td>Workstream 内部 view 能不能快速回来</td>
+<td>按 workstream scopeKey 缓存；最多 30 个 inner views</td>
+</tr>
+<tr>
+<td>Idle Prewarm</td>
+<td>用户点击前能不能先准备一部分</td>
+<td>首屏后执行；native 更早，Seto 更晚；切换中暂停</td>
+</tr>
+</tbody></table>
+<h3 id="核心原理"><a href="#核心原理" class="headerlink" title="核心原理"></a>核心原理</h3><p>热池只回答一个问题：哪些 runtime 现在值得保活。它不决定 tab 是否存在，也不修改服务端 tab list。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">WarmPool</span> &#123;</span><br><span class="line">  <span class="title function_">promote</span>(<span class="params">tabId, location, runtimeKind</span>) &#123;</span><br><span class="line">    <span class="comment">// 用户聚焦或预热命中时，把这个 tab 放进 hot set。</span></span><br><span class="line">    hot.<span class="title function_">set</span>(tabId, &#123; tabId, location, runtimeKind, <span class="attr">lastFocusedAt</span>: <span class="title function_">now</span>() &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Seto sandbox 更重，所以有单独上限；全局 hot frame 也有总上限。</span></span><br><span class="line">    <span class="comment">// 淘汰只会卸载 runtime，不会删除 opened tab。</span></span><br><span class="line">    <span class="title function_">evictOldestSetoIfOverCap</span>();</span><br><span class="line">    <span class="title function_">evictOldestHotFrameIfOverGlobalCap</span>();</span><br><span class="line"></span><br><span class="line">    <span class="title function_">notifySubscribers</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>内容区根据当前 URL 选择渲染方式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">if (resolved.kind === &#x27;nonTab&#x27;) &#123;</span><br><span class="line">  // 非 tab 页面走普通路由，不放进 HotTabStack。</span><br><span class="line">  return &lt;Outlet /&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">return (</span><br><span class="line">  &lt;HotTabStack&gt;</span><br><span class="line">    &#123;hotTabs.map(tab =&gt; (</span><br><span class="line">      &lt;HotTabFrame</span><br><span class="line">        tab=&#123;tab&#125;</span><br><span class="line">        // 只有 focused tab 可见、可交互；其它 hot tab 保留 runtime，但不接收前台事件。</span><br><span class="line">        isFocused=&#123;tab.id === focusedTabId&#125;</span><br><span class="line"></span><br><span class="line">        // focused tab 用当前浏览器 URL；后台 hot tab 用自己上次保存的 URL。</span><br><span class="line">        location=&#123;tab.id === focusedTabId ? currentLocation : tab.location&#125;</span><br><span class="line">      /&gt;</span><br><span class="line">    ))&#125;</span><br><span class="line">  &lt;/HotTabStack&gt;</span><br><span class="line">);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Idle prewarm 的策略也不是“能预热就预热”：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">afterFirstScreenReady</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="comment">// 首屏完成后才允许后台准备，不能抢 FMP。</span></span><br><span class="line">  <span class="title function_">queue</span>(nativeTabCandidates, &#123; <span class="attr">delay</span>: <span class="number">1000</span> &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Seto sandbox 更重，延后且只做必要 lifecycle prime。</span></span><br><span class="line">  <span class="title function_">queue</span>(setoTabCandidates, &#123; <span class="attr">delay</span>: <span class="number">3000</span>, <span class="attr">primeLifecycle</span>: <span class="literal">true</span> &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (<span class="title function_">tabSwitchIsSettling</span>() || <span class="title function_">foregroundTabHasLease</span>()) &#123;</span><br><span class="line">  <span class="comment">// 用户正在切 tab，后台预热必须让路。</span></span><br><span class="line">  <span class="title function_">pauseOrRetryBackgroundPrewarm</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="难点-3"><a href="#难点-3" class="headerlink" title="难点"></a>难点</h3><p>这层难点是 <strong>性能收益和资源风险相互冲突</strong>。全部保活最简单，但会把后台 runtime 变成无上限。我们把 opened tabs 和 hot runtimes 分开，保留用户语义，同时给内存和 CPU 一个硬上限。</p>
+<h2 id="第五层：Isolation-Boundary"><a href="#第五层：Isolation-Boundary" class="headerlink" title="第五层：Isolation Boundary"></a>第五层：Isolation Boundary</h2><h3 id="问题场景-4"><a href="#问题场景-4" class="headerlink" title="问题场景"></a>问题场景</h3><p>用户切到 tab B 后，tab A 里的子应用虽然看不见，但它的 iframe 仍然可能在后台运行。用户能看到的异常不是抽象的“隔离失败”，而是这些具体后果：</p>
+<table>
+<thead>
+<tr>
+<th>用户能看到的问题</th>
+<th>背后的原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>当前 tab 地址栏突然变成另一个 tab 的 URL</td>
+<td>hidden iframe 仍然能写 <code>history.pushState</code> &#x2F; <code>replaceState</code></td>
+</tr>
+<tr>
+<td>按浏览器返回键时，非当前 tab 的内部路由被唤醒</td>
+<td>所有 iframe 都可能收到同一个 <code>popstate</code> &#x2F; <code>hashchange</code></td>
+</tr>
+<tr>
+<td>切到 tab B 后，tab A 的 Modal&#x2F;Toast 盖在 B 上；Dropdown 位置漂移</td>
+<td>子应用或组件库把弹层 append 到全局 <code>document.body</code></td>
+</tr>
+<tr>
+<td>后台 tab 以为自己被聚焦，开始拉数据或执行重任务</td>
+<td>lifecycle event 没有按 tabId 过滤，所有子应用都收到 <code>TAB_FOCUSED</code></td>
+</tr>
+</tbody></table>
+<p><img src="/img/workspace-v2-tab-system/seto-isolation.png" alt="seto isolation"></p>
+<p>图 A5：Seto integration and tab isolation。Seto 负责加载 HTMLSandbox；Workspace host 在 Seto 暴露的生命周期和 sandbox window 外围加 tab 归属上下文。</p>
+<h3 id="Seto-接入：从目标倒推能力"><a href="#Seto-接入：从目标倒推能力" class="headerlink" title="Seto 接入：从目标倒推能力"></a>Seto 接入：从目标倒推能力</h3><p>这一层的目标不是“用了哪些 Seto API”。目标是更具体的四个不变量：</p>
+<table>
+<thead>
+<tr>
+<th>目标</th>
+<th>不变量</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>复用 Seto 加载能力</td>
+<td>子应用仍然由 Seto <code>HTMLSandbox</code> 加载，不重造一套 runtime</td>
+</tr>
+<tr>
+<td>每个 tab 有自己的挂载边界</td>
+<td>子应用 DOM 必须落到当前 tab 的容器里，不能落到全局容器</td>
+</tr>
+<tr>
+<td>hidden runtime 不能越界</td>
+<td>hidden sandbox 不能改当前 tab 的 URL、弹层、focus event</td>
+</tr>
+<tr>
+<td>子应用不感知 tab 细节</td>
+<td>子应用仍然按 <code>window.parent</code>、<code>document.body</code>、history、event bus 的旧方式写代码</td>
+</tr>
+</tbody></table>
+<p>为了满足这些目标，我们把“用户可见问题”和“背后原因”分开写：</p>
+<table>
+<thead>
+<tr>
+<th>用户能看到的问题</th>
+<th>背后原因 &#x2F; Seto 约束</th>
+<th>需要的边界</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>用户切到 tab B 后，地址栏变成 tab A 的 URL，tab A 的弹窗盖到 B，或 tab A 开始刷新抢资源</td>
+<td>Seto 默认解决“怎么加载子应用”，不知道这次 DOM &#x2F; history &#x2F; event 操作应该归属于哪个 Workspace tab</td>
+<td>宿主必须在 Seto 外围补一层 tab 归属上下文，把 DOM、history、event 都挂到目标 tab</td>
+</tr>
+<tr>
+<td>切回某个 tab 时，看到的是另一个 tab 的内容或滚动状态</td>
+<td>sandbox 内容如果挂到全局容器，就没有 per-tab DOM root</td>
+<td><code>getContainer()</code> 必须返回当前 HotTabFrame 的 root</td>
+</tr>
+<tr>
+<td>首次进入子应用时偶发地址栏写错、或 patch 太早导致空白 &#x2F; 异常</td>
+<td>sandbox window 只有 ready 后才能访问；太晚 patch 又可能漏掉首次 history 写入</td>
+<td><code>onSandboxReady()</code> 后立刻注册 runtime frame</td>
+</tr>
+<tr>
+<td>用户没有切回 tab A，但当前地址栏被 tab A 的内部跳转改掉</td>
+<td>Seto 自己维护 <code>RAW_HISTORY</code>，只 patch host history 不够</td>
+<td>patch <code>sandbox.raw.win.RAW_HISTORY</code>，按 tab target 校验 push &#x2F; replace</td>
+</tr>
+<tr>
+<td>点击子应用按钮后，当前 tab 被跳到其它页面，或者其它 tab 也被刷新</td>
+<td>子应用可能通过默认 <code>window.parent</code> 拿到裸 host history、document、event bus</td>
+<td>给 <code>parent</code> 返回按 tab 裁剪后的 Proxy</td>
+</tr>
+<tr>
+<td>切到 tab B 后，tab A 的 Modal&#x2F;Toast 仍盖在页面上；Dropdown 跟触发器错位</td>
+<td>组件库会把 Modal&#x2F;Dropdown&#x2F;Toast append 到全局 <code>document.body</code></td>
+<td>通过 document&#x2F;body API 把节点路由到 tab-owned overlay root</td>
+</tr>
+<tr>
+<td>Modal 被限制住了，但 Dropdown &#x2F; Tooltip 坐标漂移</td>
+<td>overlay 类型不一样：Modal 属于内容区，Dropdown&#x2F;Tooltip 需要按触发器定位</td>
+<td>区分 content overlay 和 floating overlay；大面积判断只用于 <code>position: fixed</code></td>
+</tr>
+<tr>
+<td>后台 tab 收到 <code>TAB_FOCUSED</code> 后开始刷新、轮询或执行重任务</td>
+<td>lifecycle event 默认是全局广播</td>
+<td>event bus 按 tabId 过滤 focus &#x2F; blur</td>
+</tr>
+</tbody></table>
+<p>所以我们最后用到的 Seto 能力，其实是被这些边界倒推出来的：</p>
+<table>
+<thead>
+<tr>
+<th>Seto 能力</th>
+<th>满足哪个要求</th>
+<th>接入方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>HTMLSandbox</code></td>
+<td>继续复用 Seto 的加载、entry、basename 和生命周期</td>
+<td>宿主只包一层 tab owner，不替换 Seto runtime</td>
+</tr>
+<tr>
+<td><code>getContainer()</code></td>
+<td>让 DOM 挂到当前 tab，而不是全局页面</td>
+<td>返回当前 HotTabFrame 内部的 root；root 变化时重新注册 DOM scope</td>
+</tr>
+<tr>
+<td><code>onSandboxReady(sandbox)</code></td>
+<td>拿到可 patch 的 sandbox window</td>
+<td>拿 <code>sandbox.raw.win</code> 后注册 runtime frame，patch history &#x2F; parent &#x2F; event</td>
+</tr>
+<tr>
+<td><code>BaseSandbox</code></td>
+<td>识别“这次 document&#x2F;body 调用来自哪个 sandbox”</td>
+<td>用 WeakMap 把 sandbox 关联到 tab root</td>
+</tr>
+<tr>
+<td><code>DocExternals</code> &#x2F; document plugin context</td>
+<td>接管 <code>document.body</code>、query、append 等 API</td>
+<td>查询限制在 scoped root；body portal 路由到 tab overlay root</td>
+</tr>
+<tr>
+<td><code>sandbox.raw.win.RAW_HISTORY</code></td>
+<td>接管 Seto 真正使用的 history</td>
+<td>对 <code>pushState</code> &#x2F; <code>replaceState</code> 做 tab target 校验，再决定是否同步 host history</td>
+</tr>
+</tbody></table>
+<p>接入顺序可以简化成这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">function SetoTabRuntime(&#123; tabId, entry, initialUrl &#125;) &#123;</span><br><span class="line">  const root = getCurrentHotTabRoot(tabId);</span><br><span class="line">  let sandboxRef = null;</span><br><span class="line"></span><br><span class="line">  return (</span><br><span class="line">    &lt;HTMLSandbox</span><br><span class="line">      entry=&#123;entry&#125;</span><br><span class="line">      getContainer=&#123;() =&gt; &#123;</span><br><span class="line">        // 目标 1：Seto 内容必须挂到当前 tab 的容器。</span><br><span class="line">        // 这里还不能假设 sandbox 已 ready，所以先返回 root；</span><br><span class="line">        // 如果 sandboxRef 已经有值，再把 sandbox 和 root 绑定成 DOM scope。</span><br><span class="line">        if (sandboxRef) &#123;</span><br><span class="line">          registerDomScope(&#123; sandbox: sandboxRef, root, tabId &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">        return root;</span><br><span class="line">      &#125;&#125;</span><br><span class="line">      onSandboxReady=&#123;sandbox =&gt; &#123;</span><br><span class="line">        // 目标 2：sandbox window ready 后，马上接管运行时边界。</span><br><span class="line">        sandboxRef = sandbox;</span><br><span class="line">        registerDomScope(&#123; sandbox, root, tabId &#125;);</span><br><span class="line"></span><br><span class="line">        // 目标 3：history、parent、event 不能直接用裸 iframe window。</span><br><span class="line">        registerRuntimeFrame(&#123;</span><br><span class="line">          tabId,</span><br><span class="line">          iframeWin: sandbox.raw.win,</span><br><span class="line">          initialUrl,</span><br><span class="line">        &#125;);</span><br><span class="line">      &#125;&#125;</span><br><span class="line">    /&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这个顺序很关键：<code>getContainer()</code> 解决“挂到哪里”，<code>onSandboxReady()</code> 解决“拿到哪个 window 可以 patch”，DOM scope 解决“document&#x2F;body 属于谁”，runtime frame 解决“history、parent、event 属于谁”。</p>
+<h3 id="History-x2F-Window-scope"><a href="#History-x2F-Window-scope" class="headerlink" title="History &#x2F; Window scope"></a>History &#x2F; Window scope</h3><p>核心逻辑不是“禁止所有 history 写入”，而是只允许目标 tab 写。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">scopedPushState</span>(<span class="params">state, unused, url</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> targetTabId =</span><br><span class="line">    preparedNavigation?.<span class="property">url</span> === url</span><br><span class="line">      ? preparedNavigation.<span class="property">targetTabId</span></span><br><span class="line">      : <span class="title function_">readTabIdFromHistoryState</span>(state) ?? <span class="title function_">resolveTabIdFromUrl</span>(url);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (targetTabId !== currentFrame.<span class="property">tabId</span>) &#123;</span><br><span class="line">    <span class="title function_">reportScopeDrop</span>(<span class="string">&#x27;history_drop&#x27;</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  rawHistory.<span class="title function_">pushState</span>(state, unused, url);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (focusedRuntimeTabId === currentFrame.<span class="property">tabId</span>) &#123;</span><br><span class="line">    hostHistory.<span class="title function_">pushState</span>(<span class="title function_">addTabIdToState</span>(state, currentFrame.<span class="property">tabId</span>), unused, url);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>window.parent</code> 也不是裸宿主窗口，而是 Proxy：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">parentProxy.<span class="title function_">get</span>(<span class="string">&#x27;history&#x27;</span>)  -&gt; scopedHistory</span><br><span class="line">parentProxy.<span class="title function_">get</span>(<span class="string">&#x27;document&#x27;</span>) -&gt; iframeWin.<span class="property">document</span></span><br><span class="line">parentProxy.<span class="title function_">get</span>(<span class="string">&#x27;location&#x27;</span>) -&gt; iframeWin.<span class="property">location</span></span><br><span class="line">parentProxy.<span class="title function_">get</span>(<span class="string">&#x27;__workspaceMFEventBus__&#x27;</span>) -&gt; scopedEventBus</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这样 Seto 子应用仍然按原接口访问 <code>window.parent</code>，但拿到的是按 tab 裁剪后的对象。</p>
+<h3 id="Event-scope"><a href="#Event-scope" class="headerlink" title="Event scope"></a>Event scope</h3><p>URL 类事件只投给目标 tab：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">addEventListener</span>(<span class="params"><span class="keyword">type</span>, listener</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">type</span> !== <span class="string">&#x27;popstate&#x27;</span> &amp;&amp; <span class="keyword">type</span> !== <span class="string">&#x27;hashchange&#x27;</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">rawAddEventListener</span>(<span class="keyword">type</span>, listener);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">rawAddEventListener</span>(<span class="keyword">type</span>, <span class="function"><span class="params">event</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="title function_">resolveTargetTabForEvent</span>(event) === currentFrame.<span class="property">tabId</span>) &#123;</span><br><span class="line">      <span class="title function_">listener</span>(event);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="title function_">reportScopeDrop</span>(<span class="string">&#x27;event_drop&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>MF event bus 也做生命周期事件过滤：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">scopedEventBus.<span class="title function_">listen</span>(<span class="params">listener</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!listener.<span class="title function_">listensTo</span>(<span class="string">&#x27;TAB_FOCUSED&#x27;</span>, <span class="string">&#x27;TAB_BLURRED&#x27;</span>)) &#123;</span><br><span class="line">    <span class="keyword">return</span> hostBus.<span class="title function_">listen</span>(listener);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> hostBus.<span class="title function_">listen</span>(<span class="function"><span class="params">payload</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (payload.<span class="property">data</span>.<span class="property">tabId</span> === currentFrame.<span class="property">tabId</span>) &#123;</span><br><span class="line">      <span class="title function_">listener</span>(payload);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="DOM-x2F-Overlay-scope"><a href="#DOM-x2F-Overlay-scope" class="headerlink" title="DOM &#x2F; Overlay scope"></a>DOM &#x2F; Overlay scope</h3><p>这里的用户问题是：弹窗和下拉看起来是“当前 tab 的 UI”，但底层组件库经常把节点挂到全局 <code>document.body</code>。如果宿主不接管，hidden tab 的弹窗会盖到当前 tab，或者下拉框因为坐标系变了而漂移。</p>
+<p>子应用仍然认为自己在 append 到 <code>document.body</code>，但宿主会按规则把节点路由到当前 tab 的内容层或弹层层。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">appendToRuntimeBody</span>(<span class="params">node</span>) &#123;</span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isAppShell</span>(node)) &#123;</span><br><span class="line">    scopedRoot.<span class="title function_">appendChild</span>(node);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isContentOverlay</span>(node)) &#123;</span><br><span class="line">    contentOverlayRoot.<span class="title function_">appendChild</span>(node);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (<span class="title function_">isFloatingOverlay</span>(node)) &#123;</span><br><span class="line">    floatingOverlayRoot.<span class="title function_">appendChild</span>(node);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  scopedRoot.<span class="title function_">appendChild</span>(node);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>分类规则里最容易出 bug 的是 floating overlay 和 content overlay：</p>
+<ul>
+<li>Select、Dropdown、Tooltip 这类 floating overlay 需要跟触发器定位；</li>
+<li>Modal、Drawer、Toast、Notification 这类 content overlay 需要限制在 tab 内容区域；</li>
+<li>大面积 overlay 的几何启发式只应用于 <code>position: fixed</code>，避免 absolute 下拉层因为坐标系变化而漂移。</li>
+</ul>
+<h3 id="难点-4"><a href="#难点-4" class="headerlink" title="难点"></a>难点</h3><p>这层难点是 <strong>用户看不到的 runtime 仍然会产生用户看得见的副作用</strong>。如果不在 Seto 的 sandbox window 和 document API 边界加 owner，hidden tab 就不是“隐藏”，而是“后台仍然能改当前页面”。</p>
+<h2 id="第六层：Rendered-Runtimes"><a href="#第六层：Rendered-Runtimes" class="headerlink" title="第六层：Rendered Runtimes"></a>第六层：Rendered Runtimes</h2><h3 id="问题场景-5"><a href="#问题场景-5" class="headerlink" title="问题场景"></a>问题场景</h3><p>用户看到的是一个当前 tab，但异常会很明显：切到 B 后 A 的 iframe 还挡着，点击落到 A，URL 写到 A，或者指标说切换完成但页面不能操作。背后原因才是宿主同时管理 native Workstream、Seto iframe、MF subapp 三种 runtime，它们的生命周期和 location 来源都不一样。</p>
+<p>如果只是把这些 runtime 当普通 React component 渲染，就会出现这些具体问题：</p>
+<table>
+<thead>
+<tr>
+<th>用户能看到的问题</th>
+<th>背后原因</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>从 tab A 切到 tab B 后，A 的 DOM &#x2F; iframe 还挡在页面上，或者还能接收点击</td>
+<td>hot runtime 只是被保活，不等于已经从交互层移除</td>
+</tr>
+<tr>
+<td>B 已经显示，但一次点击、弹层或 URL 写入仍然作用到 A</td>
+<td>视觉 focused tab 和 runtime owner 没有同步</td>
+</tr>
+<tr>
+<td>后台 tab 因当前 URL 变化而重新渲染，切回时内容变了</td>
+<td>所有保活 runtime 都读到同一个 location，没有 per-tab location</td>
+</tr>
+<tr>
+<td>同样是切 tab，有的页面状态保留，有的页面被重建</td>
+<td>native route、Seto sandbox、MF iframe 的生命周期不同，没有统一容器收口</td>
+</tr>
+<tr>
+<td>指标显示“切换完成”，但页面已经 visible 后仍然点不动</td>
+<td>有的 runtime 只是 mounted，不代表 focused frame 已经可交互</td>
+</tr>
+</tbody></table>
+<p>所以这里真正的问题不是“组件类型多”，而是 <strong>用户视觉上的 focused tab，必须和 router location、runtime owner、overlay owner、event owner、metric owner 同步</strong>。只要其中一个慢半拍，用户看到的就会是 B，但后台仍然按 A 在工作。</p>
+<h3 id="解决方案-2"><a href="#解决方案-2" class="headerlink" title="解决方案"></a>解决方案</h3><p>我们给每个热运行 tab 一个统一的 frame。这个 frame 不是装饰层，它负责把不同 runtime 收敛成同一套宿主语义：</p>
+<table>
+<thead>
+<tr>
+<th>Frame 负责的事</th>
+<th>为什么需要</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>稳定 DOM 容器</td>
+<td>tab 切走时不卸载 hot runtime，切回来可以保留 DOM &#x2F; iframe 内状态</td>
+</tr>
+<tr>
+<td>focused &#x2F; hidden 状态</td>
+<td>只有 focused tab 可见、可点；hidden tab 只保活，不参与当前交互</td>
+</tr>
+<tr>
+<td>per-tab location</td>
+<td>focused tab 使用当前浏览器 URL；hidden tab 使用自己上次保存的 URL，避免被当前 URL 带跑</td>
+</tr>
+<tr>
+<td>owner 同步</td>
+<td>切换时同步 Seto runtime owner、overlay owner、event owner</td>
+</tr>
+<tr>
+<td>统一 visible 时机</td>
+<td>tab switch 指标在 frame 真正可见时上报，而不是各 runtime 自己随便报</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">function HotTabFrame(&#123; tab, isFocused, location &#125;) &#123;</span><br><span class="line">  return (</span><br><span class="line">    &lt;section</span><br><span class="line">      data-hot-tab-id=&#123;tab.id&#125;</span><br><span class="line">      style=&#123;&#123;</span><br><span class="line">        visibility: isFocused ? &#x27;visible&#x27; : &#x27;hidden&#x27;,</span><br><span class="line">        pointerEvents: isFocused ? &#x27;auto&#x27; : &#x27;none&#x27;,</span><br><span class="line">      &#125;&#125;</span><br><span class="line">    &gt;</span><br><span class="line">      &#123;/* focused tab 用当前 URL；hidden hot tab 用保存的 location。 */&#125;</span><br><span class="line">      &lt;Routes location=&#123;location&#125;&gt;</span><br><span class="line">        &lt;WorkstreamTabRoutes /&gt;</span><br><span class="line">      &lt;/Routes&gt;</span><br><span class="line">    &lt;/section&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>聚焦 tab 时，宿主同步三件事：</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 运行时 owner：history / parent / popstate 应该属于哪个 Seto frame。</span></span><br><span class="line"><span class="title function_">setFocusedSetoRuntimeTab</span>(focusedTabId);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 弹层 owner：只有当前 tab 的 overlay root 可见。</span></span><br><span class="line"><span class="title function_">setFocusedWorkspaceOverlayTab</span>(focusedTabId);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 事件 owner：只把 TAB_FOCUSED 发给目标 tab，避免后台 runtime 误启动。</span></span><br><span class="line"><span class="title function_">emitTabFocusedToTargetOnly</span>(focusedTabId);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这样视觉 owner、Seto runtime owner、overlay owner、event owner 是同一个 tab。</p>
+<h3 id="难点-5"><a href="#难点-5" class="headerlink" title="难点"></a>难点</h3><p>这层难点是 <strong>用户看见的 focused tab 必须和运行时 owner 一致</strong>。如果视觉上切到了 A，但 Seto scope 还认为 B 是 focused，history、overlay、event 都会错。</p>
+<h2 id="这套设计的关键取舍"><a href="#这套设计的关键取舍" class="headerlink" title="这套设计的关键取舍"></a>这套设计的关键取舍</h2><table>
+<thead>
+<tr>
+<th>取舍</th>
+<th>为什么不选更简单方案</th>
+<th>最终选择</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>URL</td>
+<td><code>/tabs/:id</code> 实现简单，但链接只对当前用户的 tab 会话有意义，别人拿到后无法恢复业务对象</td>
+<td>保留业务 URL，宿主内部解析到 tab</td>
+</tr>
+<tr>
+<td>Cache</td>
+<td>全部 keep-alive 切换快，但资源无上限</td>
+<td>opened tabs 和 hot runtime 分离，热池有 cap</td>
+</tr>
+<tr>
+<td>Seto</td>
+<td>每次切换 reload 最干净，但状态丢失、切换慢</td>
+<td>保留 Seto runtime，并在 host 边界加 scope</td>
+</tr>
+<tr>
+<td>Interface</td>
+<td>让各子应用直接理解 tab 最省宿主代码，但耦合扩散</td>
+<td>子应用只发 intent，宿主统一决策</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>只看旧 duration 数字简单，但会漏 post-visible 卡顿</td>
+<td>FMP、switch v3、long task、scope drop 分线观测</td>
+</tr>
+</tbody></table>
+<p>最终，这个系统的价值不是“页面上多了一排 tab”。真正的技术点是：在单页工作台里同时运行多个业务 runtime 时，宿主必须明确谁拥有 URL、谁拥有 DOM、谁拥有 overlay、谁能接收事件、谁能占用前台资源。把这些所有权定义清楚，tab system 才能像浏览器，而不是像一堆互相干扰的隐藏页面。</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/Frontend/" rel="tag">Frontend</a>, <a class="classtest-link" href="/tags/React/" rel="tag">React</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a> — <time datetime="2026-05-18T08:30:00.000Z">May 18, 2026</time></p>
+    </footer>
+  </article>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">用 ❤ 和
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        制作于 <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+
+      <!-- Language switcher (globe icon) -->
+      <a class="ml-0 footer-link icon" href="/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" onclick="localStorage.setItem('preferredLang', 'en')" style="text-decoration: none" aria-label="Read in English" title="Read in English">
+        <svg class="svg-hov" width="18" role="img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><title>English</title><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </a>
+
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>Workspace V2 Tab System: Building Browser-Grade Tabs Inside a Workbench | Koh Hom&#39;s Blog</title>
+  
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/">
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
+  
+  <meta name="description" content="Background And GoalsWorkspace v2 changes the workbench from a single-page, single-context product into a workspace that can hold multiple workstreams,">
+  
+  
+  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  
+  <meta property="og:type" content="article" />
+  <meta property="article:published_time" content="2026-05-18T08:30:00.000Z" />
+  <meta property="article:modified_time" content="2026-05-18T08:30:00.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Frontend" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="React" />
+  
+  
+  <meta property="og:title" content="Workspace V2 Tab System: Building Browser-Grade Tabs Inside a Workbench | Koh Hom&#39;s Blog" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_CN" />
+  
+  <meta property="og:description" content="Background And GoalsWorkspace v2 changes the workbench from a single-page, single-context product into a workspace that can hold multiple workstreams,">
+  
+  <meta property="og:url" content="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="Workspace V2 Tab System: Building Browser-Grade Tabs Inside a Workbench | Koh Hom&#39;s Blog">
+  
+  <meta name="twitter:description" content="Background And GoalsWorkspace v2 changes the workbench from a single-page, single-context product into a workspace that can hold multiple workstreams,">
+  
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta name="twitter:url" content="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Workspace V2 Tab System: Building Browser-Grade Tabs Inside a Workbench","datePublished":"2026-05-18T08:30:00.000Z","dateModified":"2026-05-18T08:30:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","mainEntityOfPage":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","inLanguage":"en","description":"Background And GoalsWorkspace v2 changes the workbench from a single-page, single-context product into a workspace that can hold multiple workstreams, sub-application views, and ticket objects at the ","keywords":["Frontend","Software Engineering","React"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Workspace V2 Tab System: Building Browser-Grade Tabs Inside a Workbench","item":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
+    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
+    var current = isZh ? 'zh' : 'en';
+    if (stored !== current) {
+      var path = window.location.pathname;
+      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
+      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <div class="row">
+  <div class="two columns" style="max-width: 50px">
+    <h1 class="mt-2 mode">
+      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
+      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
+      <script >
+        if (localStorage.getItem('preferredTheme') == 'dark') {
+          setDarkMode(true)
+        }
+        function setDarkMode(isDark) {
+          var darkBtn = document.getElementById('darkBtn')
+          var lightBtn = document.getElementById('lightBtn')
+          if (isDark) {
+            lightBtn.style.display = "block"
+            darkBtn.style.display = "none"
+            localStorage.setItem('preferredTheme', 'dark');
+          } else {
+            lightBtn.style.display = "none"
+            darkBtn.style.display = "block"
+            localStorage.removeItem('preferredTheme');
+          }
+          document.body.classList.toggle("darkmode");
+        }
+      </script>
+    </h1>
+  </div>
+
+  <div class="six columns ml-1">
+    <h1 class="mt-2">
+      <a href="/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+    </h1>
+  </div>
+
+  <div class="twelve columns">
+    <div class="row">
+      <div class="nine columns left">
+        <a href="/">Home</a>
+        
+          
+          <a href="/Works" class="ml">Works</a>
+          
+        
+          
+          <a href="/About" class="ml">About</a>
+          
+        
+          
+          <a href="/Links" class="ml">Links</a>
+          
+        
+        
+          
+            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">Email</a>
+          
+        
+      </div>
+    </div>
+    <hr style="margin-bottom: 2.6rem">
+  </div>
+</div>
+
+        <div class="trans">
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">Workspace V2 Tab System: Building Browser-Grade Tabs Inside a Workbench</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
+          阅读中文版
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2026-05-18T08:30:00.000Z">
+      <meta itemprop="dateModified" content="2026-05-18T08:30:00.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <h2 id="Background-And-Goals"><a href="#Background-And-Goals" class="headerlink" title="Background And Goals"></a>Background And Goals</h2><p>Workspace v2 changes the workbench from a single-page, single-context product into a workspace that can hold multiple workstreams, sub-application views, and ticket objects at the same time. From the user’s perspective, the expected experience is close to a browser: several tasks stay open, switching back keeps state, refresh and shared links still land on the right business page, and a modal opened by one sub-application cannot cover another tab.</p>
+<p>Business goals:</p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>User Experience</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Multi-tasking</td>
+<td>Users can keep multiple workstreams, subapps, and tickets open without repeatedly returning to the home page.</td>
+</tr>
+<tr>
+<td>Context retention</td>
+<td>Filters, scroll position, iframe state, and inner Workstream views should survive common tab switches.</td>
+</tr>
+<tr>
+<td>Reliable links</td>
+<td>Refresh, copied links, and external deep links should recover to a reasonable tab and business page.</td>
+</tr>
+<tr>
+<td>Subapp integration without tab internals</td>
+<td>Sub-applications express intent such as “open this page”; they do not need to understand the host tab implementation.</td>
+</tr>
+<tr>
+<td>Browser-like responsiveness</td>
+<td>Switching should be fast, and background tabs should not steal foreground CPU.</td>
+</tr>
+</tbody></table>
+<p>Technical goals:</p>
+<table>
+<thead>
+<tr>
+<th>User Expectation</th>
+<th>Engineering Requirement</th>
+<th>Failure If Missing</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Multiple workstreams can stay open</td>
+<td>Persist opened tabs, order, and pinned state</td>
+<td>Refresh loses tabs, or different browser windows show different tab lists.</td>
+</tr>
+<tr>
+<td>Switching back keeps state</td>
+<td>Keep a bounded number of DOM &#x2F; iframe runtimes warm</td>
+<td>Every switch reloads the page; filters, scroll, and iframe state are lost.</td>
+</tr>
+<tr>
+<td>URLs remain refreshable and shareable</td>
+<td>Recover the target tab from the browser URL; write the business URL when a tab is activated</td>
+<td>Copied links open as orphan pages, or the address bar points to the wrong tab.</td>
+</tr>
+<tr>
+<td>Multiple windows work together</td>
+<td>Synchronize tab-list mutations across windows</td>
+<td>One window closes a tab while another still shows stale state.</td>
+</tr>
+<tr>
+<td>Subapps can open pages</td>
+<td>SDKs and event buses express intent; the host decides how to open</td>
+<td>Tab behavior becomes scattered across subapps and bypasses capacity&#x2F;reuse rules.</td>
+</tr>
+<tr>
+<td>Hidden tabs do not affect the current tab</td>
+<td>Scope history, DOM, overlays, events, and focus by tab</td>
+<td>A hidden iframe changes the current URL, shows an overlay on another tab, or starts background work.</td>
+</tr>
+<tr>
+<td>Switching feels responsive</td>
+<td>Measure and schedule first load, hot switch, and background work separately</td>
+<td>The page is visible but not clickable, while old metrics report a short duration.</td>
+</tr>
+</tbody></table>
+<p><img src="/img/workspace-v2-tab-system/architecture-goals.png" alt="architecture goals"></p>
+<p><em>Figure A1: Product goals mapped to engineering constraints. The diagram breaks “browser-grade tabs” into concrete system requirements and failure modes.</em></p>
+<p>The final design principle is:</p>
+<blockquote>
+<p>Keep the address bar as a real business URL; use server state to record which tabs are open; keep only a bounded working set warm; and put host-owned boundaries around subapp history, DOM, overlays, and events.</p>
+</blockquote>
+<p>The system has two core questions:</p>
+<ol>
+<li><strong>Should two entries reuse the same tab?</strong> For example, the same workstream should reuse one tab, while its internal view is preserved as URL&#x2F;subPath state.</li>
+<li><strong>Which tab owns runtime side effects now?</strong> Only the focused tab can write the browser URL, show overlays, receive foreground events, and consume foreground CPU.</li>
+</ol>
+<h2 id="Architecture-Layers"><a href="#Architecture-Layers" class="headerlink" title="Architecture Layers"></a>Architecture Layers</h2><p><img src="/img/workspace-v2-tab-system/architecture-layers.png" alt="architecture layers"></p>
+<p><em>Figure A2: Final layered architecture. Isolation and Observability are intentionally separate: Isolation prevents hidden runtimes from changing the current tab; Observability proves where latency, blocked writes, or regressions happen.</em></p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Problem</th>
+<th>Core Mechanism</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Intent Interface</td>
+<td>The same business object should not duplicate tabs or behave differently when opened from a menu, subapp button, SDK, iframe, or URL.</td>
+<td>Normalize every entry into an open intent; the host decides new browser tab, absorb current tab, focus existing tab, or create a new tab.</td>
+</tr>
+<tr>
+<td>URL And Tab Ownership</td>
+<td>Refresh or shared links should recover to the same business page, not an internal orphan tab route.</td>
+<td>Keep the address bar as a business URL; parse it into a tab input and match it against opened tabs.</td>
+</tr>
+<tr>
+<td>Persistent Tab State</td>
+<td>Refresh should not lose tabs; two browser windows should not split into different tab lists.</td>
+<td>BFF stores opened tabs; React Query gives instant local UI; BroadcastChannel invalidates other windows after mutation.</td>
+</tr>
+<tr>
+<td>Runtime Cache</td>
+<td>Recent tabs should switch back quickly, but many opened tabs must not create unbounded memory or CPU pressure.</td>
+<td>Separate opened tabs, hot runtime pool, and Workstream view cache. Evicting a runtime does not delete the tab.</td>
+</tr>
+<tr>
+<td>Isolation Boundary</td>
+<td>After switching to tab B, tab A must not change the URL, show overlays on B, receive foreground events, or start foreground work.</td>
+<td>Scope history, <code>window.parent</code>, document&#x2F;body, overlays, and focus events by current owner.</td>
+</tr>
+<tr>
+<td>Rendered Runtimes</td>
+<td>Users should see and interact with only the current tab. Clicks, overlays, and URL writes must belong to that tab.</td>
+<td>Put every hot runtime into a stable frame; only the focused owner is visible, clickable, and allowed to receive foreground events.</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>When first load is slow, switching is janky, an overlay crosses tabs, or the URL is wrong, we need to know which layer failed.</td>
+<td>FMP for first load, tab switch v3 for switching, long task&#x2F;frame gap for visible jank, scope-drop logs for blocked writes, stress gates for regressions.</td>
+</tr>
+</tbody></table>
+<h2 id="Layer-1-Intent-Interface"><a href="#Layer-1-Intent-Interface" class="headerlink" title="Layer 1: Intent Interface"></a>Layer 1: Intent Interface</h2><h3 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h3><p>Users can open the same business object from many entry points: sidebar, tab row, a subapp button, MF event bus, iframe <code>postMessage</code>, or a copied business URL. The expected result is consistent: an already-open object is focused, a new object opens once, and a view inside the same subapp can often navigate within the current tab.</p>
+<p>If each entry makes its own decision, users see direct failures: a menu click reuses a tab but a subapp button creates a duplicate; a shared link restores the page but SDK navigation loses the last inner view; one entry respects tab capacity while another bypasses it.</p>
+<h3 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h3><p>Subapps only express intent. The host decides how to execute it.</p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Input</th>
+<th>Host Decision</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>User tab click</td>
+<td>tab row id</td>
+<td>Restore saved tab URL, activate runtime, write browser URL.</td>
+</tr>
+<tr>
+<td>React subapp SDK</td>
+<td><code>openWorkstreamTab</code>, <code>openSubappViewTab</code>, <code>openSubApp</code></td>
+<td>Normalize payload, find existing tab, create if needed.</td>
+</tr>
+<tr>
+<td>MF event bus</td>
+<td><code>TAB_OPEN_REQUEST</code>, <code>NAVIGATE_TO_URL</code></td>
+<td>Focus existing tab, absorb into current tab, create a tab, or open a new browser window.</td>
+</tr>
+<tr>
+<td>Seto iframe</td>
+<td><code>window.postMessage</code> envelope</td>
+<td>Validate origin and payload, then convert to a host event bus request.</td>
+</tr>
+</tbody></table>
+<p>Simplified pseudocode:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// A subapp sends intent. It does not mutate host state.</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">openSubappView</span>(<span class="params">viewType, viewId</span>) &#123;</span><br><span class="line">  <span class="title function_">emit</span>(<span class="string">&#x27;TAB_OPEN_REQUEST&#x27;</span>, &#123; <span class="attr">itemType</span>: <span class="string">&#x27;SUBAPP_VIEW&#x27;</span>, viewType, viewId &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">handleTabOpenRequest</span>(<span class="params">raw</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> input = <span class="title function_">normalizeAndValidate</span>(raw);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (raw.<span class="property">openInNewBrowserTab</span>) &#123;</span><br><span class="line">    <span class="variable language_">window</span>.<span class="title function_">open</span>(<span class="title function_">buildBusinessUrl</span>(input));</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// existing: the target business object already owns a tab.</span></span><br><span class="line">  <span class="keyword">const</span> existing = <span class="title function_">findExistingTab</span>(tabs, input);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// absorbing: the currently focused tab is a suitable carrier for this navigation.</span></span><br><span class="line">  <span class="keyword">const</span> absorbing = <span class="title function_">findFocusedTabThatCanAbsorb</span>(input);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// If a subapp root can absorb but an exact tab already exists, prefer the exact tab.</span></span><br><span class="line">  <span class="keyword">if</span> (existing &amp;&amp; absorbing?.<span class="property">kind</span> === <span class="string">&#x27;subapp-root&#x27;</span>) &#123;</span><br><span class="line">    <span class="title function_">focusTab</span>(existing.<span class="property">id</span>, <span class="title function_">savedUrlOrDefault</span>(existing));</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (absorbing) &#123;</span><br><span class="line">    <span class="title function_">navigateInsideTab</span>(absorbing.<span class="property">id</span>, <span class="title function_">buildPath</span>(input));</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (existing) &#123;</span><br><span class="line">    <span class="title function_">focusTab</span>(existing.<span class="property">id</span>, <span class="title function_">savedUrlOrDefault</span>(existing));</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">addTabWithCapacityControl</span>(input);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>existing</code> and <code>absorb</code> are not the same feature. <code>existing</code> means “the target already has a stable tab”; <code>absorb</code> means “the current tab does not yet need a new runtime and can carry this navigation.” Without <code>absorb</code>, a placeholder or subapp root would leave useless tabs behind. Without <code>existing</code>, a real duplicate tab would be created.</p>
+<h3 id="Difficulty"><a href="#Difficulty" class="headerlink" title="Difficulty"></a>Difficulty</h3><p>The difficult part is not sending an event. It is making every entry point converge to the same find &#x2F; absorb &#x2F; add &#x2F; focus &#x2F; capacity-control path. Otherwise the user sees duplicate tabs, wrong focus, capacity bypass, and inconsistent return paths.</p>
+<h2 id="Layer-2-URL-And-Tab-Ownership"><a href="#Layer-2-URL-And-Tab-Ownership" class="headerlink" title="Layer 2: URL And Tab Ownership"></a>Layer 2: URL And Tab Ownership</h2><h3 id="Problem-1"><a href="#Problem-1" class="headerlink" title="Problem"></a>Problem</h3><p>The browser has one address bar, while the workspace can keep multiple tab runtimes alive. We cannot replace business URLs with internal routes such as <code>/tabs/:id</code>.</p>
+<table>
+<thead>
+<tr>
+<th>URL Shape</th>
+<th>What Happens When Users Share It</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/tabs/abc123</code></td>
+<td>It only means “my local tab list has id&#x3D;abc123.” Another user or another window does not know which workstream, ticket, or view it represents.</td>
+</tr>
+<tr>
+<td><code>/workspace/workstream/123/schedule/456</code></td>
+<td>The URL contains the business object. Refresh, bookmarks, IM sharing, and external deep links can recover the same business page.</td>
+</tr>
+</tbody></table>
+<p>So the address bar stays as a real business URL:</p>
+<ul>
+<li><code>/workspace/workstream/:id/...</code></li>
+<li><code>/workspace/scheduling/schedule/view/:viewId</code></li>
+<li><code>/workspace/audit_workbench/ticket/custom_view/:viewId</code></li>
+</ul>
+<p>Internally, the host extracts business fields from the URL and uses them to decide whether two entries should reuse the same tab.</p>
+<table>
+<thead>
+<tr>
+<th>Tab Type</th>
+<th>Fields Used For Identity</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Workstream</td>
+<td><code>workstreamId</code></td>
+<td>Inner views are stored as path&#x2F;subPath under one Workstream tab.</td>
+</tr>
+<tr>
+<td>SubApp root</td>
+<td><code>subAppType</code></td>
+<td>The subapp root is a stable tab.</td>
+</tr>
+<tr>
+<td>SubApp view</td>
+<td><code>viewType + viewId</code></td>
+<td>A concrete business view can become its own tab or be absorbed into the current subapp tab.</td>
+</tr>
+<tr>
+<td>Ticket</td>
+<td><code>ticketId + viewType</code></td>
+<td>Ticket objects are suitable independent tabs.</td>
+</tr>
+<tr>
+<td>Non-tab route</td>
+<td>None</td>
+<td>Home, notification, redirect, and unknown routes do not enter tab lifecycle.</td>
+</tr>
+</tbody></table>
+<p><img src="/img/workspace-v2-tab-system/url-tab-sync.png" alt="url tab sync"></p>
+<p><em>Figure A3: URL and tab synchronization. The address bar remains a business URL; the host maps it to an internal tab owner.</em></p>
+<h3 id="Browser-URL-gt-Tab"><a href="#Browser-URL-gt-Tab" class="headerlink" title="Browser URL -&gt; Tab"></a>Browser URL -&gt; Tab</h3><p>This path handles refresh, copied links, and external deep links.</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">onRouteChanged</span>(<span class="params">location</span>) &#123;</span><br><span class="line">  <span class="comment">// Parse the business URL into &quot;does this route belong to a tab?&quot;</span></span><br><span class="line">  <span class="keyword">const</span> resolved = <span class="title function_">resolveTabFromUrl</span>(location.<span class="property">pathname</span>, appList);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (resolved.<span class="property">kind</span> !== <span class="string">&#x27;tab&#x27;</span>) &#123;</span><br><span class="line">    <span class="comment">// Home, redirect, or fallback pages render normally.</span></span><br><span class="line">    <span class="comment">// They do not create tab rows or hot runtime entries.</span></span><br><span class="line">    <span class="title function_">renderSingleOutlet</span>();</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> matched = <span class="title function_">findOpenedTab</span>(tabs, resolved.<span class="property">input</span>);</span><br><span class="line">  <span class="keyword">if</span> (matched) &#123;</span><br><span class="line">    <span class="title function_">focusRuntime</span>(matched.<span class="property">id</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Direct URL recovery:</span></span><br><span class="line">  <span class="comment">// The user opened a valid business URL, but BFF has no opened tab yet.</span></span><br><span class="line">  <span class="title function_">addTab</span>(<span class="title function_">toAddWorkspaceTabRequest</span>(resolved.<span class="property">input</span>));</span><br><span class="line">  <span class="title function_">focusRuntimeWhenReady</span>(resolved.<span class="property">input</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="Tab-gt-Browser-URL"><a href="#Tab-gt-Browser-URL" class="headerlink" title="Tab -&gt; Browser URL"></a>Tab -&gt; Browser URL</h3><p>This path handles tab clicks.</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">activateTab</span>(<span class="params">tab</span>) &#123;</span><br><span class="line">  <span class="comment">// Restore the tab&#x27;s last business URL, not an internal /tabs/:id URL.</span></span><br><span class="line">  <span class="keyword">const</span> path = <span class="title function_">loadSavedTabUrl</span>(tab.<span class="property">id</span>) ?? <span class="title function_">buildDefaultBusinessUrl</span>(tab);</span><br><span class="line"></span><br><span class="line">  <span class="title function_">startTabSwitchMetric</span>(&#123; <span class="attr">toId</span>: tab.<span class="property">id</span>, <span class="attr">targetPath</span>: path &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// The next history write belongs to this target tab.</span></span><br><span class="line">  <span class="title function_">prepareScopedNavigation</span>(&#123; <span class="attr">targetTabId</span>: tab.<span class="property">id</span>, <span class="attr">url</span>: path &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="title function_">navigate</span>(path, &#123;</span><br><span class="line">    <span class="attr">state</span>: &#123; <span class="attr">workspaceTargetTabId</span>: tab.<span class="property">id</span> &#125;,</span><br><span class="line">    <span class="attr">flushSync</span>: <span class="literal">true</span>,</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="Window-gt-Window"><a href="#Window-gt-Window" class="headerlink" title="Window -&gt; Window"></a>Window -&gt; Window</h3><p>Tab list mutations are persistent facts, not local React state.</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">mutateTabs</span>(<span class="params">mutation</span>) &#123;</span><br><span class="line">  <span class="comment">// Current window updates optimistically for fast feedback.</span></span><br><span class="line">  queryClient.<span class="title function_">setQueryData</span>(tabListKey, <span class="title function_">applyOptimistic</span>(mutation));</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> bff.<span class="title function_">mutateTabs</span>(mutation);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Other windows do not receive the full state through BroadcastChannel.</span></span><br><span class="line">  <span class="comment">// They only get invalidation and refetch from BFF.</span></span><br><span class="line">  broadcastChannel.<span class="title function_">postMessage</span>(&#123; <span class="attr">type</span>: <span class="string">&#x27;TAB_LIST_INVALIDATED&#x27;</span> &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="Difficulty-1"><a href="#Difficulty-1" class="headerlink" title="Difficulty"></a>Difficulty</h3><p>URL is both a user contract and a runtime locator. Users must see shareable business URLs, while the host must know which tab owns a URL change. The resolver and activation state satisfy both constraints.</p>
+<h2 id="Layer-3-Persistent-Tab-State"><a href="#Layer-3-Persistent-Tab-State" class="headerlink" title="Layer 3: Persistent Tab State"></a>Layer 3: Persistent Tab State</h2><h3 id="Problem-2"><a href="#Problem-2" class="headerlink" title="Problem"></a>Problem</h3><p>Users see three concrete failures if tab state is only local: refresh loses the tab row, add&#x2F;remove&#x2F;pin feels delayed if every mutation waits for the server, and two browser windows drift apart after one window mutates the tab list.</p>
+<h3 id="Solution-1"><a href="#Solution-1" class="headerlink" title="Solution"></a>Solution</h3><p>Persistent state is handled by BFF plus React Query.</p>
+<p><img src="/img/workspace-v2-tab-system/persistent-tab-state.png" alt="persistent tab state"></p>
+<p><em>Figure A3.5: Persistent tab state. React Query makes the current window fast; BFF stores the final fact; BroadcastChannel tells other windows to invalidate and refetch.</em></p>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BFF tab controller</td>
+<td><code>list/add/remove/pin/unpin/reorder</code>, plus merging opened tabs and pinned tabs.</td>
+</tr>
+<tr>
+<td>React Query</td>
+<td>Single tab-list cache key, stale-time policy, focus refetch.</td>
+</tr>
+<tr>
+<td>Optimistic mutation</td>
+<td>Insert a temporary tab before server response; replace it when BFF returns the final tab.</td>
+</tr>
+<tr>
+<td>BroadcastChannel</td>
+<td>After mutation succeeds, tell other windows to invalidate and refetch.</td>
+</tr>
+</tbody></table>
+<p>Simplified flow:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">useAddTab</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">useMutation</span>(&#123;</span><br><span class="line">    <span class="attr">mutationFn</span>: bff.<span class="property">addTab</span>,</span><br><span class="line"></span><br><span class="line">    <span class="title function_">onMutate</span>(<span class="params">input</span>) &#123;</span><br><span class="line">      <span class="comment">// Current window becomes fast immediately.</span></span><br><span class="line">      <span class="title function_">addOptimisticTab</span>(input);</span><br><span class="line">    &#125;,</span><br><span class="line"></span><br><span class="line">    <span class="title function_">onSuccess</span>(<span class="params">serverTab</span>) &#123;</span><br><span class="line">      <span class="comment">// Server id and order are the final facts.</span></span><br><span class="line">      <span class="title function_">replaceOptimisticTab</span>(serverTab);</span><br><span class="line">      <span class="title function_">broadcast</span>(<span class="string">&#x27;TAB_LIST_INVALIDATED&#x27;</span>);</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="Difficulty-2"><a href="#Difficulty-2" class="headerlink" title="Difficulty"></a>Difficulty</h3><p>Optimistic UI can reduce interaction latency, but it cannot replace the server fact. Final tab id, pin state, order, and cross-window consistency must return to the BFF tab list.</p>
+<h2 id="Layer-4-Runtime-Cache"><a href="#Layer-4-Runtime-Cache" class="headerlink" title="Layer 4: Runtime Cache"></a>Layer 4: Runtime Cache</h2><h3 id="Problem-3"><a href="#Problem-3" class="headerlink" title="Problem"></a>Problem</h3><p>Users expect recently used tabs to switch back quickly, with scroll, form, and iframe state intact. But if every opened tab keeps a live runtime, the current tab slows down and memory grows without a bound.</p>
+<p>The key is to separate three concepts that look similar in UI but have different lifecycles.</p>
+<p><img src="/img/workspace-v2-tab-system/runtime-cache-layers.jpg" alt="runtime cache layers"></p>
+<p><em>Figure A4: Three cache layers. Opened tabs are durable user intent; hot runtime pool is bounded live resource; scoped view cache keeps inner Workstream views. Idle prewarm prepares likely future switches after first screen; it is not unlimited background loading.</em></p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Question It Answers</th>
+<th>Lifecycle</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Opened tabs</td>
+<td>Which tabs should appear in the tab row?</td>
+<td>Persisted by BFF. Evicting runtime does not delete the tab.</td>
+</tr>
+<tr>
+<td>Hot runtime pool</td>
+<td>Which runtimes are alive now?</td>
+<td>Bounded LRU&#x2F;working set. Hidden runtimes are warm but not foreground.</td>
+</tr>
+<tr>
+<td>Scoped view cache</td>
+<td>Can an inner Workstream view return quickly?</td>
+<td>Cached by Workstream <code>scopeKey</code>; capped inner views.</td>
+</tr>
+</tbody></table>
+<p>Hot-pool update:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">onTabActivated</span>(<span class="params">tabId</span>) &#123;</span><br><span class="line">  warmPool.<span class="title function_">touch</span>(tabId);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> evicted <span class="keyword">of</span> warmPool.<span class="title function_">evictOverflow</span>()) &#123;</span><br><span class="line">    <span class="comment">// Evicting runtime only frees DOM / iframe / JS resources.</span></span><br><span class="line">    <span class="comment">// It does not delete the opened tab from BFF.</span></span><br><span class="line">    <span class="title function_">disposeRuntime</span>(evicted.<span class="property">tabId</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Idle prewarm:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">afterFirstScreenReady</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="title function_">requestIdleCallback</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> candidate <span class="keyword">of</span> <span class="title function_">predictLikelyNextTabs</span>()) &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="title function_">foregroundTabIsSettling</span>()) <span class="keyword">break</span>;</span><br><span class="line">      <span class="title function_">prewarmRuntime</span>(candidate);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="Difficulty-3"><a href="#Difficulty-3" class="headerlink" title="Difficulty"></a>Difficulty</h3><p>Keeping everything alive is simple but turns background runtimes into unbounded resource consumers. Keeping nothing alive is safe but destroys the browser-like switch experience. The design preserves user intent in opened tabs while putting a hard cap on live runtimes.</p>
+<h2 id="Layer-5-Isolation-Boundary"><a href="#Layer-5-Isolation-Boundary" class="headerlink" title="Layer 5: Isolation Boundary"></a>Layer 5: Isolation Boundary</h2><h3 id="Problem-4"><a href="#Problem-4" class="headerlink" title="Problem"></a>Problem</h3><p>After the user switches to tab B, a subapp inside tab A can still be alive in the background. If we only hide the DOM, users can still see these failures:</p>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Cause</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>The current address bar suddenly changes to another tab’s URL.</td>
+<td>A hidden iframe can still call <code>history.pushState</code> &#x2F; <code>replaceState</code>.</td>
+</tr>
+<tr>
+<td>Browser back wakes up a route inside a non-current tab.</td>
+<td>Multiple iframes can observe the same <code>popstate</code> &#x2F; <code>hashchange</code>.</td>
+</tr>
+<tr>
+<td>A modal or toast from tab A covers tab B; dropdown positioning drifts.</td>
+<td>Component libraries append overlays to the global <code>document.body</code>.</td>
+</tr>
+<tr>
+<td>A background tab thinks it is focused and starts fetching or running heavy work.</td>
+<td>Lifecycle events are broadcast globally instead of filtered by tab id.</td>
+</tr>
+</tbody></table>
+<p><img src="/img/workspace-v2-tab-system/seto-isolation.png" alt="seto isolation"></p>
+<p><em>Figure A5: Seto integration and tab isolation. Seto loads the HTMLSandbox; the Workspace host adds tab ownership around Seto lifecycle and sandbox window boundaries.</em></p>
+<h3 id="Seto-Integration-Start-From-The-Failure"><a href="#Seto-Integration-Start-From-The-Failure" class="headerlink" title="Seto Integration: Start From The Failure"></a>Seto Integration: Start From The Failure</h3><p>We did not start from a list of Seto APIs. We started from the invariant users need, then mapped each failure to the platform capability we had to wrap.</p>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Cause &#x2F; Seto Constraint</th>
+<th>Boundary Needed</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>After switching to tab B, tab A changes the address bar, shows an overlay on B, or starts foreground work.</td>
+<td>Seto loads and runs the subapp, but does not know which Workspace tab should own DOM&#x2F;history&#x2F;event side effects.</td>
+<td>Add a host tab-ownership context around Seto runtime.</td>
+</tr>
+<tr>
+<td>Switching back shows another tab’s content or scroll state.</td>
+<td>Sandbox content mounted to a global container has no per-tab DOM root.</td>
+<td><code>getContainer()</code> must return the current <code>HotTabFrame</code> root.</td>
+</tr>
+<tr>
+<td>First entry occasionally writes the wrong URL, or early patching causes sandbox errors.</td>
+<td>The raw sandbox window is only stable after ready; patching too late misses first history writes.</td>
+<td>Register runtime frame in <code>onSandboxReady()</code>.</td>
+</tr>
+<tr>
+<td>A hidden tab’s internal navigation changes the current address bar.</td>
+<td>Seto maintains its own <code>RAW_HISTORY</code>; patching host history alone is not enough.</td>
+<td>Patch <code>sandbox.raw.win.RAW_HISTORY</code> and validate target tab.</td>
+</tr>
+<tr>
+<td>A subapp button navigates the wrong tab or refreshes other tabs.</td>
+<td>Default <code>window.parent</code> may expose raw host history, document, or event bus.</td>
+<td>Return a tab-scoped parent Proxy.</td>
+</tr>
+<tr>
+<td>A modal&#x2F;toast from tab A covers tab B; dropdown aligns to the wrong place.</td>
+<td>Component libraries append Modal&#x2F;Dropdown&#x2F;Toast to global <code>document.body</code>.</td>
+<td>Route document&#x2F;body operations to a tab-owned overlay root.</td>
+</tr>
+<tr>
+<td>Modal is contained, but Dropdown&#x2F;Tooltip position drifts.</td>
+<td>Floating overlays depend on the trigger’s coordinate system.</td>
+<td>Separate content overlays from floating overlays.</td>
+</tr>
+<tr>
+<td>A background tab receives <code>TAB_FOCUSED</code> and starts refreshing.</td>
+<td>Lifecycle events are global by default.</td>
+<td>Filter focus&#x2F;blur by tab id.</td>
+</tr>
+</tbody></table>
+<p>Seto capabilities used:</p>
+<table>
+<thead>
+<tr>
+<th>Seto Capability</th>
+<th>Requirement</th>
+<th>Integration</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>HTMLSandbox</code></td>
+<td>Reuse Seto loading, entry, basename, and lifecycle.</td>
+<td>The host wraps tab owner around Seto runtime; it does not rebuild the runtime.</td>
+</tr>
+<tr>
+<td><code>getContainer()</code></td>
+<td>Mount DOM into the current tab, not the global page.</td>
+<td>Return the root inside <code>HotTabFrame</code>; re-register DOM scope when root changes.</td>
+</tr>
+<tr>
+<td><code>onSandboxReady(sandbox)</code></td>
+<td>Access a patchable sandbox window.</td>
+<td>Use <code>sandbox.raw.win</code> to register runtime frame and patch history&#x2F;parent&#x2F;event.</td>
+</tr>
+<tr>
+<td><code>BaseSandbox</code></td>
+<td>Know which sandbox is calling document&#x2F;body APIs.</td>
+<td>Use WeakMap to associate sandbox with its tab root.</td>
+</tr>
+<tr>
+<td><code>DocExternals</code> &#x2F; document plugin context</td>
+<td>Scope <code>document.body</code>, queries, and append operations.</td>
+<td>Restrict queries to scoped root; route body portals to tab overlay root.</td>
+</tr>
+<tr>
+<td><code>sandbox.raw.win.RAW_HISTORY</code></td>
+<td>Patch the history Seto actually uses.</td>
+<td>Validate <code>pushState</code> &#x2F; <code>replaceState</code> target before syncing host history.</td>
+</tr>
+</tbody></table>
+<p>Integration order:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">function SetoTabRuntime(&#123; tabId, entry, initialUrl &#125;) &#123;</span><br><span class="line">  const root = getCurrentHotTabRoot(tabId);</span><br><span class="line">  let sandboxRef = null;</span><br><span class="line"></span><br><span class="line">  return (</span><br><span class="line">    &lt;HTMLSandbox</span><br><span class="line">      entry=&#123;entry&#125;</span><br><span class="line">      url=&#123;initialUrl&#125;</span><br><span class="line"></span><br><span class="line">      // DOM must mount into this tab&#x27;s frame, not a global container.</span><br><span class="line">      getContainer=&#123;() =&gt; root&#125;</span><br><span class="line"></span><br><span class="line">      onSandboxReady=&#123;(sandbox) =&gt; &#123;</span><br><span class="line">        sandboxRef = sandbox;</span><br><span class="line"></span><br><span class="line">        registerRuntimeFrame(&#123;</span><br><span class="line">          tabId,</span><br><span class="line">          window: sandbox.raw.win,</span><br><span class="line">          rawHistory: sandbox.raw.win.RAW_HISTORY,</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        installScopedHistory(tabId, sandbox.raw.win);</span><br><span class="line">        installScopedParentProxy(tabId, sandbox.raw.win);</span><br><span class="line">        installScopedEventBridge(tabId, sandbox.raw.win);</span><br><span class="line">      &#125;&#125;</span><br><span class="line">    /&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="History-x2F-Window-Scope"><a href="#History-x2F-Window-Scope" class="headerlink" title="History &#x2F; Window Scope"></a>History &#x2F; Window Scope</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">scopedPushState</span>(<span class="params">state, unused, url</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> target = <span class="title function_">getNavigationTargetFromStateOrPreparedScope</span>(state, url);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (target.<span class="property">tabId</span> !== currentRuntime.<span class="property">tabId</span>) &#123;</span><br><span class="line">    <span class="title function_">recordScopeDrop</span>(&#123;</span><br><span class="line">      <span class="attr">reason</span>: <span class="string">&#x27;history-write-to-wrong-tab&#x27;</span>,</span><br><span class="line">      <span class="attr">from</span>: currentRuntime.<span class="property">tabId</span>,</span><br><span class="line">      <span class="attr">to</span>: target.<span class="property">tabId</span>,</span><br><span class="line">      url,</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  rawHistory.<span class="title function_">pushState</span>(&#123; ...state, <span class="attr">workspaceTargetTabId</span>: target.<span class="property">tabId</span> &#125;, unused, url);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><code>window.parent</code> is also a Proxy, not the raw host window:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">parentProxy.get(&#x27;history&#x27;)  -&gt; scopedHistory</span><br><span class="line">parentProxy.get(&#x27;document&#x27;) -&gt; scopedDocumentFacade</span><br><span class="line">parentProxy.get(&#x27;__workspaceMFEventBus__&#x27;) -&gt; scopedEventBus</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Subapps still use the same interface shape, but every capability they receive is already scoped by tab.</p>
+<h3 id="Event-Scope"><a href="#Event-Scope" class="headerlink" title="Event Scope"></a>Event Scope</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">publishTabLifecycle</span>(<span class="params"><span class="keyword">type</span>, targetTabId</span>) &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> runtime <span class="keyword">of</span> runtimeRegistry.<span class="title function_">all</span>()) &#123;</span><br><span class="line">    <span class="keyword">if</span> (runtime.<span class="property">tabId</span> !== targetTabId) <span class="keyword">continue</span>;</span><br><span class="line">    runtime.<span class="property">eventBus</span>.<span class="title function_">emit</span>(<span class="keyword">type</span>, &#123; <span class="attr">tabId</span>: targetTabId &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="DOM-x2F-Overlay-Scope"><a href="#DOM-x2F-Overlay-Scope" class="headerlink" title="DOM &#x2F; Overlay Scope"></a>DOM &#x2F; Overlay Scope</h3><p>The user-facing issue is simple: a popup or dropdown looks like UI of the current tab, but many libraries append it to global <code>document.body</code>. If the host does not intercept that, hidden tab overlays can cover the current tab or dropdowns can drift because their coordinate system changed.</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">appendChild</span>(<span class="params">parent, node</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> owner = <span class="title function_">resolveOwnerFromCurrentSandboxCallStack</span>();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (parent === rawDocument.<span class="property">body</span> &amp;&amp; owner) &#123;</span><br><span class="line">    <span class="keyword">const</span> overlayRoot = <span class="title function_">getOverlayRoot</span>(owner.<span class="property">tabId</span>, node);</span><br><span class="line">    overlayRoot.<span class="title function_">appendChild</span>(node);</span><br><span class="line">    <span class="keyword">return</span> node;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> <span class="title function_">rawAppendChild</span>(parent, node);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Overlay types are different:</p>
+<ul>
+<li>Select, Dropdown, and Tooltip are floating overlays and need trigger-relative positioning.</li>
+<li>Modal, Drawer, Toast, and Notification are content overlays and should be constrained to the tab content area.</li>
+<li>Large-overlay geometry heuristics should only apply to <code>position: fixed</code>, otherwise absolute dropdowns drift.</li>
+</ul>
+<h3 id="Difficulty-4"><a href="#Difficulty-4" class="headerlink" title="Difficulty"></a>Difficulty</h3><p>A hidden runtime can still produce visible side effects. Without tab owner boundaries around sandbox window and document APIs, “hidden” only means invisible; it does not mean safe.</p>
+<h2 id="Layer-6-Rendered-Runtimes"><a href="#Layer-6-Rendered-Runtimes" class="headerlink" title="Layer 6: Rendered Runtimes"></a>Layer 6: Rendered Runtimes</h2><h3 id="Problem-5"><a href="#Problem-5" class="headerlink" title="Problem"></a>Problem</h3><p>The user sees one current tab, but the host may keep native Workstream, Seto iframe, and MF subapp runtimes alive. If these runtimes are treated as ordinary React components, users see direct failures:</p>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Cause</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>After switching from tab A to B, A’s DOM or iframe still blocks the page or receives clicks.</td>
+<td>Hot runtime is kept alive but not removed from the interactive layer.</td>
+</tr>
+<tr>
+<td>B is visible, but a click, overlay, or URL write still applies to A.</td>
+<td>Visual focus and runtime owner are not synchronized.</td>
+</tr>
+<tr>
+<td>A background tab re-renders because the current URL changed.</td>
+<td>Every retained runtime reads the same global location instead of per-tab location.</td>
+</tr>
+<tr>
+<td>Some pages keep state while others remount.</td>
+<td>Native routes, Seto sandbox, and MF iframe have different lifecycle models.</td>
+</tr>
+<tr>
+<td>Metrics say “switch complete”, but the visible page cannot be clicked.</td>
+<td>Mounted, visible, and interactive are different phases.</td>
+</tr>
+</tbody></table>
+<h3 id="Solution-2"><a href="#Solution-2" class="headerlink" title="Solution"></a>Solution</h3><p>Every hot tab gets a stable frame. The frame is not decoration; it normalizes different runtimes into host semantics.</p>
+<table>
+<thead>
+<tr>
+<th>Frame Responsibility</th>
+<th>Why It Matters</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Stable DOM container</td>
+<td>Switching away does not unmount hot runtime; switching back can keep DOM&#x2F;iframe state.</td>
+</tr>
+<tr>
+<td>Focused &#x2F; hidden state</td>
+<td>Only focused tab is visible and clickable; hidden tabs stay warm but do not participate in current interaction.</td>
+</tr>
+<tr>
+<td>Per-tab location</td>
+<td>The focused tab uses current browser URL; hidden hot tabs use their saved URL.</td>
+</tr>
+<tr>
+<td>Owner synchronization</td>
+<td>Switching updates Seto runtime owner, overlay owner, and event owner together.</td>
+</tr>
+<tr>
+<td>Unified visible timing</td>
+<td>Tab-switch metric reports when the frame is actually visible, not when an arbitrary runtime says ready.</td>
+</tr>
+</tbody></table>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">function HotTabFrame(&#123; tab, isFocused, location &#125;) &#123;</span><br><span class="line">  return (</span><br><span class="line">    &lt;section</span><br><span class="line">      data-hot-tab-id=&#123;tab.id&#125;</span><br><span class="line">      style=&#123;&#123;</span><br><span class="line">        visibility: isFocused ? &#x27;visible&#x27; : &#x27;hidden&#x27;,</span><br><span class="line">        pointerEvents: isFocused ? &#x27;auto&#x27; : &#x27;none&#x27;,</span><br><span class="line">      &#125;&#125;</span><br><span class="line">    &gt;</span><br><span class="line">      &lt;Routes location=&#123;location&#125;&gt;</span><br><span class="line">        &lt;WorkstreamTabRoutes /&gt;</span><br><span class="line">        &lt;SetoHTMLApp /&gt;</span><br><span class="line">        &lt;MFSubAppFrame /&gt;</span><br><span class="line">      &lt;/Routes&gt;</span><br><span class="line">    &lt;/section&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>Switching becomes an ownership update:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">commitFocusedTab</span>(<span class="params">nextTabId</span>) &#123;</span><br><span class="line">  <span class="title function_">setVisibleFrame</span>(nextTabId);</span><br><span class="line">  <span class="title function_">setRuntimeOwner</span>(nextTabId);</span><br><span class="line">  <span class="title function_">setOverlayOwner</span>(nextTabId);</span><br><span class="line">  <span class="title function_">publishTabLifecycle</span>(<span class="string">&#x27;TAB_FOCUSED&#x27;</span>, nextTabId);</span><br><span class="line">  <span class="title function_">reportTabSwitchVisible</span>(nextTabId);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="Difficulty-5"><a href="#Difficulty-5" class="headerlink" title="Difficulty"></a>Difficulty</h3><p>The focused tab visible to the user must match router location, runtime owner, overlay owner, event owner, and metric owner. If any of them lags behind, the user sees B while the background still behaves like A.</p>
+<h2 id="Key-Tradeoffs"><a href="#Key-Tradeoffs" class="headerlink" title="Key Tradeoffs"></a>Key Tradeoffs</h2><table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Simpler Option</th>
+<th>Final Decision</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>URL</td>
+<td>Use <code>/tabs/:id</code> internally</td>
+<td>Keep business URLs. It is harder internally, but refresh and sharing remain correct.</td>
+</tr>
+<tr>
+<td>Open intent</td>
+<td>Let each subapp call routing&#x2F;state directly</td>
+<td>Use host-owned intent. It centralizes reuse, absorb, capacity, and validation.</td>
+</tr>
+<tr>
+<td>Cache</td>
+<td>Keep every runtime alive</td>
+<td>Use bounded hot runtime pool. Recent tabs are fast, but background resource use is capped.</td>
+</tr>
+<tr>
+<td>Seto</td>
+<td>Reload on every switch</td>
+<td>Keep Seto runtime warm, then scope host-facing APIs.</td>
+</tr>
+<tr>
+<td>Isolation</td>
+<td>Hide non-current panels</td>
+<td>Scope history, parent, document, overlays, and events. Hidden DOM alone is insufficient.</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>Only look at old duration numbers</td>
+<td>Split FMP, tab switch v3, long task, scope drop, and stress gates.</td>
+</tr>
+</tbody></table>
+<p>The design is not a tab bar with a more complex UI. A normal tab bar decides which panel is visible. This system also decides which runtime can write the URL, show overlays, receive events, and consume foreground resources.</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/Frontend/" rel="tag">Frontend</a>, <a class="classtest-link" href="/tags/React/" rel="tag">React</a>, <a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a> — <time datetime="2026-05-18T08:30:00.000Z">May 18, 2026</time></p>
+    </footer>
+  </article>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">Made with ❤ and
+        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
+        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
+        </a>
+        
+        at <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+        
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+
+      <!-- Language switcher (globe icon) -->
+      <a class="ml-0 footer-link icon" href="/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" onclick="localStorage.setItem('preferredLang', 'zh')" style="text-decoration: none" aria-label="阅读中文版" title="阅读中文版">
+        <svg class="svg-hov" width="18" role="img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><title>中文</title><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </a>
+
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+
+</body>
+
+</html>
