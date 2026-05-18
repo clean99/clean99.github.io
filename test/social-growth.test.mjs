@@ -10,7 +10,7 @@ import {
   parseXProfileMetrics,
   updateMetricsTemplateFromText,
 } from '../tools/social-growth/capture.mjs';
-import { buildDistributionCandidates, buildXArticle, selectHashtags } from '../tools/social-growth/copy.mjs';
+import { buildDistributionCandidates, buildXArticle, extractKeyPoints, selectHashtags } from '../tools/social-growth/copy.mjs';
 import { expandQueueOptionsForWeeklyCoverage, runDailyGrowthPlan, selectPackageItems } from '../tools/social-growth/daily.mjs';
 import {
   appendSnapshot,
@@ -397,6 +397,37 @@ test('generates article-specific Chinese X copy instead of repeating one templat
   assert.match(strongPosts[0].xArticle.body, /Skill 的价值不是多一段提示词/);
   assert.match(strongPosts[1].xArticle.body, /SEO 不是标签清单/);
   assert.equal(validateQueue(queue).status, 'pass');
+});
+
+test('filters heading-glued fragments from Chinese X Article extraction', () => {
+  const points = extractKeyPoints([
+    '真正的问题 目标看起来很简单：优化 Workspace FMP。',
+    '实际目标更严格： | 指标 | 目标 | | --- | ---: | | 子应用 FMP P90 | 2。',
+    '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+    '测量契约修复后，loop 才开始优化真实瓶颈。',
+  ].join(' '));
+  const article = {
+    title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+    excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+    slug: 'Automated-AI-Performance-Optimization',
+    lang: 'zh',
+    tags: ['AI', 'Software Engineering', 'Web Performance'],
+    text: [
+      '真正的问题 目标看起来很简单：优化 Workspace FMP。',
+      '实际目标更严格： | 指标 | 目标 | | --- | ---: | | 子应用 FMP P90 | 2。',
+      '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+      '测量契约修复后，loop 才开始优化真实瓶颈。',
+    ].join(' '),
+  };
+  const xArticle = buildXArticle(article, 'https://clean99.github.io/zh/post/');
+
+  assert.deepEqual(points, [
+    '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline',
+    '测量契约修复后，loop 才开始优化真实瓶颈',
+  ]);
+  assert.doesNotMatch(xArticle.body, /真正的问题 目标/);
+  assert.doesNotMatch(xArticle.body, /\| 指标 \|/);
+  assert.match(xArticle.body, /没有可重复测量/);
 });
 
 test('exports a browser publish package with image, article, and checklist artifacts', async () => {
@@ -904,6 +935,64 @@ test('quality gate rejects raw blog URLs and low-value X copy', () => {
   assert.equal(validation.status, 'fail');
   assert.equal(validation.failed, 1);
   assert.ok(validation.items[0].errors.some((error) => error.includes('raw blog URLs')));
+});
+
+test('quality gate rejects heading-glued Chinese X Article fragments', () => {
+  const queue = buildPublishQueue([
+    {
+      title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+      excerpt: '核心是可度量的 harness、goal-driven loop。',
+      slug: 'Automated-AI-Performance-Optimization',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering', 'Web Performance'],
+      url: 'https://clean99.github.io/zh/automated-ai-performance/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  queue.items[0] = {
+    ...queue.items[0],
+    xArticle: {
+      ...queue.items[0].xArticle,
+      body: `${queue.items[0].xArticle.body}\n- 真正的问题 目标看起来很简单：优化 Workspace FMP`,
+    },
+  };
+
+  const validation = validateQueue(queue);
+
+  assert.equal(validation.status, 'fail');
+  assert.ok(validation.items[0].errors.some((error) => error.includes('heading-glued')));
+});
+
+test('quality gate rejects table fragments in Chinese X Article bullets', () => {
+  const queue = buildPublishQueue([
+    {
+      title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+      excerpt: '核心是可度量的 harness、goal-driven loop。',
+      slug: 'Automated-AI-Performance-Optimization',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering', 'Web Performance'],
+      url: 'https://clean99.github.io/zh/automated-ai-performance/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  queue.items[0] = {
+    ...queue.items[0],
+    xArticle: {
+      ...queue.items[0].xArticle,
+      body: `${queue.items[0].xArticle.body}\n- 实际目标更严格： | 指标 | 目标 |`,
+    },
+  };
+
+  const validation = validateQueue(queue);
+
+  assert.equal(validation.status, 'fail');
+  assert.ok(validation.items[0].errors.some((error) => error.includes('table fragments')));
 });
 
 test('daily package selection prefers distinct articles before extra variants', () => {

@@ -16,6 +16,13 @@ const LOW_VALUE_ENGAGEMENT_PATTERNS = [
   /怎么看/u,
   /(^|\s)RT($|\s)/i,
 ];
+const HEADING_GLUED_X_ARTICLE_PATTERNS = [
+  /真正的问题\s+目标/u,
+  /先修 Harness，再谈优化\s+\S/u,
+  /Goal-Driven Loop 怎么跑\s+\S/u,
+  /成功落地时改了什么\s+\S/u,
+  /模式[一二三四五六七八九十]\s+\S/u,
+];
 const CHINESE_MECHANISM_PATTERNS = [
   /不是.+而是/u,
   /真正/u,
@@ -111,6 +118,7 @@ export function formatValidationMarkdown(validation) {
     '- First screen contains a Chinese claim plus a concrete mechanism.',
     '- Queue does not reuse the same short post across different articles.',
     '- X Article carries the blog link at the end.',
+    '- X Article does not contain heading-glued or table extraction fragments.',
     '- Image prompt uses gpt-image-2 and is readable as an X image.',
     '- Follow-up replies add substance instead of engagement bait.',
     '',
@@ -193,6 +201,12 @@ function validateXArticle(item, errors, warnings) {
   }
   if (!/##\s*(关键结论|可复用框架)|Useful frame:/u.test(body)) {
     warnings.push('xArticle should include a reusable framework section');
+  }
+  if (item.lang === 'zh' && HEADING_GLUED_X_ARTICLE_PATTERNS.some((pattern) => pattern.test(body))) {
+    errors.push('Chinese X Article contains heading-glued extraction fragments');
+  }
+  if (item.lang === 'zh' && /^\s*-\s+.*\|.*$/mu.test(body)) {
+    errors.push('Chinese X Article contains table fragments in bullet points');
   }
 }
 

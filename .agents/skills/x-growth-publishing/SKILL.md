@@ -209,6 +209,7 @@ Quality gate:
 - reject short posts that do not state a Chinese claim plus a concrete mechanism in the first screen;
 - reject duplicated short posts across different articles;
 - require the X Article to carry the blog URL at the end under `博客原文：`;
+- reject X Article extraction artifacts such as heading-glued fragments or Markdown table fragments in bullet points;
 - require `gpt-image-2`, `1536x1024`, and mobile-readable image prompts;
 - reject low-value follow-up replies such as "怎么看", "点赞", "转发", or generic comment bait.
 

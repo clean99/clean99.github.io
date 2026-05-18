@@ -57,6 +57,7 @@ Core records:
 - `Article`: parsed from `source/_posts/*.md`.
 - `DistributionCandidate`: one article, one X variant, one UTM URL, a Chinese short post, an X Article draft, and an image prompt. The short post does not include the blog URL, and Chinese copy is generated from an article-specific topic frame.
 - `QualityGate`: deterministic checks for raw blog URLs, weak first-screen structure, duplicated short posts across articles, X Article link placement, image prompt requirements, and low-value follow-up replies.
+- The X Article gate also rejects obvious extraction artifacts, including section-heading fragments glued to body text and Markdown table fragments inside bullets.
 - `PublishQueue`: local draft queue of candidates to hand to Chrome.
 - `WeeklyExecutionPlan`: seven-day posting and metrics-capture schedule tied to the follower target.
 - `PublishPreflight`: the selected package, expected image path, image generation command, blockers, and browser stop points.

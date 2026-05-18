@@ -169,8 +169,8 @@ const ARTICLE_FRAMES = [
       mechanism: 'baseline -> change -> verify -> ledger',
       imageTitle: '可度量的 AI 工程闭环',
       diagramText: 'baseline -> change -> verify -> ledger',
-      coreClaim: '没有可重复 measurement，AI 优化就是在讲故事。',
-      failureMode: 'measurement 错了，任何性能收益都不能算数。',
+      coreClaim: '没有可重复测量，AI 优化就是在讲故事。',
+      failureMode: '测量口径错了，任何性能收益都不能算数。',
       readerPayoff: '判断 AI 优化到底有没有胡说',
       frameworkSteps: [
         '定义一个用户可感知指标。',
@@ -352,11 +352,14 @@ export function buildChineseXArticleBody(article, targetUrl) {
     '## 关键结论',
     '',
     ...dedupePoints([
-      clamp(takeaway, 120),
+      sanitizeArticlePoint(takeaway),
       frame.failureMode,
       `读者应该带走的是：${frame.readerPayoff}。`,
       ...points,
-    ]).slice(0, 5).map((point) => `- ${point}`),
+    ])
+      .filter((point) => point !== frame.coreClaim)
+      .slice(0, 5)
+      .map((point) => `- ${point}`),
     '',
     '## 可复用框架',
     '',
@@ -482,14 +485,28 @@ export function articleFrame(article) {
 export function extractKeyPoints(text, limit = 5) {
   const normalized = String(text || '')
     .split(/[。！？.!?]\s*/)
-    .map((item) => item.trim())
+    .map((item) => sanitizeArticlePoint(item))
+    .filter(Boolean)
     .filter((item) => item.length >= 18 && item.length <= 120)
-    .filter((item) => !/[|]{2,}/.test(item))
+    .filter((item) => !/[|]/.test(item))
     .filter((item) => !/^\d+(\.\d+)?s\s*\|/.test(item))
     .filter((item) => !/^\|/.test(item))
-    .filter((item) => !/^TL;DR/i.test(item));
+    .filter((item) => !/^TL;DR/i.test(item))
+    .filter((item) => !isHeadingGluedPoint(item));
 
   return normalized.slice(0, limit);
+}
+
+export function sanitizeArticlePoint(point) {
+  return String(point || '')
+    .replace(/\s+/g, ' ')
+    .replace(/^#+\s*/, '')
+    .trim();
+}
+
+export function isHeadingGluedPoint(point) {
+  return /^(真正的问题|先修 Harness，再谈优化|Goal-Driven Loop 怎么跑|成功落地时改了什么|模式[一二三四五六七八九十]|结论|为什么值得读原文)\s+\S/u
+    .test(String(point || '').trim());
 }
 
 export function dedupePoints(points) {
