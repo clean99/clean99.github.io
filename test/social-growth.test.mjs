@@ -675,7 +675,7 @@ test('builds publish queue and composes handoff posts without losing the URL', (
   const composed = composePublishPosts(queue.items[0]);
   assert.equal(composed.length, 1);
   assert.ok(!composed[0].includes('https://clean99.github.io/zh/2026/05/18/Useful-Systems/'));
-  assert.ok(composed[0].includes('#软件工程'));
+  assert.doesNotMatch(composed[0], /#[\p{Script=Han}A-Za-z0-9_]+/u);
   assert.ok(queue.items[0].xArticle.body.includes('博客原文：https://clean99.github.io/zh/2026/05/18/Useful-Systems/'));
   assert.ok(queue.items[0].media.prompt.includes('gpt-image-2') || queue.items[0].media.model === 'gpt-image-2');
   assert.ok(queue.items[0].threadFallback[2].includes('完整过程'));
@@ -976,8 +976,6 @@ test('copy override bridge lets a writing skill replace queue copy locally', asy
         '同一条 path 换了测量条件，后面所有收益都会变成故事。',
         '',
         '配图放 baseline -> change -> verify -> ledger，后面贴完整复盘。',
-        '',
-        '#AI #软件工程',
       ].join('\n'),
       xArticle: {
         title: 'AI 性能优化，先别谈建议',
@@ -5657,6 +5655,32 @@ test('quality gate rejects negative-parallelism Chinese X templates', () => {
   assert.ok(validation.items[0].errors.some((error) => error.includes('low-value meta copy')));
 });
 
+test('quality gate rejects Chinese short post hashtags by default', () => {
+  const queue = buildPublishQueue([
+    {
+      title: '有用的系统',
+      excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈诚实。',
+      slug: 'Useful-Systems',
+      lang: 'zh',
+      tags: ['AI'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  queue.items[0] = {
+    ...queue.items[0],
+    shortPost: `${queue.items[0].shortPost}\n\n#AI`,
+  };
+
+  const validation = validateQueue(queue);
+
+  assert.equal(validation.status, 'fail');
+  assert.ok(validation.items[0].errors.some((error) => error.includes('should not include hashtags')));
+});
+
 test('quality gate rejects heading-glued Chinese X Article fragments', () => {
   const queue = buildPublishQueue([
     {
@@ -6481,8 +6505,8 @@ test('merges daily queues without losing published URLs', () => {
   assert.ok(merged.items[0].targetUrl.includes('utm_campaign=new'));
 });
 
-test('maps existing tags to Chinese audience hashtags', () => {
-  assert.equal(selectHashtags(['AI', 'Software Engineering', 'Web Performance'], 'zh'), '#AI #软件工程');
+test('keeps Chinese X short posts hashtag-free by default', () => {
+  assert.equal(selectHashtags(['AI', 'Software Engineering', 'Web Performance'], 'zh'), '');
   assert.equal(selectHashtags(['Software Engineering'], 'en'), '#SoftwareEngineering');
 });
 

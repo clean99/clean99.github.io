@@ -2,17 +2,6 @@ import { addUtm } from './articles.mjs';
 
 const DEFAULT_CAMPAIGN = 'blog-growth-2026w21';
 const MAX_POST_CHARS = 260;
-const CHINESE_HASHTAGS = new Map([
-  ['AI', 'AI'],
-  ['ChatGPT', 'ChatGPT'],
-  ['Software Engineering', '软件工程'],
-  ['Web Performance', '前端性能'],
-  ['Frontend', '前端'],
-  ['React', 'React'],
-  ['testing', '软件测试'],
-  ['tdd', 'TDD'],
-  ['code generation', '代码生成'],
-]);
 
 const DEFAULT_FRAME = {
   topic: '工程判断',
@@ -292,6 +281,8 @@ export function buildDistributionCandidates(article, options = {}) {
 
 export function buildShortPost(article, variant) {
   const hook = shortPostHook(article, variant);
+  if (article.lang === 'zh') return clampPost(hook);
+
   const tags = selectHashtags(article.tags, article.lang);
   return clampPost(`${hook}${tags ? `\n\n${tags}` : ''}`);
 }
@@ -363,6 +354,8 @@ export function usefulLesson(article) {
 }
 
 export function selectHashtags(tags, lang = 'en') {
+  if (lang === 'zh') return '';
+
   const selected = tags
     .map((tag) => normalizeHashtag(tag, lang))
     .filter(Boolean)
@@ -373,11 +366,7 @@ export function selectHashtags(tags, lang = 'en') {
 }
 
 export function normalizeHashtag(tag, lang = 'en') {
-  if (lang === 'zh') {
-    const mapped = CHINESE_HASHTAGS.get(tag) || tag;
-    const normalized = mapped.replace(/\s+/g, '');
-    return /^[\p{Script=Han}A-Za-z0-9]{1,24}$/u.test(normalized) ? normalized : '';
-  }
+  if (lang === 'zh') return '';
 
   if (!/^[A-Za-z][A-Za-z0-9 -]{1,24}$/.test(tag)) return '';
   return tag.replace(/\s+/g, '');

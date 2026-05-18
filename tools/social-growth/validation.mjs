@@ -229,7 +229,9 @@ function validateShortPost(item, errors, warnings) {
     warnings.push(`shortPost does not strongly match ${item.variant} structure`);
   }
   const hashtags = shortPost.match(/#[\p{Script=Han}A-Za-z0-9_]+/gu) || [];
-  if (hashtags.length > HASHTAG_MAX_COUNT) {
+  if (item.lang === 'zh' && hashtags.length) {
+    errors.push('Chinese shortPost should not include hashtags by default');
+  } else if (hashtags.length > HASHTAG_MAX_COUNT) {
     warnings.push(`shortPost has more than ${HASHTAG_MAX_COUNT} hashtags`);
   }
 }

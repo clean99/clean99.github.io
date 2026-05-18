@@ -210,7 +210,7 @@ Use \`x-technical-sharing\` to replace only these JSON fields:
 - \`threadFallback\`
 - \`followUpReplies\`
 
-Keep the short post X-native: concrete Chinese claim, mechanism in the first two lines, no blog URL, image/X Article handoff, at most two hashtags.
+Keep the short post X-native: concrete Chinese claim, mechanism in the first two lines, no blog URL, image/X Article handoff, and no hashtags by default.
 
 Keep the X Article causal: observable problem, cause, mechanism, tradeoff, validation, and the blog link only at the end under \`博客原文：\`.
 
