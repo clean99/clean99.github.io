@@ -35,12 +35,14 @@ export function buildPublishConfirmation({
     ...(xPublishPrep?.blockers || []),
   ]);
   const contentReview = reviewContent(item);
+  const publishMode = xPublishPrep?.publishMode || 'x_article';
 
   return {
     generatedAt: toIsoString(generatedAt),
     status: confirmationStatus({ blockers, contentReview }),
     blockers,
     contentReview,
+    publishMode,
     selected: {
       id: item.id,
       articleSlug: item.articleSlug,
@@ -52,22 +54,26 @@ export function buildPublishConfirmation({
     },
     content: {
       xArticle: item.xArticle || {},
-      imagePost: imagePostWithArticlePlaceholder(item.shortPost || '', ARTICLE_URL_PLACEHOLDER),
+      imagePost: publishMode === 'thread_fallback'
+        ? (item.threadFallback?.[0] || item.shortPost || '')
+        : imagePostWithArticlePlaceholder(item.shortPost || '', ARTICLE_URL_PLACEHOLDER),
       followUpReplies: item.followUpReplies || [],
       threadFallback: item.threadFallback || [],
     },
     commands: {
       prepareArticle: xPublishPrep?.commands?.prepareArticle || '',
       prepareShortPost: xPublishPrep?.commands?.prepareShortPost || '',
-      recordPublished: preflight.browser?.recordCommand || `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${item.id} --url <x-post-url> --article-url <x-article-url>`,
+      recordPublished: publishMode === 'thread_fallback'
+        ? `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${item.id} --url <x-thread-url>`
+        : (preflight.browser?.recordCommand || `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${item.id} --url <x-post-url> --article-url <x-article-url>`),
     },
     stopBefore: [
-      'final X Article publish click',
+      publishMode === 'thread_fallback' ? null : 'final X Article publish click',
       'media upload or cover upload confirmation',
-      'final image-backed short-post publish click',
+      publishMode === 'thread_fallback' ? 'final image-backed thread first-post publish click' : 'final image-backed short-post publish click',
       'each public follow-up Reply click',
       'any like, repost, quote, follow, profile edit, or pinned-post action',
-    ],
+    ].filter(Boolean),
   };
 }
 
@@ -97,6 +103,7 @@ Status: ${packet.status}
 - Package: \`${packet.selected.packageDir}\`
 - Image: \`${packet.selected.imagePath}\`
 - Image ready: ${packet.selected.imageReady}
+- Publish mode: ${packet.publishMode}
 - Blog URL: ${packet.selected.targetUrl}
 
 ## Local Blockers
@@ -120,34 +127,15 @@ npm run social:confirmation -- --id ${packet.selected.id} --out data/social-grow
 
 ## Approval Order
 
-1. Confirm the Chrome account is \`@Clean993\`.
-2. Review and prepare the X Article below.
-3. Stop before the final X Article publish click.
-4. After the X Article is public, replace \`${ARTICLE_URL_PLACEHOLDER}\` in the image post with the real X Article URL.
-5. Review and prepare the image-backed short post below.
-6. Stop before the final short-post publish click.
-7. Only after the short post is public, review optional follow-up replies.
-8. Stop before each public Reply click.
+${formatApprovalOrder(packet)}
 
 ## Stop Points
 
 ${stopPoints}
 
-## X Article To Review
+${formatPrimaryArticleSection(packet)}
 
-Title:
-
-\`\`\`text
-${packet.content.xArticle.title || ''}
-\`\`\`
-
-Body:
-
-\`\`\`markdown
-${packet.content.xArticle.body || ''}
-\`\`\`
-
-## Image-backed Short Post To Review
+## Image-backed ${packet.publishMode === 'thread_fallback' ? 'Thread First Post' : 'Short Post'} To Review
 
 \`\`\`text
 ${packet.content.imagePost}
@@ -169,7 +157,7 @@ Prepare X Article:
 ${packet.commands.prepareArticle || '# No x-article command generated.'}
 \`\`\`
 
-Prepare image-backed short post after replacing the article URL:
+Prepare ${packet.publishMode === 'thread_fallback' ? 'thread first post' : 'image-backed short post after replacing the article URL'}:
 
 \`\`\`bash
 ${packet.commands.prepareShortPost || '# No short-post command generated.'}
@@ -187,6 +175,48 @@ ${packet.commands.recordPublished}
 
 This file is not permission to perform public X actions. Publishing, uploading media, replying, liking, reposting, quoting, following, editing the profile, and pinning content still require action-time confirmation.
 `;
+}
+
+function formatApprovalOrder(packet) {
+  if (packet.publishMode === 'thread_fallback') {
+    return `1. Confirm the Chrome account is \`@Clean993\`.
+2. Review and prepare the image-backed thread first post below.
+3. Stop before media upload confirmation and the final thread first-post publish click.
+4. Only after the first post is public, prepare the remaining thread replies.
+5. Stop before each public Reply click.
+6. Record the public thread URL.`;
+  }
+
+  return `1. Confirm the Chrome account is \`@Clean993\`.
+2. Review and prepare the X Article below.
+3. Stop before the final X Article publish click.
+4. After the X Article is public, replace \`${ARTICLE_URL_PLACEHOLDER}\` in the image post with the real X Article URL.
+5. Review and prepare the image-backed short post below.
+6. Stop before the final short-post publish click.
+7. Only after the short post is public, review optional follow-up replies.
+8. Stop before each public Reply click.`;
+}
+
+function formatPrimaryArticleSection(packet) {
+  if (packet.publishMode === 'thread_fallback') {
+    return `## X Article Status
+
+X Article publishing is unavailable for this account/browser path. Use the thread fallback as the primary publishing path for this package.`;
+  }
+
+  return `## X Article To Review
+
+Title:
+
+\`\`\`text
+${packet.content.xArticle.title || ''}
+\`\`\`
+
+Body:
+
+\`\`\`markdown
+${packet.content.xArticle.body || ''}
+\`\`\``;
 }
 
 export async function writePublishConfirmation(packet, filePath = DEFAULT_OUT_PATH) {

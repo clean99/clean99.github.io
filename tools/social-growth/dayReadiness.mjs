@@ -16,6 +16,8 @@ export async function buildDayReadiness({
   ensurePackage = true,
   xSkillDir,
   xBunCommand,
+  xProfileDir,
+  publishMode,
   env = process.env,
 } = {}) {
   const plan = buildWeeklyExecutionPlan({ queue, ledger, now });
@@ -42,6 +44,8 @@ export async function buildDayReadiness({
     const xPrep = await buildXPublishPrep(preflight, {
       skillDir: xSkillDir,
       bunCommand: xBunCommand,
+      profileDir: xProfileDir,
+      publishMode,
     });
 
     slots.push({
@@ -55,6 +59,7 @@ export async function buildDayReadiness({
       imageReady: preflight.image.ready,
       preflightStatus: preflight.status,
       xPrepStatus: xPrep.status,
+      publishMode: xPrep.publishMode,
       blockers: dedupe([
         ...preflight.blockers,
         ...xPrep.blockers,
@@ -127,6 +132,7 @@ function formatSlot(slot) {
 - Image ready: ${slot.imageReady}
 - Preflight: ${slot.preflightStatus}
 - X prep: ${slot.xPrepStatus}
+- Publish mode: ${slot.publishMode}
 
 Blockers:
 

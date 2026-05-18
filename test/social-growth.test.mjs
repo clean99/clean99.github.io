@@ -1965,6 +1965,7 @@ test('x publish prep bridges selected package to baoyu-post-to-x commands', asyn
       skillDir,
       bunCommand: 'bun',
       articleUrlPlaceholder: 'https://x.com/Clean993/articles/123',
+      profileDir: '/tmp/x-profile',
     });
     const markdown = formatXPublishPrepMarkdown(prep);
     const writtenPath = await writeXPublishPrep(prep, join(outDir, 'x-publish-prep.md'));
@@ -1974,11 +1975,76 @@ test('x publish prep bridges selected package to baoyu-post-to-x commands', asyn
     assert.equal(prep.blockers.length, 0);
     assert.match(prep.commands.prepareArticle, /x-article\.ts/);
     assert.match(prep.commands.prepareArticle, /--cover/);
+    assert.match(prep.commands.prepareArticle, /--profile '\/tmp\/x-profile'/);
     assert.match(prep.commands.prepareShortPost, /x-browser\.ts/);
     assert.match(prep.commands.prepareShortPost, /--image/);
+    assert.match(prep.commands.prepareShortPost, /--profile '\/tmp\/x-profile'/);
     assert.match(markdown, /baoyu-post-to-x Bridge/);
+    assert.match(markdown, /Chrome profile: `\/tmp\/x-profile`/);
     assert.match(markdown, /Stop before the final public post click/);
     assert.match(persisted, /ARTICLE_URL='https:\/\/x\.com\/Clean993\/articles\/123'/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('x publish prep can fall back to an image-backed thread when X Article is unavailable', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-x-thread-prep-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    const imagePath = join(imageDir, `${queue.items[0].id}.png`);
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(imagePath, 'fake image');
+
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      id: queue.items[0].id,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+    const prep = await buildXPublishPrep(preflight, {
+      skillDir,
+      bunCommand: 'bun',
+      publishMode: 'thread',
+      profileDir: '/tmp/x-profile',
+    });
+    const markdown = formatXPublishPrepMarkdown(prep);
+
+    assert.equal(prep.status, 'ready');
+    assert.equal(prep.publishMode, 'thread_fallback');
+    assert.equal(prep.blockers.length, 0);
+    assert.match(prep.commands.prepareArticle, /X Article is unavailable/);
+    assert.match(prep.commands.prepareShortPost, /x-browser\.ts/);
+    assert.match(prep.commands.prepareShortPost, /--image/);
+    assert.match(prep.commands.prepareShortPost, /--profile '\/tmp\/x-profile'/);
+    assert.match(prep.commands.prepareShortPost, /Workspace v2 Tab System 性能优化/);
+    assert.match(markdown, /Publish mode: thread_fallback/);
+    assert.match(markdown, /Thread Replies After First Post/);
+    assert.doesNotMatch(markdown, /ARTICLE_URL=/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -2076,6 +2142,69 @@ test('publish confirmation packet combines copy, commands, and public action sto
     assert.match(markdown, /final image-backed short-post publish click/);
     assert.match(markdown, /social:mark-published/);
     assert.match(persisted, /This file is not permission to perform public X actions/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('publish confirmation uses thread fallback when X Article is unavailable', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-thread-confirmation-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    const imagePath = join(imageDir, `${queue.items[0].id}.png`);
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(imagePath, 'fake image');
+
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      id: queue.items[0].id,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+    const prep = await buildXPublishPrep(preflight, {
+      skillDir,
+      bunCommand: 'bun',
+      publishMode: 'thread_fallback',
+    });
+    const packet = buildPublishConfirmation({
+      queue,
+      preflight,
+      xPublishPrep: prep,
+    });
+    const markdown = formatPublishConfirmationMarkdown(packet);
+
+    assert.equal(packet.status, 'ready_for_confirmation');
+    assert.equal(packet.publishMode, 'thread_fallback');
+    assert.doesNotMatch(packet.content.imagePost, /<x-article-url>/);
+    assert.match(packet.content.imagePost, /Workspace v2 Tab System 性能优化/);
+    assert.match(packet.commands.recordPublished, /<x-thread-url>/);
+    assert.match(markdown, /X Article Status/);
+    assert.match(markdown, /Image-backed Thread First Post To Review/);
+    assert.doesNotMatch(markdown, /replace `<x-article-url>`/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

@@ -276,6 +276,8 @@ if (command === 'articles') {
     engagementLimit: args.engagementLimit || 5,
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
+    xProfileDir: args.xProfileDir || args.profileDir,
+    publishMode: args.publishMode || args.articleMode,
     preferReadyImage: args.preferReadyImage === 'true',
     packageLimit: args.packageLimit || 3,
     weeklyDays: args.days || 7,
@@ -332,6 +334,8 @@ if (command === 'articles') {
     engagementLimit: args.engagementLimit || 5,
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
+    xProfileDir: args.xProfileDir || args.profileDir,
+    publishMode: args.publishMode || args.articleMode,
     preferReadyImage: args.preferReadyImage !== 'false',
     packageLimit: args.packageLimit || 3,
     weeklyDays: args.days || 7,
@@ -363,6 +367,8 @@ if (command === 'articles') {
     ensurePackage: args.ensurePackage !== 'false',
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
+    xProfileDir: args.xProfileDir || args.profileDir,
+    publishMode: args.publishMode || args.articleMode,
   });
   if (args.out) {
     await writeDayReadiness(readiness, args.out);
@@ -390,6 +396,8 @@ if (command === 'articles') {
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
+    xProfileDir: args.xProfileDir || args.profileDir,
+    publishMode: args.publishMode || args.articleMode,
     env: process.env,
   });
   if (args.out) {
@@ -671,6 +679,8 @@ if (command === 'articles') {
     skillDir: args.skillDir,
     bunCommand: args.bunCommand || 'npx -y bun',
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
+    publishMode: args.publishMode || args.articleMode,
+    profileDir: args.xProfileDir || args.profileDir,
   });
   if (args.out) {
     await writeXPublishPrep(prep, args.out);
@@ -699,6 +709,8 @@ if (command === 'articles') {
     skillDir: args.skillDir,
     bunCommand: args.bunCommand || 'npx -y bun',
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
+    publishMode: args.publishMode || args.articleMode,
+    profileDir: args.xProfileDir || args.profileDir,
   });
   const packet = buildPublishConfirmation({
     queue,

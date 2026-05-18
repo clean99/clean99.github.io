@@ -28,6 +28,8 @@ export async function buildDailyExecutionBrief({
   packageOutDir = 'data/social-growth/packages',
   xSkillDir,
   xBunCommand,
+  xProfileDir,
+  publishMode,
   env = process.env,
 } = {}) {
   const generatedAt = toIsoString(now);
@@ -41,6 +43,8 @@ export async function buildDailyExecutionBrief({
     ensurePackage: true,
     xSkillDir,
     xBunCommand,
+    xProfileDir,
+    publishMode,
     env,
   });
   const engagementSearch = buildEngagementSearchPlan({
@@ -217,7 +221,7 @@ function formatSlot(slot) {
     ? slot.blockers.join('; ')
     : 'none';
   return `- ${slot.time}: ${slot.id}
-  Image ready: ${slot.imageReady}; preflight: ${slot.preflightStatus}; X prep: ${slot.xPrepStatus}; blockers: ${blockers}`;
+  Image ready: ${slot.imageReady}; preflight: ${slot.preflightStatus}; X prep: ${slot.xPrepStatus}; mode: ${slot.publishMode}; blockers: ${blockers}`;
 }
 
 function buildActionItems({

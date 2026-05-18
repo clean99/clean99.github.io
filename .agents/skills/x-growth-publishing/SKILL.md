@@ -168,6 +168,21 @@ npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-pre
 ```
 
 This command does not publish. It emits commands for the `x-article.ts` and `x-browser.ts` scripts and keeps the stop-before-final-click boundary explicit.
+If the account/browser probe shows `https://x.com/compose/articles` is unavailable, use the thread fallback mode instead of pretending X Article publishing works:
+
+```bash
+npm run social:x-prep -- --day 1 --slot 1 --publishMode thread_fallback --out data/social-growth/x-publish-prep.md
+npm run social:confirmation -- --day 1 --slot 1 --publishMode thread_fallback --out data/social-growth/publish-confirmation.md
+```
+
+Thread fallback mode prepares the first thread post with the generated image, lists the remaining thread replies, removes the `<x-article-url>` placeholder, and records only the public thread URL after confirmed publication.
+If the default `baoyu-post-to-x` browser opens without the expected X login, pass a persistent logged-in profile directory:
+
+```bash
+npm run social:x-prep -- --day 1 --slot 1 --publishMode thread_fallback --xProfileDir "$HOME/Library/Application Support/baoyu-skills/chrome-profile" --out data/social-growth/x-publish-prep.md
+```
+
+Do not point this at a profile that is currently locked by another running Chrome unless you have verified the helper can reuse it.
 
 For single-item control:
 

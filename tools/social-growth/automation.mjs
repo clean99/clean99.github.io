@@ -97,6 +97,8 @@ export async function runSafeAutomationCycle({
   engagementLimit = 5,
   xSkillDir,
   xBunCommand,
+  xProfileDir,
+  publishMode,
   preferReadyImage = false,
   packageLimit = 3,
   weeklyDays = 7,
@@ -176,6 +178,8 @@ export async function runSafeAutomationCycle({
   const xPublishPrep = await buildXPublishPrep(preflight, {
     skillDir: xSkillDir,
     bunCommand: xBunCommand,
+    profileDir: xProfileDir,
+    publishMode,
   });
   await writeXPublishPrep(xPublishPrep, xPublishPrepPath);
   const publishConfirmation = buildPublishConfirmation({
@@ -233,6 +237,8 @@ export async function runSafeAutomationCycle({
     packageOutDir,
     xSkillDir,
     xBunCommand,
+    xProfileDir,
+    publishMode,
     env,
   });
   await writeDailyExecutionBrief(dailyBrief, dailyBriefPath);
