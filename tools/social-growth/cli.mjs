@@ -726,7 +726,7 @@ if (command === 'articles') {
   });
   const prep = await buildXPublishPrep(preflight, {
     skillDir: args.skillDir,
-    bunCommand: args.bunCommand || 'npx -y bun',
+    bunCommand: args.bunCommand,
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
     publishMode: args.publishMode || args.articleMode,
     profileDir: args.xProfileDir || args.profileDir,
@@ -756,7 +756,7 @@ if (command === 'articles') {
   });
   const prep = await buildXPublishPrep(preflight, {
     skillDir: args.skillDir,
-    bunCommand: args.bunCommand || 'npx -y bun',
+    bunCommand: args.bunCommand,
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
     publishMode: args.publishMode || args.articleMode,
     profileDir: args.xProfileDir || args.profileDir,
@@ -801,7 +801,7 @@ if (command === 'articles') {
   });
   const prep = await buildXPublishPrep(preflight, {
     skillDir: args.skillDir,
-    bunCommand: args.bunCommand || 'npx -y bun',
+    bunCommand: args.bunCommand,
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
     publishMode: args.publishMode || args.articleMode,
     profileDir: args.xProfileDir || args.profileDir,

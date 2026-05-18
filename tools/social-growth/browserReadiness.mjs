@@ -49,6 +49,9 @@ export function buildBrowserReadiness({
   }
   if (xPrep?.status && xPrep.status !== 'ready') {
     blockers.push('X publish prep is not ready.');
+    for (const blocker of xPrep.blockers || []) {
+      blockers.push(`X publish prep blocker: ${blocker}`);
+    }
   }
   if (signals.chromeRunning === 'no') {
     blockers.push('Google Chrome is not running.');
@@ -226,6 +229,13 @@ function nextActions({ blockers, signals, publishMode, profileDir }) {
       priority: 'P0',
       action: 'Confirm opening a new Chrome window for the selected profile, then retry the Chrome extension connection.',
       reason: 'The extension and native host are installed, but the active communication pipe is closed.',
+    });
+  }
+  if (blockers.some((item) => item.includes('Bun runtime is unavailable'))) {
+    actions.push({
+      priority: 'P0',
+      action: 'Install bun or rerun the X prep command with --bunCommand pointing to an executable Bun command.',
+      reason: 'The baoyu-post-to-x browser handoff cannot run until its TypeScript scripts have a Bun runtime.',
     });
   }
   if (blockers.some((item) => item.includes('not logged into X'))) {

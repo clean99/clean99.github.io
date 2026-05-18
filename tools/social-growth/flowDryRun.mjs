@@ -84,7 +84,7 @@ export async function runXGrowthDryRun({
   });
   const xPrep = await buildXPublishPrep(preflight, {
     skillDir: xSkillDir,
-    bunCommand: xBunCommand || 'npx -y bun',
+    bunCommand: xBunCommand,
     articleUrlPlaceholder: dryUrls.xArticleUrl,
   });
   const paths = pathsForDryRun(dryRunDir, outPath);

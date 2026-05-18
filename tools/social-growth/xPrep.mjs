@@ -1,16 +1,16 @@
 import { access, mkdir, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, delimiter } from 'node:path';
 import { homedir } from 'node:os';
 
 const DEFAULT_OUT_PATH = 'data/social-growth/x-publish-prep.md';
-const DEFAULT_BUN_COMMAND = 'npx -y bun';
 
 export async function buildXPublishPrep(preflight, {
   skillDir = defaultBaoyuPostToXSkillDir(),
-  bunCommand = DEFAULT_BUN_COMMAND,
+  bunCommand,
   articleUrlPlaceholder = '<x-article-url>',
   publishMode = 'x_article',
   profileDir,
+  runtimeResolver = resolveBunCommand,
 } = {}) {
   if (!preflight?.selected?.id) {
     throw new Error('preflight with a selected item is required');
@@ -33,6 +33,10 @@ export async function buildXPublishPrep(preflight, {
   const threadReplies = threadFallback.slice(1);
   const blockers = [...(preflight.blockers || [])];
   const profileArg = profileDir ? ` --profile ${shellQuote(profileDir)}` : '';
+  const runtime = await runtimeResolver(bunCommand);
+  const runtimeCommand = runtime.command || '# Install bun or npx before running baoyu-post-to-x';
+
+  if (runtime.blocker) blockers.push(runtime.blocker);
 
   if (resolvedPublishMode === 'x_article' && !(await fileExists(scripts.article))) {
     blockers.push(`baoyu-post-to-x article script is missing: ${scripts.article}`);
@@ -58,22 +62,23 @@ export async function buildXPublishPrep(preflight, {
     skill: {
       name: 'baoyu-post-to-x',
       dir: skillDir,
-      bunCommand,
+      bunCommand: runtime.command,
+      runtimeStatus: runtime.status,
       scripts,
       profileDir,
     },
     commands: {
       prepareArticle: resolvedPublishMode === 'x_article'
-        ? `${bunCommand} ${shellQuote(scripts.article)} ${shellQuote(files.xArticle)} --cover ${shellQuote(files.image)}${profileArg}`
+        ? `${runtimeCommand} ${shellQuote(scripts.article)} ${shellQuote(files.xArticle)} --cover ${shellQuote(files.image)}${profileArg}`
         : '# X Article is unavailable for this account. Use the thread fallback command below.',
       prepareShortPost: resolvedPublishMode === 'x_article'
         ? [
           `ARTICLE_URL=${shellQuote(articleUrlPlaceholder)}`,
           `SHORT_POST="$(cat ${shellQuote(files.shortPost)}; printf '\\n\\n%s' "$ARTICLE_URL")"`,
-          `${bunCommand} ${shellQuote(scripts.regularPost)} "$SHORT_POST" --image ${shellQuote(files.image)}${profileArg}`,
+          `${runtimeCommand} ${shellQuote(scripts.regularPost)} "$SHORT_POST" --image ${shellQuote(files.image)}${profileArg}`,
         ].join('\n')
-        : `${bunCommand} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${profileArg}`,
-      prepareThreadFirstPost: `${bunCommand} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${profileArg}`,
+        : `${runtimeCommand} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${profileArg}`,
+      prepareThreadFirstPost: `${runtimeCommand} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${profileArg}`,
     },
     boundary: [
       'The baoyu-post-to-x scripts may open Chrome and fill editors.',
@@ -108,7 +113,8 @@ Status: ${prep.status}
 ## baoyu-post-to-x Bridge
 
 - Skill dir: \`${prep.skill.dir}\`
-- Runtime: \`${prep.skill.bunCommand}\`
+- Runtime: ${prep.skill.bunCommand ? `\`${prep.skill.bunCommand}\`` : 'unavailable'}
+- Runtime status: ${prep.skill.runtimeStatus}
 - X Article script: \`${prep.skill.scripts.article}\`
 - Regular post script: \`${prep.skill.scripts.regularPost}\`
 - Chrome profile: ${prep.skill.profileDir ? `\`${prep.skill.profileDir}\`` : 'default baoyu shared profile'}
@@ -183,6 +189,66 @@ async function fileExists(filePath) {
     if (error.code === 'ENOENT') return false;
     throw error;
   }
+}
+
+async function resolveBunCommand(preferredCommand) {
+  const preferred = String(preferredCommand || '').trim();
+  if (preferred) {
+    return {
+      command: preferred,
+      status: 'provided',
+      blocker: null,
+    };
+  }
+
+  if (await executableOnPath('bun')) {
+    return {
+      command: 'bun',
+      status: 'auto_bun',
+      blocker: null,
+    };
+  }
+
+  const homeBun = join(homedir(), '.bun/bin/bun');
+  if (await fileExists(homeBun)) {
+    return {
+      command: shellQuote(homeBun),
+      status: 'auto_home_bun',
+      blocker: null,
+    };
+  }
+
+  for (const bunPath of ['/opt/homebrew/bin/bun', '/usr/local/bin/bun']) {
+    if (await fileExists(bunPath)) {
+      return {
+        command: shellQuote(bunPath),
+        status: 'auto_absolute_bun',
+        blocker: null,
+      };
+    }
+  }
+
+  if (await executableOnPath('npx')) {
+    return {
+      command: 'npx -y bun',
+      status: 'auto_npx_bun',
+      blocker: null,
+    };
+  }
+
+  return {
+    command: null,
+    status: 'missing',
+    blocker: 'Bun runtime is unavailable: install bun or provide --bunCommand with an executable command before preparing Chrome.',
+  };
+}
+
+async function executableOnPath(name) {
+  const paths = String(process.env.PATH || '').split(delimiter).filter(Boolean);
+  for (const dir of paths) {
+    if (await fileExists(join(dir, name))) return true;
+  }
+  return false;
 }
 
 function shellQuote(value) {

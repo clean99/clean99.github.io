@@ -353,7 +353,6 @@ function blockingBrowserStatus(browserReadiness) {
   if (!browserReadiness?.blockers?.length) return '';
   if (browserReadiness.status === 'needs_browser_probe') return '';
   if (browserReadiness.status === 'ready_for_browser_confirmation') return '';
-  if (browserReadiness.status === 'blocked_local_prep') return '';
   return browserReadiness.status;
 }
 

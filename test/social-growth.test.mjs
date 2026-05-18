@@ -2447,6 +2447,104 @@ test('x publish prep can fall back to an image-backed thread when X Article is u
   }
 });
 
+test('x publish prep blocks when no bun runtime is available', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-x-prep-runtime-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    const imagePath = join(imageDir, `${queue.items[0].id}.png`);
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(imagePath, 'fake image');
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      id: queue.items[0].id,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+    const prep = await buildXPublishPrep(preflight, {
+      skillDir,
+      publishMode: 'thread_fallback',
+      runtimeResolver: async () => ({
+        command: null,
+        status: 'missing',
+        blocker: 'Bun runtime is unavailable: install bun or provide --bunCommand with an executable command before preparing Chrome.',
+      }),
+    });
+    const markdown = formatXPublishPrepMarkdown(prep);
+
+    assert.equal(prep.status, 'blocked');
+    assert.equal(prep.skill.runtimeStatus, 'missing');
+    assert.ok(prep.blockers.some((item) => item.includes('Bun runtime is unavailable')));
+    assert.match(markdown, /Runtime: unavailable/);
+    assert.match(markdown, /Runtime status: missing/);
+    assert.match(markdown, /Install bun or npx/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('browser readiness surfaces missing bun runtime as an actionable blocker', async () => {
+  const readiness = buildBrowserReadiness({
+    preflight: {
+      generatedAt: '2026-05-18T00:00:00.000Z',
+      status: 'ready',
+      selected: {
+        id: 'queue-id',
+        articleSlug: 'article-slug',
+      },
+      image: {
+        outputPath: 'output/imagegen/queue-id.png',
+        ready: true,
+      },
+    },
+    xPrep: {
+      status: 'blocked',
+      publishMode: 'thread_fallback',
+      blockers: [
+        'Bun runtime is unavailable: install bun or provide --bunCommand with an executable command before preparing Chrome.',
+      ],
+      skill: {},
+    },
+    expectedAccount: '@Clean993',
+    observedAccount: '@Clean993',
+    chromeRunning: 'yes',
+    extensionInstalled: 'yes',
+    nativeHost: 'yes',
+    extensionPipe: 'open',
+    articleAvailable: 'no',
+    mediaUpload: 'ready',
+  });
+  const markdown = formatBrowserReadinessMarkdown(readiness);
+
+  assert.equal(readiness.status, 'blocked_local_prep');
+  assert.ok(readiness.blockers.some((item) => item.includes('Bun runtime is unavailable')));
+  assert.ok(readiness.nextActions.some((item) => item.action.includes('Install bun')));
+  assert.match(markdown, /X publish prep blocker: Bun runtime is unavailable/);
+});
+
 test('browser readiness records Chrome pipe and media upload blockers', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-browser-readiness-'));
   try {
@@ -3309,6 +3407,57 @@ test('growth status surfaces blocking browser readiness before publish prep', as
     assert.ok(status.nextActions.some((item) => item.priority === 'P1' && item.reason.includes('After the current blocker is cleared')));
     assert.match(markdown, /Browser Readiness/);
     assert.match(markdown, /Chrome extension native pipe is closed/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('growth status treats blocked local X prep as a blocker', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-status-local-prep-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(imageDir, `${queue.items[0].id}.png`), 'fake image');
+
+    const status = await buildGrowthStatus({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      publishMode: 'thread_fallback',
+      browserReadiness: {
+        status: 'blocked_local_prep',
+        blockers: [
+          'X publish prep is not ready.',
+          'X publish prep blocker: Bun runtime is unavailable.',
+        ],
+      },
+      env: {},
+    });
+
+    assert.equal(status.status, 'blocked_local_prep');
+    assert.ok(status.nextActions.some((item) => item.action.includes('Fix browser readiness')));
+    assert.ok(!status.nextActions.some((item) => item.priority === 'P0' && item.action.includes('thread first post')));
+    assert.ok(status.nextActions.some((item) => item.priority === 'P1' && item.reason.includes('After the current blocker is cleared')));
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

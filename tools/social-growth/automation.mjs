@@ -260,7 +260,7 @@ export async function runSafeAutomationCycle({
   const automationStatus = status.status === 'ready_for_browser_confirmation'
     && publishConfirmation.status === 'needs_copy_review'
     ? 'needs_copy_review'
-    : browserBlockingStatus(browserReadiness) || status.status;
+    : primaryAutomationStatus(status.status, browserReadiness);
 
   const metrics = await readJson(metricsPath);
   const dailyBrief = await buildDailyExecutionBrief({
@@ -480,8 +480,12 @@ function browserBlockingStatus(browserReadiness) {
   if (!browserReadiness?.blockers?.length) return null;
   if (browserReadiness.status === 'needs_browser_probe') return null;
   if (browserReadiness.status === 'ready_for_browser_confirmation') return null;
-  if (browserReadiness.status === 'blocked_local_prep') return null;
   return browserReadiness.status;
+}
+
+function primaryAutomationStatus(status, browserReadiness) {
+  if (status && status !== 'ready_for_browser_confirmation') return status;
+  return browserBlockingStatus(browserReadiness) || status;
 }
 
 function browserActionBlockers(browserReadiness) {
