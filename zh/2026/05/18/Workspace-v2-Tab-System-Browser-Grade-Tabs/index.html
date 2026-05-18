@@ -164,7 +164,7 @@
   <!-- JSON-LD Structured Data
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Workspace V2 Tab System：把浏览器标签页能力带进单页工作台","datePublished":"2026-05-18T08:30:00.000Z","dateModified":"2026-05-18T08:30:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","mainEntityOfPage":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","inLanguage":"zh-CN","description":"背景和目标Workspace v2 要把原来偏“单页面、单上下文”的工作台，改成可以同时承载多个工作流、多个子应用视图、多个工单对象的工作空间。对用户来说，这个体验更接近浏览器：我打开了几个工作流，切来切去状态还在；我刷新页面或者把链接发给别人，应该还能回到正确的业务页面；我在一个子应用里打开弹窗，不能盖到另一个 tab 上。 业务目标： 业务目标 用户看到的体验 多任务并行 同时打开多个 wor","keywords":["Frontend","Software Engineering","React"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Workspace V2 Tab System：把浏览器标签页能力带进单页工作台","datePublished":"2026-05-18T08:30:00.000Z","dateModified":"2026-05-18T08:30:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","mainEntityOfPage":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","inLanguage":"zh-CN","description":"背景和目标Workspace v2 要把原来偏“单页面、单上下文”的工作台，改成可以同时承载多个工作流、多个子应用视图、多个工单对象的工作空间。对用户来说，这个体验更接近浏览器：我打开了几个工作流，切来切去状态还在；我刷新页面或者把链接发给别人，应该还能回到正确的业务页面；我在一个子应用里打开弹窗，不能盖到另一个 tab 上。 图 0：一个通用工作台里的 tab system 演示。用户可以同时打","keywords":["Frontend","Software Engineering","React"]}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Workspace V2 Tab System：把浏览器标签页能力带进单页工作台","item":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/"}]}</script>
   
 
@@ -272,6 +272,8 @@
     </header>
     <div itemprop="articleBody">
       <h2 id="背景和目标"><a href="#背景和目标" class="headerlink" title="背景和目标"></a>背景和目标</h2><p>Workspace v2 要把原来偏“单页面、单上下文”的工作台，改成可以同时承载多个工作流、多个子应用视图、多个工单对象的工作空间。对用户来说，这个体验更接近浏览器：我打开了几个工作流，切来切去状态还在；我刷新页面或者把链接发给别人，应该还能回到正确的业务页面；我在一个子应用里打开弹窗，不能盖到另一个 tab 上。</p>
+<p><img src="/img/workspace-v2-tab-system/workspace-tab-system-demo.svg" alt="workspace tab system demo"></p>
+<p>图 0：一个通用工作台里的 tab system 演示。用户可以同时打开多个工作对象，像浏览器一样切回；只有当前 tab 拥有 URL、弹层、事件和前台 CPU。</p>
 <p>业务目标：</p>
 <table>
 <thead>
