@@ -30,6 +30,7 @@ The code can automate safe local work:
 - run a publish preflight that checks image readiness and the public-action confirmation boundary;
 - export an image brief with the exact image 2 / `gpt-image-2` prompt, built-in `imagegen` instructions, CLI fallback command, visual review checklist, expected output path, and register command;
 - write a single growth status dashboard that combines follower pace, queue coverage, publish preflight, blockers, and next commands;
+- write a daily execution brief that combines publish readiness, engagement search/capture, metrics capture, profile conversion, and action order;
 - run the local daily preparation loop in one command;
 - run a safe Codex automation cycle that refreshes local artifacts, status, preflight, image brief, and profile audit without public X actions;
 - export and apply a JSON copy override so a separate writing skill can replace generated short-post, X Article, image prompt, fallback thread, and replies before preflight;
@@ -118,6 +119,7 @@ This performs only local work:
 - writes `data/social-growth/profile-audit.md` from copied visible profile text;
 - writes `data/social-growth/profile-update.md` as a Chrome handoff for display name, bio, link, and pinned post;
 - writes `data/social-growth/publish-preflight.md`;
+- writes `data/social-growth/daily-brief.md` as the operator-facing action order for the day;
 - writes or refreshes the selected `data/social-growth/image-briefs/*.md`;
 - writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` Chrome prefill commands;
 - writes `data/social-growth/engagement-search.md` with read-only X search URLs for finding relevant threads;
@@ -264,6 +266,14 @@ npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.m
 ```
 
 This report stays local. It runs preflight and `baoyu-post-to-x` handoff checks for every slot on the selected day, then shows which slots still need images before Chrome work.
+
+Write the daily execution brief:
+
+```bash
+npm run social:daily-brief -- --day 1 --out data/social-growth/daily-brief.md
+```
+
+This is the operator-facing runbook for the day. It combines publish slot readiness, engagement search, engagement reply candidates, metrics capture readiness, profile conversion, and the prioritized action order. It is still local-only and does not open Chrome or perform public X actions.
 
 Run a publish preflight for the next slot:
 
@@ -462,35 +472,36 @@ Do not commit private analytics or account history.
 1. Generate a queue with `npm run social:queue -- --limit 5 --out data/social-growth/queue.json`.
 2. Run `npm run social:validate -- --queue data/social-growth/queue.json --format markdown`.
 3. Run `npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json`.
-4. Pick 2-4 strong queue items for the day from `data/social-growth/weekly-plan.md`.
-5. Run `npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md`.
-6. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
-7. Run `npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>`.
-8. Generate the image from `image-prompt.txt` with built-in `imagegen`, then register the final selected PNG into the expected path.
-9. If the image was generated elsewhere, run `npm run social:register-image -- --day 1 --slot 1 --source /absolute/path/to/generated.png`.
-10. Re-run preflight and require `Status: ready`.
-11. Run `npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md`.
-12. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
-13. Stop before publishing the X Article or thread and confirm the exact content and account.
-14. Publish only after confirmation.
-15. Use Chrome to prepare the short image-backed X post linking to the X Article.
-16. Stop before publishing the short post and confirm the exact content and account.
-17. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
-18. Stop before each public reply and confirm the exact content and account.
-19. Run `npm run social:engagement-search -- --out data/social-growth/engagement-search.md`.
-20. Use the search plan to capture 5-10 relevant technical X threads into `data/social-growth/engagement-opportunities/`.
-21. Run `npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md`.
-22. Prepare only the reply candidates that add a mechanism, proof caveat, checklist, or correction; stop before each public Reply click and confirm.
-23. If `profile-update.md` is still needed, prepare the profile edit and pinned-post flow in Chrome, stopping before every save/publish/pin action.
-24. Mark the published URL with `npm run social:mark-published`.
-25. Run `npm run social:metrics-template`.
-26. Use `npm run social:capture-metrics` when visible X text has been captured.
-27. Or run `npm run social:metrics-cycle` to merge capture, snapshot, report, and recommendations in one read-only local pass.
-28. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
-29. Run `npm run social:snapshot` if you did not use `social:metrics-cycle`.
-30. Run `npm run social:report -- --format markdown`.
-31. Run `npm run social:recommend -- --format markdown`.
-32. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+4. Run `npm run social:daily-brief -- --day 1 --out data/social-growth/daily-brief.md`.
+5. Pick 2-4 strong queue items for the day from `data/social-growth/daily-brief.md` and `data/social-growth/weekly-plan.md`.
+6. Run `npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md`.
+7. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
+8. Run `npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>`.
+9. Generate the image from `image-prompt.txt` with built-in `imagegen`, then register the final selected PNG into the expected path.
+10. If the image was generated elsewhere, run `npm run social:register-image -- --day 1 --slot 1 --source /absolute/path/to/generated.png`.
+11. Re-run preflight and require `Status: ready`.
+12. Run `npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md`.
+13. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
+14. Stop before publishing the X Article or thread and confirm the exact content and account.
+15. Publish only after confirmation.
+16. Use Chrome to prepare the short image-backed X post linking to the X Article.
+17. Stop before publishing the short post and confirm the exact content and account.
+18. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
+19. Stop before each public reply and confirm the exact content and account.
+20. Run `npm run social:engagement-search -- --out data/social-growth/engagement-search.md`.
+21. Use the search plan to capture 5-10 relevant technical X threads into `data/social-growth/engagement-opportunities/`.
+22. Run `npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md`.
+23. Prepare only the reply candidates that add a mechanism, proof caveat, checklist, or correction; stop before each public Reply click and confirm.
+24. If `profile-update.md` is still needed, prepare the profile edit and pinned-post flow in Chrome, stopping before every save/publish/pin action.
+25. Mark the published URL with `npm run social:mark-published`.
+26. Run `npm run social:metrics-template`.
+27. Use `npm run social:capture-metrics` when visible X text has been captured.
+28. Or run `npm run social:metrics-cycle` to merge capture, snapshot, report, and recommendations in one read-only local pass.
+29. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
+30. Run `npm run social:snapshot` if you did not use `social:metrics-cycle`.
+31. Run `npm run social:report -- --format markdown`.
+32. Run `npm run social:recommend -- --format markdown`.
+33. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 For regular operation, replace steps 1-6 with:
 

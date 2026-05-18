@@ -1,0 +1,286 @@
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
+import { buildDayReadiness } from './dayReadiness.mjs';
+import {
+  buildEngagementPlan,
+  buildEngagementSearchPlan,
+} from './engagement.mjs';
+import { createMetricsTemplateFromQueue } from './ledger.mjs';
+import { summarizeGrowthLedger } from './metrics.mjs';
+import {
+  buildMetricsReadiness,
+  mergeMetricsTemplate,
+} from './metricsCycle.mjs';
+import { buildProfileAudit } from './profile.mjs';
+
+const DEFAULT_DAILY_BRIEF_PATH = 'data/social-growth/daily-brief.md';
+
+export async function buildDailyExecutionBrief({
+  queue,
+  ledger,
+  metrics = null,
+  profileText = '',
+  opportunityTexts = [],
+  day = 1,
+  now = new Date(),
+  imageDir = 'output/imagegen',
+  packageOutDir = 'data/social-growth/packages',
+  xSkillDir,
+  xBunCommand,
+  env = process.env,
+} = {}) {
+  const generatedAt = toIsoString(now);
+  const dayReadiness = await buildDayReadiness({
+    queue,
+    ledger,
+    day,
+    now,
+    imageDir,
+    packageOutDir,
+    ensurePackage: true,
+    xSkillDir,
+    xBunCommand,
+    env,
+  });
+  const engagementSearch = buildEngagementSearchPlan({
+    queue,
+    now,
+    limit: 8,
+  });
+  const engagementPlan = buildEngagementPlan({
+    queue,
+    opportunityTexts,
+    now,
+    limit: 5,
+  });
+  const metricsTemplate = createMetricsTemplateFromQueue(queue, {
+    date: generatedAt.slice(0, 10),
+  });
+  const mergedMetrics = mergeMetricsTemplate(metrics, metricsTemplate);
+  const metricsReadiness = buildMetricsReadiness(mergedMetrics);
+  const profileAudit = await buildProfileAudit({
+    profileText,
+    queue,
+    generatedAt,
+  });
+  const summary = summarizeGrowthLedger(ledger);
+  const actionItems = buildActionItems({
+    dayReadiness,
+    engagementSearch,
+    engagementPlan,
+    metricsReadiness,
+    profileAudit,
+    day,
+  });
+
+  return {
+    version: 1,
+    generatedAt,
+    status: briefStatus({
+      dayReadiness,
+      metricsReadiness,
+      profileAudit,
+    }),
+    day: dayReadiness.day,
+    date: dayReadiness.date,
+    timezone: dayReadiness.timezone,
+    summary,
+    dayReadiness,
+    engagementSearch,
+    engagementPlan,
+    metricsReadiness,
+    profileAudit,
+    actionItems,
+    boundary: 'Local brief only. Publishing, media upload, reply, like, repost, follow, profile edit, and pin actions still require action-time confirmation in Chrome.',
+  };
+}
+
+export async function writeDailyExecutionBrief(brief, filePath = DEFAULT_DAILY_BRIEF_PATH) {
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${formatDailyExecutionBriefMarkdown(brief).trimEnd()}\n`);
+  return filePath;
+}
+
+export function formatDailyExecutionBriefMarkdown(brief) {
+  const slots = brief.dayReadiness.slots.length
+    ? brief.dayReadiness.slots.map(formatSlot).join('\n')
+    : '- No publish slots for this day.';
+  const actions = brief.actionItems.length
+    ? brief.actionItems.map((item) => `- ${item.priority}: ${item.action}\n  Reason: ${item.reason}`).join('\n')
+    : '- No actions.';
+  const profileFixes = brief.profileAudit.checks
+    .filter((check) => check.status !== 'pass')
+    .map((check) => `- ${check.message}`)
+    .join('\n') || '- No profile fixes.';
+
+  return `# Daily X Growth Brief
+
+Generated at: ${brief.generatedAt}
+Status: ${brief.status}
+Day: ${brief.day}
+Date: ${brief.date}
+Timezone: ${brief.timezone}
+
+## Target
+
+- Baseline followers: ${brief.summary.baselineFollowers}
+- Latest followers: ${brief.summary.latestFollowers}
+- Follower delta: ${brief.summary.followerDelta}
+- 7-day target: ${brief.summary.targetFollowers}
+- Required daily pace: ${round(brief.summary.requiredDailyPace)}
+- Actual daily pace: ${round(brief.summary.actualDailyPace)}
+- Day cumulative target: +${brief.dayReadiness.cumulativeFollowerTarget}
+
+## Publish Readiness
+
+- Ready slots: ${brief.dayReadiness.readySlots}/${brief.dayReadiness.totalSlots}
+- Day status: ${brief.dayReadiness.status}
+
+${slots}
+
+## Engagement
+
+- Search status: ${brief.engagementSearch.status}
+- Search queries: ${brief.engagementSearch.searchCount}
+- Engagement plan status: ${brief.engagementPlan.status}
+- Captured opportunities: ${brief.engagementPlan.opportunityCount}
+- Ready reply candidates: ${brief.engagementPlan.selectedCount}
+
+Commands:
+
+\`\`\`bash
+npm run social:engagement-search -- --out data/social-growth/engagement-search.md
+npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md
+\`\`\`
+
+## Metrics Capture
+
+- Published posts in template: ${brief.metricsReadiness.totalPosts}
+- Followers ready: ${brief.metricsReadiness.followersReady}
+- Posts with any metrics: ${brief.metricsReadiness.postsWithAnyMetrics}/${brief.metricsReadiness.totalPosts}
+- Posts with views: ${brief.metricsReadiness.postsWithViews}/${brief.metricsReadiness.totalPosts}
+- Fully complete posts: ${brief.metricsReadiness.completePosts}/${brief.metricsReadiness.totalPosts}
+
+Command:
+
+\`\`\`bash
+npm run social:metrics-cycle -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
+\`\`\`
+
+## Profile
+
+- Audit status: ${brief.profileAudit.status}
+- Display name: ${brief.profileAudit.profile.displayName || 'unknown'}
+- Bio: ${brief.profileAudit.profile.bio || 'missing'}
+- Link: ${brief.profileAudit.profile.link || 'missing'}
+- Pinned post detected: ${brief.profileAudit.profile.pinned}
+
+Fixes:
+
+${profileFixes}
+
+## Action Order
+
+${actions}
+
+## Boundary
+
+${brief.boundary}
+`;
+}
+
+function formatSlot(slot) {
+  const blockers = slot.blockers.length
+    ? slot.blockers.join('; ')
+    : 'none';
+  return `- ${slot.time}: ${slot.id}
+  Image ready: ${slot.imageReady}; preflight: ${slot.preflightStatus}; X prep: ${slot.xPrepStatus}; blockers: ${blockers}`;
+}
+
+function buildActionItems({
+  dayReadiness,
+  engagementSearch,
+  engagementPlan,
+  metricsReadiness,
+  profileAudit,
+  day,
+}) {
+  const actions = [];
+  const blockedSlots = dayReadiness.slots.filter((slot) => slot.preflightStatus !== 'ready' || slot.xPrepStatus !== 'ready');
+  const readySlots = dayReadiness.slots.filter((slot) => slot.preflightStatus === 'ready' && slot.xPrepStatus === 'ready');
+
+  if (blockedSlots.length) {
+    actions.push({
+      priority: 'P0',
+      action: `Fix ${blockedSlots.length} blocked publish slot(s), usually by generating/registering the missing image and rerunning preflight.`,
+      reason: `${dayReadiness.readySlots}/${dayReadiness.totalSlots} publish slots are ready.`,
+    });
+  }
+  if (readySlots.length) {
+    actions.push({
+      priority: 'P0',
+      action: `Prepare ${readySlots.length} ready X Article/image post slot(s) in Chrome, stopping before every public action for confirmation.`,
+      reason: 'Ready slots are the direct path to measurable follower and interaction data.',
+    });
+  }
+  if (engagementSearch.status === 'ready_for_read_only_search' && engagementPlan.status === 'needs_opportunity_capture') {
+    actions.push({
+      priority: 'P1',
+      action: 'Open read-only X search URLs, capture 5-10 relevant technical threads, then rerun the engagement plan.',
+      reason: 'Second-degree technical conversations are missing; the plan has search queries but no captured opportunities.',
+    });
+  } else if (engagementPlan.status === 'ready_for_browser_confirmation') {
+    actions.push({
+      priority: 'P1',
+      action: `Prepare ${engagementPlan.selectedCount} substantive reply candidate(s), stopping before every public Reply click.`,
+      reason: 'Selective replies can create social proof without mass interaction.',
+    });
+  }
+  if (!metricsReadiness.totalPosts) {
+    actions.push({
+      priority: 'P1',
+      action: 'After confirmed publishing, mark the X URLs so metrics capture has published posts to track.',
+      reason: 'No published posts are present in the metrics template yet.',
+    });
+  } else if (!metricsReadiness.followersReady || metricsReadiness.postsWithAnyMetrics < metricsReadiness.totalPosts) {
+    actions.push({
+      priority: 'P1',
+      action: 'Capture visible profile and post metrics, then run the metrics cycle.',
+      reason: `${metricsReadiness.postsWithAnyMetrics}/${metricsReadiness.totalPosts} published posts have any metrics and followersReady=${metricsReadiness.followersReady}.`,
+    });
+  }
+  if (profileAudit.status === 'needs_work') {
+    actions.push({
+      priority: 'P2',
+      action: 'Prepare profile promise and pinned post update for browser confirmation.',
+      reason: `${profileAudit.checks.filter((check) => check.status !== 'pass').length} profile conversion checks need work.`,
+    });
+  }
+
+  actions.push({
+    priority: 'P2',
+    action: `Regenerate day ${Number(day)} brief after publishing, engagement capture, or metrics changes.`,
+    reason: 'The brief is a current-state runbook, not a static plan.',
+  });
+
+  return actions;
+}
+
+function briefStatus({ dayReadiness, metricsReadiness, profileAudit }) {
+  if (dayReadiness.readySlots === 0) return 'needs_publish_readiness';
+  if (!metricsReadiness.totalPosts) return 'ready_to_publish';
+  if (!metricsReadiness.followersReady || metricsReadiness.postsWithAnyMetrics < metricsReadiness.totalPosts) {
+    return 'needs_metrics_capture';
+  }
+  if (profileAudit.status === 'needs_work') return 'needs_profile_conversion';
+  return 'ready_for_next_iteration';
+}
+
+function round(value) {
+  return Math.round(Number(value || 0) * 10) / 10;
+}
+
+function toIsoString(value) {
+  if (value instanceof Date) return value.toISOString();
+  return new Date(value).toISOString();
+}

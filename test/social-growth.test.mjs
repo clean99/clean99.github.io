@@ -20,6 +20,11 @@ import {
   writeCopyOverrideTemplate,
 } from '../tools/social-growth/copyOverride.mjs';
 import { expandQueueOptionsForWeeklyCoverage, runDailyGrowthPlan, selectPackageItems } from '../tools/social-growth/daily.mjs';
+import {
+  buildDailyExecutionBrief,
+  formatDailyExecutionBriefMarkdown,
+  writeDailyExecutionBrief,
+} from '../tools/social-growth/dailyBrief.mjs';
 import { buildDayReadiness, formatDayReadinessMarkdown, writeDayReadiness } from '../tools/social-growth/dayReadiness.mjs';
 import {
   buildEngagementPlan,
@@ -893,6 +898,74 @@ test('engagement search plan creates read-only X searches from queue topics', as
   }
 });
 
+test('daily execution brief combines publish, engagement, metrics, and profile actions', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-brief-'));
+  try {
+    const article = {
+      title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+      excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+      slug: 'Automated-AI-Performance-Optimization',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering', 'Web Performance'],
+      url: 'https://clean99.github.io/zh/automated-ai-performance/',
+    };
+    const queue = buildPublishQueue([article], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    const imageDir = join(outDir, 'images');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-article.ts'), '// test script');
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await writeFile(join(imageDir, `${queue.items[0].id}.png`), 'fake image');
+
+    const brief = await buildDailyExecutionBrief({
+      queue,
+      ledger,
+      profileText: [
+        'Clean99 | AI 工程化与前端性能',
+        '@Clean993',
+        '写 AI 工程化、前端性能、React 和测试。把真实工程问题压成可复用框架。',
+        'https://clean99.github.io',
+        'Pinned',
+        '30 Followers',
+      ].join('\n'),
+      opportunityTexts: [],
+      day: 1,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      xSkillDir: skillDir,
+      xBunCommand: 'bun',
+      env: {},
+    });
+    const markdown = formatDailyExecutionBriefMarkdown(brief);
+    const outPath = join(outDir, 'daily-brief.md');
+    await writeDailyExecutionBrief(brief, outPath);
+    const persisted = await readFile(outPath, 'utf8');
+
+    assert.equal(brief.status, 'ready_to_publish');
+    assert.equal(brief.dayReadiness.readySlots, 1);
+    assert.equal(brief.engagementSearch.status, 'ready_for_read_only_search');
+    assert.equal(brief.engagementPlan.status, 'needs_opportunity_capture');
+    assert.equal(brief.metricsReadiness.totalPosts, 0);
+    assert.ok(brief.actionItems.some((item) => item.action.includes('Prepare 1 ready X Article')));
+    assert.match(markdown, /Daily X Growth Brief/);
+    assert.match(markdown, /Action Order/);
+    assert.match(persisted, /metrics-cycle/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('daily growth run writes queue, packages, and a browser-safe report', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-'));
   try {
@@ -1020,6 +1093,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       queuePath: join(outDir, 'queue.json'),
       packageOutDir: join(outDir, 'packages'),
       dailyReportPath: join(outDir, 'daily-run.md'),
+      dailyBriefPath: join(outDir, 'daily-brief.md'),
       weeklyPlanPath: join(outDir, 'weekly-plan.md'),
       ledgerPath: join(outDir, 'ledger.json'),
       metricsPath: join(outDir, 'posts.local.json'),
@@ -1047,6 +1121,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     });
 
     const report = await readFile(join(outDir, 'automation-run.md'), 'utf8');
+    const dailyBrief = await readFile(join(outDir, 'daily-brief.md'), 'utf8');
     const status = await readFile(join(outDir, 'status.md'), 'utf8');
     const preflight = await readFile(join(outDir, 'publish-preflight.md'), 'utf8');
     const profileAudit = await readFile(join(outDir, 'profile-audit.md'), 'utf8');
@@ -1059,12 +1134,15 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(result.blockers.join('\n'), /Image file is missing/);
     assert.match(result.blockers.join('\n'), /pin a post/);
     assert.ok(result.paths.imageBrief.endsWith('.md'));
+    assert.equal(result.paths.dailyBrief, join(outDir, 'daily-brief.md'));
     assert.equal(result.paths.xPublishPrep, join(outDir, 'x-publish-prep.md'));
     assert.equal(result.paths.engagementSearch, join(outDir, 'engagement-search.md'));
     assert.equal(result.paths.engagementPlan, join(outDir, 'engagement-plan.md'));
     assert.equal(result.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.engagement.status, 'needs_opportunity_capture');
     assert.match(report, /No public X action was performed/);
+    assert.match(report, /Daily brief/);
+    assert.match(dailyBrief, /Daily X Growth Brief/);
     assert.match(report, /X publish prep/);
     assert.match(report, /Engagement plan/);
     assert.match(report, /Profile update package/);
@@ -1125,6 +1203,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       queuePath: join(outDir, 'queue.json'),
       packageOutDir: join(outDir, 'packages'),
       dailyReportPath: join(outDir, 'daily-run.md'),
+      dailyBriefPath: join(outDir, 'daily-brief.md'),
       weeklyPlanPath: join(outDir, 'weekly-plan.md'),
       ledgerPath: join(outDir, 'ledger.json'),
       metricsPath: join(outDir, 'posts.local.json'),
@@ -1165,6 +1244,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.selected.id, expectedQueue.items[0].id);
     assert.match(scheduledReport, /Scheduled X Growth Run/);
+    assert.match(scheduledReport, /Daily brief/);
     assert.match(scheduledReport, /Engagement search/);
     assert.match(scheduledReport, /Engagement plan/);
     assert.match(scheduledReport, /safe for recurring execution/);

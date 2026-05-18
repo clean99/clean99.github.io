@@ -42,6 +42,7 @@ It also writes `data/social-growth/profile-update.md` when profile conversion ne
 It writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` commands that can prefill Chrome for the X Article and image-backed short post while preserving the final confirmation boundary.
 It writes `data/social-growth/engagement-search.md` with read-only X search URLs for finding relevant technical threads.
 It writes `data/social-growth/engagement-plan.md` from copied relevant thread opportunities when available; missing opportunities are a capture task, not an automation blocker.
+It writes `data/social-growth/daily-brief.md` as the single operator-facing action order across publish readiness, engagement, metrics, and profile conversion.
 
 For day-level readiness across all publish slots, run:
 
@@ -50,6 +51,14 @@ npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.m
 ```
 
 This does not open Chrome. It summarizes each slot's image readiness, publish preflight, `baoyu-post-to-x` handoff status, blockers, and exact slot commands.
+
+For the day-level operator runbook, run:
+
+```bash
+npm run social:daily-brief -- --day 1 --out data/social-growth/daily-brief.md
+```
+
+Use this before browser work. It combines publish readiness, read-only engagement search, reply-candidate status, metrics capture readiness, profile conversion, and a prioritized action order.
 
 When the user says not to publish content yet, run the full dry-run instead:
 

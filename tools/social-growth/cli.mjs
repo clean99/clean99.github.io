@@ -12,6 +12,11 @@ import {
 } from './copyOverride.mjs';
 import { runDailyGrowthPlan } from './daily.mjs';
 import {
+  buildDailyExecutionBrief,
+  formatDailyExecutionBriefMarkdown,
+  writeDailyExecutionBrief,
+} from './dailyBrief.mjs';
+import {
   buildDayReadiness,
   formatDayReadinessMarkdown,
   writeDayReadiness,
@@ -231,6 +236,7 @@ if (command === 'articles') {
     queuePath: args.queue || 'data/social-growth/queue.json',
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     dailyReportPath: args.report || 'data/social-growth/daily-run.md',
+    dailyBriefPath: args.dailyBriefOut || 'data/social-growth/daily-brief.md',
     weeklyPlanPath: args.weeklyPlan || 'data/social-growth/weekly-plan.md',
     ledgerPath: args.ledger || 'data/social-growth/ledger.json',
     metricsPath: args.metrics || 'data/social-growth/posts.local.json',
@@ -276,6 +282,7 @@ if (command === 'articles') {
     queuePath: args.queue || 'data/social-growth/queue.json',
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     dailyReportPath: args.report || 'data/social-growth/daily-run.md',
+    dailyBriefPath: args.dailyBriefOut || 'data/social-growth/daily-brief.md',
     weeklyPlanPath: args.weeklyPlan || 'data/social-growth/weekly-plan.md',
     ledgerPath: args.ledger || 'data/social-growth/ledger.json',
     metricsPath: args.metrics || 'data/social-growth/posts.local.json',
@@ -337,6 +344,34 @@ if (command === 'articles') {
     console.log(JSON.stringify(readiness, null, 2));
   } else {
     console.log(formatDayReadinessMarkdown(readiness));
+  }
+} else if (command === 'daily-brief') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const metrics = await readOptionalJson(args.metrics || 'data/social-growth/posts.local.json');
+  const profileText = await readOptionalText(args.profileText || 'data/social-growth/profile.local.txt');
+  const opportunityTexts = await readEngagementOpportunityTexts(args.opportunities || 'data/social-growth/engagement-opportunities');
+  const brief = await buildDailyExecutionBrief({
+    queue,
+    ledger,
+    metrics,
+    profileText,
+    opportunityTexts,
+    day: args.day || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    xSkillDir: args.xSkillDir,
+    xBunCommand: args.xBunCommand,
+    env: process.env,
+  });
+  if (args.out) {
+    await writeDailyExecutionBrief(brief, args.out);
+    console.log(`Wrote daily X growth brief to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(brief, null, 2));
+  } else {
+    console.log(formatDailyExecutionBriefMarkdown(brief));
   }
 } else if (command === 'engagement-plan') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
@@ -739,6 +774,7 @@ function printHelp() {
   npm run social:automation -- --day 1 --slot 1
   npm run social:scheduled-run -- --day 1 --slot 1
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
+  npm run social:daily-brief -- --day 1 --out data/social-growth/daily-brief.md
   npm run social:engagement-search -- --out data/social-growth/engagement-search.md
   npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md
   npm run social:copy-template -- --day 1 --slot 1
@@ -776,6 +812,15 @@ function requiredArg(options, key) {
 async function readText(filePath) {
   const { readFile } = await import('node:fs/promises');
   return readFile(filePath, 'utf8');
+}
+
+async function readOptionalJson(filePath) {
+  try {
+    return await readJson(filePath);
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  }
 }
 
 function dirnameFromPath(filePath) {

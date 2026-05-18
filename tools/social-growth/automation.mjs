@@ -2,6 +2,10 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { runDailyGrowthPlan } from './daily.mjs';
 import {
+  buildDailyExecutionBrief,
+  writeDailyExecutionBrief,
+} from './dailyBrief.mjs';
+import {
   buildImageBrief,
   imageBriefPath,
   writeImageBrief,
@@ -37,6 +41,7 @@ import {
 const DEFAULT_QUEUE_PATH = 'data/social-growth/queue.json';
 const DEFAULT_PACKAGE_DIR = 'data/social-growth/packages';
 const DEFAULT_DAILY_REPORT_PATH = 'data/social-growth/daily-run.md';
+const DEFAULT_DAILY_BRIEF_PATH = 'data/social-growth/daily-brief.md';
 const DEFAULT_WEEKLY_PLAN_PATH = 'data/social-growth/weekly-plan.md';
 const DEFAULT_LEDGER_PATH = 'data/social-growth/ledger.json';
 const DEFAULT_METRICS_PATH = 'data/social-growth/posts.local.json';
@@ -61,6 +66,7 @@ export async function runSafeAutomationCycle({
   queuePath = DEFAULT_QUEUE_PATH,
   packageOutDir = DEFAULT_PACKAGE_DIR,
   dailyReportPath = DEFAULT_DAILY_REPORT_PATH,
+  dailyBriefPath = DEFAULT_DAILY_BRIEF_PATH,
   weeklyPlanPath = DEFAULT_WEEKLY_PLAN_PATH,
   ledgerPath = DEFAULT_LEDGER_PATH,
   metricsPath = DEFAULT_METRICS_PATH,
@@ -175,6 +181,23 @@ export async function runSafeAutomationCycle({
   });
   await writeGrowthStatus(status, statusPath);
 
+  const metrics = await readJson(metricsPath);
+  const dailyBrief = await buildDailyExecutionBrief({
+    queue,
+    ledger,
+    metrics,
+    profileText,
+    opportunityTexts: engagementOpportunities,
+    day,
+    now,
+    imageDir,
+    packageOutDir,
+    xSkillDir,
+    xBunCommand,
+    env,
+  });
+  await writeDailyExecutionBrief(dailyBrief, dailyBriefPath);
+
   const result = {
     generatedAt,
     status: status.status,
@@ -190,6 +213,7 @@ export async function runSafeAutomationCycle({
     paths: {
       queue: queuePath,
       dailyReport: dailyReportPath,
+      dailyBrief: dailyBriefPath,
       weeklyPlan: daily.weeklyPlanPath,
       metrics: metricsPath,
       status: statusPath,
@@ -208,6 +232,12 @@ export async function runSafeAutomationCycle({
       searchQueries: engagementSearch.searchCount,
       readyCandidates: engagementPlan.selectedCount,
       capturedOpportunities: engagementPlan.opportunityCount,
+    },
+    dailyBrief: {
+      status: dailyBrief.status,
+      readySlots: dailyBrief.dayReadiness.readySlots,
+      totalSlots: dailyBrief.dayReadiness.totalSlots,
+      actionItems: dailyBrief.actionItems.length,
     },
     boundary: 'No public X action was performed. Chrome publishing, media upload, profile edits, replies, likes, reposts, follows, and final publish clicks still require action-time confirmation.',
   };
@@ -236,6 +266,7 @@ Status: ${result.status}
 
 - Queue: \`${result.paths.queue}\`
 - Daily report: \`${result.paths.dailyReport}\`
+- Daily brief: \`${result.paths.dailyBrief}\`
 - Weekly plan: \`${result.paths.weeklyPlan || 'not generated'}\`
 - Metrics template: \`${result.paths.metrics}\`
 - Status: \`${result.paths.status}\`
@@ -254,6 +285,12 @@ Status: ${result.status}
 - Search queries: ${result.engagement.searchQueries}
 - Captured opportunities: ${result.engagement.capturedOpportunities}
 - Ready reply candidates: ${result.engagement.readyCandidates}
+
+## Daily Brief
+
+- Status: ${result.dailyBrief.status}
+- Ready slots: ${result.dailyBrief.readySlots}/${result.dailyBrief.totalSlots}
+- Action items: ${result.dailyBrief.actionItems}
 
 ## Local Blockers
 

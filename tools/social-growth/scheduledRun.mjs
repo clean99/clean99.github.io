@@ -6,6 +6,7 @@ import { runPostPublishMetricsCycle } from './metricsCycle.mjs';
 const DEFAULT_QUEUE_PATH = 'data/social-growth/queue.json';
 const DEFAULT_PACKAGE_DIR = 'data/social-growth/packages';
 const DEFAULT_DAILY_REPORT_PATH = 'data/social-growth/daily-run.md';
+const DEFAULT_DAILY_BRIEF_PATH = 'data/social-growth/daily-brief.md';
 const DEFAULT_WEEKLY_PLAN_PATH = 'data/social-growth/weekly-plan.md';
 const DEFAULT_LEDGER_PATH = 'data/social-growth/ledger.json';
 const DEFAULT_METRICS_PATH = 'data/social-growth/posts.local.json';
@@ -35,6 +36,7 @@ export async function runScheduledGrowthLoop({
   queuePath = DEFAULT_QUEUE_PATH,
   packageOutDir = DEFAULT_PACKAGE_DIR,
   dailyReportPath = DEFAULT_DAILY_REPORT_PATH,
+  dailyBriefPath = DEFAULT_DAILY_BRIEF_PATH,
   weeklyPlanPath = DEFAULT_WEEKLY_PLAN_PATH,
   ledgerPath = DEFAULT_LEDGER_PATH,
   metricsPath = DEFAULT_METRICS_PATH,
@@ -73,6 +75,7 @@ export async function runScheduledGrowthLoop({
     queuePath,
     packageOutDir,
     dailyReportPath,
+    dailyBriefPath,
     weeklyPlanPath,
     ledgerPath,
     metricsPath,
@@ -162,6 +165,7 @@ Status: ${result.status}
 
 - Status: ${result.automation.status}
 - Queue: \`${result.paths.queue}\`
+- Daily brief: \`${result.paths.dailyBrief}\`
 - Status dashboard: \`${result.paths.status}\`
 - Preflight: \`${result.paths.preflight}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
