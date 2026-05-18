@@ -5,8 +5,21 @@ const FORBIDDEN_SHORT_POST_PATTERNS = [
   /https?:\/\//i,
   /clean99\.github\.io/i,
   /\bI wrote about\b/i,
+  /\bA technical post is useful only when\b/i,
+  /\bThis post is about\b/i,
+  /我写了?一篇/u,
+  /欢迎阅读/u,
+  /希望.*帮助/u,
+  /用白话说/u,
+  /我们可以看到/u,
+  /这个问题很有意思/u,
   /^原文[:：]/u,
   /^博客[:：]/u,
+];
+const GENERIC_FIRST_LINE_PATTERNS = [
+  /^A technical post is useful\b/i,
+  /^技术文章(只有|只在|的价值|有用)/u,
+  /^这篇(文章|博客)/u,
 ];
 const LOW_VALUE_ENGAGEMENT_PATTERNS = [
   /点赞/u,
@@ -14,6 +27,10 @@ const LOW_VALUE_ENGAGEMENT_PATTERNS = [
   /评论区/u,
   /关注我/u,
   /怎么看/u,
+  /欢迎阅读/u,
+  /希望.*帮助/u,
+  /用白话说/u,
+  /我们可以看到/u,
   /(^|\s)RT($|\s)/i,
 ];
 const HEADING_GLUED_X_ARTICLE_PATTERNS = [
@@ -125,6 +142,7 @@ export function formatValidationMarkdown(validation) {
     '',
     '- Short post sells the idea without raw blog URLs.',
     '- First screen contains a Chinese claim plus a concrete mechanism.',
+    '- Short post avoids AI-smelling meta commentary and generic article praise.',
     '- Chinese short post sells the generated image or X Article before any blog link.',
     '- Queue does not reuse the same short post across different articles.',
     '- X Article carries the blog link at the end.',
@@ -174,6 +192,9 @@ function validateShortPost(item, errors, warnings) {
   if (FORBIDDEN_SHORT_POST_PATTERNS.some((pattern) => pattern.test(shortPost))) {
     errors.push('shortPost must not contain raw blog URLs or low-value meta copy');
   }
+  if (GENERIC_FIRST_LINE_PATTERNS.some((pattern) => pattern.test(firstLine(shortPost)))) {
+    errors.push('shortPost first line must state a concrete technical claim, not generic article praise');
+  }
   if (item.lang === 'zh' && hanChars(shortPost) < 18) {
     errors.push('Chinese shortPost must be written for Chinese readers');
   }
@@ -189,9 +210,6 @@ function validateShortPost(item, errors, warnings) {
   const hashtags = shortPost.match(/#[\p{Script=Han}A-Za-z0-9_]+/gu) || [];
   if (hashtags.length > HASHTAG_MAX_COUNT) {
     warnings.push(`shortPost has more than ${HASHTAG_MAX_COUNT} hashtags`);
-  }
-  if (/^这篇文章/u.test(firstLine(shortPost))) {
-    warnings.push('first line should state a claim or pain, not describe the post itself');
   }
 }
 

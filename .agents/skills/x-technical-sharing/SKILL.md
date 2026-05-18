@@ -168,6 +168,8 @@ Never imitate personal attacks, political rage, slurs, or outrage bait. The acco
 
 Remove AI-smelling filler:
 
+- `A technical post is useful only when`;
+- `技术文章只有...才有用`;
 - `我写了一篇`;
 - `欢迎阅读`;
 - `希望对你有帮助`;
@@ -254,6 +256,7 @@ Before returning the JSON, do this pass:
 
 - Does the first line say something a technical reader can agree or disagree with?
 - Is the mechanism visible before the first blank line?
+- Would `social:validate` reject the first line as generic article praise or AI-smelling meta copy?
 - Can the image be understood without the article?
 - Does the X Article separate problem and cause?
 - Does the blog URL appear only at the end of the X Article?

@@ -2202,6 +2202,39 @@ test('quality gate rejects raw blog URLs and low-value X copy', () => {
   assert.ok(validation.items[0].errors.some((error) => error.includes('raw blog URLs')));
 });
 
+test('quality gate rejects AI-smelling generic short posts', () => {
+  const queue = buildPublishQueue([
+    {
+      title: '有用的系统',
+      excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+      slug: 'Useful-Systems',
+      lang: 'zh',
+      tags: ['AI'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  queue.items[0] = {
+    ...queue.items[0],
+    shortPost: [
+      '技术文章只有留下可复用框架才有用。',
+      '',
+      '我写了一篇关于系统设计的文章，欢迎阅读。',
+      '',
+      '图里是判断框架，长文放在 X Article。',
+    ].join('\n'),
+  };
+
+  const validation = validateQueue(queue);
+
+  assert.equal(validation.status, 'fail');
+  assert.ok(validation.items[0].errors.some((error) => error.includes('low-value meta copy')));
+  assert.ok(validation.items[0].errors.some((error) => error.includes('concrete technical claim')));
+});
+
 test('quality gate rejects heading-glued Chinese X Article fragments', () => {
   const queue = buildPublishQueue([
     {

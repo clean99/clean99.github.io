@@ -274,7 +274,7 @@ export function sharpTake(article) {
     return strongThesis(article);
   }
 
-  return clamp(`A technical post is useful only when it leaves a reusable frame.\n\nReusable frame: ${takeaway}`, 220);
+  return clamp(`Don't turn "${clamp(article.title, 72)}" into an implementation log.\n\nReusable frame: ${takeaway}`, 220);
 }
 
 export function researchUtility(article) {

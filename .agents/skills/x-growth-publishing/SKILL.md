@@ -340,6 +340,7 @@ Image:
 Quality gate:
 
 - reject raw blog URLs in the short post;
+- reject AI-smelling meta copy such as "A technical post is useful only when", `我写了一篇`, `欢迎阅读`, `技术文章只有...才有用`;
 - reject short posts that do not state a Chinese claim plus a concrete mechanism in the first screen;
 - reject short posts that merely say the blog exists without selling the image-backed mechanism or X Article;
 - reject duplicated short posts across different articles;

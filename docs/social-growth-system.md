@@ -74,7 +74,7 @@ Core records:
 
 - `Article`: parsed from `source/_posts/*.md`.
 - `DistributionCandidate`: one article, one X variant, one UTM URL, a Chinese short post, an X Article draft, and an image prompt. The short post does not include the blog URL, and Chinese copy is generated from an article-specific topic frame.
-- `QualityGate`: deterministic checks for raw blog URLs, weak first-screen structure, duplicated short posts across articles, X Article link placement, image prompt requirements, and low-value follow-up replies.
+- `QualityGate`: deterministic checks for raw blog URLs, AI-smelling meta copy, weak first-screen structure, duplicated short posts across articles, X Article link placement, image prompt requirements, and low-value follow-up replies.
 - The X Article gate also rejects obvious extraction artifacts, including section-heading fragments glued to body text and Markdown table fragments inside bullets.
 - `PublishQueue`: local draft queue of candidates to hand to Chrome.
 - `WeeklyExecutionPlan`: seven-day posting and metrics-capture schedule tied to the follower target.
@@ -251,7 +251,7 @@ Validate the queue before opening Chrome:
 npm run social:validate -- --queue data/social-growth/queue.json --format markdown
 ```
 
-The validation must pass before a candidate should be published. The gate rejects the original bad pattern that produced the screenshot: a short post with a raw blog URL and no real reason to click.
+The validation must pass before a candidate should be published. The gate rejects the original bad pattern that produced the screenshot: a short post with a raw blog URL and no real reason to click. It also rejects generic AI-smelling meta lines such as "A technical post is useful only when...", "我写了一篇", "欢迎阅读", and "技术文章只有..." because those lines describe content instead of making a concrete technical claim.
 
 Generate the week-level operating plan:
 
