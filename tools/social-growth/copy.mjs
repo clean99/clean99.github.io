@@ -161,6 +161,34 @@ const ARTICLE_FRAMES = [
     },
   },
   {
+    pattern: /Browser-Grade-Tabs|浏览器标签页|浏览器级|单页工作台|URL and Tab Ownership|Intent Interface/i,
+    frame: {
+      topic: 'Browser-grade 工作台 Tab',
+      falseFrame: '把 tab 当成一排按钮和局部 state',
+      betterFrame: '把入口意图、URL 归属、runtime 热池和隔离边界拆开设计',
+      mechanism: 'intent -> ownership -> runtime -> isolation',
+      imageTitle: 'Browser-grade 工作台 Tab 分层',
+      diagramText: 'intent -> ownership -> runtime -> isolation',
+      coreClaim: '工作台里的 tab 要像浏览器，但不能把业务 URL、runtime、弹层和后台任务混成一个前端 state。',
+      failureMode: '如果 hidden tab 还能改 URL、弹窗或抢 CPU，用户看到的是浏览器壳，里面还是单页应用脾气。',
+      readerPayoff: '把工作台 tab 从 UI 组件拆成可验证的系统边界',
+      strongPost: '把浏览器标签页搬进工作台，最坑的不是画一排 tab。\n\n更容易炸的是这些细节：刷新后 tab 还在吗？hidden iframe 会不会改 URL？A 窗口关 tab，B 窗口还显示吗？弹窗会不会串到另一个 tab？\n\n我先看 intent / ownership / runtime / isolation 四层。配图放分层，后面贴设计取舍。',
+      proofPoints: [
+        'URL 不能退化成 `/tabs/:id`，否则分享和刷新会丢业务语义。',
+        'opened tabs 是用户语义，hot runtime pool 只是最近工作集；淘汰 runtime 不能删 tab。',
+        'hidden runtime 的 history、overlay、focus event 和前台 CPU 都要被 owner 过滤。',
+      ],
+      tradeoff: '不能把所有 runtime 无限保活；热切换速度要和内存、后台 CPU、隔离成本一起守。',
+      frameworkSteps: [
+        '所有入口先归一成打开意图。',
+        '用真实业务 URL 推导 tab ownership，而不是把链接改成私有 tab id。',
+        '服务端保存 opened tabs，前端只保有限 hot runtime pool。',
+        '按 owner 隔离 history、overlay、focus event 和前台 CPU。',
+        '用多窗口同步、backend contract 和 stress gate 守刷新、多窗口、隐藏 tab 回归。',
+      ],
+    },
+  },
+  {
     pattern: /Workspace v2 Tab System 性能|Tab System 性能|Hot Switch|Background Pressure|热切换|后台任务|后台压力/i,
     frame: {
       topic: 'Workspace Tab 性能',

@@ -780,6 +780,33 @@ test('distinguishes workspace tab performance from AI performance loop copy', ()
   assert.equal(validateQueue(queue).status, 'pass');
 });
 
+test('generates browser-grade tab system copy instead of default engineering template', () => {
+  const queue = buildPublishQueue([
+    {
+      title: 'Workspace v2 Tab System：把浏览器标签页能力带进单页工作台',
+      excerpt: '工作台要支持多个 workstream、子应用视图和工单对象，体验要接近浏览器标签页。',
+      slug: 'Workspace-v2-Tab-System-Browser-Grade-Tabs',
+      lang: 'zh',
+      tags: ['Frontend', 'React', 'Software Engineering'],
+      url: 'https://clean99.github.io/zh/browser-grade-tabs/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  const item = queue.items.find((entry) => entry.variant === 'strong-thesis');
+
+  assert.match(item.shortPost, /把浏览器标签页搬进工作台/);
+  assert.match(item.shortPost, /intent \/ ownership \/ runtime \/ isolation/);
+  assert.doesNotMatch(item.shortPost, /工程判断/);
+  assert.equal(item.threadFallback[0], item.shortPost);
+  assert.match(item.xArticle.body, /URL 不能退化成 `\/tabs\/:id`/);
+  assert.match(item.xArticle.body, /hidden runtime 的 history、overlay、focus event/);
+  assert.match(item.media.prompt, /Browser-grade 工作台 Tab 分层/);
+  assert.equal(validateQueue(queue).status, 'pass');
+});
+
 test('filters heading-glued fragments from Chinese X Article extraction', () => {
   const points = extractKeyPoints([
     '本文从第一性原理出发，拆解性能优化的自动化闭环。',

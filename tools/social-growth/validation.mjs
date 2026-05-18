@@ -70,6 +70,10 @@ const CHINESE_MECHANISM_PATTERNS = [
   /harness/i,
   /metric/i,
   /path/i,
+  /intent/i,
+  /ownership/i,
+  /runtime/i,
+  /isolation/i,
 ];
 const CHINESE_VISUAL_HANDOFF_PATTERNS = [
   /图中/u,
