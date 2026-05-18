@@ -11,12 +11,18 @@ export function buildPublicActionChecklist({
   engagementPlan = null,
   browserReadiness = null,
 } = {}) {
+  const profile = profileActions(profileUpdate);
+  const publish = publishActions({ publishConfirmation, manualPublishKits });
+  const replies = replyActions(engagementPlan);
   const actions = [
-    ...publishActions({ publishConfirmation, manualPublishKits }),
-    ...profileActions(profileUpdate),
-    ...replyActions(engagementPlan),
+    ...profile,
+    ...publish,
+    ...replies,
   ];
   const blockedByLogin = browserReadiness?.status === 'needs_x_login';
+  const priorityNote = profile.length && publish.length
+    ? 'Profile conversion actions come before publish actions so profile clicks from a launch can convert into follows.'
+    : '';
 
   return {
     version: 1,
@@ -26,6 +32,7 @@ export function buildPublicActionChecklist({
       : 'no_public_actions_ready',
     actionCount: actions.length,
     blockedByLogin,
+    priorityNote,
     actions,
     allowedLocalActions: [
       'read-only X search and copied visible-text capture',
@@ -60,6 +67,7 @@ Status: ${checklist.status}
 
 - Pending public actions: ${checklist.actionCount}
 - Blocked until X login: ${checklist.blockedByLogin}
+${checklist.priorityNote ? `- Priority: ${checklist.priorityNote}\n` : ''}
 
 ## Pending Public Actions
 

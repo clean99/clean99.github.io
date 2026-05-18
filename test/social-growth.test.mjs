@@ -4017,7 +4017,16 @@ test('public action checklist centralizes confirmation boundaries', async () => 
   assert.equal(checklist.status, 'blocked_until_x_login');
   assert.equal(checklist.actionCount, 5);
   assert.equal(checklist.blockedByLogin, true);
+  assert.equal(checklist.priorityNote, 'Profile conversion actions come before publish actions so profile clicks from a launch can convert into follows.');
+  assert.deepEqual(checklist.actions.map((item) => item.type), [
+    'edit_profile',
+    'publish_pinned_post',
+    'pin_profile_post',
+    'publish_image_thread',
+    'reply',
+  ]);
   assert.ok(checklist.actions.every((item) => item.status === 'needs_action_time_confirmation'));
+  assert.match(markdown, /Profile conversion actions come before publish actions/);
   assert.match(markdown, /final public publish click/);
   assert.match(markdown, /final profile save click/);
   assert.match(markdown, /final public Reply click/);
