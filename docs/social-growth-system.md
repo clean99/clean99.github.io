@@ -1,6 +1,14 @@
 # Social Growth System
 
-This repository now has a small, testable growth pipeline for turning blog posts into X distribution candidates and measuring follower/interaction progress.
+This repository now has a small, testable growth pipeline for turning blog posts into Chinese-audience X distribution candidates and measuring follower/interaction progress.
+
+The repeatable workflow is also captured as a project skill:
+
+```text
+.agents/skills/x-growth-publishing/SKILL.md
+```
+
+Use that skill for future requests about X posting, blog distribution, Chinese X growth, X Article creation, image-backed posts, follower tracking, or content optimization.
 
 ## Boundary
 
@@ -11,6 +19,8 @@ The code can automate safe local work:
 - draft X posts and threads;
 - create and persist a browser publishing queue;
 - prepare exact handoff text for Chrome;
+- produce `gpt-image-2` image prompts for each candidate;
+- produce an X Article draft before the blog link;
 - mark published X URLs back into the queue;
 - initialize a one-week follower target ledger;
 - append follower and interaction snapshots;
@@ -36,7 +46,7 @@ flowchart LR
 Core records:
 
 - `Article`: parsed from `source/_posts/*.md`.
-- `DistributionCandidate`: one article, one X variant, one UTM URL, one or more post bodies. The post text and `targetUrl` are separate so long UTM links are not truncated by local text guards.
+- `DistributionCandidate`: one article, one X variant, one UTM URL, a Chinese short post, an X Article draft, and an image prompt. The short post does not include the blog URL.
 - `PublishQueue`: local draft queue of candidates to hand to Chrome.
 - `MetricsSnapshot`: date, follower count, per-post interactions.
 - `GrowthReport`: follower delta, target progress, interaction totals, top posts.
@@ -61,10 +71,10 @@ Generate a multi-post plan from recent articles:
 npm run social:plan -- --limit 3
 ```
 
-Write a local publishing queue:
+Write a local publishing queue. Default language is Chinese:
 
 ```bash
-npm run social:queue -- --limit 3 --out data/social-growth/queue.json
+npm run social:queue -- --limit 3 --lang zh --out data/social-growth/queue.json
 ```
 
 Prepare the exact text a browser executor should fill:
@@ -73,7 +83,7 @@ Prepare the exact text a browser executor should fill:
 npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>
 ```
 
-After a confirmed browser publish, write the public X URL back to the queue:
+After a confirmed browser publish, write the public X post URL back to the queue:
 
 ```bash
 npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url https://x.com/Clean993/status/<id>
@@ -168,20 +178,23 @@ Do not commit private analytics or account history.
 1. Generate a queue with `npm run social:queue -- --limit 5 --out data/social-growth/queue.json`.
 2. Pick 2-4 strong queue items for the day.
 3. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
-4. Use Chrome to prepare the post.
-5. Stop before publishing and confirm the exact text and account.
-6. Publish only after confirmation.
-7. Mark the published URL with `npm run social:mark-published`.
-8. Record follower count and post interactions twice per day.
-9. Run `npm run social:snapshot`.
-10. Run `npm run social:report -- --format markdown`.
-11. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+4. Generate the image from `image.prompt` with `gpt-image-2`.
+5. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
+6. Stop before publishing the X Article or thread and confirm the exact content and account.
+7. Publish only after confirmation.
+8. Use Chrome to prepare the short image-backed X post linking to the X Article.
+9. Stop before publishing the short post and confirm the exact content and account.
+10. Mark the published URL with `npm run social:mark-published`.
+11. Record follower count and post interactions twice per day.
+12. Run `npm run social:snapshot`.
+13. Run `npm run social:report -- --format markdown`.
+14. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 ## Chrome Integration Plan
 
-The browser layer should be thin. It should accept a `DistributionCandidate`, open X, fill the composer, and stop before the final publish action.
+The browser layer should be thin. It should accept a `DistributionCandidate`, open X, fill the Article editor or composer, and stop before the final publish action.
 
-When publishing, append `targetUrl` to the post at `linkPostIndex`. Keep the link out of local truncation logic; X will shorten it through its own URL handling.
+For the Chinese growth workflow, do not append `targetUrl` to the short post. Put the blog URL only at the end of `xArticle.body`, then link the short post to the published X Article URL.
 
 Do not put growth logic in the browser layer. The browser layer is only an executor. Article parsing, copy generation, UTM creation, and scoring stay in `tools/social-growth/`.
 

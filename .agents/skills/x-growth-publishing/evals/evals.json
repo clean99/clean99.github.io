@@ -1,0 +1,23 @@
+{
+  "skill_name": "x-growth-publishing",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "把最新一篇中文博客生成适合简中 X 用户的发帖队列，要有图片提示词、X Article 和短帖。",
+      "expected_output": "生成中文 queue/handoff；短帖不直接放博客长链接；包含 gpt-image-2 图片提示词；X Article 末尾包含博客链接。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "这条推文看着没人想点，参考铁锤人、立党这类简中大 V 的结构，但不要模仿人身攻击风格，重写发 X 流程。",
+      "expected_output": "读取 chinese-x-style reference；产出强判断/调研工具/项目复盘三类结构；保持合规边界。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "记录今天 @Clean993 的 follower 和帖子互动，生成一周涨粉 1000 的进度报告。",
+      "expected_output": "更新本地 ledger/snapshot；输出 follower delta、required pace、interaction rate 和 top posts。",
+      "files": []
+    }
+  ]
+}

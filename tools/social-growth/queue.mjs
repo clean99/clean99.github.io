@@ -4,7 +4,7 @@ import { buildDistributionCandidates } from './copy.mjs';
 export function buildPublishQueue(articles, options = {}) {
   const createdAt = options.createdAt || new Date().toISOString();
   const limit = Number(options.limit || 5);
-  const lang = options.lang || 'en';
+  const lang = options.lang || 'zh';
   const candidates = articles
     .filter((article) => !lang || article.lang === lang)
     .slice(0, limit)
@@ -33,6 +33,10 @@ export function queueItemFromCandidate(candidate, { createdAt, index = 0 } = {})
     variant: candidate.variant,
     channel: candidate.channel,
     targetUrl: candidate.targetUrl,
+    shortPost: candidate.shortPost,
+    xArticle: candidate.xArticle,
+    media: candidate.media,
+    threadFallback: candidate.threadFallback,
     posts: candidate.posts,
     linkPostIndex: candidate.linkPostIndex,
     requiresBrowserConfirmation: candidate.requiresBrowserConfirmation,
@@ -50,6 +54,7 @@ export function stableQueueId(candidate, index = 0) {
 
 export function composePublishPosts(item) {
   return item.posts.map((post, index) => {
+    if (item.linkPostIndex === null || item.linkPostIndex === undefined) return post;
     if (index !== item.linkPostIndex) return post;
     return `${post}\n${item.targetUrl}`.trim();
   });
@@ -62,6 +67,11 @@ export function prepareBrowserHandoff(item) {
     status: item.status,
     requiresBrowserConfirmation: true,
     accountAction: 'public_x_post',
+    publishOrder: ['generate_image', 'publish_x_article_or_thread', 'publish_short_post_with_image_and_article_link'],
+    image: item.media,
+    xArticle: item.xArticle,
+    threadFallback: item.threadFallback,
+    shortPost: item.shortPost || composePublishPosts(item)[0],
     posts: composePublishPosts(item),
     stopBeforeFinalClick: true,
   };

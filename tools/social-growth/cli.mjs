@@ -19,6 +19,7 @@ import {
 
 const command = process.argv[2] || 'help';
 const args = parseArgs(process.argv.slice(3));
+const DEFAULT_LANG = 'zh';
 
 if (command === 'articles') {
   const articles = await loadArticles();
@@ -42,7 +43,11 @@ if (command === 'articles') {
 } else if (command === 'plan') {
   const articles = await loadArticles();
   const limit = Number(args.limit || 5);
-  const plan = articles.slice(0, limit).flatMap((article) =>
+  const lang = args.lang || DEFAULT_LANG;
+  const plan = articles
+    .filter((article) => !lang || article.lang === lang)
+    .slice(0, limit)
+    .flatMap((article) =>
     buildDistributionCandidates(article, { campaign: args.campaign }).map((candidate) => ({
       articleSlug: candidate.articleSlug,
       lang: candidate.lang,
@@ -126,7 +131,7 @@ function toCamelKey(key) {
 }
 
 function selectArticle(articles, options) {
-  const preferredLang = options.lang || 'en';
+  const preferredLang = options.lang || DEFAULT_LANG;
 
   if (options.slug) {
     const matches = articles.filter((item) => item.slug === options.slug || item.i18nKey === options.slug);

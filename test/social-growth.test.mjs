@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { articleFromMarkdown, addUtm, parseFrontmatter } from '../tools/social-growth/articles.mjs';
-import { buildDistributionCandidates } from '../tools/social-growth/copy.mjs';
+import { buildDistributionCandidates, buildXArticle, selectHashtags } from '../tools/social-growth/copy.mjs';
 import { appendSnapshot, createLedger, formatMarkdownReport } from '../tools/social-growth/ledger.mjs';
 import { parseCompactNumber, postScore, summarizeGrowthLedger } from '../tools/social-growth/metrics.mjs';
 import { buildPublishQueue, composePublishPosts, markQueueItemPublished } from '../tools/social-growth/queue.mjs';
@@ -82,9 +82,13 @@ test('generates bounded X distribution candidates', () => {
   assert.equal(candidates[0].requiresBrowserConfirmation, true);
   assert.ok(candidates.every((candidate) => candidate.posts.every((post) => post.length <= 260)));
   assert.ok(candidates[0].targetUrl.includes('utm_source=x'));
-  assert.equal(candidates[0].linkPostIndex, 0);
-  assert.equal(candidates[2].linkPostIndex, 2);
-  assert.equal(candidates[2].posts[2], 'Full post:');
+  assert.equal(candidates[0].variant, 'strong-thesis');
+  assert.equal(candidates[0].linkPostIndex, null);
+  assert.equal(candidates[2].variant, 'case-story');
+  assert.equal(candidates[2].linkPostIndex, null);
+  assert.ok(candidates[0].xArticle.body.includes('Full blog post:'));
+  assert.equal(candidates[0].media.model, 'gpt-image-2');
+  assert.ok(candidates[0].threadFallback[2].includes('https://clean99.github.io'));
 });
 
 test('parses compact metrics and computes growth summary', () => {
@@ -142,12 +146,12 @@ x`);
 test('builds publish queue and composes handoff posts without losing the URL', () => {
   const articles = [
     {
-      title: 'Useful Systems',
-      excerpt: 'A useful system keeps the data model small and the feedback loop honest.',
+      title: '有用的系统',
+      excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
       slug: 'Useful-Systems',
-      lang: 'en',
-      tags: ['AI'],
-      url: 'https://clean99.github.io/2026/05/18/Useful-Systems/',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
     },
   ];
 
@@ -161,7 +165,11 @@ test('builds publish queue and composes handoff posts without losing the URL', (
   assert.equal(queue.items[0].status, 'draft');
   const composed = composePublishPosts(queue.items[0]);
   assert.equal(composed.length, 1);
-  assert.ok(composed[0].includes('https://clean99.github.io/2026/05/18/Useful-Systems/'));
+  assert.ok(!composed[0].includes('https://clean99.github.io/zh/2026/05/18/Useful-Systems/'));
+  assert.ok(composed[0].includes('#软件工程'));
+  assert.ok(queue.items[0].xArticle.body.includes('博客原文：https://clean99.github.io/zh/2026/05/18/Useful-Systems/'));
+  assert.ok(queue.items[0].media.prompt.includes('gpt-image-2') || queue.items[0].media.model === 'gpt-image-2');
+  assert.ok(queue.items[0].threadFallback[2].includes('完整过程'));
 
   const updated = markQueueItemPublished(queue, {
     id: queue.items[0].id,
@@ -170,6 +178,26 @@ test('builds publish queue and composes handoff posts without losing the URL', (
   });
   assert.equal(updated.items[0].status, 'published');
   assert.equal(updated.items[0].xPostUrl, 'https://x.com/Clean993/status/1');
+});
+
+test('maps existing tags to Chinese audience hashtags', () => {
+  assert.equal(selectHashtags(['AI', 'Software Engineering', 'Web Performance'], 'zh'), '#AI #软件工程');
+  assert.equal(selectHashtags(['Software Engineering'], 'en'), '#SoftwareEngineering');
+});
+
+test('builds Chinese X Article before the blog link', () => {
+  const article = {
+    title: '全自动 AI 性能优化',
+    excerpt: '我做了一个性能优化 skill，让 AI Agent 执行真正的优化闭环。',
+    text: '没有可重复 measurement，AI 优化就是在讲故事。每轮只攻击一个瓶颈。没有可比数据，就不要声明收益。',
+    lang: 'zh',
+  };
+
+  const xArticle = buildXArticle(article, 'https://clean99.github.io/zh/post/');
+
+  assert.match(xArticle.body, /## 关键结论/);
+  assert.ok(xArticle.body.indexOf('## 关键结论') < xArticle.body.indexOf('博客原文：'));
+  assert.ok(xArticle.body.endsWith('https://clean99.github.io/zh/post/'));
 });
 
 test('creates ledger, replaces same-day snapshots, and renders markdown report', () => {
