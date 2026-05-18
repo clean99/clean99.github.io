@@ -21,6 +21,8 @@ const FORBIDDEN_SHORT_POST_PATTERNS = [
   /判断框架/u,
   /复盘框架/u,
   /验证闭环/u,
+  /先别急着看/u,
+  /一个总分/u,
   /图里是/u,
   /图里放/u,
   /一个指标或一句经验带偏/u,

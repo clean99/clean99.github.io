@@ -736,8 +736,8 @@ test('generates article-specific Chinese X copy instead of repeating one templat
   assert.match(strongPosts[0].shortPost, /Agent Skill/);
   assert.match(strongPosts[1].shortPost, /技术博客 SEO/);
   assert.notEqual(strongPosts[0].shortPost, strongPosts[1].shortPost);
-  assert.match(strongPosts[0].shortPost, /配图放检查顺序，后面贴证据和取舍|配图放路径，后面贴完整证据和取舍/);
-  assert.doesNotMatch(strongPosts[0].shortPost, /不是.+而是|验证闭环|判断框架|图里是/u);
+  assert.match(strongPosts[0].shortPost, /配图放我现在用的检查顺序，后面贴完整过程|配图放路径，后面贴完整证据和取舍/);
+  assert.doesNotMatch(strongPosts[0].shortPost, /不是.+而是|验证闭环|判断框架|图里是|先别急着看|一个总分/u);
   assert.match(strongPosts[0].xArticle.body, /Skill 要把可复用能力写成稳定契约/);
   assert.match(strongPosts[1].xArticle.body, /技术博客做 SEO/);
   assert.equal(validateQueue(queue).status, 'pass');
@@ -761,10 +761,10 @@ test('Chinese short posts sell the image and X Article before the blog link', ()
   const item = queue.items[0];
 
   assert.doesNotMatch(item.shortPost, /https?:\/\//i);
-  assert.match(item.shortPost, /AI 性能优化，先别急着看模型给了多少建议/);
+  assert.match(item.shortPost, /AI 性能优化最怕假进步/);
   assert.match(item.shortPost, /baseline -> change -> verify -> ledger/);
-  assert.match(item.shortPost, /配图放检查顺序，后面贴证据和取舍/);
-  assert.doesNotMatch(item.shortPost, /不是.+而是|真正值钱|验证闭环|判断框架|图里是/u);
+  assert.match(item.shortPost, /后面贴证据和失败轮次/);
+  assert.doesNotMatch(item.shortPost, /不是.+而是|真正值钱|验证闭环|判断框架|图里是|先别急着看|一个总分/u);
   assert.match(item.xArticle.body, /博客原文：https:\/\/clean99\.github\.io\/zh\/automated-ai-performance\//);
   assert.match(item.xArticle.body, /## 证据/);
   assert.doesNotMatch(item.xArticle.body, /为什么值得读原文|原文围绕|短帖只能|本文从/);

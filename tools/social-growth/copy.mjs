@@ -228,7 +228,7 @@ const ARTICLE_FRAMES = [
       coreClaim: '没有可重复测量，AI 优化就是在讲故事。',
       failureMode: '测量口径错了，任何性能收益都不能算数。',
       readerPayoff: '判断 AI 优化到底有没有胡说',
-      strongPost: 'AI 性能优化，先别急着看模型给了多少建议。\n\n测量口径错了，任何性能收益都不能算数。\n\n我会按 baseline -> change -> verify -> ledger 拆：先固定 baseline，再让每次修改都能被同一个 harness 复验。\n\n配图放检查顺序，后面贴证据和取舍。',
+      strongPost: 'AI 性能优化最怕假进步。\n\n模型给出懒加载、拆包、预取都不难；难的是每一轮都回到同一个 baseline，用同一个 harness 复验。\n\n配图放 baseline -> change -> verify -> ledger，后面贴证据和失败轮次。',
       frameworkSteps: [
         '定义一个用户可感知指标。',
         '为这个指标搭一个可重复 harness。',
@@ -250,6 +250,7 @@ const ARTICLE_FRAMES = [
       coreClaim: 'Skill 要把可复用能力写成稳定契约：输入、输出、执行边界和验收标准都要清楚。',
       failureMode: '没有契约的 Skill 只是长提示词，越堆越难复用。',
       readerPayoff: '把零散 AI 经验沉淀成可执行能力',
+      strongPost: '很多 Agent Skill 写坏了，原因很简单：它只是在收纳提示词。\n\n真的能复用的 Skill，要把 context、输入输出、执行边界和 eval 写清楚。缺一项，后面就会变成靠运气跑。\n\n配图放我现在用的检查顺序，后面贴完整过程。',
       frameworkSteps: [
         '先定义 Skill 要接收什么上下文。',
         '写清楚它必须产出什么结果。',
@@ -342,7 +343,7 @@ export function researchUtility(article) {
 export function strongThesis(article) {
   const frame = articleFrame(article);
   if (frame.strongPost) return clamp(frame.strongPost, 230);
-  return clamp(`${frame.topic}，先别急着看一个总分。\n\n${frame.failureMode}\n\n我会按 ${frame.mechanism} 拆：先定路径和指标，再决定动作，最后用证据过 gate。\n\n配图放检查顺序，后面贴证据和取舍。`, 220);
+  return clamp(`${frame.topic} 先看证据，别先看结论。\n\n${frame.failureMode}\n\n我会按 ${frame.mechanism} 这条线查：输入是什么、动作怎么收敛、结果用什么证据过关。\n\n配图放检查顺序，后面贴完整过程。`, 220);
 }
 
 export function caseStory(article) {
@@ -463,13 +464,13 @@ export function buildFollowUpReplies(article, variant) {
   const frame = articleFrame(article);
   const variantReply = {
     'research-utility': `配图里我只保留 ${frame.mechanism} 这条线。少放形容词，多放检查点，读者才知道下一步该验证什么。`,
-    'strong-thesis': `我判断「${frame.topic}」是否靠谱，会直接看 ${frame.mechanism} 有没有落成检查步骤：场景、指标、动作、证据。`,
+    'strong-thesis': `我现在会先问一句：${frame.mechanism} 里哪一步能被别人复验？答不上来，就先别把它写成流程。`,
     'case-story': `这个 case 的教训是：先别急着套方案。先识别是不是还停在“${frame.falseFrame}”，否则后面动作都会跑偏。`,
   }[variant] || `我会把 ${frame.mechanism} 写成检查顺序，避免读者只记住一句固定说法。`;
 
   return [
     clampPost(variantReply),
-    clampPost(`落地时先看一个失败信号：如果流程仍然停在“${frame.falseFrame}”，后面动作很容易变成堆复杂度。先把 ${frame.mechanism} 跑通。`),
+    clampPost(`落地时最容易漏的是失败案例。只记录成功路径，Skill 很快会变成一堆口号。先把 ${frame.mechanism} 跑通，再把失败轮次写回去。`),
   ];
 }
 
