@@ -3439,6 +3439,104 @@ test('manual publish kit condenses copy, recovery, and metrics targets without p
   }
 });
 
+test('manual publish kits CLI writes all ready fallback kits and an index', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-manual-kits-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+      {
+        title: 'Vibe Coding VS Spec-Driven Coding',
+        excerpt: '复杂改动需要先固定意图、边界和验收标准。',
+        slug: 'Spec-Driven-Coding',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/spec-driven-coding/',
+      },
+      {
+        title: '全自动 AI 性能优化',
+        excerpt: '每一轮修改都应该被同一个 harness 复验。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 9,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+    const plannedSlots = buildWeeklyExecutionPlan({
+      queue,
+      ledger,
+      now: '2026-05-18T00:00:00.000Z',
+    }).days[0].publishSlots;
+    const imageDir = join(outDir, 'images');
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    const kitDir = join(outDir, 'manual-publish-kits');
+    const indexPath = join(kitDir, 'index.md');
+    const queuePath = join(outDir, 'queue.json');
+    const ledgerPath = join(outDir, 'ledger.json');
+    await mkdir(imageDir, { recursive: true });
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await writeFile(join(imageDir, `${plannedSlots[0].item.id}.png`), 'fake image');
+    await writeFile(join(imageDir, `${plannedSlots[1].item.id}.png`), 'fake image');
+    await writeJson(queuePath, queue);
+    await writeJson(ledgerPath, ledger);
+
+    const result = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'manual-publish-kits',
+      '--queue', queuePath,
+      '--ledger', ledgerPath,
+      '--image-dir', imageDir,
+      '--package-out', join(outDir, 'packages'),
+      '--skill-dir', skillDir,
+      '--bun-command', 'bun',
+      '--publishMode', 'thread_fallback',
+      '--day', '1',
+      '--out-dir', kitDir,
+      '--out', indexPath,
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.match(result.stdout, /Wrote 2 manual X publish kit\(s\)/);
+    const firstKitPath = join(kitDir, `day1-slot1-${plannedSlots[0].item.id}.md`);
+    const secondKitPath = join(kitDir, `day1-slot2-${plannedSlots[1].item.id}.md`);
+    const indexMarkdown = await readFile(indexPath, 'utf8');
+    const firstKit = await readFile(firstKitPath, 'utf8');
+    const secondKit = await readFile(secondKitPath, 'utf8');
+
+    assert.match(indexMarkdown, /Manual X Publish Kits/);
+    assert.match(indexMarkdown, /Ready slots: 2\/3/);
+    assert.ok(indexMarkdown.includes(firstKitPath));
+    assert.ok(indexMarkdown.includes(secondKitPath));
+    assert.match(indexMarkdown, /post-publish-recovery/);
+    assert.match(indexMarkdown, /Publishing, uploading media, replying/);
+    assert.match(firstKit, /Manual X Publish Kit/);
+    assert.match(firstKit, /Absolute image path: `/);
+    assert.match(secondKit, /Manual X Publish Kit/);
+    assert.match(secondKit, /Thread Post 2/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('thread reply handoff materializes reply intent URLs from a published thread URL', () => {
   const queue = buildPublishQueue([
     {

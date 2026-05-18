@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 
 const DEFAULT_OUT_PATH = 'data/social-growth/manual-publish-kit.md';
+const DEFAULT_BATCH_DIR = 'data/social-growth/manual-publish-kits';
 
 export function buildManualPublishKit({
   confirmation,
@@ -136,4 +137,93 @@ export async function writeManualPublishKit(kit, filePath = DEFAULT_OUT_PATH) {
   await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, `${formatManualPublishKitMarkdown(kit).trimEnd()}\n`);
   return filePath;
+}
+
+export function manualPublishKitPath({
+  day,
+  slot,
+  id,
+  outDir = DEFAULT_BATCH_DIR,
+} = {}) {
+  return join(outDir, `day${Number(day || 1)}-slot${Number(slot || 1)}-${safePathSegment(id || 'manual-publish-kit')}.md`);
+}
+
+export function manualPublishKitIndexPath({
+  day,
+  outDir = DEFAULT_BATCH_DIR,
+} = {}) {
+  return join(outDir, `day${Number(day || 1)}-ready-slots.md`);
+}
+
+export function buildManualPublishKitIndex({
+  generatedAt = new Date().toISOString(),
+  day = 1,
+  date = '',
+  readySlots = 0,
+  totalSlots = 0,
+  kits = [],
+} = {}) {
+  return {
+    generatedAt,
+    status: kits.length ? 'ready_for_manual_confirmation' : 'no_ready_slots',
+    day: Number(day || 1),
+    date,
+    readySlots: numberOrDefault(readySlots, kits.length),
+    totalSlots: numberOrDefault(totalSlots, kits.length),
+    kits,
+    boundary: 'Manual publish kits only. Publishing, uploading media, replying, liking, reposting, following, editing the profile, and pinning content still require action-time confirmation in Chrome.',
+  };
+}
+
+export function formatManualPublishKitIndexMarkdown(index) {
+  const kits = index.kits.length
+    ? index.kits.map(formatManualKitEntry).join('\n\n')
+    : '- No ready manual publish kits were generated.';
+
+  return `# Manual X Publish Kits
+
+Generated at: ${index.generatedAt}
+Status: ${index.status}
+Day: ${index.day}
+Date: ${index.date || 'unknown'}
+Ready slots: ${index.readySlots}/${index.totalSlots}
+
+## Kits
+
+${kits}
+
+## Boundary
+
+${index.boundary}
+`;
+}
+
+export async function writeManualPublishKitIndex(index, filePath) {
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${formatManualPublishKitIndexMarkdown(index).trimEnd()}\n`);
+  return filePath;
+}
+
+function formatManualKitEntry(entry) {
+  return `### Slot ${entry.slot}: ${entry.id}
+
+- Time: ${entry.time || 'unknown'}
+- Status: ${entry.status}
+- Kit: \`${entry.path}\`
+- Absolute image path: \`${entry.imageAbsolutePath || 'missing'}\`
+
+After confirmed publication:
+
+\`\`\`bash
+${entry.recoveryCommand}
+\`\`\``;
+}
+
+function safePathSegment(value) {
+  return String(value).replace(/[^A-Za-z0-9._=-]+/g, '-');
+}
+
+function numberOrDefault(value, fallback) {
+  if (value === undefined || value === null || value === '') return Number(fallback || 0);
+  return Number(value);
 }

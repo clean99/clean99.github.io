@@ -104,8 +104,12 @@ import {
   writePublishConfirmation,
 } from './publishConfirmation.mjs';
 import {
+  buildManualPublishKitIndex,
   buildManualPublishKit,
   formatManualPublishKitMarkdown,
+  manualPublishKitIndexPath,
+  manualPublishKitPath,
+  writeManualPublishKitIndex,
   writeManualPublishKit,
 } from './manualPublishKit.mjs';
 import {
@@ -963,40 +967,7 @@ if (command === 'articles') {
     console.log(formatPublishConfirmationMarkdown(packet));
   }
 } else if (command === 'manual-publish-kit') {
-  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
-  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
-  const preflight = await buildPublishPreflight({
-    queue,
-    ledger,
-    id: args.id,
-    day: args.day || 1,
-    slot: args.slot || 1,
-    now: args.now ? new Date(args.now) : new Date(),
-    imageDir: args.imageDir || 'output/imagegen',
-    packageOutDir: args.packageOut || 'data/social-growth/packages',
-    ensurePackage: args.ensurePackage !== 'false',
-    preferReadyImage: args.preferReadyImage !== 'false',
-  });
-  const prep = await buildXPublishPrep(preflight, {
-    skillDir: args.skillDir,
-    bunCommand: args.bunCommand,
-    articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
-    publishMode: args.publishMode || args.articleMode || 'thread_fallback',
-    profileDir: args.xProfileDir || args.profileDir,
-    profileDirectory: args.xProfileDirectory || args.profileDirectory,
-  });
-  const confirmation = buildPublishConfirmation({
-    queue,
-    preflight,
-    xPublishPrep: prep,
-    generatedAt: preflight.generatedAt,
-  });
-  const kit = buildManualPublishKit({
-    confirmation,
-    account: args.account || '@Clean993',
-    profileTextPath: args.profileText || 'data/social-growth/profile.local.txt',
-    postTextDir: args.postTextDir || 'data/social-growth/post-texts',
-  });
+  const { kit } = await buildManualPublishKitFromCli(args);
   if (args.out) {
     await writeManualPublishKit(kit, args.out);
     console.log(`Wrote manual X publish kit to ${args.out}`);
@@ -1004,6 +975,70 @@ if (command === 'articles') {
     console.log(JSON.stringify(kit, null, 2));
   } else {
     console.log(formatManualPublishKitMarkdown(kit));
+  }
+} else if (command === 'manual-publish-kits') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const publishMode = args.publishMode || args.articleMode || 'thread_fallback';
+  const outDir = args.outDir || 'data/social-growth/manual-publish-kits';
+  const dayReadiness = await buildDayReadiness({
+    queue,
+    ledger,
+    day: args.day || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    ensurePackage: args.ensurePackage !== 'false',
+    xSkillDir: args.skillDir,
+    xBunCommand: args.bunCommand,
+    xProfileDir: args.xProfileDir || args.profileDir,
+    xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
+    publishMode,
+  });
+  const readySlots = dayReadiness.slots.filter((slot) => slot.preflightStatus === 'ready' && slot.xPrepStatus === 'ready');
+  const entries = [];
+  for (const slot of readySlots) {
+    const kitPath = manualPublishKitPath({
+      day: dayReadiness.day,
+      slot: slot.slot,
+      id: slot.id,
+      outDir,
+    });
+    const { kit } = await buildManualPublishKitFromCli({
+      ...args,
+      id: slot.id,
+      day: dayReadiness.day,
+      slot: slot.slot,
+      publishMode,
+    }, { queue, ledger });
+    await writeManualPublishKit(kit, kitPath);
+    entries.push({
+      slot: slot.slot,
+      time: slot.time,
+      id: slot.id,
+      status: kit.status,
+      path: kitPath,
+      imageAbsolutePath: kit.image.absolutePath,
+      recoveryCommand: kit.recoveryCommand,
+    });
+  }
+  const index = buildManualPublishKitIndex({
+    generatedAt: dayReadiness.generatedAt,
+    day: dayReadiness.day,
+    date: dayReadiness.date,
+    readySlots: dayReadiness.readySlots,
+    totalSlots: dayReadiness.totalSlots,
+    kits: entries,
+  });
+  const indexPath = args.out || manualPublishKitIndexPath({
+    day: dayReadiness.day,
+    outDir,
+  });
+  await writeManualPublishKitIndex(index, indexPath);
+  if (args.format === 'json') {
+    console.log(JSON.stringify(index, null, 2));
+  } else {
+    console.log(`Wrote ${entries.length} manual X publish kit(s) and index to ${indexPath}`);
   }
 } else if (command === 'register-image') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
@@ -1722,6 +1757,7 @@ function printHelp() {
   npm run social:x-prep -- --day today --slot 1 --out data/social-growth/x-publish-prep.md
   npm run social:confirmation -- --day today --slot 1 --out data/social-growth/publish-confirmation.md
   npm run social:manual-publish-kit -- --day today --slot 1 --out data/social-growth/manual-publish-kit.md
+  npm run social:manual-publish-kits -- --day today --out-dir data/social-growth/manual-publish-kits
   npm run social:register-image -- --day today --slot 1 --source /path/to/generated.png
   npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out data/social-growth/thread-reply-handoff.md --id <queue-id> --url <x-post-url>
   npm run social:post-publish-recovery -- --day today --slot 1 --url <x-post-url>
@@ -1804,6 +1840,52 @@ async function buildComposeDraftResolutionFromCli(options) {
     prep,
     readiness,
     resolution,
+  };
+}
+
+async function buildManualPublishKitFromCli(options, existing = {}) {
+  const queue = existing.queue || await readJson(options.queue || 'data/social-growth/queue.json');
+  const ledger = existing.ledger || await readJson(options.ledger || 'data/social-growth/ledger.json');
+  const preflight = await buildPublishPreflight({
+    queue,
+    ledger,
+    id: options.id,
+    day: options.day || 1,
+    slot: options.slot || 1,
+    now: options.now ? new Date(options.now) : new Date(),
+    imageDir: options.imageDir || 'output/imagegen',
+    packageOutDir: options.packageOut || 'data/social-growth/packages',
+    ensurePackage: options.ensurePackage !== 'false',
+    preferReadyImage: options.preferReadyImage !== 'false',
+  });
+  const prep = await buildXPublishPrep(preflight, {
+    skillDir: options.skillDir,
+    bunCommand: options.bunCommand,
+    articleUrlPlaceholder: options.articleUrl || '<x-article-url>',
+    publishMode: options.publishMode || options.articleMode || 'thread_fallback',
+    profileDir: options.xProfileDir || options.profileDir,
+    profileDirectory: options.xProfileDirectory || options.profileDirectory,
+  });
+  const confirmation = buildPublishConfirmation({
+    queue,
+    preflight,
+    xPublishPrep: prep,
+    generatedAt: preflight.generatedAt,
+  });
+  const kit = buildManualPublishKit({
+    confirmation,
+    account: options.account || '@Clean993',
+    profileTextPath: options.profileText || 'data/social-growth/profile.local.txt',
+    postTextDir: options.postTextDir || 'data/social-growth/post-texts',
+  });
+
+  return {
+    queue,
+    ledger,
+    preflight,
+    prep,
+    confirmation,
+    kit,
   };
 }
 
