@@ -4797,6 +4797,26 @@ test('login recovery command refreshes readiness files without public actions', 
     const statusPath = join(outDir, 'status.md');
     const browserReadinessPath = join(outDir, 'browser-readiness.md');
     const xPrepPath = join(outDir, 'x-publish-prep.md');
+    const profileDiagnosticsPath = join(outDir, 'x-profile-diagnostics.md');
+    const loginHandoffPath = join(outDir, 'login-handoff.md');
+    const xProfileDir = join(outDir, 'chrome-profile');
+    await mkdir(join(xProfileDir, 'Profile 1'), { recursive: true });
+    await writeFile(join(xProfileDir, 'Local State'), `${JSON.stringify({
+      profile: {
+        info_cache: {
+          'Profile 1': {
+            name: 'Clean993 publishing',
+          },
+        },
+        profiles_order: ['Profile 1'],
+        last_used: 'Profile 1',
+      },
+    }, null, 2)}\n`);
+    await writeFile(join(xProfileDir, 'Profile 1', 'Preferences'), `${JSON.stringify({
+      profile: {
+        name: 'Clean993 publishing',
+      },
+    }, null, 2)}\n`);
     await writeJson(queuePath, queue);
     await writeJson(ledgerPath, createLedger({
       startDate: '2026-05-18',
@@ -4835,6 +4855,10 @@ test('login recovery command refreshes readiness files without public actions', 
       '--status-out', statusPath,
       '--browser-readiness-out', browserReadinessPath,
       '--x-prep-out', xPrepPath,
+      '--profile-diagnostics-out', profileDiagnosticsPath,
+      '--login-handoff-out', loginHandoffPath,
+      '--x-profile-dir', xProfileDir,
+      '--include-system-chrome', 'false',
     ], {
       cwd: process.cwd(),
       encoding: 'utf8',
@@ -4843,6 +4867,8 @@ test('login recovery command refreshes readiness files without public actions', 
     const statusMarkdown = await readFile(statusPath, 'utf8');
     const readinessMarkdown = await readFile(browserReadinessPath, 'utf8');
     const xPrepMarkdown = await readFile(xPrepPath, 'utf8');
+    const profileDiagnosticsMarkdown = await readFile(profileDiagnosticsPath, 'utf8');
+    const loginHandoffMarkdown = await readFile(loginHandoffPath, 'utf8');
     const persistedProbe = await readBrowserProbe(probePath);
 
     assert.equal(result.status, 0, result.stderr || result.stdout);
@@ -4850,6 +4876,11 @@ test('login recovery command refreshes readiness files without public actions', 
     assert.equal(output.publicActions.typedText, false);
     assert.equal(output.publicActions.uploadedMedia, false);
     assert.equal(output.publicActions.clickedSubmit, false);
+    assert.equal(output.paths.profileDiagnostics, profileDiagnosticsPath);
+    assert.equal(output.paths.loginHandoff, loginHandoffPath);
+    assert.equal(output.profileDiagnostics.status, 'generated');
+    assert.equal(output.profileDiagnostics.profiles, 1);
+    assert.equal(output.loginHandoff.status, 'needs_x_login');
     assert.match(statusMarkdown, /Status: needs_x_login/);
     assert.match(statusMarkdown, /--xProfileDirectory 'Profile 1'/);
     assert.match(readinessMarkdown, /The Chrome profile used for publishing is not logged into X/);
@@ -4857,6 +4888,11 @@ test('login recovery command refreshes readiness files without public actions', 
     assert.match(readinessMarkdown, /Current URL: https:\/\/x\.com\/i\/flow\/login\?redirect_after_login=%2Fcompose%2Fpost/);
     assert.match(xPrepMarkdown, /Probe Browser Without Public Actions/);
     assert.match(xPrepMarkdown, /--profile-directory 'Profile 1'/);
+    assert.match(profileDiagnosticsMarkdown, /X Profile Diagnostics/);
+    assert.match(profileDiagnosticsMarkdown, /Profile 1 \(last used\)/);
+    assert.match(loginHandoffMarkdown, /X Login Handoff/);
+    assert.match(loginHandoffMarkdown, /Status: needs_x_login/);
+    assert.match(loginHandoffMarkdown, /login-recovery/);
     assert.equal(persistedProbe.profileDirectory, 'Profile 1');
     assert.equal(persistedProbe.currentUrl, 'https://x.com/i/flow/login?redirect_after_login=%2Fcompose%2Fpost');
   } finally {

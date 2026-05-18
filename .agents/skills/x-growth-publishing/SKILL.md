@@ -238,10 +238,10 @@ npm run social:manual-publish-kits -- --day today --publishMode thread_fallback 
 After each confirmed manual publication, paste the public X status URL into `data/social-growth/manual-publish-kits/day<N>-published-urls.json`. Leave unpublished slots blank, then run:
 
 ```bash
-npm run social:post-publish-recovery-batch -- --input data/social-growth/manual-publish-kits/day<N>-published-urls.json
+npm run social:post-publish-recovery-batch -- --input data/social-growth/manual-publish-kits/day<N>-published-urls.json --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies --launch-window-dir data/social-growth/launch-windows
 ```
 
-This batch recovery is local-only. It validates X status URLs, marks queue items as published, refreshes `posts.local.json`, and writes per-post reply handoffs. It must not publish, upload media, reply, like, repost, follow, edit profile, or pin content.
+This batch recovery is local-only. It validates X status URLs, marks queue items as published, refreshes `posts.local.json`, writes per-post reply handoffs, and creates per-post launch-window plans. It must not publish, upload media, reply, like, repost, follow, edit profile, or pin content.
 If the default `baoyu-post-to-x` browser opens without the expected X login, pass a persistent logged-in profile directory:
 
 ```bash
@@ -260,6 +260,8 @@ Then make the intended Chrome profile explicit:
 ```bash
 npm run social:login-recovery -- --day today --slot 1 --publishMode thread_fallback --xProfileDirectory "Profile 1"
 ```
+
+`login-recovery` refreshes `browser-probe.local.json`, `browser-readiness.md`, `status.md`, `x-publish-prep.md`, `x-profile-diagnostics.md`, and `login-handoff.md`. If it still returns `needs_x_login`, stop and use the refreshed `login-handoff.md` rather than guessing which Chrome profile is active.
 
 Before opening Chrome for a public-action handoff, run or update the browser readiness report:
 

@@ -150,6 +150,10 @@ import {
   writeXProfileDiagnostics,
 } from './xProfileDiagnostics.mjs';
 import {
+  buildLoginHandoff,
+  writeLoginHandoff,
+} from './loginHandoff.mjs';
+import {
   buildLaunchWindowPlan,
   formatLaunchWindowPlanMarkdown,
   writeLaunchWindowPlan,
@@ -1379,6 +1383,7 @@ async function runLoginRecovery(options = {}) {
   const publishMode = options.publishMode || options.articleMode || 'thread_fallback';
   const probePath = options.browserProbe || options.probeOut || 'data/social-growth/browser-probe.local.json';
   const account = options.account || '@Clean993';
+  const now = options.now ? new Date(options.now) : new Date();
   const storedProbeBeforeRun = await readBrowserProbe(probePath);
   const inputProbe = browserProbeFromArgs(options);
   const preRunProbe = mergeBrowserProbe(storedProbeBeforeRun, inputProbe);
@@ -1410,7 +1415,7 @@ async function runLoginRecovery(options = {}) {
     id: options.id,
     day,
     slot,
-    now: options.now ? new Date(options.now) : new Date(),
+    now,
     imageDir: options.imageDir || 'output/imagegen',
     packageOutDir: options.packageOut || 'data/social-growth/packages',
     ensurePackage: options.ensurePackage !== 'false',
@@ -1450,7 +1455,7 @@ async function runLoginRecovery(options = {}) {
     ledger,
     day,
     slot,
-    now: options.now ? new Date(options.now) : new Date(),
+    now,
     imageDir: commonPreflight.imageDir,
     packageOutDir: commonPreflight.packageOutDir,
     profileText,
@@ -1463,6 +1468,27 @@ async function runLoginRecovery(options = {}) {
   });
   const statusPath = options.statusOut || 'data/social-growth/status.md';
   await writeGrowthStatus(status, statusPath);
+
+  const profileDiagnostics = await buildXProfileDiagnostics({
+    profileDir,
+    includeSystemChrome: options.includeSystemChrome !== 'false',
+    extraProfileDirs: options.extraProfileDir || options.extraProfileDirs,
+    debugPort: options.debugPort,
+    generatedAt: now,
+  });
+  const profileDiagnosticsPath = options.profileDiagnosticsOut || 'data/social-growth/x-profile-diagnostics.md';
+  await writeXProfileDiagnostics(profileDiagnostics, profileDiagnosticsPath);
+  const loginHandoff = buildLoginHandoff({
+    browserReadiness: readiness,
+    profileDiagnostics,
+    day,
+    slot,
+    publishMode,
+    generatedAt: now,
+    nodeCommand: process.execPath,
+  });
+  const loginHandoffPath = options.loginHandoffOut || 'data/social-growth/login-handoff.md';
+  await writeLoginHandoff(loginHandoff, loginHandoffPath);
 
   return {
     status: status.status,
@@ -1485,6 +1511,18 @@ async function runLoginRecovery(options = {}) {
       browserReadiness: browserReadinessPath,
       status: statusPath,
       xPublishPrep: xPrepPath,
+      profileDiagnostics: profileDiagnosticsPath,
+      loginHandoff: loginHandoffPath,
+    },
+    profileDiagnostics: {
+      status: 'generated',
+      profiles: profileDiagnostics.profiles.length,
+      alternateProfileDirs: profileDiagnostics.alternateProfileDirs.length,
+      recommendations: profileDiagnostics.recommendations.length,
+    },
+    loginHandoff: {
+      status: loginHandoff.status,
+      alternateProfiles: loginHandoff.alternateProfiles.length,
     },
     next: status.nextActions[0] || null,
   };
