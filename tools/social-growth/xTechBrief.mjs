@@ -237,8 +237,8 @@ function buildXNativeFrame(frame) {
     return {
       firstScreenJob: 'Turn the source into one concrete Chinese claim plus one falsifiable mechanism.',
       openingOptions: [
-        '别把「主题」写成经验总结，先说清楚问题会怎么失败。',
-        '我发现真正有用的不是结论，而是可复用的判断顺序。',
+        '最近做「主题」时，最容易误判的是某个表面信号。',
+        '我把「主题」拆成问题、动作和证据三个检查点。',
       ],
       imageHeadline: '把机制画出来',
       imagePromise: '让读者在移动端一眼看到问题、机制和证据。',
@@ -259,9 +259,9 @@ function buildXNativeFrame(frame) {
   return {
     firstScreenJob: `Make the reader feel why "${frame.falseFrame}" fails, then show "${frame.mechanism}" as the reusable mechanism.`,
     openingOptions: [
-      `别把「${frame.topic}」做成${frame.falseFrame}。真正要看的是 ${frame.mechanism}。`,
-      `很多人把「${frame.topic}」想错了：问题不在${frame.falseFrame}，而在${frame.betterFrame}。`,
-      `我发现「${frame.topic}」最该先画成一张图：${frame.mechanism}。`,
+      `${frame.topic} 最容易被「${frame.falseFrame}」这个表面信号带偏。`,
+      `我会先按 ${frame.mechanism} 看「${frame.topic}」，缺证据就先不下结论。`,
+      `这次复盘「${frame.topic}」，我把排查顺序压到 ${frame.mechanism}。`,
     ],
     imageHeadline: `${frame.topic}：先看机制`,
     imagePromise: `Use one mobile-readable diagram to show ${frame.mechanism}, not a decorative cover.`,
@@ -276,6 +276,11 @@ function buildXNativeFrame(frame) {
       '欢迎阅读',
       '怎么看',
       '点赞转发',
+      '不是 X，而是 Y',
+      '真正值钱',
+      '验证闭环',
+      '判断框架',
+      '图里是...长文放在 X Article',
     ],
   };
 }

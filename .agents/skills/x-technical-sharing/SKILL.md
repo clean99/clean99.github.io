@@ -125,11 +125,11 @@ Bad short post:
 Good short post:
 
 ```text
-别把「AI 性能优化」做成建议清单。
+最近用 AI Agent 跑前端性能优化，第一个坑是测量口径。
 
-真正要验证的是 baseline -> change -> verify -> ledger 这条链路有没有闭合。
+同一条 path 换了 baseline，后面所有“优化收益”都会变成故事。
 
-图里放判断框架，完整推演放 X Article。
+配图放 baseline -> change -> verify -> ledger，X Article 写完整复盘。
 ```
 
 ## Short Post Rules
@@ -147,10 +147,10 @@ Good short post:
 Allowed opening shapes:
 
 ```text
-别把「<topic>」做成 <wrong frame>。
-我发现 <topic> 真正该先画成一张图。
-我以为 <topic> 卡在 <surface issue>，后来发现根因是 <cause>。
-很多人把 <topic> 想错了。
+最近做 <topic>，我先卡在 <observable failure>。
+<topic> 最容易被 <single metric / surface symptom> 带偏。
+我把 <topic> 拆成 <mechanism> 几个检查点。
+这次复盘 <topic>，最容易误判的是 <specific false signal>。
 ```
 
 Use strong wording only when the next sentence gives a falsifiable mechanism.
@@ -170,6 +170,13 @@ Remove AI-smelling filler:
 
 - `A technical post is useful only when`;
 - `技术文章只有...才有用`;
+- `不是 X，而是 Y`;
+- `不是 X，是 Y`;
+- `不只是 X，更是 Y`;
+- `真正值钱的不是...而是...`;
+- `验证闭环`;
+- `判断框架`;
+- `图里是...，长文放在 X Article`;
 - `我写了一篇`;
 - `欢迎阅读`;
 - `希望对你有帮助`;
@@ -233,8 +240,8 @@ Prompt must be in English and generate the final bitmap directly:
 Image headline should not sound like a corporate slogan. Prefer concrete mechanism language:
 
 ```text
-AI 性能优化，先别谈建议
-先把验证链路闭合
+AI 性能优化先看 baseline
+每轮都要能复测
 ```
 
 When asked to generate the image, use the built-in `imagegen` skill directly. Do not require `OPENAI_API_KEY` for the preferred path. After generation, register the chosen image into the social-growth expected path with `social:register-image`.
@@ -258,6 +265,8 @@ Before returning the JSON, do this pass:
 - Is the mechanism visible before the first blank line?
 - Would `social:validate` reject the first line as generic article praise or AI-smelling meta copy?
 - Can the image be understood without the article?
+- Does the copy avoid negative parallelism such as `不是 X，而是 Y` and template handoff lines such as `图里是...长文...`?
+- Would this still read naturally if a human technical lead posted it?
 - Does the X Article separate problem and cause?
 - Does the blog URL appear only at the end of the X Article?
 - Are replies adding new substance rather than repeating the hook?

@@ -26,6 +26,7 @@ Before optimizing metrics, queue selection, engagement, or follow conversion, re
 ## Reusable Skills
 
 - Use `x-technical-sharing` as the writing layer when turning technical sharing docs, design notes, performance write-ups, or blog posts into X-native Chinese copy. It preserves the `technical-sharing-doc` causality chain but outputs short post, X Article, image prompt, fallback thread, and follow-up replies for the copy override bridge.
+- Use `humanizer` as a final style cleanup pass when copy feels AI-written. Its most relevant rule for this workflow is to remove negative parallelism such as `不是 X，而是 Y`, inflated words, and template handoff lines. If that skill is not loaded in the current session, apply the same rule manually.
 - Use the built-in `imagegen` skill as the primary image path. It uses image 2 / `gpt-image-2` and does not require `OPENAI_API_KEY`. After generation, copy or register the selected PNG into the expected `output/imagegen/<queue-id>.png` path.
 - Use `baoyu-post-to-x` as the preferred Chrome/CDP helper for preparing X Articles, regular image posts, quote posts, or media posts when a scripted browser handoff is useful. Its scripts fill content in Chrome and leave the final public publish click to the user, which matches this skill's confirmation boundary.
 - Use `baoyu-danger-x-to-markdown` only for consented research or competitor/content archiving. It uses a reverse-engineered X API and must not become the default publishing or metrics path.

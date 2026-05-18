@@ -631,9 +631,10 @@ test('generates article-specific Chinese X copy instead of repeating one templat
   assert.match(strongPosts[0].shortPost, /Agent Skill/);
   assert.match(strongPosts[1].shortPost, /技术博客 SEO/);
   assert.notEqual(strongPosts[0].shortPost, strongPosts[1].shortPost);
-  assert.match(strongPosts[0].shortPost, /图里是判断框架，长文放在 X Article/);
-  assert.match(strongPosts[0].xArticle.body, /Skill 的价值不是多一段提示词/);
-  assert.match(strongPosts[1].xArticle.body, /SEO 不是标签清单/);
+  assert.match(strongPosts[0].shortPost, /配图把检查点摊开，X Article 写完整复盘/);
+  assert.doesNotMatch(strongPosts[0].shortPost, /不是.+而是|验证闭环|判断框架|图里是/u);
+  assert.match(strongPosts[0].xArticle.body, /Skill 要把可复用能力写成稳定契约/);
+  assert.match(strongPosts[1].xArticle.body, /技术博客做 SEO/);
   assert.equal(validateQueue(queue).status, 'pass');
 });
 
@@ -655,14 +656,15 @@ test('Chinese short posts sell the image and X Article before the blog link', ()
   const item = queue.items[0];
 
   assert.doesNotMatch(item.shortPost, /https?:\/\//i);
-  assert.match(item.shortPost, /很多人把「AI 性能优化」想错了/);
-  assert.match(item.shortPost, /真正值钱的不是让模型多给几条优化建议/);
-  assert.match(item.shortPost, /图里是判断框架，长文放在 X Article/);
+  assert.match(item.shortPost, /AI 性能优化，最容易被一个指标或一句经验带偏/);
+  assert.match(item.shortPost, /baseline -> change -> verify -> ledger/);
+  assert.match(item.shortPost, /配图把检查点摊开，X Article 写完整复盘/);
+  assert.doesNotMatch(item.shortPost, /不是.+而是|真正值钱|验证闭环|判断框架|图里是/u);
   assert.match(item.xArticle.body, /博客原文：https:\/\/clean99\.github\.io\/zh\/automated-ai-performance\//);
   assert.match(item.xArticle.body, /## 验证/);
   assert.doesNotMatch(item.xArticle.body, /为什么值得读原文|原文围绕|短帖只能|本文从/);
   assert.doesNotMatch(item.followUpReplies.join('\n'), /你现在是不是|有没有证据|下一步能不能/);
-  assert.match(item.media.prompt, /Scroll-stopper headline: AI 性能优化：不是建议，是验证闭环/);
+  assert.match(item.media.prompt, /Scroll-stopper headline: AI 性能优化：先看证据/);
   assert.equal(validateQueueItem(item).status, 'pass');
 });
 
@@ -706,6 +708,7 @@ test('filters heading-glued fragments from Chinese X Article extraction', () => 
   const points = extractKeyPoints([
     '本文从第一性原理出发，拆解性能优化的自动化闭环。',
     '真正的问题 目标看起来很简单：优化 Workspace FMP。',
+    '图 0：一个通用工作台里的 tab system 演示。',
     '实际目标更严格： | 指标 | 目标 | | --- | ---: | | 子应用 FMP P90 | 2。',
     '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
     '测量契约修复后，loop 才开始优化真实瓶颈。',
@@ -719,6 +722,7 @@ test('filters heading-glued fragments from Chinese X Article extraction', () => 
     text: [
       '本文从第一性原理出发，拆解性能优化的自动化闭环。',
       '真正的问题 目标看起来很简单：优化 Workspace FMP。',
+      '图 0：一个通用工作台里的 tab system 演示。',
       '实际目标更严格： | 指标 | 目标 | | --- | ---: | | 子应用 FMP P90 | 2。',
       '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
       '测量契约修复后，loop 才开始优化真实瓶颈。',
@@ -731,6 +735,7 @@ test('filters heading-glued fragments from Chinese X Article extraction', () => 
     '测量契约修复后，loop 才开始优化真实瓶颈',
   ]);
   assert.doesNotMatch(xArticle.body, /真正的问题 目标/);
+  assert.doesNotMatch(xArticle.body, /图 0/);
   assert.doesNotMatch(xArticle.body, /本文从第一性原理/);
   assert.doesNotMatch(xArticle.body, /\| 指标 \|/);
   assert.match(xArticle.body, /没有可重复测量/);
@@ -809,18 +814,18 @@ test('copy override bridge lets a writing skill replace queue copy locally', asy
     const optimized = {
       ...template,
       shortPost: [
-        '别把「AI 性能优化」做成建议清单。',
+        '最近用 AI Agent 做前端性能优化，我最先卡住的是 baseline 口径。',
         '',
-        '真正要验证的是 baseline -> change -> verify -> ledger 这条链路有没有闭合。',
+        '同一条 path 换了测量条件，后面所有收益都会变成故事。',
         '',
-        '图里放判断框架，完整推演放 X Article。',
+        '配图放 baseline -> change -> verify -> ledger，X Article 写完整复盘。',
         '',
         '#AI #软件工程',
       ].join('\n'),
       xArticle: {
         title: 'AI 性能优化，先别谈建议',
         body: [
-          '这篇文章要解决的不是“让模型多给几条建议”，而是验证优化闭环到底有没有成立。',
+          '这篇文章记录一次 AI Agent 跑性能优化时踩到的测量问题。',
           '',
           '## 关键结论',
           '',
@@ -837,12 +842,12 @@ test('copy override bridge lets a writing skill replace queue copy locally', asy
       },
       image: {
         ...template.image,
-        alt: 'AI 性能优化验证闭环图',
+        alt: 'AI 性能优化测量链路图',
         prompt: `${template.image.prompt}\nUse natural Chinese technical wording, readable at mobile size, no brand logos.`,
       },
       threadFallback: [
-        '别把 AI 性能优化做成建议清单。图里是验证闭环。',
-        '真正要看的不是模型说了什么，而是同一个 harness 复测后指标有没有变。',
+        '最近用 AI Agent 做前端性能优化，第一件事先把 baseline 口径固定住。',
+        '我按 baseline -> change -> verify -> ledger 看：同一个 harness 复测后指标没变，就不要声明收益。',
         `完整过程：${item.targetUrl}`,
       ],
       followUpReplies: [
@@ -1041,7 +1046,8 @@ test('engagement plan creates selective reply candidates from captured technical
 
     assert.equal(plan.status, 'ready_for_browser_confirmation');
     assert.equal(plan.selectedCount, 1);
-    assert.equal(plan.opportunities[0].queueId, queue.items[0].id);
+    assert.ok(queue.items.some((item) => item.id === plan.opportunities[0].queueId));
+    assert.equal(plan.opportunities[0].articleSlug, article.slug);
     assert.equal(plan.opportunities[0].browserAction.requiresConfirmation, true);
     assert.match(plan.opportunities[0].draftReply, /可验证链路/);
     assert.doesNotMatch(plan.opportunities[0].draftReply, /https?:\/\//);
@@ -2736,6 +2742,38 @@ test('quality gate rejects AI-smelling generic short posts', () => {
   assert.equal(validation.status, 'fail');
   assert.ok(validation.items[0].errors.some((error) => error.includes('low-value meta copy')));
   assert.ok(validation.items[0].errors.some((error) => error.includes('concrete technical claim')));
+});
+
+test('quality gate rejects negative-parallelism Chinese X templates', () => {
+  const queue = buildPublishQueue([
+    {
+      title: '有用的系统',
+      excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈诚实。',
+      slug: 'Useful-Systems',
+      lang: 'zh',
+      tags: ['AI'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  queue.items[0] = {
+    ...queue.items[0],
+    shortPost: [
+      '这个系统真正值钱的不是多一个功能，而是验证闭环。',
+      '',
+      '图里是判断框架，长文放在 X Article。',
+      '',
+      '#AI',
+    ].join('\n'),
+  };
+
+  const validation = validateQueue(queue);
+
+  assert.equal(validation.status, 'fail');
+  assert.ok(validation.items[0].errors.some((error) => error.includes('low-value meta copy')));
 });
 
 test('quality gate rejects heading-glued Chinese X Article fragments', () => {

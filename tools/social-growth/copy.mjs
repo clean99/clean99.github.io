@@ -19,13 +19,13 @@ const DEFAULT_FRAME = {
   falseFrame: '把经验写成零散建议',
   betterFrame: '把判断标准、失败边界和复用步骤说清楚',
   mechanism: 'problem -> criteria -> action -> evidence',
-  imageTitle: '可复用的工程判断框架',
+  imageTitle: '工程判断检查表',
   diagramText: 'problem -> criteria -> action -> evidence',
-  coreClaim: '真正有用的技术文章应该留下可复用判断，而不是只记录一次经验。',
+  coreClaim: '一篇技术文章要能复用，至少要交代问题、判断标准、执行动作和证据。',
   failureMode: '如果没有判断标准，读者只会得到一组无法迁移的经验碎片。',
-  readerPayoff: '带走一个可以复用到自己项目里的判断框架',
+  readerPayoff: '带走一个可以复用到自己项目里的检查顺序',
   frameworkSteps: [
-    '先说清楚真正的问题是什么。',
+    '先说清楚用户遇到的具体失败是什么。',
     '把判断标准压成少数几个可验证条件。',
     '给出能复用的执行顺序。',
     '记录哪些做法看起来对、实际会失败。',
@@ -41,9 +41,9 @@ const ARTICLE_FRAMES = [
       falseFrame: '照着清单补 meta 标签',
       betterFrame: '理解搜索引擎如何读取、归类和信任页面',
       mechanism: 'crawl -> understand -> trust -> distribute',
-      imageTitle: '技术博客 SEO 闭环',
+      imageTitle: '技术博客 SEO 检查表',
       diagramText: 'crawl -> understand -> trust -> distribute',
-      coreClaim: 'SEO 不是标签清单，而是让搜索引擎稳定理解你的页面价值。',
+      coreClaim: '技术博客做 SEO，重点是让爬虫稳定读懂页面主题、结构和信任线索。',
       failureMode: '只补标签不改信息结构，搜索引擎仍然不知道该把页面分发给谁。',
       readerPayoff: '从第一性原理理解博客 SEO 改造',
       frameworkSteps: [
@@ -81,15 +81,15 @@ const ARTICLE_FRAMES = [
     frame: {
       topic: 'React 性能优化',
       falseFrame: '看到慢就先 memo 或拆组件',
-      betterFrame: '先定位 render、网络和交互成本真正落在哪一层',
+      betterFrame: '先定位 render、网络和交互成本主要落在哪一层',
       mechanism: 'measure -> isolate -> optimize -> verify',
-      imageTitle: 'React 性能诊断闭环',
+      imageTitle: 'React 性能诊断路径',
       diagramText: 'measure -> isolate -> optimize -> verify',
-      coreClaim: 'React 性能优化的关键不是 API 技巧，而是先证明瓶颈在哪里。',
+      coreClaim: 'React 性能优化要先证明瓶颈位置，再决定 memo、拆组件还是改数据流。',
       failureMode: '没有 profile 的 memo 很容易把复杂度加进去，却没有真实收益。',
       readerPayoff: '把 React 性能问题拆成可验证的诊断路径',
       frameworkSteps: [
-        '先用 profile 找出真正的慢点。',
+        '先用 profile 找出主要慢点。',
         '区分 render、network、bundle 和 interaction 成本。',
         '只针对一个瓶颈做修改。',
         '用同一场景复测。',
@@ -106,7 +106,7 @@ const ARTICLE_FRAMES = [
       mechanism: 'server tree -> client boundary -> payload -> hydration',
       imageTitle: 'React Server Component 边界',
       diagramText: 'server tree -> client boundary -> payload -> hydration',
-      coreClaim: 'RSC 的核心不是“服务端渲染更多东西”，而是重新划分组件、数据和 bundle 的边界。',
+      coreClaim: 'RSC 会改变组件、数据和 bundle 的边界，不能只按 SSR 的心智模型理解。',
       failureMode: '如果不理解边界，RSC 很容易被用成更复杂的 SSR。',
       readerPayoff: '看清 RSC 为什么会改变 React 应用结构',
       frameworkSteps: [
@@ -127,8 +127,8 @@ const ARTICLE_FRAMES = [
       mechanism: 'isolate -> report -> recover',
       imageTitle: 'React 容错边界',
       diagramText: 'isolate -> report -> recover',
-      coreClaim: 'Error Boundary 的重点不是兜底 UI，而是控制失败范围并保留恢复路径。',
-      failureMode: '只显示 fallback 会隐藏真正的故障，也无法帮助用户继续操作。',
+      coreClaim: 'Error Boundary 要同时处理崩溃隔离、错误上报和用户恢复路径。',
+      failureMode: '只显示 fallback 会隐藏原始故障，也无法帮助用户继续操作。',
       readerPayoff: '把 React 崩溃从整页事故变成局部可恢复问题',
       frameworkSteps: [
         '按业务风险划分错误边界。',
@@ -146,9 +146,9 @@ const ARTICLE_FRAMES = [
       falseFrame: '追求覆盖率或者盯着实现细节测',
       betterFrame: '用行为用例保护重构空间',
       mechanism: 'behavior -> signal -> regression',
-      imageTitle: '前端测试信心闭环',
+      imageTitle: '前端测试信号链',
       diagramText: 'behavior -> signal -> regression',
-      coreClaim: '好的前端测试不奖励覆盖率，而是给重构留下信心。',
+      coreClaim: '好的前端测试用行为信号保护重构空间，覆盖率只是辅助指标。',
       failureMode: '测试实现细节会制造假阴性，覆盖率也可能给出假安全感。',
       readerPayoff: '写出更少但更有信心的测试',
       frameworkSteps: [
@@ -169,7 +169,7 @@ const ARTICLE_FRAMES = [
       mechanism: 'path -> metric -> scheduler -> gate',
       imageTitle: 'Workspace Tab 性能分层',
       diagramText: 'first load -> hot switch -> background pressure -> gates',
-      coreClaim: 'Workspace Tab 性能优化不是追一个总分，而是让不同用户路径各自有指标、调度和防回归 gate。',
+      coreClaim: 'Workspace Tab 性能要拆开看：首屏、热切换和后台压力各自需要指标、调度和回归门。',
       failureMode: '如果把首屏、热切换和后台压力混在一起，漂亮数字会掩盖用户看得见的卡顿。',
       readerPayoff: '把复杂工作台性能拆成可验证的路径模型',
       frameworkSteps: [
@@ -188,7 +188,7 @@ const ARTICLE_FRAMES = [
       falseFrame: '让模型多给几条优化建议',
       betterFrame: '让每一轮修改都能被同一个 harness 复验',
       mechanism: 'baseline -> change -> verify -> ledger',
-      imageTitle: '可度量的 AI 工程闭环',
+      imageTitle: 'AI 性能优化检查表',
       diagramText: 'baseline -> change -> verify -> ledger',
       coreClaim: '没有可重复测量，AI 优化就是在讲故事。',
       failureMode: '测量口径错了，任何性能收益都不能算数。',
@@ -211,7 +211,7 @@ const ARTICLE_FRAMES = [
       mechanism: 'context -> contract -> execution -> eval',
       imageTitle: 'Agent Skill 能力单元',
       diagramText: 'context -> contract -> execution -> eval',
-      coreClaim: 'Skill 的价值不是多一段提示词，而是把可复用能力变成稳定契约。',
+      coreClaim: 'Skill 要把可复用能力写成稳定契约：输入、输出、执行边界和验收标准都要清楚。',
       failureMode: '没有契约的 Skill 只是长提示词，越堆越难复用。',
       readerPayoff: '把零散 AI 经验沉淀成可执行能力',
       frameworkSteps: [
@@ -300,17 +300,17 @@ export function sharpTake(article) {
 
 export function researchUtility(article) {
   const frame = articleFrame(article);
-  return clamp(`我发现「${frame.topic}」最该先画成一张图。\n\n痛点不是${frame.falseFrame}，而是${frame.betterFrame}。\n\n照这条线走：${frame.mechanism}。\n\n图里是完整结构，长文放在 X Article。`, 220);
+  return clamp(`我把「${frame.topic}」拆成 ${frame.mechanism} 四个检查点。\n\n先看读者或用户会遇到什么失败，再看哪一步有证据。\n\n配图放检查顺序，X Article 写完整证据和取舍。`, 220);
 }
 
 export function strongThesis(article) {
   const frame = articleFrame(article);
-  return clamp(`很多人把「${frame.topic}」想错了。\n\n真正值钱的不是${frame.falseFrame}，而是${frame.betterFrame}，并且能按 ${frame.mechanism} 复用。\n\n图里是判断框架，长文放在 X Article。`, 220);
+  return clamp(`${frame.topic}，最容易被一个指标或一句经验带偏。\n\n我会先处理这件事：${frame.betterFrame}；再追 ${frame.mechanism}。场景、指标、动作、证据缺一项，结论就先放下。\n\n配图把检查点摊开，X Article 写完整复盘。`, 220);
 }
 
 export function caseStory(article) {
   const frame = articleFrame(article);
-  return clamp(`我以为「${frame.topic}」一开始卡在${frame.falseFrame}。\n\n后来发现根因是${frame.betterFrame}。\n\n这类问题要按 ${frame.mechanism} 走，否则经验没法复用。\n\n图里是复盘框架，长文放在 X Article。`, 220);
+  return clamp(`这次复盘「${frame.topic}」时，最容易误判的是：${frame.falseFrame}。\n\n我最后按 ${frame.mechanism} 把问题拆开，才知道该先处理哪条路径。\n\n配图放排查顺序，X Article 写证据和取舍。`, 220);
 }
 
 export function usefulLesson(article) {
@@ -318,7 +318,7 @@ export function usefulLesson(article) {
   const takeaway = clamp(sentence(article.excerpt), 130);
   if (article.lang === 'zh') {
     const frame = articleFrame(article);
-    return clamp(`我把这篇文章压成一个可复用结论：\n\n${frame.coreClaim}\n\n主题：${title}\n${takeaway}`, 220);
+    return clamp(`${frame.topic} 这类文章最怕只剩口号。\n\n我把它压成 ${frame.mechanism} 这条检查顺序：先看失败现象，再看动作和证据。\n\n主题：${title}\n${takeaway}`, 220);
   }
 
   return clamp(`I compressed this post into one practical lesson: ${takeaway}\n\nTopic: ${title}`, 220);
@@ -367,9 +367,9 @@ export function buildChineseXArticleBody(article, targetUrl) {
   const proofPoint = verificationPoint(frame);
 
   return [
-    `很多「${frame.topic}」的讨论会卡在“${frame.falseFrame}”。`,
+    `这篇讲「${frame.topic}」里一个很具体的问题：${frame.failureMode}`,
     '',
-    `真正要解决的是：${frame.betterFrame}。`,
+    `我用 ${frame.mechanism} 这条顺序拆：先看用户或读者能感知的失败，再回到机制、动作和证据。`,
     '',
     frame.coreClaim,
     '',
@@ -384,7 +384,7 @@ export function buildChineseXArticleBody(article, targetUrl) {
       .slice(0, 5)
       .map((point) => `- ${point}`),
     '',
-    '## 可复用框架',
+    '## 检查顺序',
     '',
     ...frame.frameworkSteps.map((step, index) => `${index + 1}. ${step}`),
     '',
@@ -409,9 +409,9 @@ export function buildThreadFallback(article, targetUrl) {
   if (article.lang === 'zh') {
     const frame = articleFrame(article);
     return [
-      clampPost(`${title}\n\n很多人把「${frame.topic}」想错了。真正的问题不是 ${frame.falseFrame}，而是 ${frame.betterFrame}。`),
-      clampPost(`可复用框架：\n\n${numberedSteps(frame.frameworkSteps, 5)}`),
-      linkPost('完整过程和框架：', targetUrl),
+      clampPost(`${title}\n\n先按 ${frame.mechanism} 看一遍：场景、指标、动作、证据哪一项缺了，结论都不稳。`),
+      clampPost(`检查顺序：\n\n${numberedSteps(frame.frameworkSteps, 5)}`),
+      linkPost('完整过程：', targetUrl),
     ];
   }
 
@@ -432,14 +432,14 @@ export function buildFollowUpReplies(article, variant) {
 
   const frame = articleFrame(article);
   const variantReply = {
-    'research-utility': `图里最重要的不是流程箭头，而是这条机制：${frame.mechanism}。它把「${frame.topic}」从经验变成了可复用步骤。`,
-    'strong-thesis': `我判断「${frame.topic}」是否靠谱，只看一件事：有没有把“${frame.betterFrame}”落实成可检查的步骤。`,
+    'research-utility': `配图里我只保留 ${frame.mechanism} 这条线。少放形容词，多放检查点，读者才知道下一步该验证什么。`,
+    'strong-thesis': `我判断「${frame.topic}」是否靠谱，会直接看 ${frame.mechanism} 有没有落成检查步骤：场景、指标、动作、证据。`,
     'case-story': `这个 case 的教训是：先别急着套方案。先识别是不是还停在“${frame.falseFrame}”，否则后面动作都会跑偏。`,
-  }[variant] || `真正要复用的是 ${frame.mechanism} 这个框架，而不是某个固定说法。`;
+  }[variant] || `我会把 ${frame.mechanism} 写成检查顺序，避免读者只记住一句固定说法。`;
 
   return [
     clampPost(variantReply),
-    clampPost(`落地时先看一个失败信号：如果流程仍然停在“${frame.falseFrame}”，后面再多动作也只是堆复杂度。先把 ${frame.mechanism} 这条链路跑通。`),
+    clampPost(`落地时先看一个失败信号：如果流程仍然停在“${frame.falseFrame}”，后面动作很容易变成堆复杂度。先把 ${frame.mechanism} 跑通。`),
   ];
 }
 
@@ -515,6 +515,7 @@ export function extractKeyPoints(text, limit = 5) {
     .filter((item) => !/[|]/.test(item))
     .filter((item) => !/^\d+(\.\d+)?s\s*\|/.test(item))
     .filter((item) => !/^\|/.test(item))
+    .filter((item) => !/^图\s*\d+\s*[：:]/u.test(item))
     .filter((item) => !/^TL;DR/i.test(item))
     .filter((item) => !isMetaArticlePoint(item))
     .filter((item) => !isHeadingGluedPoint(item));
@@ -561,13 +562,13 @@ function numberedSteps(steps, limit = 5) {
 
 function visualHook(frame, variant) {
   if (!frame) return 'Stop guessing. Measure the loop.';
-  if (variant === 'research-utility') return `${frame.topic}：把方法画出来`;
+  if (variant === 'research-utility') return `${frame.topic}：四个检查点`;
   if (variant === 'case-story') return `${frame.topic}：从误判到根因`;
-  return `${frame.topic}：不是建议，是验证闭环`;
+  return `${frame.topic}：先看证据`;
 }
 
 function verificationPoint(frame) {
-  return `判断它是否成立，不看表述多完整，只看 ${frame.mechanism} 能不能在同类问题里重复跑通；如果缺少可检查结果，这个框架还不能算工程资产。`;
+  return `判断它是否成立，不看表述多完整，只看 ${frame.mechanism} 能不能在同类问题里重复跑通；如果缺少可检查结果，就先不要声明收益。`;
 }
 
 export function sentence(text) {

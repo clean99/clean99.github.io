@@ -57,13 +57,11 @@ Use when the blog post is about AI tools, workflows, debugging, performance, or 
 Template:
 
 ```text
-我发现 <topic> 最该先画成一张图。
+我把 <topic> 拆成 <mechanism> 几个检查点。
 
-痛点不是<false frame>，而是<better frame>。
+先看 <observable failure>，再看哪一步有证据。
 
-照这条线走：<mechanism>。
-
-图里是完整结构，长文放在 X Article。
+配图放检查顺序，X Article 写完整证据和取舍。
 ```
 
 ### Strong Thesis Pattern
@@ -82,11 +80,11 @@ Use the structure, not the abusive tone. Avoid insults, slurs, personal attacks,
 Template:
 
 ```text
-很多人把 <topic> 想错了。
+<topic> 最容易被 <surface metric / false signal> 带偏。
 
-真正值钱的不是<false frame>，而是<better frame>，并且能按 <mechanism> 复用。
+我会先追 <mechanism>：场景、指标、动作、证据缺一项，结论就先放下。
 
-图里是判断框架，长文放在 X Article。
+配图把检查点摊开，X Article 写完整复盘。
 ```
 
 ### Case Story Pattern
@@ -94,13 +92,11 @@ Template:
 Use when there is a concrete project result:
 
 ```text
-我以为 <topic> 一开始卡在<surface issue>。
+这次复盘 <topic>，最容易误判的是 <surface issue>。
 
-后来发现真正的瓶颈是 <root cause>。
+后来按 <mechanism> 拆开，才知道要先处理 <root cause>。
 
-这类问题要按 <mechanism> 走，否则经验没法复用。
-
-图里是复盘框架，长文放在 X Article。
+配图放排查顺序，X Article 写证据和取舍。
 ```
 
 ## Rules for Clean993
@@ -113,7 +109,9 @@ Use when there is a concrete project result:
 - X Article job: satisfy the click inside X before sending the reader to the blog.
 - Blog link job: archive and full detail, placed at the end of the X Article.
 - First screen order: claim or pain -> mechanism/proof -> image. Do not lead with the blog URL.
-- For technical posts, prefer "我发现/我以为/很多人把...想错了" only when the next sentence names the mechanism.
+- For technical posts, use first-person only when it points to a concrete project observation, metric, or failure signal.
+- Avoid negative parallelism (`不是 X，而是 Y`, `不只是 X，更是 Y`) in short posts. It is now a high-frequency AI tell.
+- Avoid template handoff lines such as `图里是...，长文放在 X Article`; use a concrete asset promise such as `配图放排查顺序，X Article 写证据和取舍`.
 - Use a number only when it is real: saved tokens, views, steps, weeks, files, test count, or measured improvement.
 - Replies should extend the technical frame. They are not a place to ask for likes or generic discussion.
 
@@ -124,5 +122,10 @@ Use when there is a concrete project result:
 - abusive personal style;
 - fake certainty without evidence;
 - "AI will change everything" without a mechanism;
+- `验证闭环`;
+- `判断框架`;
+- `真正值钱`;
+- `不是...而是...`;
+- `图里是...长文放在 X Article`;
 - more than two hashtags;
 - mass replies or low-quality engagement bait.
