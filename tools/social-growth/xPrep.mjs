@@ -1,12 +1,16 @@
 import { access, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join, delimiter } from 'node:path';
 import { homedir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 
 const DEFAULT_OUT_PATH = 'data/social-growth/x-publish-prep.md';
+const DEFAULT_BROWSER_COMMAND = shellQuote(process.execPath);
 
 export async function buildXPublishPrep(preflight, {
   skillDir = defaultBaoyuPostToXSkillDir(),
   bunCommand,
+  browserCommand = DEFAULT_BROWSER_COMMAND,
+  regularPostScript = defaultProjectXBrowserScript(),
   articleUrlPlaceholder = '<x-article-url>',
   publishMode = 'x_article',
   profileDir,
@@ -20,7 +24,7 @@ export async function buildXPublishPrep(preflight, {
   const packageDir = preflight.selected.packageDir;
   const scripts = {
     article: join(skillDir, 'scripts/x-article.ts'),
-    regularPost: join(skillDir, 'scripts/x-browser.ts'),
+    regularPost: regularPostScript,
   };
   const files = {
     xArticle: join(packageDir, 'x-article.md'),
@@ -33,16 +37,24 @@ export async function buildXPublishPrep(preflight, {
   const threadReplies = threadFallback.slice(1);
   const blockers = [...(preflight.blockers || [])];
   const profileArg = profileDir ? ` --profile ${shellQuote(profileDir)}` : '';
-  const runtime = await runtimeResolver(bunCommand);
-  const runtimeCommand = runtime.command || '# Install bun or npx before running baoyu-post-to-x';
+  const runtime = resolvedPublishMode === 'x_article'
+    ? await runtimeResolver(bunCommand)
+    : { command: null, status: 'not_required', blocker: null };
+  const articleCommand = runtime.command || '# Install bun or npx before running baoyu-post-to-x';
+  const browserRuntime = {
+    command: browserCommand,
+    status: browserCommand ? 'provided' : 'missing',
+    blocker: browserCommand ? null : 'Browser handoff runtime is unavailable.',
+  };
 
   if (runtime.blocker) blockers.push(runtime.blocker);
+  if (browserRuntime.blocker) blockers.push(browserRuntime.blocker);
 
   if (resolvedPublishMode === 'x_article' && !(await fileExists(scripts.article))) {
     blockers.push(`baoyu-post-to-x article script is missing: ${scripts.article}`);
   }
   if (!(await fileExists(scripts.regularPost))) {
-    blockers.push(`baoyu-post-to-x regular post script is missing: ${scripts.regularPost}`);
+    blockers.push(`Project X browser handoff script is missing: ${scripts.regularPost}`);
   }
   if (resolvedPublishMode === 'thread_fallback' && !threadFirstPost.trim()) {
     blockers.push('Thread fallback first post is missing.');
@@ -60,25 +72,29 @@ export async function buildXPublishPrep(preflight, {
       replies: threadReplies,
     },
     skill: {
-      name: 'baoyu-post-to-x',
+      name: 'project-x-browser-cdp',
+      articleHelper: 'baoyu-post-to-x',
+      browserHandoff: 'cdp',
       dir: skillDir,
       bunCommand: runtime.command,
       runtimeStatus: runtime.status,
+      browserCommand: browserRuntime.command,
+      browserRuntimeStatus: browserRuntime.status,
       scripts,
       profileDir,
     },
     commands: {
       prepareArticle: resolvedPublishMode === 'x_article'
-        ? `${runtimeCommand} ${shellQuote(scripts.article)} ${shellQuote(files.xArticle)} --cover ${shellQuote(files.image)}${profileArg}`
+        ? `${articleCommand} ${shellQuote(scripts.article)} ${shellQuote(files.xArticle)} --cover ${shellQuote(files.image)}${profileArg}`
         : '# X Article is unavailable for this account. Use the thread fallback command below.',
       prepareShortPost: resolvedPublishMode === 'x_article'
         ? [
           `ARTICLE_URL=${shellQuote(articleUrlPlaceholder)}`,
           `SHORT_POST="$(cat ${shellQuote(files.shortPost)}; printf '\\n\\n%s' "$ARTICLE_URL")"`,
-          `${runtimeCommand} ${shellQuote(scripts.regularPost)} "$SHORT_POST" --image ${shellQuote(files.image)}${profileArg}`,
+          `${browserRuntime.command} ${shellQuote(scripts.regularPost)} "$SHORT_POST" --image ${shellQuote(files.image)}${profileArg}`,
         ].join('\n')
-        : `${runtimeCommand} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${profileArg}`,
-      prepareThreadFirstPost: `${runtimeCommand} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${profileArg}`,
+        : `${browserRuntime.command} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${profileArg}`,
+      prepareThreadFirstPost: `${browserRuntime.command} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${profileArg}`,
     },
     boundary: [
       'The baoyu-post-to-x scripts may open Chrome and fill editors.',
@@ -110,13 +126,16 @@ Status: ${prep.status}
 - Image: \`${prep.files.image}\`
 - Publish mode: ${prep.publishMode}
 
-## baoyu-post-to-x Bridge
+## X Browser Handoff
 
-- Skill dir: \`${prep.skill.dir}\`
-- Runtime: ${prep.skill.bunCommand ? `\`${prep.skill.bunCommand}\`` : 'unavailable'}
-- Runtime status: ${prep.skill.runtimeStatus}
-- X Article script: \`${prep.skill.scripts.article}\`
+- Regular post helper: project CDP handoff
+- Browser runtime: ${prep.skill.browserCommand ? `\`${prep.skill.browserCommand}\`` : 'unavailable'}
+- Browser runtime status: ${prep.skill.browserRuntimeStatus}
 - Regular post script: \`${prep.skill.scripts.regularPost}\`
+- X Article helper: ${prep.skill.articleHelper}
+- X Article runtime: ${formatArticleRuntime(prep)}
+- X Article runtime status: ${prep.skill.runtimeStatus}
+- X Article script: \`${prep.skill.scripts.article}\`
 - Chrome profile: ${prep.skill.profileDir ? `\`${prep.skill.profileDir}\`` : 'default baoyu shared profile'}
 
 ## Local Blockers
@@ -161,6 +180,10 @@ function defaultBaoyuPostToXSkillDir() {
   return join(homedir(), '.codex/skills/baoyu-post-to-x');
 }
 
+function defaultProjectXBrowserScript() {
+  return join(dirname(fileURLToPath(import.meta.url)), 'x-browser-cdp.mjs');
+}
+
 function normalizePublishMode(value) {
   const normalized = String(value || '').trim().toLowerCase().replace(/-/g, '_');
   if (['thread', 'fallback', 'thread_fallback'].includes(normalized)) return 'thread_fallback';
@@ -179,6 +202,12 @@ Prepare these only after the first post is public. Stop before each public reply
 
 ${replies}
 `;
+}
+
+function formatArticleRuntime(prep) {
+  if (prep.skill.bunCommand) return `\`${prep.skill.bunCommand}\``;
+  if (prep.skill.runtimeStatus === 'not_required') return 'not required for this publish mode';
+  return 'unavailable';
 }
 
 async function fileExists(filePath) {

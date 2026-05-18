@@ -1673,7 +1673,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(preflight, /Status: blocked/);
     assert.match(profileAudit, /Status: needs_work/);
     assert.match(profileUpdate, /final profile save click/);
-    assert.match(xPrep, /baoyu-post-to-x Bridge/);
+    assert.match(xPrep, /X Browser Handoff/);
     assert.match(confirmation, /X Publish Confirmation Packet/);
     assert.match(confirmation, /X Article To Review/);
     assert.match(confirmation, /Image-backed Short Post To Review/);
@@ -2373,10 +2373,10 @@ test('x publish prep bridges selected package to baoyu-post-to-x commands', asyn
     assert.match(prep.commands.prepareArticle, /x-article\.ts/);
     assert.match(prep.commands.prepareArticle, /--cover/);
     assert.match(prep.commands.prepareArticle, /--profile '\/tmp\/x-profile'/);
-    assert.match(prep.commands.prepareShortPost, /x-browser\.ts/);
+    assert.match(prep.commands.prepareShortPost, /x-browser-cdp\.mjs/);
     assert.match(prep.commands.prepareShortPost, /--image/);
     assert.match(prep.commands.prepareShortPost, /--profile '\/tmp\/x-profile'/);
-    assert.match(markdown, /baoyu-post-to-x Bridge/);
+    assert.match(markdown, /X Browser Handoff/);
     assert.match(markdown, /Chrome profile: `\/tmp\/x-profile`/);
     assert.match(markdown, /Stop before the final public post click/);
     assert.match(persisted, /ARTICLE_URL='https:\/\/x\.com\/Clean993\/articles\/123'/);
@@ -2435,7 +2435,7 @@ test('x publish prep can fall back to an image-backed thread when X Article is u
     assert.equal(prep.publishMode, 'thread_fallback');
     assert.equal(prep.blockers.length, 0);
     assert.match(prep.commands.prepareArticle, /X Article is unavailable/);
-    assert.match(prep.commands.prepareShortPost, /x-browser\.ts/);
+    assert.match(prep.commands.prepareShortPost, /x-browser-cdp\.mjs/);
     assert.match(prep.commands.prepareShortPost, /--image/);
     assert.match(prep.commands.prepareShortPost, /--profile '\/tmp\/x-profile'/);
     assert.match(prep.commands.prepareShortPost, /工作台一上 Tab/);
@@ -2468,7 +2468,7 @@ test('x publish prep blocks when no bun runtime is available', async () => {
     const imagePath = join(imageDir, `${queue.items[0].id}.png`);
     const skillDir = join(outDir, 'baoyu-post-to-x');
     await mkdir(join(skillDir, 'scripts'), { recursive: true });
-    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await writeFile(join(skillDir, 'scripts/x-article.ts'), '// test script');
     await mkdir(imageDir, { recursive: true });
     await writeFile(imagePath, 'fake image');
     const preflight = await buildPublishPreflight({
@@ -2486,7 +2486,7 @@ test('x publish prep blocks when no bun runtime is available', async () => {
     });
     const prep = await buildXPublishPrep(preflight, {
       skillDir,
-      publishMode: 'thread_fallback',
+      publishMode: 'x_article',
       runtimeResolver: async () => ({
         command: null,
         status: 'missing',
@@ -2498,12 +2498,23 @@ test('x publish prep blocks when no bun runtime is available', async () => {
     assert.equal(prep.status, 'blocked');
     assert.equal(prep.skill.runtimeStatus, 'missing');
     assert.ok(prep.blockers.some((item) => item.includes('Bun runtime is unavailable')));
-    assert.match(markdown, /Runtime: unavailable/);
-    assert.match(markdown, /Runtime status: missing/);
+    assert.match(markdown, /X Article runtime: not required|X Article runtime: unavailable/);
+    assert.match(markdown, /X Article runtime status: missing/);
     assert.match(markdown, /Install bun or npx/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('project x browser cdp handoff exposes a non-publishing help command', () => {
+  const result = spawnSync(process.execPath, ['tools/social-growth/x-browser-cdp.mjs', '--help'], {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+  });
+
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /Prepare an X post in Chrome through CDP/);
+  assert.match(result.stdout, /stops before final publish/);
 });
 
 test('browser readiness surfaces missing bun runtime as an actionable blocker', async () => {

@@ -42,7 +42,10 @@ export function buildBrowserReadiness({
     mediaUpload: normalizeSignal(mediaUpload),
   };
   const publishMode = xPrep?.publishMode || 'x_article';
-  const baoyuHandoffReady = xPrep?.status === 'ready' && xPrep?.skill?.name === 'baoyu-post-to-x';
+  const cdpHandoffReady = xPrep?.status === 'ready' && (
+    xPrep?.skill?.browserHandoff === 'cdp'
+    || xPrep?.skill?.name === 'baoyu-post-to-x'
+  );
   const blockers = [];
 
   if (preflight?.status && preflight.status !== 'ready') {
@@ -57,13 +60,13 @@ export function buildBrowserReadiness({
   if (signals.chromeRunning === 'no') {
     blockers.push('Google Chrome is not running.');
   }
-  if (signals.extensionInstalled === 'no' && !baoyuHandoffReady) {
+  if (signals.extensionInstalled === 'no' && !cdpHandoffReady) {
     blockers.push('Codex Chrome Extension is not installed or enabled.');
   }
-  if (signals.nativeHost === 'no' && !baoyuHandoffReady) {
+  if (signals.nativeHost === 'no' && !cdpHandoffReady) {
     blockers.push('Codex Chrome native host manifest is missing or invalid.');
   }
-  if (signals.extensionPipe === 'closed' && !baoyuHandoffReady) {
+  if (signals.extensionPipe === 'closed' && !cdpHandoffReady) {
     blockers.push('Codex Chrome Extension native pipe is closed.');
   }
   if (signals.loginState === 'logged_out') {
@@ -236,7 +239,7 @@ function nextActions({ blockers, signals, publishMode, profileDir }) {
     actions.push({
       priority: 'P0',
       action: 'Install bun or rerun the X prep command with --bunCommand pointing to an executable Bun command.',
-      reason: 'The baoyu-post-to-x browser handoff cannot run until its TypeScript scripts have a Bun runtime.',
+      reason: 'The X Article helper cannot run its TypeScript scripts without a Bun runtime.',
     });
   }
   if (blockers.some((item) => item.includes('not logged into X'))) {
