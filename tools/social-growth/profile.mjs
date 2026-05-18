@@ -296,19 +296,19 @@ function buildProfileSuggestions({ themes }) {
   const primaryThemes = themes.length ? themes.slice(0, 4) : ['AI Agent 落地', '前端性能', 'React', '技术博客增长'];
   const readableThemes = primaryThemes.join('、');
   return {
-    displayName: 'Clean99 | AI工程化/前端性能',
-    bio: `写 ${readableThemes}。只记录一线工程里的问题、指标、复验和踩坑。`,
+    displayName: 'Clean99 | AI工程化与前端性能',
+    bio: `写 ${readableThemes}。记录真实工程里的定位、指标、代码边界和踩坑。`,
     link: 'https://clean99.github.io',
     pinnedPost: [
       '我是 Clean99。',
       '',
-      '这里主要写四类东西：',
-      'AI Agent 怎么落到真实工程；',
-      '前端性能问题怎么定位；',
-      'React / 测试里哪些坑会反复出现；',
-      '技术博客怎么被搜索和读者看见。',
+      `这个号写 ${readableThemes}。`,
+      '我更关心一件事：真实工程里，问题是怎么被定位、验证和收口的。',
       '',
-      '每篇尽量给出场景、指标、做法和失败轮次。关注这里，不会每天刷屏，但会看到可复用的工程判断。',
+      '所以这里不会只贴结论。',
+      '我会放场景、指标、失败假设、代码边界，以及最后能复用的判断。',
+      '',
+      '如果你也在把 AI 工具塞进真实项目，或者经常被性能、React、测试和技术写作折腾，这里应该对你有用。',
     ].join('\n'),
   };
 }

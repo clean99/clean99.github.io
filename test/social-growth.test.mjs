@@ -4630,12 +4630,13 @@ test('profile update package prepares browser-confirmed profile changes', async 
   assert.equal(profilePackage.status, 'needs_browser_confirmation');
   assert.equal(profilePackage.current.displayName, 'clean');
   assert.match(profilePackage.proposed.bio, /AI 工程化/);
-  assert.match(profilePackage.proposed.bio, /问题、指标、复验和踩坑/);
+  assert.match(profilePackage.proposed.bio, /定位、指标、代码边界和踩坑/);
   assert.ok(profilePackage.proposed.bio.length <= 160);
   assert.match(profilePackage.proposed.pinnedPost, /我是 Clean99/);
-  assert.match(profilePackage.proposed.pinnedPost, /技术博客怎么被搜索和读者看见/);
-  assert.match(profilePackage.proposed.pinnedPost, /可复用的工程判断/);
-  assert.doesNotMatch(profilePackage.proposed.pinnedPost, /真实遇到的判断题|少看口号/);
+  assert.match(profilePackage.proposed.pinnedPost, /真实工程里，问题是怎么被定位、验证和收口的/);
+  assert.match(profilePackage.proposed.pinnedPost, /失败假设、代码边界/);
+  assert.match(profilePackage.proposed.pinnedPost, /这里应该对你有用/);
+  assert.doesNotMatch(profilePackage.proposed.pinnedPost, /这里主要写四类东西|不会每天刷屏|真实遇到的判断题|少看口号/);
   assert.match(markdown, /final profile save click/);
   assert.match(markdown, /Pinned post draft/);
   assert.match(markdown, /action-time confirmation/);
