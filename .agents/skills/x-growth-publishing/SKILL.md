@@ -56,6 +56,21 @@ npm run social:flow-dry-run -- --day 1 --slot 1 --out data/social-growth/dry-run
 
 This exercises the whole local flow without public actions: selected package, preflight, `baoyu-post-to-x` handoff, simulated publication URLs on `x.example.invalid`, metrics template, dry ledger snapshot, report, and recommendations. It must not open Chrome and must not write to the real `queue.json` or `ledger.json`.
 
+When a separate writing skill will produce better copy, use the copy override bridge:
+
+```bash
+npm run social:copy-template -- --day 1 --slot 1
+```
+
+Give the generated JSON file under `data/social-growth/copy-overrides/` to the writing skill. It should replace only `shortPost`, `xArticle`, `image`, `threadFallback`, and `followUpReplies`.
+After the JSON is optimized, apply it locally:
+
+```bash
+npm run social:apply-copy -- --input data/social-growth/copy-overrides/<queue-id>.json
+```
+
+Then rerun `social:validate` or `social:flow-dry-run`. Applying copy is local-only and must not open Chrome or publish.
+
 Automation is still local-only: it must not publish, upload media, reply, like, repost, follow, or edit the X profile. Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate. When the ledger exists, the daily command inside automation expands the queue enough to cover the default 7-day, 3-posts/day cadence, capped by available Chinese articles.
 
 If you only need the lower-level preparation step, run:

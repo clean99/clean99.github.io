@@ -32,6 +32,7 @@ The code can automate safe local work:
 - write a single growth status dashboard that combines follower pace, queue coverage, publish preflight, blockers, and next commands;
 - run the local daily preparation loop in one command;
 - run a safe Codex automation cycle that refreshes local artifacts, status, preflight, image brief, and profile audit without public X actions;
+- export and apply a JSON copy override so a separate writing skill can replace generated short-post, X Article, image prompt, fallback thread, and replies before preflight;
 - run a full dry-run cycle that simulates publication, metrics capture, ledger update, reporting, and recommendations in ignored local copies;
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
@@ -126,6 +127,30 @@ npm run social:flow-dry-run -- --day 1 --slot 1 --out data/social-growth/dry-run
 ```
 
 This writes ignored copies under `data/social-growth/dry-run/`: dry queue, dry metrics, dry ledger, preflight copy, X prep copy, report, recommendations, and a summary. It uses placeholder URLs on `x.example.invalid`, does not open Chrome, and does not touch real `queue.json` or `ledger.json`.
+
+Hand content control to a writing skill:
+
+```bash
+npm run social:copy-template -- --day 1 --slot 1
+```
+
+This writes an ignored JSON template under `data/social-growth/copy-overrides/`. A writing skill should edit these fields only:
+
+- `shortPost`
+- `xArticle.title`
+- `xArticle.body`
+- `image.alt`
+- `image.prompt`
+- `threadFallback`
+- `followUpReplies`
+
+Apply the optimized copy back to the local queue:
+
+```bash
+npm run social:apply-copy -- --input data/social-growth/copy-overrides/<queue-id>.json
+```
+
+This updates the local queue, writes `data/social-growth/copy-override.md`, and runs the deterministic quality gate, including queue-wide duplicate checks. It still does not open Chrome or perform public X actions. After it passes, run `social:flow-dry-run`, then `social:preflight`, then `social:x-prep`.
 
 Draft X candidates for one post:
 

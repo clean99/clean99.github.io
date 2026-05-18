@@ -12,6 +12,13 @@ import {
   updateMetricsTemplateFromText,
 } from '../tools/social-growth/capture.mjs';
 import { buildDistributionCandidates, buildXArticle, extractKeyPoints, selectHashtags } from '../tools/social-growth/copy.mjs';
+import {
+  applyCopyOverrideToQueue,
+  buildCopyOverrideTemplate,
+  selectCopyTarget,
+  writeCopyOverrideReport,
+  writeCopyOverrideTemplate,
+} from '../tools/social-growth/copyOverride.mjs';
 import { expandQueueOptionsForWeeklyCoverage, runDailyGrowthPlan, selectPackageItems } from '../tools/social-growth/daily.mjs';
 import { buildDayReadiness, formatDayReadinessMarkdown, writeDayReadiness } from '../tools/social-growth/dayReadiness.mjs';
 import {
@@ -523,6 +530,134 @@ test('exports a browser publish package with image, article, and checklist artif
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('copy override bridge lets a writing skill replace queue copy locally', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-copy-override-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+    const item = selectCopyTarget(queue, ledger, {
+      day: 1,
+      slot: 1,
+      now: '2026-05-18T00:00:00.000Z',
+    });
+    const template = buildCopyOverrideTemplate(item);
+    const optimized = {
+      ...template,
+      shortPost: [
+        '别把「AI 性能优化」做成建议清单。',
+        '',
+        '真正要验证的是 baseline -> change -> verify -> ledger 这条链路有没有闭合。',
+        '',
+        '图里放判断框架，完整推演放 X Article。',
+        '',
+        '#AI #软件工程',
+      ].join('\n'),
+      xArticle: {
+        title: 'AI 性能优化，先别谈建议',
+        body: [
+          '这篇文章要解决的不是“让模型多给几条建议”，而是验证优化闭环到底有没有成立。',
+          '',
+          '## 关键结论',
+          '',
+          '- 没有 baseline，任何收益都只是感觉。',
+          '- 没有同一个 harness，前后对比没有意义。',
+          '- 没有 ledger，优化过程不能复盘。',
+          '',
+          '## 可复用框架',
+          '',
+          'baseline -> change -> verify -> ledger',
+          '',
+          `博客原文：${item.targetUrl}`,
+        ].join('\n'),
+      },
+      image: {
+        ...template.image,
+        alt: 'AI 性能优化验证闭环图',
+        prompt: `${template.image.prompt}\nUse natural Chinese technical wording, readable at mobile size, no brand logos.`,
+      },
+      threadFallback: [
+        '别把 AI 性能优化做成建议清单。图里是验证闭环。',
+        '真正要看的不是模型说了什么，而是同一个 harness 复测后指标有没有变。',
+        `完整过程：${item.targetUrl}`,
+      ],
+      followUpReplies: [
+        '补一个判断：如果 baseline、场景、网络条件任意一个变了，这轮优化结果就不能直接归因。',
+      ],
+      notes: 'test optimized copy',
+    };
+
+    const result = applyCopyOverrideToQueue(queue, optimized, {
+      now: '2026-05-18T00:00:00.000Z',
+    });
+    const templatePath = await writeCopyOverrideTemplate(template, join(outDir, 'template.json'));
+    const reportPath = await writeCopyOverrideReport({
+      ...result,
+      generatedAt: '2026-05-18T00:00:00.000Z',
+    }, join(outDir, 'copy-override.md'));
+    const persistedTemplate = JSON.parse(await readFile(templatePath, 'utf8'));
+    const report = await readFile(reportPath, 'utf8');
+
+    assert.equal(queue.items[0].shortPost, template.shortPost);
+    assert.equal(result.item.shortPost, optimized.shortPost);
+    assert.equal(result.item.posts[0], optimized.shortPost);
+    assert.equal(result.item.contentStatus, 'ready_for_validation');
+    assert.equal(result.item.copySource, 'external-writing-skill');
+    assert.equal(result.validation.status, 'pass');
+    assert.equal(result.queueValidation.status, 'pass');
+    assert.equal(persistedTemplate.id, item.id);
+    assert.match(report, /This only updates local queue copy/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('copy override refuses to mutate published queue items by default', () => {
+  const queue = buildPublishQueue([
+    {
+      title: '有用的系统',
+      excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+      slug: 'Useful-Systems',
+      lang: 'zh',
+      tags: ['AI'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  const publishedQueue = markQueueItemPublished(queue, {
+    id: queue.items[0].id,
+    xPostUrl: 'https://x.com/Clean993/status/1',
+    publishedAt: '2026-05-18T01:00:00.000Z',
+  });
+
+  assert.throws(
+    () => applyCopyOverrideToQueue(publishedQueue, {
+      id: queue.items[0].id,
+      shortPost: '不会写入已发布项目',
+    }),
+    /Refusing to change published queue item/,
+  );
 });
 
 test('daily growth run writes queue, packages, and a browser-safe report', async () => {

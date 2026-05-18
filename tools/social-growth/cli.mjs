@@ -3,6 +3,13 @@ import { loadArticles } from './articles.mjs';
 import { runSafeAutomationCycle } from './automation.mjs';
 import { parseXPostMetrics, parseXProfileMetrics, updateMetricsTemplateFromText } from './capture.mjs';
 import { buildDistributionCandidates } from './copy.mjs';
+import {
+  applyCopyOverrideToQueue,
+  buildCopyOverrideTemplate,
+  selectCopyTarget,
+  writeCopyOverrideReport,
+  writeCopyOverrideTemplate,
+} from './copyOverride.mjs';
 import { runDailyGrowthPlan } from './daily.mjs';
 import {
   buildDayReadiness,
@@ -261,6 +268,52 @@ if (command === 'articles') {
   } else {
     console.log(formatDayReadinessMarkdown(readiness));
   }
+} else if (command === 'copy-template') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const item = selectCopyTarget(queue, ledger, {
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+  });
+  const template = buildCopyOverrideTemplate(item, {
+    source: args.source || 'external-writing-skill',
+    contentStatus: args.contentStatus || 'ready_for_validation',
+  });
+  const outPath = args.out || `data/social-growth/copy-overrides/${safePathSegment(item.id)}.json`;
+  await writeCopyOverrideTemplate(template, outPath);
+  console.log(JSON.stringify({
+    id: item.id,
+    outPath,
+    nextCommand: `npm run social:apply-copy -- --input ${outPath}`,
+  }, null, 2));
+} else if (command === 'apply-copy') {
+  const queuePath = args.queue || 'data/social-growth/queue.json';
+  const queue = await readJson(queuePath);
+  const override = await readJson(requiredArg(args, 'input'));
+  const result = applyCopyOverrideToQueue(queue, override, {
+    id: args.id,
+    now: args.now ? new Date(args.now) : new Date(),
+    allowPublished: args.allowPublished === 'true',
+  });
+  const outPath = args.out || queuePath;
+  const reportPath = args.report || 'data/social-growth/copy-override.md';
+  const report = {
+    ...result,
+    generatedAt: (args.now ? new Date(args.now) : new Date()).toISOString(),
+  };
+  await writeJson(outPath, result.queue);
+  await writeCopyOverrideReport(report, reportPath);
+  console.log(JSON.stringify({
+    id: result.item.id,
+    queue: outPath,
+    report: reportPath,
+    status: result.validation.status,
+    queueStatus: result.queueValidation.status,
+    errors: result.validation.errors,
+    warnings: result.validation.warnings,
+  }, null, 2));
 } else if (command === 'flow-dry-run') {
   const outPath = args.out || 'data/social-growth/dry-run/flow-dry-run.md';
   const dryRunDir = args.dryRunDir || dirnameFromPath(outPath);
@@ -533,6 +586,8 @@ function printHelp() {
   npm run social:daily -- --limit 5 --package-limit 3
   npm run social:automation -- --day 1 --slot 1
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
+  npm run social:copy-template -- --day 1 --slot 1
+  npm run social:apply-copy -- --input data/social-growth/copy-overrides/<queue-id>.json
   npm run social:flow-dry-run -- --day 1 --slot 1 --out data/social-growth/dry-run/flow-dry-run.md
   npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json
   npm run social:status -- --day 1 --slot 1 --out data/social-growth/status.md
@@ -570,4 +625,8 @@ function dirnameFromPath(filePath) {
   const normalized = String(filePath).replace(/\\/g, '/');
   const index = normalized.lastIndexOf('/');
   return index === -1 ? '.' : normalized.slice(0, index) || '/';
+}
+
+function safePathSegment(value) {
+  return String(value).replace(/[^A-Za-z0-9._=-]+/g, '-');
 }
