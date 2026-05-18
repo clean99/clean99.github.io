@@ -269,6 +269,7 @@ export async function runSafeAutomationCycle({
     profileText,
     opportunityTexts: engagementOpportunities,
     day,
+    slot,
     now,
     imageDir,
     packageOutDir,

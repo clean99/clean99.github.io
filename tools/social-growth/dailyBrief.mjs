@@ -23,6 +23,7 @@ export async function buildDailyExecutionBrief({
   profileText = '',
   opportunityTexts = [],
   day = 1,
+  slot = 1,
   now = new Date(),
   imageDir = 'output/imagegen',
   packageOutDir = 'data/social-growth/packages',
@@ -82,6 +83,12 @@ export async function buildDailyExecutionBrief({
     browserReadiness,
     day,
   });
+  const browserReadinessCommand = buildBrowserReadinessCommand({
+    day: dayReadiness.day,
+    slot,
+    publishMode: browserReadiness?.publishMode || selectedSlot(dayReadiness, slot)?.publishMode || publishMode,
+    profileDir: xProfileDir || browserReadiness?.profileDir,
+  });
 
   return {
     version: 1,
@@ -104,6 +111,7 @@ export async function buildDailyExecutionBrief({
     metricsReadiness,
     profileAudit,
     browserReadiness: summarizeBrowserReadiness(browserReadiness),
+    browserReadinessCommand,
     actionItems,
     boundary: 'Local brief only. Publishing, media upload, reply, like, repost, follow, profile edit, and pin actions still require action-time confirmation in Chrome.',
   };
@@ -162,7 +170,7 @@ ${formatBrowserBlockers(brief.browserReadiness.blockers)}
 Command:
 
 \`\`\`bash
-npm run social:browser-readiness -- --day ${brief.day} --slot 1 --out data/social-growth/browser-readiness.md
+${brief.browserReadinessCommand || buildBrowserReadinessCommand({ day: brief.day, slot: 1 })}
 \`\`\`
 
 ## Engagement
@@ -240,6 +248,34 @@ function formatSlot(slot) {
     : 'none';
   return `- ${slot.time}: ${slot.id}
   Image ready: ${slot.imageReady}; preflight: ${slot.preflightStatus}; X prep: ${slot.xPrepStatus}; mode: ${slot.publishMode}; blockers: ${blockers}`;
+}
+
+function selectedSlot(dayReadiness, slot) {
+  const slotNumber = Number(slot || 1);
+  return dayReadiness.slots.find((item) => item.slot === slotNumber)
+    || dayReadiness.slots[0]
+    || null;
+}
+
+function buildBrowserReadinessCommand({
+  day,
+  slot,
+  publishMode,
+  profileDir,
+} = {}) {
+  const args = [
+    'npm run social:browser-readiness --',
+    `--day ${Number(day || 1)}`,
+    `--slot ${Number(slot || 1)}`,
+  ];
+  if (publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
+  if (profileDir) args.push(`--xProfileDir ${shellQuote(profileDir)}`);
+  args.push('--out data/social-growth/browser-readiness.md');
+  return args.join(' ');
+}
+
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, "'\\''")}'`;
 }
 
 function buildActionItems({

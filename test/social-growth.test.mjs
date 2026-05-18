@@ -1424,9 +1424,12 @@ test('daily execution brief surfaces browser blockers before ready publish slots
       packageOutDir: join(outDir, 'packages'),
       xSkillDir: skillDir,
       xBunCommand: 'bun',
+      xProfileDir: '/tmp/x-profile',
       publishMode: 'thread_fallback',
       browserReadiness: {
         status: 'needs_chrome_extension_reconnect',
+        publishMode: 'thread_fallback',
+        profileDir: '/tmp/x-profile',
         blockers: [
           'Codex Chrome Extension native pipe is closed.',
           'Media upload is blocked in the current browser automation path.',
@@ -1437,10 +1440,13 @@ test('daily execution brief surfaces browser blockers before ready publish slots
     const markdown = formatDailyExecutionBriefMarkdown(brief);
 
     assert.equal(brief.status, 'needs_chrome_extension_reconnect');
+    assert.match(brief.browserReadinessCommand, /--publishMode thread_fallback/);
+    assert.match(brief.browserReadinessCommand, /--xProfileDir '\/tmp\/x-profile'/);
     assert.equal(brief.dayReadiness.readySlots, 1);
     assert.ok(brief.actionItems.some((item) => item.action.includes('Fix browser readiness')));
     assert.ok(brief.actionItems.some((item) => item.action.includes('prepare them only after browser readiness passes')));
     assert.match(markdown, /Browser Readiness/);
+    assert.match(markdown, /browser-readiness -- --day 1 --slot 1 --publishMode thread_fallback --xProfileDir '\/tmp\/x-profile'/);
     assert.match(markdown, /Extension native pipe is closed|native pipe is closed/);
     assert.doesNotMatch(markdown, /P0: Prepare 1 ready/);
   } finally {

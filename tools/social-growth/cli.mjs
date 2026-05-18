@@ -431,6 +431,7 @@ if (command === 'articles') {
     profileText,
     opportunityTexts,
     day: args.day || 1,
+    slot: args.slot || 1,
     now: args.now ? new Date(args.now) : new Date(),
     imageDir: args.imageDir || 'output/imagegen',
     packageOutDir: args.packageOut || 'data/social-growth/packages',
