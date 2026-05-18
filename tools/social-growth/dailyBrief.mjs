@@ -618,7 +618,7 @@ function manualPublishUrlTemplatePath(day) {
 }
 
 function manualPublishBatchRecoveryCommand(day) {
-  return `npm run social:post-publish-recovery-batch -- --input ${manualPublishUrlTemplatePath(day)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies`;
+  return `npm run social:post-publish-recovery-batch -- --input ${manualPublishUrlTemplatePath(day)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies --launch-window-dir data/social-growth/launch-windows`;
 }
 
 function manualPublishKitPath(day, slot) {

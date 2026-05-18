@@ -197,7 +197,7 @@ export function buildManualPublishKitIndex({
 } = {}) {
   const recoveryCommand = batchRecoveryCommand || (
     urlTemplatePath
-      ? `npm run social:post-publish-recovery-batch -- --input ${shellQuote(urlTemplatePath)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies`
+      ? `npm run social:post-publish-recovery-batch -- --input ${shellQuote(urlTemplatePath)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies --launch-window-dir data/social-growth/launch-windows`
       : ''
   );
   return {

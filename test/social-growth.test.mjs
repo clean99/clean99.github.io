@@ -1650,6 +1650,7 @@ test('daily execution brief lists manual fallback commands for every ready slot'
     assert.match(markdown, /manual-publish-kits\/day1-ready-slots\.md/);
     assert.match(markdown, /manual-publish-kits\/day1-published-urls\.json/);
     assert.match(markdown, /post-publish-recovery-batch/);
+    assert.match(markdown, /launch-window-dir data\/social-growth\/launch-windows/);
     assert.match(markdown, /post-publish-recovery/);
     assert.match(markdown, /fill the batch URL template/);
   } finally {
@@ -3801,6 +3802,7 @@ test('manual publish kits CLI writes all ready fallback kits and an index', asyn
     assert.match(indexMarkdown, /Ready slots: 2\/3/);
     assert.match(indexMarkdown, /Batch Recovery/);
     assert.match(indexMarkdown, /post-publish-recovery-batch/);
+    assert.match(indexMarkdown, /launch-window-dir data\/social-growth\/launch-windows/);
     assert.equal(urlTemplate.status, 'ready_for_url_capture');
     assert.equal(urlTemplate.items.length, 2);
     assert.equal(urlTemplate.items[0].id, plannedSlots[0].item.id);
@@ -4570,6 +4572,7 @@ test('growth status surfaces blocking browser readiness before publish prep', as
     assert.match(markdown, /manual-publish-kits\/day1-published-urls\.json/);
     assert.match(markdown, /cli\.mjs manual-publish-kits --day 1 --publishMode thread_fallback/);
     assert.match(markdown, /cli\.mjs post-publish-recovery-batch --input data\/social-growth\/manual-publish-kits\/day1-published-urls\.json/);
+    assert.match(markdown, /launch-window-dir data\/social-growth\/launch-windows/);
     assert.match(markdown, /manual-publish-kit/);
     assert.match(markdown, /post-publish-recovery/);
     assert.match(markdown, /Chrome extension native pipe is closed/);
