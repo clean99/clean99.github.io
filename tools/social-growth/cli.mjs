@@ -1280,8 +1280,11 @@ async function runLoginRecovery(options = {}) {
   const publishMode = options.publishMode || options.articleMode || 'thread_fallback';
   const probePath = options.browserProbe || options.probeOut || 'data/social-growth/browser-probe.local.json';
   const account = options.account || '@Clean993';
+  const storedProbeBeforeRun = await readBrowserProbe(probePath);
+  const inputProbe = browserProbeFromArgs(options);
+  const preRunProbe = mergeBrowserProbe(storedProbeBeforeRun, inputProbe);
   const profileDir = options.xProfileDir || options.profileDir;
-  const profileDirectory = options.xProfileDirectory || options.profileDirectory;
+  const profileDirectory = options.xProfileDirectory || options.profileDirectory || preRunProbe.profileDirectory;
   let probeRun = {
     skipped: options.skipProbe === 'true',
     status: 'skipped',
@@ -1326,8 +1329,7 @@ async function runLoginRecovery(options = {}) {
   const xPrepPath = options.xPrepOut || 'data/social-growth/x-publish-prep.md';
   await writeXPublishPrep(prep, xPrepPath);
 
-  const storedProbe = await readBrowserProbe(probePath);
-  const inputProbe = browserProbeFromArgs(options);
+  const storedProbe = options.skipProbe === 'true' ? storedProbeBeforeRun : await readBrowserProbe(probePath);
   const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
   if (hasBrowserProbeValues(inputProbe)) effectiveProbe.generatedAt = preflight.generatedAt;
   if (options.writeProbe !== 'false' && hasBrowserProbeValues(effectiveProbe)) {

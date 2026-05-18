@@ -4487,6 +4487,7 @@ test('login recovery command refreshes readiness files without public actions', 
       loginState: 'logged_out',
       articleAvailable: 'no',
       mediaUpload: 'unknown',
+      profileDirectory: 'Profile 1',
     }, null, 2)}\n`);
     await writeFile(profilePath, [
       'Clean99 | AI 工程化与前端性能',
@@ -4519,6 +4520,7 @@ test('login recovery command refreshes readiness files without public actions', 
     const statusMarkdown = await readFile(statusPath, 'utf8');
     const readinessMarkdown = await readFile(browserReadinessPath, 'utf8');
     const xPrepMarkdown = await readFile(xPrepPath, 'utf8');
+    const persistedProbe = await readBrowserProbe(probePath);
 
     assert.equal(result.status, 0, result.stderr || result.stdout);
     assert.equal(output.status, 'needs_x_login');
@@ -4526,8 +4528,12 @@ test('login recovery command refreshes readiness files without public actions', 
     assert.equal(output.publicActions.uploadedMedia, false);
     assert.equal(output.publicActions.clickedSubmit, false);
     assert.match(statusMarkdown, /Status: needs_x_login/);
+    assert.match(statusMarkdown, /--xProfileDirectory 'Profile 1'/);
     assert.match(readinessMarkdown, /The Chrome profile used for publishing is not logged into X/);
+    assert.match(readinessMarkdown, /Chrome profile directory: Profile 1/);
     assert.match(xPrepMarkdown, /Probe Browser Without Public Actions/);
+    assert.match(xPrepMarkdown, /--profile-directory 'Profile 1'/);
+    assert.equal(persistedProbe.profileDirectory, 'Profile 1');
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
