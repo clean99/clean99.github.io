@@ -9,7 +9,11 @@ The code can automate safe local work:
 - read Hexo posts;
 - generate UTM links;
 - draft X posts and threads;
-- create a browser publishing plan;
+- create and persist a browser publishing queue;
+- prepare exact handoff text for Chrome;
+- mark published X URLs back into the queue;
+- initialize a one-week follower target ledger;
+- append follower and interaction snapshots;
 - calculate follower and interaction progress from snapshots;
 - generate reports.
 
@@ -33,6 +37,7 @@ Core records:
 
 - `Article`: parsed from `source/_posts/*.md`.
 - `DistributionCandidate`: one article, one X variant, one UTM URL, one or more post bodies. The post text and `targetUrl` are separate so long UTM links are not truncated by local text guards.
+- `PublishQueue`: local draft queue of candidates to hand to Chrome.
 - `MetricsSnapshot`: date, follower count, per-post interactions.
 - `GrowthReport`: follower delta, target progress, interaction totals, top posts.
 
@@ -56,10 +61,46 @@ Generate a multi-post plan from recent articles:
 npm run social:plan -- --limit 3
 ```
 
+Write a local publishing queue:
+
+```bash
+npm run social:queue -- --limit 3 --out data/social-growth/queue.json
+```
+
+Prepare the exact text a browser executor should fill:
+
+```bash
+npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>
+```
+
+After a confirmed browser publish, write the public X URL back to the queue:
+
+```bash
+npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url https://x.com/Clean993/status/<id>
+```
+
+Initialize a one-week follower ledger:
+
+```bash
+npm run social:init-ledger -- --followers 1234 --target 1000 --out data/social-growth/ledger.json
+```
+
+Append a snapshot:
+
+```bash
+npm run social:snapshot -- --ledger data/social-growth/ledger.json --date 2026-05-19 --followers 1300 --posts-file data/social-growth/posts.local.json
+```
+
 Summarize growth progress from a ledger:
 
 ```bash
 npm run social:report -- --ledger data/social-growth/example-ledger.json
+```
+
+Generate a Markdown report:
+
+```bash
+npm run social:report -- --ledger data/social-growth/example-ledger.json --format markdown
 ```
 
 Validate code:
@@ -94,20 +135,47 @@ Use `data/social-growth/example-ledger.json` as the shape. Real local data shoul
 
 - `data/social-growth/ledger.json`
 - `data/social-growth/*.local.json`
+- `data/social-growth/queue.json`
 - `data/social-growth/snapshots/`
 
 Do not commit private analytics or account history.
 
+`posts.local.json` can be a plain array:
+
+```json
+[
+  {
+    "id": "Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops__en__sharp-take__00",
+    "articleSlug": "Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops",
+    "variant": "sharp-take",
+    "url": "https://x.com/Clean993/status/0000000000000000000",
+    "metrics": {
+      "replies": "2",
+      "reposts": "3",
+      "quotes": "1",
+      "likes": "40",
+      "bookmarks": "5",
+      "views": "1.5K",
+      "profileClicks": "8",
+      "follows": "4"
+    }
+  }
+]
+```
+
 ## First-Week Loop
 
-1. Generate candidates with `npm run social:plan -- --limit 5`.
-2. Select 2-4 strong candidates for the day.
-3. Use Chrome to prepare the post.
-4. Stop before publishing and confirm the exact text and account.
-5. Publish only after confirmation.
-6. Record follower count and post interactions twice per day.
-7. Run `npm run social:report`.
-8. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+1. Generate a queue with `npm run social:queue -- --limit 5 --out data/social-growth/queue.json`.
+2. Pick 2-4 strong queue items for the day.
+3. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
+4. Use Chrome to prepare the post.
+5. Stop before publishing and confirm the exact text and account.
+6. Publish only after confirmation.
+7. Mark the published URL with `npm run social:mark-published`.
+8. Record follower count and post interactions twice per day.
+9. Run `npm run social:snapshot`.
+10. Run `npm run social:report -- --format markdown`.
+11. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 ## Chrome Integration Plan
 

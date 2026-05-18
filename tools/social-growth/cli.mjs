@@ -1,8 +1,21 @@
 #!/usr/bin/env node
-import { readFile } from 'node:fs/promises';
 import { loadArticles } from './articles.mjs';
 import { buildDistributionCandidates } from './copy.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
+import {
+  buildPublishQueue,
+  findQueueItem,
+  markQueueItemPublished,
+  prepareBrowserHandoff,
+  readJson,
+  writeJson,
+} from './queue.mjs';
+import {
+  createLedger,
+  formatMarkdownReport,
+  publishedPostsFromQueue,
+  updateLedgerSnapshot,
+} from './ledger.mjs';
 
 const command = process.argv[2] || 'help';
 const args = parseArgs(process.argv.slice(3));
@@ -20,8 +33,12 @@ if (command === 'articles') {
   console.log(JSON.stringify(candidates, null, 2));
 } else if (command === 'report') {
   const ledgerPath = args.ledger || 'data/social-growth/example-ledger.json';
-  const ledger = JSON.parse(await readFile(ledgerPath, 'utf8'));
-  console.log(JSON.stringify(summarizeGrowthLedger(ledger), null, 2));
+  const ledger = await readJson(ledgerPath);
+  if (args.format === 'markdown') {
+    console.log(formatMarkdownReport(ledger));
+  } else {
+    console.log(JSON.stringify(summarizeGrowthLedger(ledger), null, 2));
+  }
 } else if (command === 'plan') {
   const articles = await loadArticles();
   const limit = Number(args.limit || 5);
@@ -37,6 +54,51 @@ if (command === 'articles') {
     })),
   );
   console.log(JSON.stringify(plan, null, 2));
+} else if (command === 'queue') {
+  const articles = await loadArticles();
+  const queue = buildPublishQueue(articles, args);
+  if (args.out) {
+    await writeJson(args.out, queue);
+    console.log(`Wrote ${queue.items.length} queue items to ${args.out}`);
+  } else {
+    console.log(JSON.stringify(queue, null, 2));
+  }
+} else if (command === 'handoff') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const item = findQueueItem(queue, args.id || queue.items[0]?.id);
+  console.log(JSON.stringify(prepareBrowserHandoff(item), null, 2));
+} else if (command === 'mark-published') {
+  const queuePath = args.queue || 'data/social-growth/queue.json';
+  const queue = await readJson(queuePath);
+  const updated = markQueueItemPublished(queue, {
+    id: requiredArg(args, 'id'),
+    xPostUrl: requiredArg(args, 'url'),
+    publishedAt: args.publishedAt,
+  });
+  await writeJson(queuePath, updated);
+  console.log(`Marked ${args.id} as published in ${queuePath}`);
+} else if (command === 'init-ledger') {
+  const ledger = createLedger({
+    startDate: args.start,
+    endDate: args.end,
+    baselineFollowers: requiredArg(args, 'followers'),
+    followersIn7Days: args.target || 1000,
+  });
+  await writeJson(args.out || 'data/social-growth/ledger.json', ledger);
+  console.log(JSON.stringify(summarizeGrowthLedger(ledger), null, 2));
+} else if (command === 'snapshot') {
+  const ledgerPath = args.ledger || 'data/social-growth/ledger.json';
+  const queue = args.queue ? await readJson(args.queue) : null;
+  const updated = await updateLedgerSnapshot({
+    ledgerPath,
+    postsFile: args.postsFile,
+    snapshot: {
+      date: requiredArg(args, 'date'),
+      followers: requiredArg(args, 'followers'),
+      posts: queue ? publishedPostsFromQueue(queue) : [],
+    },
+  });
+  console.log(JSON.stringify(summarizeGrowthLedger(updated), null, 2));
 } else {
   printHelp();
 }
@@ -47,7 +109,7 @@ function parseArgs(rawArgs) {
     const token = rawArgs[index];
     if (!token.startsWith('--')) continue;
 
-    const key = token.slice(2);
+    const key = toCamelKey(token.slice(2));
     const next = rawArgs[index + 1];
     if (!next || next.startsWith('--')) {
       parsed[key] = true;
@@ -57,6 +119,10 @@ function parseArgs(rawArgs) {
     }
   }
   return parsed;
+}
+
+function toCamelKey(key) {
+  return key.replace(/-([a-z])/g, (_, char) => char.toUpperCase());
 }
 
 function selectArticle(articles, options) {
@@ -83,6 +149,18 @@ function printHelp() {
   npm run social:articles -- --limit 5
   npm run social:draft -- --slug Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops
   npm run social:plan -- --limit 3
+  npm run social:queue -- --limit 3 --out data/social-growth/queue.json
+  npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>
+  npm run social:init-ledger -- --followers 1234 --out data/social-growth/ledger.json
+  npm run social:snapshot -- --ledger data/social-growth/ledger.json --date 2026-05-19 --followers 1300 --posts-file data/social-growth/posts.local.json
   npm run social:report -- --ledger data/social-growth/example-ledger.json
+  npm run social:report -- --ledger data/social-growth/example-ledger.json --format markdown
 `);
+}
+
+function requiredArg(options, key) {
+  if (options[key] === undefined || options[key] === null || options[key] === '') {
+    throw new Error(`Missing required argument: --${key}`);
+  }
+  return options[key];
 }

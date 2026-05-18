@@ -10,8 +10,13 @@
     "server": "hexo server",
     "social:articles": "node tools/social-growth/cli.mjs articles",
     "social:draft": "node tools/social-growth/cli.mjs draft",
+    "social:handoff": "node tools/social-growth/cli.mjs handoff",
+    "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",
+    "social:mark-published": "node tools/social-growth/cli.mjs mark-published",
     "social:plan": "node tools/social-growth/cli.mjs plan",
+    "social:queue": "node tools/social-growth/cli.mjs queue",
     "social:report": "node tools/social-growth/cli.mjs report",
+    "social:snapshot": "node tools/social-growth/cli.mjs snapshot",
     "test": "node --test test/social-growth.test.mjs"
   },
   "hexo": {
