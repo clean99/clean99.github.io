@@ -147,6 +147,19 @@ npm run social:scheduled-run -- --day 1 --slot 1
 
 This combines `social:automation` and `social:metrics-cycle` into one recurring-safe local pass. It refreshes queue/packages/status/preflight/profile/image/X prep artifacts, prefers the next candidate that already has a prepared image, parses copied visible X text when available, writes growth, funnel, and recommendation reports, and never opens Chrome or performs public X actions.
 
+Codex App recurring automation is configured outside the repository:
+
+- active: `x-growth-safe-automation`
+- paused duplicate: `prepare-x-growth-daily-run`
+
+The active automation uses the verified bundled Node runtime:
+
+```bash
+/Users/bytedance/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node tools/social-growth/cli.mjs scheduled-run --day 1 --slot 1 --funnel-out data/social-growth/funnel.md
+```
+
+It is allowed to refresh local reports and summarize the next safe action. It must still stop before browser publishing, media upload, replies, likes, reposts, follows, profile edits, pinned-post changes, or any other public X action.
+
 Generate the read-only engagement search plan:
 
 ```bash

@@ -278,11 +278,12 @@ Use the daily command for scheduled automation. It is allowed to prepare local a
 For recurring safe jobs, prefer:
 
 ```bash
-npm run social:scheduled-run -- --day 1 --slot 1
+/Users/bytedance/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node tools/social-growth/cli.mjs scheduled-run --day 1 --slot 1 --funnel-out data/social-growth/funnel.md
 ```
 
 This combines safe local publishing preparation with read-only metrics-cycle parsing and writes `data/social-growth/scheduled-run.md`.
 The scheduled run also writes `data/social-growth/funnel.md` so each recurring pass exposes the current views -> interactions -> profile clicks -> follows bottleneck before the next writing or publishing decision.
+The Codex App automation `x-growth-safe-automation` runs this safe scheduled loop. Keep the older `prepare-x-growth-daily-run` automation paused unless it is deliberately repurposed, because it duplicates part of the same local report generation.
 
 For selective distribution into relevant technical conversations, capture copied visible X thread text into `data/social-growth/engagement-opportunities/*.txt`, then run:
 
