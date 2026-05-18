@@ -48,6 +48,14 @@ npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.m
 
 This does not open Chrome. It summarizes each slot's image readiness, publish preflight, `baoyu-post-to-x` handoff status, blockers, and exact slot commands.
 
+When the user says not to publish content yet, run the full dry-run instead:
+
+```bash
+npm run social:flow-dry-run -- --day 1 --slot 1 --out data/social-growth/dry-run/flow-dry-run.md
+```
+
+This exercises the whole local flow without public actions: selected package, preflight, `baoyu-post-to-x` handoff, simulated publication URLs on `x.example.invalid`, metrics template, dry ledger snapshot, report, and recommendations. It must not open Chrome and must not write to the real `queue.json` or `ledger.json`.
+
 Automation is still local-only: it must not publish, upload media, reply, like, repost, follow, or edit the X profile. Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate. When the ledger exists, the daily command inside automation expands the queue enough to cover the default 7-day, 3-posts/day cadence, capped by available Chinese articles.
 
 If you only need the lower-level preparation step, run:

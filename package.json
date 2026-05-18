@@ -14,6 +14,7 @@
     "social:daily": "node tools/social-growth/cli.mjs daily",
     "social:day-readiness": "node tools/social-growth/cli.mjs day-readiness",
     "social:draft": "node tools/social-growth/cli.mjs draft",
+    "social:flow-dry-run": "node tools/social-growth/cli.mjs flow-dry-run",
     "social:handoff": "node tools/social-growth/cli.mjs handoff",
     "social:image-brief": "node tools/social-growth/cli.mjs image-brief",
     "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",

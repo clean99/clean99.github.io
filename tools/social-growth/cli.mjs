@@ -30,6 +30,7 @@ import {
   imageBriefPath,
   writeImageBrief,
 } from './imageBrief.mjs';
+import { runXGrowthDryRun } from './flowDryRun.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from './recommendations.mjs';
 import {
   buildWeeklyExecutionPlan,
@@ -260,6 +261,36 @@ if (command === 'articles') {
   } else {
     console.log(formatDayReadinessMarkdown(readiness));
   }
+} else if (command === 'flow-dry-run') {
+  const outPath = args.out || 'data/social-growth/dry-run/flow-dry-run.md';
+  const dryRunDir = args.dryRunDir || dirnameFromPath(outPath);
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const result = await runXGrowthDryRun({
+    queue,
+    ledger,
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    dryRunDir,
+    outPath,
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || `${dryRunDir}/packages`,
+    xSkillDir: args.xSkillDir,
+    xBunCommand: args.xBunCommand,
+    contentStatus: args.contentStatus || 'paused_for_copy_refinement',
+    simulatedFollowers: args.followers,
+  });
+  console.log(JSON.stringify({
+    generatedAt: result.generatedAt,
+    status: result.status,
+    contentStatus: result.contentStatus,
+    selected: result.selected,
+    preflight: result.preflight,
+    xPrep: result.xPrep,
+    paths: result.paths,
+  }, null, 2));
 } else if (command === 'week') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -502,6 +533,7 @@ function printHelp() {
   npm run social:daily -- --limit 5 --package-limit 3
   npm run social:automation -- --day 1 --slot 1
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
+  npm run social:flow-dry-run -- --day 1 --slot 1 --out data/social-growth/dry-run/flow-dry-run.md
   npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json
   npm run social:status -- --day 1 --slot 1 --out data/social-growth/status.md
   npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md
@@ -532,4 +564,10 @@ function requiredArg(options, key) {
 async function readText(filePath) {
   const { readFile } = await import('node:fs/promises');
   return readFile(filePath, 'utf8');
+}
+
+function dirnameFromPath(filePath) {
+  const normalized = String(filePath).replace(/\\/g, '/');
+  const index = normalized.lastIndexOf('/');
+  return index === -1 ? '.' : normalized.slice(0, index) || '/';
 }

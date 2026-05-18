@@ -32,6 +32,7 @@ The code can automate safe local work:
 - write a single growth status dashboard that combines follower pace, queue coverage, publish preflight, blockers, and next commands;
 - run the local daily preparation loop in one command;
 - run a safe Codex automation cycle that refreshes local artifacts, status, preflight, image brief, and profile audit without public X actions;
+- run a full dry-run cycle that simulates publication, metrics capture, ledger update, reporting, and recommendations in ignored local copies;
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
 - audit the X profile's follower-conversion signals from copied visible profile text;
@@ -117,6 +118,14 @@ This performs only local work:
 - writes `data/social-growth/automation-run.md`.
 
 It is the preferred recurring entry point. It still does not publish, upload media, reply, like, repost, follow, or edit the X profile. If the output says the image file is missing, generate it with built-in `imagegen` or register an existing PNG first, then rerun preflight before opening Chrome.
+
+Run the full local dry-run when content is not ready for real publishing:
+
+```bash
+npm run social:flow-dry-run -- --day 1 --slot 1 --out data/social-growth/dry-run/flow-dry-run.md
+```
+
+This writes ignored copies under `data/social-growth/dry-run/`: dry queue, dry metrics, dry ledger, preflight copy, X prep copy, report, recommendations, and a summary. It uses placeholder URLs on `x.example.invalid`, does not open Chrome, and does not touch real `queue.json` or `ledger.json`.
 
 Draft X candidates for one post:
 

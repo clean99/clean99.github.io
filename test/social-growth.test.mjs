@@ -45,6 +45,7 @@ import {
 } from '../tools/social-growth/profile.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
 import { buildGrowthStatus, formatGrowthStatusMarkdown, writeGrowthStatus } from '../tools/social-growth/status.mjs';
+import { runXGrowthDryRun } from '../tools/social-growth/flowDryRun.mjs';
 import { buildXPublishPrep, formatXPublishPrepMarkdown, writeXPublishPrep } from '../tools/social-growth/xPrep.mjs';
 import { validateQueue, validateQueueItem } from '../tools/social-growth/validation.mjs';
 import {
@@ -694,6 +695,74 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(profileAudit, /Status: needs_work/);
     assert.match(profileUpdate, /final profile save click/);
     assert.match(xPrep, /baoyu-post-to-x Bridge/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('full flow dry run simulates publication and metrics without touching real state', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-flow-dry-run-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+    const dryRunDir = join(outDir, 'dry-run');
+    const imageDir = join(outDir, 'images');
+    const imagePath = join(imageDir, `${queue.items[0].id}.png`);
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-article.ts'), '// test script');
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await writeFile(imagePath, 'fake image');
+
+    const result = await runXGrowthDryRun({
+      queue,
+      ledger,
+      now: '2026-05-18T00:00:00.000Z',
+      dryRunDir,
+      outPath: join(dryRunDir, 'flow-dry-run.md'),
+      imageDir,
+      packageOutDir: join(dryRunDir, 'packages'),
+      xSkillDir: skillDir,
+      xBunCommand: 'bun',
+    });
+    const flow = await readFile(join(dryRunDir, 'flow-dry-run.md'), 'utf8');
+    const dryQueue = JSON.parse(await readFile(join(dryRunDir, 'queue.dry-run.json'), 'utf8'));
+    const dryMetrics = JSON.parse(await readFile(join(dryRunDir, 'posts.dry-run.json'), 'utf8'));
+    const dryLedger = JSON.parse(await readFile(join(dryRunDir, 'ledger.dry-run.json'), 'utf8'));
+    const xPrep = await readFile(join(dryRunDir, 'x-publish-prep.dry-run.md'), 'utf8');
+
+    assert.equal(result.status, 'dry_run_complete');
+    assert.equal(result.contentStatus, 'paused_for_copy_refinement');
+    assert.equal(result.preflight.status, 'ready');
+    assert.equal(result.xPrep.status, 'ready');
+    assert.equal(queue.items[0].status, 'draft');
+    assert.equal(dryQueue.items[0].status, 'published');
+    assert.match(dryQueue.items[0].xPostUrl, /x\.example\.invalid/);
+    assert.equal(dryMetrics.followers, '31');
+    assert.equal(dryMetrics.posts[0].metrics.follows, '1');
+    assert.equal(dryLedger.snapshots[0].followers, 31);
+    assert.match(flow, /No browser was opened/);
+    assert.match(flow, /Keep real publishing paused/);
+    assert.match(xPrep, /x\.example\.invalid/);
+    assert.doesNotMatch(flow, /https:\/\/x\.com\/Clean993\/status/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
