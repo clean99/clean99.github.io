@@ -115,7 +115,7 @@ export function extractMetricByLabels(text, labels) {
 }
 
 async function readPostTexts(postTextDir) {
-  const files = (await readdir(postTextDir)).filter((file) => file.endsWith('.txt'));
+  const files = (await readOptionalDir(postTextDir)).filter((file) => file.endsWith('.txt'));
   const entries = await Promise.all(files.map(async (file) => {
     const id = file.replace(/\.txt$/, '');
     const text = await readFile(join(postTextDir, file), 'utf8');
@@ -123,6 +123,15 @@ async function readPostTexts(postTextDir) {
   }));
 
   return Object.fromEntries(entries);
+}
+
+async function readOptionalDir(dirPath) {
+  try {
+    return await readdir(dirPath);
+  } catch (error) {
+    if (error.code === 'ENOENT') return [];
+    throw error;
+  }
 }
 
 function compactDefinedMetrics(metrics) {

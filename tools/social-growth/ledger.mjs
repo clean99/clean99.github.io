@@ -140,11 +140,12 @@ export async function updateLedgerSnapshot({ ledgerPath, snapshot, postsFile }) 
   const postsInput = postsFile ? await readJson(postsFile) : null;
   const posts = postsInput ? postsFromInput(postsInput) : snapshot.posts;
   const inputSnapshot = postsInput && !Array.isArray(postsInput) ? postsInput : {};
+  const explicitSnapshot = compactDefined(snapshot || {});
   const nextSnapshot = {
     ...inputSnapshot,
-    ...snapshot,
-    date: snapshot.date || inputSnapshot.date,
-    followers: snapshot.followers ?? inputSnapshot.followers,
+    ...explicitSnapshot,
+    date: explicitSnapshot.date || inputSnapshot.date,
+    followers: explicitSnapshot.followers ?? inputSnapshot.followers,
     posts,
   };
 
@@ -162,6 +163,13 @@ export async function updateLedgerSnapshot({ ledgerPath, snapshot, postsFile }) 
 export function postsFromInput(input) {
   if (Array.isArray(input)) return input;
   return input.posts || [];
+}
+
+function compactDefined(value) {
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([, item]) => item !== undefined),
+  );
 }
 
 function emptyMetrics() {

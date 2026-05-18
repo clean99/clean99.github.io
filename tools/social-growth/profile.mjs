@@ -45,14 +45,16 @@ export function parseProfileText(text = '') {
     .map((line) => line.trim())
     .filter(Boolean);
   const followers = safeParseFollowers(text);
-  const handleLine = lines.find((line) => /^@[\w_]{1,30}$/.test(line));
-  const linkLine = lines.find((line) => /https?:\/\/|clean99\.github\.io|github\.io/i.test(line));
+  const profileIndex = findProfileHandleIndex(lines);
+  const handleLine = profileIndex >= 0 ? lines[profileIndex] : lines.find((line) => /^@[\w_]{1,30}$/.test(line));
+  const displayName = profileIndex > 0 ? lines[profileIndex - 1] : lines[0] || '';
+  const linkLine = extractProfileLink(lines.find((line) => /https?:\/\/|clean99\.github\.io|github\.io/i.test(line)));
   const pinned = lines.some((line) => /Pinned|置顶|已置顶/i.test(line));
-  const bio = extractLikelyBio(lines, { handleLine, linkLine });
+  const bio = extractLikelyBio(lines, { handleLine, linkLine, profileIndex });
 
   return {
     rawLines: lines,
-    displayName: lines[0] || '',
+    displayName,
     handle: handleLine || '',
     bio,
     link: linkLine || '',
@@ -210,20 +212,39 @@ function inferQueueThemes(queue) {
     .map(([, theme]) => theme);
 }
 
-function extractLikelyBio(lines, { handleLine, linkLine }) {
+function findProfileHandleIndex(lines) {
+  const handleIndexes = lines
+    .map((line, index) => (/^@[\w_]{1,30}$/.test(line) ? index : -1))
+    .filter((index) => index >= 0);
+
+  return handleIndexes.findLast((index) => (
+    lines.slice(index, index + 16).some((line) => /followers|关注者|粉丝/i.test(line))
+  )) ?? handleIndexes[0] ?? -1;
+}
+
+function extractLikelyBio(lines, { handleLine, linkLine, profileIndex = -1 }) {
   const ignored = new Set([
     handleLine,
     linkLine,
     lines[0],
   ].filter(Boolean));
   const metricsPattern = /following|followers|正在关注|关注者|位关注者|joined|加入|posts|帖子/i;
-  const line = lines.find((item) => (
+  const sourceLines = profileIndex >= 0 ? lines.slice(profileIndex + 1, profileIndex + 12) : lines;
+  const line = sourceLines.find((item) => (
     !ignored.has(item)
     && !metricsPattern.test(item)
     && !/^@/.test(item)
+    && !/Edit profile|See new posts|Get verified|You aren’t verified/i.test(item)
     && !/^\d+(\.\d+)?[KMB万亿]?\s*/i.test(item)
   ));
   return line || '';
+}
+
+function extractProfileLink(line = '') {
+  const value = String(line || '').trim();
+  if (/clean99\.github\.io/i.test(value)) return 'clean99.github.io';
+  const match = value.match(/https?:\/\/\S+|[A-Za-z0-9.-]*github\.io\S*/i);
+  return match ? match[0] : '';
 }
 
 function hasPositioning(text) {

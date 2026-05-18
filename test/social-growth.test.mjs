@@ -320,6 +320,19 @@ test('applies captured visible text to metrics template', async () => {
     assert.equal(result.followers, '37');
     assert.equal(persisted.posts[0].metrics.views, '2000');
     assert.equal(persisted.posts[0].metrics.likes, '20');
+
+    const profileOnlyPath = join(outDir, 'profile-only.local.json');
+    await writeJson(profileOnlyPath, template);
+    const profileOnly = await updateMetricsTemplateFromText({
+      metricsPath: profileOnlyPath,
+      profileTextPath,
+      postTextDir: join(outDir, 'missing-post-texts'),
+    });
+    const profileOnlyPersisted = JSON.parse(await readFile(profileOnlyPath, 'utf8'));
+
+    assert.equal(profileOnly.followers, '37');
+    assert.equal(profileOnly.postMetricsUpdated, 0);
+    assert.equal(profileOnlyPersisted.posts[0].metrics.views, '');
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -869,6 +882,33 @@ test('profile audit turns visible profile text into conversion checks', async ()
   }
 });
 
+test('profile parser ignores X navigation chrome around the profile card', () => {
+  const parsed = parseProfileText([
+    'To view keyboard shortcuts, press question mark',
+    'Home',
+    'Profile',
+    'clean',
+    '@Clean993',
+    'clean',
+    '57 posts',
+    'See new posts',
+    'Edit profile',
+    'clean',
+    '@Clean993',
+    'Software Engineer at Tiktok',
+    'Singaporeclean99.github.io',
+    'Joined July 2021',
+    '105 Following',
+    '30 Followers',
+  ].join('\n'));
+
+  assert.equal(parsed.displayName, 'clean');
+  assert.equal(parsed.handle, '@Clean993');
+  assert.equal(parsed.bio, 'Software Engineer at Tiktok');
+  assert.equal(parsed.link, 'clean99.github.io');
+  assert.equal(parsed.followers, 30);
+});
+
 test('profile audit flags missing captured profile conversion signals', async () => {
   const audit = await buildProfileAudit({
     profileText: '',
@@ -1295,9 +1335,18 @@ test('metrics template includes only published posts and snapshot can read it', 
       postsFile: postsPath,
       snapshot: {},
     });
+    const explicitUndefined = await updateLedgerSnapshot({
+      ledgerPath,
+      postsFile: postsPath,
+      snapshot: {
+        date: undefined,
+        followers: undefined,
+      },
+    });
 
     assert.equal(template.posts.length, 1);
     assert.equal(updated.snapshots[1].followers, 35);
+    assert.equal(explicitUndefined.snapshots[1].followers, 35);
     assert.equal(updated.snapshots[1].posts[0].metrics.views, 1200);
     assert.equal(summarizeGrowthLedger(updated).followerDelta, 5);
   } finally {
