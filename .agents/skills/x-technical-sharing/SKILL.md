@@ -185,6 +185,8 @@ Remove AI-smelling filler:
 - `我们可以看到`;
 - generic questions such as `你怎么看`.
 
+If the project-level `x-writing` community skill is available, use its `references/anti-patterns.md` as a cleanup checklist for rhythm, inflated vocabulary, formal transitions, and reframing cliches. Do not inherit its English-only examples blindly; Chinese technical specificity and this skill's output contract win.
+
 ## X Article Structure
 
 Use X Article to satisfy the click inside X before the blog link.

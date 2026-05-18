@@ -11,6 +11,7 @@
     "social:articles": "node tools/social-growth/cli.mjs articles",
     "social:apply-copy": "node tools/social-growth/cli.mjs apply-copy",
     "social:automation": "node tools/social-growth/cli.mjs automation",
+    "social:browser-readiness": "node tools/social-growth/cli.mjs browser-readiness",
     "social:copy-template": "node tools/social-growth/cli.mjs copy-template",
     "social:capture-metrics": "node tools/social-growth/cli.mjs capture-metrics",
     "social:confirmation": "node tools/social-growth/cli.mjs confirmation",

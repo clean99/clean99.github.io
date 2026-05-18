@@ -27,6 +27,7 @@ const DEFAULT_IMAGE_BACKLOG_PATH = 'data/social-growth/image-backlog.md';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
 const DEFAULT_PUBLISH_CONFIRMATION_PATH = 'data/social-growth/publish-confirmation.md';
+const DEFAULT_BROWSER_READINESS_PATH = 'data/social-growth/browser-readiness.md';
 const DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
 const DEFAULT_ENGAGEMENT_PLAN_PATH = 'data/social-growth/engagement-plan.md';
 const DEFAULT_ENGAGEMENT_SEARCH_PATH = 'data/social-growth/engagement-search.md';
@@ -60,6 +61,7 @@ export async function runScheduledGrowthLoop({
   imageDir = DEFAULT_IMAGE_DIR,
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
   publishConfirmationPath = DEFAULT_PUBLISH_CONFIRMATION_PATH,
+  browserReadinessPath = DEFAULT_BROWSER_READINESS_PATH,
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
   engagementSearchPath = DEFAULT_ENGAGEMENT_SEARCH_PATH,
@@ -99,6 +101,7 @@ export async function runScheduledGrowthLoop({
     imageDir,
     xPublishPrepPath,
     publishConfirmationPath,
+    browserReadinessPath,
     engagementOpportunityDir,
     engagementPlanPath,
     engagementSearchPath,
@@ -136,6 +139,7 @@ export async function runScheduledGrowthLoop({
       blockers: automation.blockers,
       profileConversion: automation.profileConversion,
       publishConfirmation: automation.publishConfirmation,
+      browserReadiness: automation.browserReadiness,
       engagement: automation.engagement,
     },
     metrics: {
@@ -195,6 +199,7 @@ Status: ${result.status}
 - Image backlog: \`${result.paths.imageBacklog || 'not generated'}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
 - Publish confirmation: \`${result.paths.publishConfirmation}\`
+- Browser readiness: \`${result.paths.browserReadiness}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
 - Engagement search status: ${result.automation.engagement?.searchStatus || 'unknown'}
@@ -220,6 +225,12 @@ ${profileIssues}
 - Packet: \`${result.paths.publishConfirmation}\`
 
 ${confirmationIssues}
+
+## Browser Readiness
+
+- Status: ${result.automation.browserReadiness?.status || 'unknown'}
+- Blockers: ${result.automation.browserReadiness?.blockers?.length ?? 'unknown'}
+- Report: \`${result.paths.browserReadiness}\`
 
 ## Metrics
 

@@ -6,6 +6,10 @@ import {
   writeDailyExecutionBrief,
 } from './dailyBrief.mjs';
 import {
+  buildBrowserReadiness,
+  writeBrowserReadiness,
+} from './browserReadiness.mjs';
+import {
   buildImageBrief,
   imageBriefPath,
   writeImageBrief,
@@ -64,6 +68,7 @@ const DEFAULT_IMAGE_BACKLOG_PATH = 'data/social-growth/image-backlog.md';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
 const DEFAULT_PUBLISH_CONFIRMATION_PATH = 'data/social-growth/publish-confirmation.md';
+const DEFAULT_BROWSER_READINESS_PATH = 'data/social-growth/browser-readiness.md';
 const DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
 const DEFAULT_ENGAGEMENT_PLAN_PATH = 'data/social-growth/engagement-plan.md';
 const DEFAULT_ENGAGEMENT_SEARCH_PATH = 'data/social-growth/engagement-search.md';
@@ -91,6 +96,7 @@ export async function runSafeAutomationCycle({
   imageDir = DEFAULT_IMAGE_DIR,
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
   publishConfirmationPath = DEFAULT_PUBLISH_CONFIRMATION_PATH,
+  browserReadinessPath = DEFAULT_BROWSER_READINESS_PATH,
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
   engagementSearchPath = DEFAULT_ENGAGEMENT_SEARCH_PATH,
@@ -182,6 +188,13 @@ export async function runSafeAutomationCycle({
     publishMode,
   });
   await writeXPublishPrep(xPublishPrep, xPublishPrepPath);
+  const browserReadiness = buildBrowserReadiness({
+    preflight,
+    xPrep: xPublishPrep,
+    profileDir: xProfileDir,
+    generatedAt,
+  });
+  await writeBrowserReadiness(browserReadiness, browserReadinessPath);
   const publishConfirmation = buildPublishConfirmation({
     queue,
     preflight,
@@ -256,6 +269,10 @@ export async function runSafeAutomationCycle({
     ]),
     profileConversion: summarizeProfileConversion(profileAudit),
     publishConfirmation: summarizePublishConfirmation(publishConfirmation),
+    browserReadiness: {
+      status: browserReadiness.status,
+      blockers: browserReadiness.blockers,
+    },
     paths: {
       queue: queuePath,
       dailyReport: dailyReportPath,
@@ -270,6 +287,7 @@ export async function runSafeAutomationCycle({
       imageBacklog: imageBacklogPath,
       xPublishPrep: xPublishPrepPath,
       publishConfirmation: publishConfirmationPath,
+      browserReadiness: browserReadinessPath,
       engagementSearch: engagementSearchPath,
       engagementPlan: engagementPlanPath,
       automationReport: automationReportPath,
@@ -337,6 +355,7 @@ Status: ${result.status}
 - Image backlog: \`${result.paths.imageBacklog || 'not generated'}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
 - Publish confirmation: \`${result.paths.publishConfirmation}\`
+- Browser readiness: \`${result.paths.browserReadiness}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
 
@@ -363,6 +382,12 @@ ${profileIssues}
 - Packet: \`${result.paths.publishConfirmation}\`
 
 ${confirmationIssues}
+
+## Browser Readiness
+
+- Status: ${result.browserReadiness?.status || 'unknown'}
+- Blockers: ${result.browserReadiness?.blockers?.length ?? 'unknown'}
+- Report: \`${result.paths.browserReadiness}\`
 
 ## Daily Brief
 

@@ -247,7 +247,7 @@ function buildActionItems({
   if (readySlots.length) {
     actions.push({
       priority: 'P0',
-      action: `Prepare ${readySlots.length} ready X Article/image post slot(s) in Chrome, stopping before every public action for confirmation.`,
+      action: `Prepare ${readySlots.length} ready ${publishSurface(readySlots)} in Chrome, stopping before every public action for confirmation.`,
       reason: 'Ready slots are the direct path to measurable follower and interaction data.',
     });
   }
@@ -299,6 +299,13 @@ function buildActionItems({
   });
 
   return actions;
+}
+
+function publishSurface(slots) {
+  const modes = new Set(slots.map((slot) => slot.publishMode));
+  if (modes.size === 1 && modes.has('thread_fallback')) return 'image-backed thread slot(s)';
+  if (modes.has('thread_fallback')) return 'X Article/image post or image-backed thread slot(s)';
+  return 'X Article/image post slot(s)';
 }
 
 function briefStatus({ dayReadiness, metricsReadiness, profileAudit, funnel }) {

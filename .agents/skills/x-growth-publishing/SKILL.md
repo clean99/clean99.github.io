@@ -27,6 +27,7 @@ Before optimizing metrics, queue selection, engagement, or follow conversion, re
 
 - Use `x-technical-sharing` as the writing layer when turning technical sharing docs, design notes, performance write-ups, or blog posts into X-native Chinese copy. It preserves the `technical-sharing-doc` causality chain but outputs short post, X Article, image prompt, fallback thread, and follow-up replies for the copy override bridge.
 - Use `humanizer` as a final style cleanup pass when copy feels AI-written. Its most relevant rule for this workflow is to remove negative parallelism such as `不是 X，而是 Y`, inflated words, and template handoff lines. If that skill is not loaded in the current session, apply the same rule manually.
+- Use the community `x-writing` skill as a style reference, not as the publishing controller. Its useful parts are first-line hook discipline, one-sentence-per-line X formatting, specificity checks, and `references/anti-patterns.md`. Keep our Chinese technical constraints, image-first packaging, thread fallback, metrics ledger, and browser confirmation boundary as the source of truth.
 - Use the built-in `imagegen` skill as the primary image path. It uses image 2 / `gpt-image-2` and does not require `OPENAI_API_KEY`. After generation, copy or register the selected PNG into the expected `output/imagegen/<queue-id>.png` path.
 - Use `baoyu-post-to-x` as the preferred Chrome/CDP helper for preparing X Articles, regular image posts, quote posts, or media posts when a scripted browser handoff is useful. Its scripts fill content in Chrome and leave the final public publish click to the user, which matches this skill's confirmation boundary.
 - Use `baoyu-danger-x-to-markdown` only for consented research or competitor/content archiving. It uses a reverse-engineered X API and must not become the default publishing or metrics path.
@@ -43,6 +44,7 @@ This safe automation cycle creates or refreshes `data/social-growth/queue.json`,
 It also writes `data/social-growth/profile-update.md` when profile conversion needs a browser handoff for display name, bio, link, or pinned post.
 It writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` commands that can prefill Chrome for the X Article and image-backed short post while preserving the final confirmation boundary.
 It writes `data/social-growth/publish-confirmation.md` with the exact X Article, image-backed short post, follow-up replies, fallback thread, browser prep commands, and public-action stop points for action-time review.
+It writes `data/social-growth/browser-readiness.md` as the browser probe handoff: selected package, expected account, Chrome/profile signals, extension/native-host status, X Article availability, media upload status, blockers, and next actions.
 It writes `data/social-growth/engagement-search.md` with read-only X search URLs for finding relevant technical threads.
 It writes `data/social-growth/engagement-plan.md` from copied relevant thread opportunities when available; missing opportunities are a capture task, not an automation blocker.
 It writes `data/social-growth/daily-brief.md` as the single operator-facing action order across publish readiness, engagement, metrics, conversion funnel, and profile conversion.
@@ -173,6 +175,7 @@ If the account/browser probe shows `https://x.com/compose/articles` is unavailab
 ```bash
 npm run social:x-prep -- --day 1 --slot 1 --publishMode thread_fallback --out data/social-growth/x-publish-prep.md
 npm run social:confirmation -- --day 1 --slot 1 --publishMode thread_fallback --out data/social-growth/publish-confirmation.md
+npm run social:browser-readiness -- --day 1 --slot 1 --publishMode thread_fallback --out data/social-growth/browser-readiness.md
 ```
 
 Thread fallback mode prepares the first thread post with the generated image, lists the remaining thread replies, removes the `<x-article-url>` placeholder, and records only the public thread URL after confirmed publication.
@@ -183,6 +186,23 @@ npm run social:x-prep -- --day 1 --slot 1 --publishMode thread_fallback --xProfi
 ```
 
 Do not point this at a profile that is currently locked by another running Chrome unless you have verified the helper can reuse it.
+
+Before opening Chrome for a public-action handoff, run or update the browser readiness report:
+
+```bash
+npm run social:browser-readiness -- --day 1 --slot 1 --publishMode thread_fallback --out data/social-growth/browser-readiness.md
+```
+
+If Chrome probing has already observed facts, record them explicitly:
+
+```bash
+npm run social:browser-readiness -- --day 1 --slot 1 --publishMode thread_fallback \
+  --chromeRunning yes --extensionInstalled yes --nativeHost yes --extensionPipe closed \
+  --articleAvailable no --mediaUpload blocked --observedAccount @Clean993 \
+  --out data/social-growth/browser-readiness.md
+```
+
+If the Chrome extension native pipe is `closed`, ask for confirmation before opening a fresh Chrome window for reconnect. A readiness report is not permission to publish, upload, reply, like, repost, follow, edit, pin, or click any final public X button.
 
 For single-item control:
 
@@ -310,7 +330,7 @@ Use the daily command for scheduled automation. It is allowed to prepare local a
 For recurring safe jobs, prefer:
 
 ```bash
-/Users/bytedance/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node tools/social-growth/cli.mjs scheduled-run --day 1 --slot 1 --funnel-out data/social-growth/funnel.md
+/Users/bytedance/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node tools/social-growth/cli.mjs scheduled-run --day 1 --slot 1 --publishMode thread_fallback --funnel-out data/social-growth/funnel.md
 ```
 
 This combines safe local publishing preparation with read-only metrics-cycle parsing and writes `data/social-growth/scheduled-run.md`.

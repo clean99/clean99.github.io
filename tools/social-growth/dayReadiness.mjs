@@ -67,7 +67,7 @@ export async function buildDayReadiness({
       commands: {
         imageBrief: `npm run social:image-brief -- --day ${Number(day)} --slot ${slotNumber}`,
         preflight: `npm run social:preflight -- --day ${Number(day)} --slot ${slotNumber} --out ${slotArtifactPath('publish-preflight', day, slotNumber)}`,
-        xPrep: `npm run social:x-prep -- --day ${Number(day)} --slot ${slotNumber} --out ${slotArtifactPath('x-publish-prep', day, slotNumber)}`,
+        xPrep: `npm run social:x-prep -- --day ${Number(day)} --slot ${slotNumber}${publishArgs(xPrep.publishMode, xProfileDir)} --out ${slotArtifactPath('x-publish-prep', day, slotNumber)}`,
       },
     });
   }
@@ -153,6 +153,17 @@ function slotArtifactPath(prefix, day, slot) {
 
 function dedupe(items) {
   return [...new Set(items)];
+}
+
+function publishArgs(publishMode, profileDir) {
+  const args = [];
+  if (publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
+  if (profileDir) args.push(`--xProfileDir ${shellQuote(profileDir)}`);
+  return args.length ? ` ${args.join(' ')}` : '';
+}
+
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, "'\\''")}'`;
 }
 
 function toIsoString(value) {

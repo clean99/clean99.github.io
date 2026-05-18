@@ -22,6 +22,11 @@ import {
 } from '../tools/social-growth/copyOverride.mjs';
 import { expandQueueOptionsForWeeklyCoverage, runDailyGrowthPlan, selectPackageItems } from '../tools/social-growth/daily.mjs';
 import {
+  buildBrowserReadiness,
+  formatBrowserReadinessMarkdown,
+  writeBrowserReadiness,
+} from '../tools/social-growth/browserReadiness.mjs';
+import {
   buildDailyExecutionBrief,
   formatDailyExecutionBriefMarkdown,
   writeDailyExecutionBrief,
@@ -1349,6 +1354,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       imageDir: join(outDir, 'images'),
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
       publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
+      browserReadinessPath: join(outDir, 'browser-readiness.md'),
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
@@ -1371,6 +1377,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const profileUpdate = await readFile(join(outDir, 'profile-update.md'), 'utf8');
     const xPrep = await readFile(join(outDir, 'x-publish-prep.md'), 'utf8');
     const confirmation = await readFile(join(outDir, 'publish-confirmation.md'), 'utf8');
+    const browserReadiness = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
     const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
     const engagementSearch = await readFile(join(outDir, 'engagement-search.md'), 'utf8');
     const engagementPlan = await readFile(join(outDir, 'engagement-plan.md'), 'utf8');
@@ -1387,6 +1394,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.equal(result.paths.dailyBrief, join(outDir, 'daily-brief.md'));
     assert.equal(result.paths.xPublishPrep, join(outDir, 'x-publish-prep.md'));
     assert.equal(result.paths.publishConfirmation, join(outDir, 'publish-confirmation.md'));
+    assert.equal(result.paths.browserReadiness, join(outDir, 'browser-readiness.md'));
     assert.equal(result.paths.engagementSearch, join(outDir, 'engagement-search.md'));
     assert.equal(result.paths.engagementPlan, join(outDir, 'engagement-plan.md'));
     assert.equal(result.engagement.searchStatus, 'ready_for_read_only_search');
@@ -1395,6 +1403,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(report, /Daily brief/);
     assert.match(dailyBrief, /Daily X Growth Brief/);
     assert.match(report, /X publish prep/);
+    assert.match(report, /Browser readiness/);
     assert.match(report, /Image backlog/);
     assert.match(imageBacklog, /X Image Backlog/);
     assert.match(imageBacklog, /social:register-image/);
@@ -1409,6 +1418,8 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(confirmation, /X Publish Confirmation Packet/);
     assert.match(confirmation, /X Article To Review/);
     assert.match(confirmation, /Image-backed Short Post To Review/);
+    assert.match(browserReadiness, /X Browser Readiness/);
+    assert.match(browserReadiness, /blocked_local_prep/);
     assert.match(engagementSearch, /X Engagement Search Plan/);
     assert.match(engagementPlan, /needs_opportunity_capture/);
   } finally {
@@ -1482,6 +1493,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       imageDir,
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
       publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
+      browserReadinessPath: join(outDir, 'browser-readiness.md'),
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
@@ -1499,12 +1511,14 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const metricsReport = await readFile(join(outDir, 'metrics-cycle.md'), 'utf8');
     const funnelReport = await readFile(join(outDir, 'funnel.md'), 'utf8');
     const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
+    const browserReadiness = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
 
     assert.equal(result.status, 'ready_for_browser_confirmation');
     assert.equal(result.automation.status, 'ready_for_browser_confirmation');
     assert.equal(result.metrics.status, 'needs_published_posts');
     assert.equal(result.automation.profileConversion.status, 'pass');
     assert.equal(result.automation.publishConfirmation.status, 'ready_for_confirmation');
+    assert.equal(result.automation.browserReadiness.status, 'needs_browser_probe');
     assert.equal(result.automation.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.selected.id, expectedQueue.items[0].id);
@@ -1514,6 +1528,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Engagement search/);
     assert.match(scheduledReport, /Engagement plan/);
     assert.match(scheduledReport, /Publish confirmation/);
+    assert.match(scheduledReport, /Browser readiness/);
     assert.match(scheduledReport, /Content review: pass/);
     assert.match(scheduledReport, /Profile Conversion/);
     assert.match(scheduledReport, /Funnel report/);
@@ -1521,6 +1536,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(metricsReport, /No browser publish/);
     assert.match(funnelReport, /X Growth Funnel/);
     assert.match(imageBacklog, /Images missing: 2/);
+    assert.match(browserReadiness, /X Browser Readiness/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -2050,6 +2066,121 @@ test('x publish prep can fall back to an image-backed thread when X Article is u
   }
 });
 
+test('browser readiness records Chrome pipe and media upload blockers', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-browser-readiness-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    const imagePath = join(imageDir, `${queue.items[0].id}.png`);
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(imagePath, 'fake image');
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      id: queue.items[0].id,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+    const xPrep = await buildXPublishPrep(preflight, {
+      skillDir,
+      bunCommand: 'bun',
+      publishMode: 'thread_fallback',
+      profileDir: '/tmp/x-profile',
+    });
+    const readiness = buildBrowserReadiness({
+      preflight,
+      xPrep,
+      expectedAccount: '@Clean993',
+      observedAccount: '@Clean993',
+      chromeRunning: 'yes',
+      extensionInstalled: 'yes',
+      nativeHost: 'yes',
+      extensionPipe: 'closed',
+      articleAvailable: 'no',
+      mediaUpload: 'blocked',
+      profileDir: '/tmp/x-profile',
+    });
+    const markdown = formatBrowserReadinessMarkdown(readiness);
+    const writtenPath = await writeBrowserReadiness(readiness, join(outDir, 'browser-readiness.md'));
+    const persisted = await readFile(writtenPath, 'utf8');
+
+    assert.equal(readiness.status, 'needs_chrome_extension_reconnect');
+    assert.ok(readiness.blockers.some((item) => item.includes('native pipe')));
+    assert.ok(readiness.blockers.some((item) => item.includes('Media upload')));
+    assert.match(markdown, /Confirm opening a new Chrome window/);
+    assert.match(markdown, /Media upload is blocked/);
+    assert.match(persisted, /Readiness only/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('browser readiness asks for thread fallback when X Article editor is unavailable', async () => {
+  const preflight = {
+    generatedAt: '2026-05-18T00:00:00.000Z',
+    status: 'ready',
+    blockers: [],
+    selected: {
+      id: 'Agent-Skills__zh__strong-thesis',
+      articleSlug: 'Agent-Skills',
+    },
+    image: {
+      outputPath: 'output/imagegen/Agent-Skills__zh__strong-thesis.png',
+      ready: true,
+    },
+  };
+  const xPrep = {
+    status: 'ready',
+    publishMode: 'x_article',
+    blockers: [],
+    selected: preflight.selected,
+    files: {
+      image: preflight.image.outputPath,
+    },
+  };
+  const readiness = buildBrowserReadiness({
+    preflight,
+    xPrep,
+    expectedAccount: '@Clean993',
+    observedAccount: '@Clean993',
+    chromeRunning: 'yes',
+    extensionInstalled: 'yes',
+    nativeHost: 'yes',
+    extensionPipe: 'yes',
+    loginState: 'logged_in',
+    articleAvailable: 'no',
+    mediaUpload: 'yes',
+  });
+  const markdown = formatBrowserReadinessMarkdown(readiness);
+
+  assert.equal(readiness.status, 'needs_thread_fallback');
+  assert.ok(readiness.blockers.some((item) => item.includes('X Article editor is unavailable')));
+  assert.match(markdown, /--publishMode thread_fallback/);
+  assert.match(markdown, /Status: needs_thread_fallback/);
+});
+
 test('publish confirmation packet combines copy, commands, and public action stop points', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-confirmation-'));
   try {
@@ -2354,6 +2485,56 @@ test('day readiness summarizes all daily publish slots without public actions', 
     assert.match(markdown, /Ready slots: 1\/3/);
     assert.match(markdown, /social:x-prep -- --day 1 --slot 2/);
     assert.match(persisted, /Opening Chrome, uploading media, publishing/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('day readiness carries thread fallback and profile args into slot commands', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-day-readiness-thread-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    const imageDir = join(outDir, 'images');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(imageDir, `${queue.items[0].id}.png`), 'fake image');
+
+    const readiness = await buildDayReadiness({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      day: 1,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      xSkillDir: skillDir,
+      xBunCommand: 'bun',
+      xProfileDir: '/tmp/x-profile',
+      publishMode: 'thread_fallback',
+    });
+    const markdown = formatDayReadinessMarkdown(readiness);
+
+    assert.equal(readiness.slots[0].publishMode, 'thread_fallback');
+    assert.match(readiness.slots[0].commands.xPrep, /--publishMode thread_fallback --xProfileDir '\/tmp\/x-profile'/);
+    assert.match(markdown, /Publish mode: thread_fallback/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

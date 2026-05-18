@@ -17,6 +17,11 @@ import {
   writeDailyExecutionBrief,
 } from './dailyBrief.mjs';
 import {
+  buildBrowserReadiness,
+  formatBrowserReadinessMarkdown,
+  writeBrowserReadiness,
+} from './browserReadiness.mjs';
+import {
   buildDayReadiness,
   formatDayReadinessMarkdown,
   writeDayReadiness,
@@ -270,6 +275,7 @@ if (command === 'articles') {
     imageDir: args.imageDir || 'output/imagegen',
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
     publishConfirmationPath: args.confirmationOut || 'data/social-growth/publish-confirmation.md',
+    browserReadinessPath: args.browserReadinessOut || 'data/social-growth/browser-readiness.md',
     engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
     engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
     engagementSearchPath: args.engagementSearchOut || 'data/social-growth/engagement-search.md',
@@ -294,6 +300,7 @@ if (command === 'articles') {
     selected: result.selected,
     blockers: result.blockers,
     profileConversion: result.profileConversion,
+    browserReadiness: result.browserReadiness,
     engagement: result.engagement,
     paths: result.paths,
   }, null, 2));
@@ -328,6 +335,7 @@ if (command === 'articles') {
     imageDir: args.imageDir || 'output/imagegen',
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
     publishConfirmationPath: args.confirmationOut || 'data/social-growth/publish-confirmation.md',
+    browserReadinessPath: args.browserReadinessOut || 'data/social-growth/browser-readiness.md',
     engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
     engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
     engagementSearchPath: args.engagementSearchOut || 'data/social-growth/engagement-search.md',
@@ -692,6 +700,51 @@ if (command === 'articles') {
   } else {
     console.log(formatXPublishPrepMarkdown(prep));
   }
+} else if (command === 'browser-readiness') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const preflight = await buildPublishPreflight({
+    queue,
+    ledger,
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    ensurePackage: args.ensurePackage !== 'false',
+    preferReadyImage: args.preferReadyImage !== 'false',
+  });
+  const prep = await buildXPublishPrep(preflight, {
+    skillDir: args.skillDir,
+    bunCommand: args.bunCommand || 'npx -y bun',
+    articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
+    publishMode: args.publishMode || args.articleMode,
+    profileDir: args.xProfileDir || args.profileDir,
+  });
+  const readiness = buildBrowserReadiness({
+    preflight,
+    xPrep: prep,
+    expectedAccount: args.account || '@Clean993',
+    observedAccount: args.observedAccount,
+    chromeRunning: args.chromeRunning,
+    extensionInstalled: args.extensionInstalled,
+    nativeHost: args.nativeHost,
+    extensionPipe: args.extensionPipe,
+    loginState: args.loginState,
+    articleAvailable: args.articleAvailable,
+    mediaUpload: args.mediaUpload,
+    profileDir: args.xProfileDir || args.profileDir,
+    generatedAt: preflight.generatedAt,
+  });
+  if (args.out) {
+    await writeBrowserReadiness(readiness, args.out);
+    console.log(`Wrote X browser readiness to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(readiness, null, 2));
+  } else {
+    console.log(formatBrowserReadinessMarkdown(readiness));
+  }
 } else if (command === 'confirmation') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -886,6 +939,7 @@ function printHelp() {
   npm run social:daily -- --limit 5 --package-limit 3
   npm run social:automation -- --day 1 --slot 1
   npm run social:scheduled-run -- --day 1 --slot 1
+  npm run social:browser-readiness -- --day 1 --slot 1 --out data/social-growth/browser-readiness.md
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
   npm run social:daily-brief -- --day 1 --out data/social-growth/daily-brief.md
   npm run social:engagement-search -- --out data/social-growth/engagement-search.md
