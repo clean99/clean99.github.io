@@ -13,6 +13,7 @@ import {
 } from '../tools/social-growth/capture.mjs';
 import { buildDistributionCandidates, buildXArticle, extractKeyPoints, selectHashtags } from '../tools/social-growth/copy.mjs';
 import { expandQueueOptionsForWeeklyCoverage, runDailyGrowthPlan, selectPackageItems } from '../tools/social-growth/daily.mjs';
+import { buildDayReadiness, formatDayReadinessMarkdown, writeDayReadiness } from '../tools/social-growth/dayReadiness.mjs';
 import {
   appendSnapshot,
   createLedger,
@@ -1013,6 +1014,81 @@ test('x publish prep bridges selected package to baoyu-post-to-x commands', asyn
     assert.match(markdown, /baoyu-post-to-x Bridge/);
     assert.match(markdown, /Stop before the final public post click/);
     assert.match(persisted, /ARTICLE_URL='https:\/\/x\.com\/Clean993\/articles\/123'/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('day readiness summarizes all daily publish slots without public actions', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-day-readiness-'));
+  try {
+    const articles = [
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '每一轮修改都应该被同一个 harness 复验。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+      {
+        title: 'Vibe Coding VS Spec-Driven Coding',
+        excerpt: '复杂改动需要先固定意图、边界和验收标准。',
+        slug: 'Spec-Driven-Coding',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/spec/',
+      },
+    ];
+    const queue = buildPublishQueue(articles, {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 3,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-article.ts'), '// test script');
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    const imageDir = join(outDir, 'images');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(imageDir, `${queue.items[0].id}.png`), 'fake image');
+
+    const readiness = await buildDayReadiness({
+      queue,
+      ledger,
+      day: 1,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      xSkillDir: skillDir,
+      xBunCommand: 'bun',
+    });
+    const markdown = formatDayReadinessMarkdown(readiness);
+    const writtenPath = await writeDayReadiness(readiness, join(outDir, 'day-readiness.md'));
+    const persisted = await readFile(writtenPath, 'utf8');
+
+    assert.equal(readiness.status, 'needs_images');
+    assert.equal(readiness.totalSlots, 3);
+    assert.equal(readiness.readySlots, 1);
+    assert.equal(readiness.slots[0].preflightStatus, 'ready');
+    assert.equal(readiness.slots[1].preflightStatus, 'blocked');
+    assert.match(readiness.slots[1].blockers.join('\n'), /Image file is missing/);
+    assert.match(markdown, /Ready slots: 1\/3/);
+    assert.match(markdown, /social:x-prep -- --day 1 --slot 2/);
+    assert.match(persisted, /Opening Chrome, uploading media, publishing/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

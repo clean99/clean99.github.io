@@ -175,6 +175,14 @@ npm run social:week -- --queue data/social-growth/queue.json --ledger data/socia
 
 This plan maps validated queue candidates to seven days of publish slots, keeps the pace visible, and warns when the queue does not contain enough validated candidates to sustain the 2-4 posts/day target. The expected healthy state before browser work is `21/21 passed` with `Unfilled slots: 0` for the default cadence.
 
+Check day-level publish readiness:
+
+```bash
+npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
+```
+
+This report stays local. It runs preflight and `baoyu-post-to-x` handoff checks for every slot on the selected day, then shows which slots still need images before Chrome work.
+
 Run a publish preflight for the next slot:
 
 ```bash
@@ -325,6 +333,8 @@ Use `data/social-growth/example-ledger.json` as the shape. Real local data shoul
 - `data/social-growth/queue.json`
 - `data/social-growth/post-texts/`
 - `data/social-growth/snapshots/`
+- `data/social-growth/day-readiness.md`
+- `data/social-growth/slot-readiness/`
 
 Do not commit private analytics or account history.
 

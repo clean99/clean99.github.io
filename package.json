@@ -12,6 +12,7 @@
     "social:automation": "node tools/social-growth/cli.mjs automation",
     "social:capture-metrics": "node tools/social-growth/cli.mjs capture-metrics",
     "social:daily": "node tools/social-growth/cli.mjs daily",
+    "social:day-readiness": "node tools/social-growth/cli.mjs day-readiness",
     "social:draft": "node tools/social-growth/cli.mjs draft",
     "social:handoff": "node tools/social-growth/cli.mjs handoff",
     "social:image-brief": "node tools/social-growth/cli.mjs image-brief",

@@ -40,6 +40,14 @@ This safe automation cycle creates or refreshes `data/social-growth/queue.json`,
 It also writes `data/social-growth/profile-update.md` when profile conversion needs a browser handoff for display name, bio, link, or pinned post.
 It writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` commands that can prefill Chrome for the X Article and image-backed short post while preserving the final confirmation boundary.
 
+For day-level readiness across all publish slots, run:
+
+```bash
+npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
+```
+
+This does not open Chrome. It summarizes each slot's image readiness, publish preflight, `baoyu-post-to-x` handoff status, blockers, and exact slot commands.
+
 Automation is still local-only: it must not publish, upload media, reply, like, repost, follow, or edit the X profile. Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate. When the ledger exists, the daily command inside automation expands the queue enough to cover the default 7-day, 3-posts/day cadence, capped by available Chinese articles.
 
 If you only need the lower-level preparation step, run:
@@ -64,6 +72,7 @@ npm run social:week -- --queue data/social-growth/queue.json --ledger data/socia
 
 Use `data/social-growth/weekly-plan.md` as the day-level schedule. It maps validated candidates to publish slots, metric capture times, and the follower pace required for the `+1000` target.
 Before browser work, the healthy default state is `21/21 passed` and `Unfilled slots: 0`. If the quality gate fails, fix copy generation or reduce scope before posting.
+For the active day, also check `data/social-growth/day-readiness.md`; the healthy day state is every slot showing `Preflight: ready` and `X prep: ready`.
 
 For one consolidated status view, write:
 

@@ -4,6 +4,11 @@ import { runSafeAutomationCycle } from './automation.mjs';
 import { parseXPostMetrics, parseXProfileMetrics, updateMetricsTemplateFromText } from './capture.mjs';
 import { buildDistributionCandidates } from './copy.mjs';
 import { runDailyGrowthPlan } from './daily.mjs';
+import {
+  buildDayReadiness,
+  formatDayReadinessMarkdown,
+  writeDayReadiness,
+} from './dayReadiness.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
 import {
   buildPublishPreflight,
@@ -233,6 +238,28 @@ if (command === 'articles') {
     blockers: result.blockers,
     paths: result.paths,
   }, null, 2));
+} else if (command === 'day-readiness') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const readiness = await buildDayReadiness({
+    queue,
+    ledger,
+    day: args.day || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    ensurePackage: args.ensurePackage !== 'false',
+    xSkillDir: args.xSkillDir,
+    xBunCommand: args.xBunCommand,
+  });
+  if (args.out) {
+    await writeDayReadiness(readiness, args.out);
+    console.log(`Wrote X day readiness to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(readiness, null, 2));
+  } else {
+    console.log(formatDayReadinessMarkdown(readiness));
+  }
 } else if (command === 'week') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -474,6 +501,7 @@ function printHelp() {
   npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:daily -- --limit 5 --package-limit 3
   npm run social:automation -- --day 1 --slot 1
+  npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
   npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json
   npm run social:status -- --day 1 --slot 1 --out data/social-growth/status.md
   npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md
