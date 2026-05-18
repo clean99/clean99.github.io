@@ -778,6 +778,9 @@ if (command === 'articles') {
 } else if (command === 'browser-metrics-capture') {
   const result = await runBrowserMetricsCapture(args);
   console.log(JSON.stringify(result, null, 2));
+} else if (command === 'post-publish-recovery') {
+  const result = await runPostPublishRecovery(args);
+  console.log(JSON.stringify(result, null, 2));
 } else if (command === 'x-prep') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -1301,6 +1304,167 @@ async function runBrowserMetricsCapture(options = {}) {
   };
 }
 
+async function runPostPublishRecovery(options = {}) {
+  const queuePath = options.queue || 'data/social-growth/queue.json';
+  const ledgerPath = options.ledger || 'data/social-growth/ledger.json';
+  const metricsPath = options.metrics === 'false'
+    ? null
+    : (options.metrics || options.metricsPath || 'data/social-growth/posts.local.json');
+  const replyOutPath = options.replyOut === 'false'
+    ? null
+    : (options.replyOut || 'data/social-growth/thread-reply-handoff.md');
+  const xPostUrl = normalizeXStatusUrl(requiredArg(options, 'url'));
+  const queue = await readJson(queuePath);
+  const selected = await selectRecoveryQueueItem({
+    queue,
+    ledgerPath,
+    id: options.id,
+    day: options.day || 1,
+    slot: options.slot || 1,
+    now: options.now,
+    imageDir: options.imageDir || 'output/imagegen',
+    packageOutDir: options.packageOut || 'data/social-growth/packages',
+  });
+  const publishedAt = options.publishedAt || new Date().toISOString();
+  const updatedQueue = markQueueItemPublished(queue, {
+    id: selected.id,
+    xPostUrl,
+    xArticleUrl: options.articleUrl,
+    publishedAt,
+  });
+  const metricsDate = options.metricsDate
+    || options.date
+    || (options.now ? new Date(options.now).toISOString().slice(0, 10) : undefined);
+
+  await writeJson(queuePath, updatedQueue);
+
+  const refreshedMetrics = metricsPath
+    ? await refreshMetricsTemplateFromQueue({
+      queue: updatedQueue,
+      metricsPath,
+      date: metricsDate,
+    })
+    : null;
+  const replyHandoff = replyOutPath
+    ? buildThreadReplyHandoff({
+      queue: updatedQueue,
+      id: selected.id,
+      threadUrl: xPostUrl,
+      generatedAt: publishedAt,
+    })
+    : null;
+  if (replyHandoff) {
+    await writeThreadReplyHandoff(replyHandoff, replyOutPath);
+  }
+
+  const metricsCycle = options.metricsCycle === 'false'
+    ? null
+    : await runBrowserMetricsCapture({
+      ...options,
+      queue: queuePath,
+      ledger: ledgerPath,
+      metrics: metricsPath || undefined,
+      skipBrowser: options.skipBrowser === undefined ? true : options.skipBrowser,
+      profileText: options.profileText || 'data/social-growth/profile.local.txt',
+      postTextDir: options.postTextDir || 'data/social-growth/post-texts',
+      cycleOut: options.cycleOut || 'data/social-growth/metrics-cycle.md',
+      growthReportOut: options.growthReportOut || 'data/social-growth/growth-report.md',
+      recommendationsOut: options.recommendationsOut || 'data/social-growth/recommendations.md',
+      funnelOut: options.funnelOut || 'data/social-growth/funnel.md',
+    });
+
+  return {
+    status: metricsCycle?.status || 'published',
+    selected,
+    xPostUrl,
+    publishedAt,
+    publicActions: {
+      typedText: false,
+      uploadedMedia: false,
+      clickedSubmit: false,
+    },
+    queue: {
+      path: queuePath,
+      updated: true,
+    },
+    metricsTemplate: refreshedMetrics,
+    replyHandoff: replyHandoff
+      ? {
+        path: replyOutPath,
+        status: replyHandoff.status,
+        statusId: replyHandoff.statusId,
+      }
+      : null,
+    metricsCycle,
+  };
+}
+
+async function selectRecoveryQueueItem({
+  queue,
+  ledgerPath,
+  id,
+  day,
+  slot,
+  now,
+  imageDir,
+  packageOutDir,
+} = {}) {
+  if (id) {
+    const item = findQueueItem(queue, id);
+    return {
+      id: item.id,
+      source: 'id',
+      articleSlug: item.articleSlug,
+      variant: item.variant,
+    };
+  }
+
+  const ledger = await readJson(ledgerPath);
+  const preflight = await buildPublishPreflight({
+    queue,
+    ledger,
+    day,
+    slot,
+    now: now ? new Date(now) : new Date(),
+    imageDir,
+    packageOutDir,
+    ensurePackage: false,
+    preferReadyImage: true,
+  });
+  if (!preflight.selected?.id) {
+    throw new Error(`No queue item selected for day ${day}, slot ${slot}`);
+  }
+  return {
+    id: preflight.selected.id,
+    source: 'day_slot',
+    day: Number(day),
+    slot: Number(slot),
+    articleSlug: preflight.selected.articleSlug,
+    variant: preflight.selected.variant,
+  };
+}
+
+function normalizeXStatusUrl(rawUrl) {
+  let parsed;
+  try {
+    parsed = new URL(String(rawUrl));
+  } catch {
+    throw new Error(`Invalid X status URL: ${rawUrl}`);
+  }
+  const host = parsed.hostname.replace(/^www\./, '').replace(/^mobile\./, '').toLowerCase();
+  if (host !== 'x.com' && host !== 'twitter.com') {
+    throw new Error(`Invalid X status URL host: ${parsed.hostname}`);
+  }
+  const parts = parsed.pathname.split('/').filter(Boolean);
+  const statusIndex = parts.findIndex((part) => part.toLowerCase() === 'status' || part.toLowerCase() === 'statuses');
+  const account = parts[statusIndex - 1];
+  const statusId = parts[statusIndex + 1];
+  if (statusIndex <= 0 || !account || !/^\d+$/.test(statusId || '')) {
+    throw new Error(`Invalid X status URL path: ${parsed.pathname}`);
+  }
+  return `https://x.com/${account}/status/${statusId}`;
+}
+
 function booleanOption(value) {
   return value === true || value === 'true';
 }
@@ -1402,6 +1566,7 @@ function printHelp() {
   npm run social:confirmation -- --day 1 --slot 1 --out data/social-growth/publish-confirmation.md
   npm run social:register-image -- --day 1 --slot 1 --source /path/to/generated.png
   npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out data/social-growth/thread-reply-handoff.md --id <queue-id> --url <x-post-url>
+  npm run social:post-publish-recovery -- --day 1 --slot 1 --url <x-post-url>
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt
   npm run social:browser-metrics-capture -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --metrics data/social-growth/posts.local.json

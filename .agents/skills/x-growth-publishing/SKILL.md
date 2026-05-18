@@ -304,6 +304,11 @@ For single-item control:
    ```bash
    npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>
    ```
+   If the post was published manually from a logged-in Chrome profile while the CDP publishing profile is blocked, use the recovery command instead:
+   ```bash
+   npm run social:post-publish-recovery -- --day 1 --slot 1 --url <x-post-url>
+   ```
+   This validates the public X status URL, marks the selected queue item as published, refreshes the metrics template, writes the reply handoff, and runs the read-only metrics cycle from local copied text by default. It does not open Chrome unless `--skip-browser false` is explicitly passed.
 19. Prepare the metrics template:
    ```bash
    npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json

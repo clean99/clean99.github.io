@@ -36,6 +36,7 @@
     "social:package": "node tools/social-growth/cli.mjs package",
     "social:parse-x-text": "node tools/social-growth/cli.mjs parse-x-text",
     "social:plan": "node tools/social-growth/cli.mjs plan",
+    "social:post-publish-recovery": "node tools/social-growth/cli.mjs post-publish-recovery",
     "social:preflight": "node tools/social-growth/cli.mjs preflight",
     "social:profile-audit": "node tools/social-growth/cli.mjs profile-audit",
     "social:profile-package": "node tools/social-growth/cli.mjs profile-package",

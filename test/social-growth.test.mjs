@@ -4454,6 +4454,127 @@ test('browser metrics capture can run read-only metrics cycle without opening Ch
   }
 });
 
+test('post-publish recovery marks a manually published X URL and runs local metrics cycle', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-post-publish-recovery-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '有用的系统',
+        excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+        slug: 'Useful-Systems',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const queuePath = join(outDir, 'queue.json');
+    const ledgerPath = join(outDir, 'ledger.json');
+    const metricsPath = join(outDir, 'posts.local.json');
+    const profileTextPath = join(outDir, 'profile.local.txt');
+    const postTextDir = join(outDir, 'post-texts');
+    const replyOutPath = join(outDir, 'thread-reply-handoff.md');
+    await writeJson(queuePath, queue);
+    await writeJson(ledgerPath, createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+    await mkdir(postTextDir);
+    await writeFile(profileTextPath, 'Clean993\n33 Followers\n');
+    await writeFile(join(postTextDir, `${queue.items[0].id}.txt`), 'Views\n900\nLikes\n9\nReplies\n2\nReposts\n1\nBookmarks\n4\nNew follows\n3\n');
+
+    const result = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'post-publish-recovery',
+      '--queue', queuePath,
+      '--ledger', ledgerPath,
+      '--metrics', metricsPath,
+      '--profile-text', profileTextPath,
+      '--post-text-dir', postTextDir,
+      '--cycle-out', join(outDir, 'metrics-cycle.md'),
+      '--growth-report-out', join(outDir, 'growth-report.md'),
+      '--recommendations-out', join(outDir, 'recommendations.md'),
+      '--funnel-out', join(outDir, 'funnel.md'),
+      '--reply-out', replyOutPath,
+      '--day', '1',
+      '--slot', '1',
+      '--url', 'https://twitter.com/Clean993/status/1234567890123456789?s=20',
+      '--now', '2026-05-19T00:00:00.000Z',
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const payload = JSON.parse(result.stdout);
+    const updatedQueue = JSON.parse(await readFile(queuePath, 'utf8'));
+    const metrics = JSON.parse(await readFile(metricsPath, 'utf8'));
+    const ledger = JSON.parse(await readFile(ledgerPath, 'utf8'));
+    const replyHandoff = await readFile(replyOutPath, 'utf8');
+
+    assert.equal(payload.status, 'snapshotted');
+    assert.equal(payload.selected.source, 'day_slot');
+    assert.equal(payload.xPostUrl, 'https://x.com/Clean993/status/1234567890123456789');
+    assert.equal(payload.publicActions.typedText, false);
+    assert.equal(payload.publicActions.uploadedMedia, false);
+    assert.equal(payload.publicActions.clickedSubmit, false);
+    assert.equal(payload.metricsCycle.capture.skipped, true);
+    assert.equal(updatedQueue.items[0].status, 'published');
+    assert.equal(updatedQueue.items[0].xPostUrl, 'https://x.com/Clean993/status/1234567890123456789');
+    assert.equal(metrics.followers, '33');
+    assert.equal(metrics.posts[0].metrics.views, '900');
+    assert.equal(metrics.posts[0].metrics.follows, '3');
+    assert.equal(ledger.snapshots[1].followers, 33);
+    assert.match(replyHandoff, /in_reply_to=1234567890123456789/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('post-publish recovery rejects non-X status URLs before mutating queue', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-post-publish-recovery-invalid-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '有用的系统',
+        excerpt: '一个有用的系统，核心是保持数据模型足够小。',
+        slug: 'Useful-Systems',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const queuePath = join(outDir, 'queue.json');
+    await writeJson(queuePath, queue);
+
+    const result = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'post-publish-recovery',
+      '--queue', queuePath,
+      '--metrics-cycle', 'false',
+      '--id', queue.items[0].id,
+      '--url', 'https://example.com/Clean993/status/123',
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+    const unchangedQueue = JSON.parse(await readFile(queuePath, 'utf8'));
+
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Invalid X status URL host/);
+    assert.equal(unchangedQueue.items[0].status, 'draft');
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('post-publish metrics cycle does not snapshot when follower count is missing', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-metrics-cycle-missing-'));
   try {
