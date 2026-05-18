@@ -348,6 +348,7 @@ npm run social:confirmation -- --day 1 --slot 1 --out data/social-growth/publish
 ```
 
 This combines the selected X Article, image-backed short post with an `<x-article-url>` placeholder, follow-up replies, fallback thread, browser prep commands, stop points, and the `social:mark-published` command. Use it as the action-time review packet before any browser publish/upload/reply step.
+The packet also runs a final content review. If it reports `needs_copy_review`, do not open Chrome for publishing yet; generate an `x-technical-sharing` brief, apply the copy override, then regenerate the confirmation packet.
 
 After a confirmed browser publish, write the public X post URL back to the queue:
 

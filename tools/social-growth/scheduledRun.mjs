@@ -128,6 +128,7 @@ export async function runScheduledGrowthLoop({
       status: automation.status,
       blockers: automation.blockers,
       profileConversion: automation.profileConversion,
+      publishConfirmation: automation.publishConfirmation,
       engagement: automation.engagement,
     },
     metrics: {
@@ -162,6 +163,9 @@ export function formatScheduledRunReport(result) {
   const profileIssues = result.automation.profileConversion?.issues?.length
     ? result.automation.profileConversion.issues.map((issue) => `- ${issue}`).join('\n')
     : '- No profile conversion issues.';
+  const confirmationIssues = result.automation.publishConfirmation?.contentIssues?.length
+    ? result.automation.publishConfirmation.contentIssues.map((issue) => `- ${issue}`).join('\n')
+    : '- No publish confirmation copy issues.';
 
   return `# Scheduled X Growth Run
 
@@ -200,6 +204,15 @@ ${blockers}
 
 ${profileIssues}
 
+## Publish Confirmation
+
+- Status: ${result.automation.publishConfirmation?.status || 'unknown'}
+- Content review: ${result.automation.publishConfirmation?.contentReviewStatus || 'unknown'}
+- Content issues: ${result.automation.publishConfirmation?.contentIssues?.length ?? 'unknown'}
+- Packet: \`${result.paths.publishConfirmation}\`
+
+${confirmationIssues}
+
 ## Metrics
 
 - Status: ${result.metrics.status}
@@ -231,6 +244,9 @@ function scheduledStatus(automationStatus, metricsStatus) {
   if (automationStatus === 'ready_for_browser_confirmation') {
     return 'ready_for_browser_confirmation';
   }
+  if (automationStatus === 'needs_copy_review') {
+    return automationStatus;
+  }
   if (automationStatus?.startsWith('blocked')) {
     return automationStatus;
   }
@@ -244,6 +260,9 @@ function scheduledStatus(automationStatus, metricsStatus) {
 }
 
 function nextAction(result) {
+  if (result.automation.status === 'needs_copy_review') {
+    return 'Run the X technical sharing brief and apply a copy override before opening Chrome for browser confirmation.';
+  }
   if (result.automation.status === 'ready_for_browser_confirmation') {
     return 'Review the prepared copy, image, and account in Chrome, then stop before every public action for confirmation.';
   }

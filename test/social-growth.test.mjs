@@ -1435,10 +1435,11 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const metricsReport = await readFile(join(outDir, 'metrics-cycle.md'), 'utf8');
     const funnelReport = await readFile(join(outDir, 'funnel.md'), 'utf8');
 
-    assert.equal(result.status, 'ready_for_browser_confirmation');
-    assert.equal(result.automation.status, 'ready_for_browser_confirmation');
+    assert.equal(result.status, 'needs_copy_review');
+    assert.equal(result.automation.status, 'needs_copy_review');
     assert.equal(result.metrics.status, 'needs_published_posts');
     assert.equal(result.automation.profileConversion.status, 'pass');
+    assert.equal(result.automation.publishConfirmation.status, 'needs_copy_review');
     assert.equal(result.automation.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.selected.id, expectedQueue.items[0].id);
@@ -1447,6 +1448,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Engagement search/);
     assert.match(scheduledReport, /Engagement plan/);
     assert.match(scheduledReport, /Publish confirmation/);
+    assert.match(scheduledReport, /Content review: needs_copy_review/);
     assert.match(scheduledReport, /Profile Conversion/);
     assert.match(scheduledReport, /Funnel report/);
     assert.match(scheduledReport, /safe for recurring execution/);
@@ -1862,6 +1864,35 @@ test('publish confirmation packet combines copy, commands, and public action sto
       createdAt: '2026-05-18T00:00:00.000Z',
       limit: 1,
     });
+    queue.items[0] = {
+      ...queue.items[0],
+      xArticle: {
+        title: 'Agent Skill，不是提示词仓库',
+        body: [
+          'Agent Skill 要解决的不是“多写几段提示词”，而是把能力变成可检查的执行契约。',
+          '',
+          '## 关键结论',
+          '',
+          '- 上下文决定 Skill 能不能启动。',
+          '- 契约决定 Skill 能不能复用。',
+          '- eval 决定 Skill 能不能改进。',
+          '',
+          '## 可复用框架',
+          '',
+          'context -> contract -> execution -> eval',
+          '',
+          '## 验证',
+          '',
+          '如果同一个输入不能稳定产出同类结果，这个 Skill 就还不是工程资产。',
+          '',
+          `博客原文：${queue.items[0].targetUrl}`,
+        ].join('\n'),
+      },
+      followUpReplies: [
+        '我更关心 Skill 的失败样本：同一个输入漂移，说明契约没写清；同一个输出不可验收，说明 eval 没接上。',
+        '落地时先写输入、输出、停止条件，再写提示词。否则只是把上下文变长，不是把能力产品化。',
+      ],
+    };
     const imageDir = join(outDir, 'images');
     const imagePath = join(imageDir, `${queue.items[0].id}.png`);
     const skillDir = join(outDir, 'baoyu-post-to-x');
@@ -1898,6 +1929,7 @@ test('publish confirmation packet combines copy, commands, and public action sto
     const persisted = await readFile(writtenPath, 'utf8');
 
     assert.equal(packet.status, 'ready_for_confirmation');
+    assert.equal(packet.contentReview.status, 'pass');
     assert.equal(packet.blockers.length, 0);
     assert.match(packet.content.imagePost, /<x-article-url>/);
     assert.match(markdown, /X Publish Confirmation Packet/);
@@ -1910,6 +1942,58 @@ test('publish confirmation packet combines copy, commands, and public action sto
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('publish confirmation packet requires copy review for article-summary framing', async () => {
+  const queue = buildPublishQueue([
+    {
+      title: 'Agent Skills 探索实录',
+      excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+      slug: 'Agent-Skills',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering'],
+      url: 'https://clean99.github.io/zh/agent-skills/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  const preflight = {
+    generatedAt: '2026-05-18T00:00:00.000Z',
+    blockers: [],
+    selected: {
+      id: queue.items[0].id,
+      packageDir: 'data/social-growth/packages/Agent-Skills__zh__strong-thesis',
+      imagePath: 'output/imagegen/Agent-Skills__zh__strong-thesis.png',
+    },
+    image: {
+      outputPath: 'output/imagegen/Agent-Skills__zh__strong-thesis.png',
+      ready: true,
+    },
+    browser: {
+      recordCommand: 'npm run social:mark-published -- --queue data/social-growth/queue.json --id Agent-Skills__zh__strong-thesis --url <x-post-url> --article-url <x-article-url>',
+    },
+  };
+
+  const packet = buildPublishConfirmation({
+    queue,
+    preflight,
+    xPublishPrep: {
+      blockers: [],
+      commands: {
+        prepareArticle: 'bun x-article.ts',
+        prepareShortPost: 'bun x-browser.ts',
+      },
+    },
+  });
+  const markdown = formatPublishConfirmationMarkdown(packet);
+
+  assert.equal(packet.status, 'needs_copy_review');
+  assert.equal(packet.contentReview.status, 'needs_copy_review');
+  assert.match(packet.contentReview.issues.join('\n'), /long-form article-summary/);
+  assert.match(markdown, /Content Review/);
+  assert.match(markdown, /npm run social:x-tech-brief/);
 });
 
 test('day readiness summarizes all daily publish slots without public actions', async () => {

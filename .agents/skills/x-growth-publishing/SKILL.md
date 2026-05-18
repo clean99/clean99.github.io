@@ -217,6 +217,7 @@ For single-item control:
    npm run social:confirmation -- --id <queue-id> --out data/social-growth/publish-confirmation.md
    ```
    Review this file before every browser publish/upload/reply step. It is not permission to perform public X actions.
+   If it reports `needs_copy_review`, do not open Chrome yet; run the `x-technical-sharing` copy override loop first.
 12. In Chrome, prepare the X Article first. If X Article publishing is unavailable for the account, fall back to a thread using `thread-fallback.md`:
    - title: `xArticle.title`;
    - body: `xArticle.body`;

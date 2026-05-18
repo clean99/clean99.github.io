@@ -196,6 +196,10 @@ export async function runSafeAutomationCycle({
     preferReadyImage,
   });
   await writeGrowthStatus(status, statusPath);
+  const automationStatus = status.status === 'ready_for_browser_confirmation'
+    && publishConfirmation.status === 'needs_copy_review'
+    ? 'needs_copy_review'
+    : status.status;
 
   const metrics = await readJson(metricsPath);
   const dailyBrief = await buildDailyExecutionBrief({
@@ -216,7 +220,7 @@ export async function runSafeAutomationCycle({
 
   const result = {
     generatedAt,
-    status: status.status,
+    status: automationStatus,
     daily,
     selected: preflight.selected,
     blockers: dedupe([
@@ -224,6 +228,7 @@ export async function runSafeAutomationCycle({
       ...xPublishPrep.blockers,
     ]),
     profileConversion: summarizeProfileConversion(profileAudit),
+    publishConfirmation: summarizePublishConfirmation(publishConfirmation),
     paths: {
       queue: queuePath,
       dailyReport: dailyReportPath,
@@ -268,6 +273,9 @@ export function formatAutomationReport(result) {
   const profileIssues = result.profileConversion?.issues?.length
     ? result.profileConversion.issues.map((issue) => `- ${issue}`).join('\n')
     : '- No profile conversion issues.';
+  const confirmationIssues = result.publishConfirmation?.contentIssues?.length
+    ? result.publishConfirmation.contentIssues.map((issue) => `- ${issue}`).join('\n')
+    : '- No publish confirmation copy issues.';
 
   return `# X Growth Automation Run
 
@@ -312,6 +320,15 @@ Status: ${result.status}
 
 ${profileIssues}
 
+## Publish Confirmation
+
+- Status: ${result.publishConfirmation?.status || 'unknown'}
+- Content review: ${result.publishConfirmation?.contentReviewStatus || 'unknown'}
+- Content issues: ${result.publishConfirmation?.contentIssues?.length ?? 'unknown'}
+- Packet: \`${result.paths.publishConfirmation}\`
+
+${confirmationIssues}
+
 ## Daily Brief
 
 - Status: ${result.dailyBrief.status}
@@ -352,5 +369,13 @@ function summarizeProfileConversion(profileAudit) {
     status: profileAudit?.status || 'unknown',
     failedChecks: issues.length,
     issues,
+  };
+}
+
+function summarizePublishConfirmation(publishConfirmation) {
+  return {
+    status: publishConfirmation?.status || 'unknown',
+    contentReviewStatus: publishConfirmation?.contentReview?.status || 'unknown',
+    contentIssues: publishConfirmation?.contentReview?.issues || [],
   };
 }
