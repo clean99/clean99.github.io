@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { articleFromMarkdown, addUtm, parseFrontmatter } from '../tools/social-growth/articles.mjs';
@@ -26,6 +26,7 @@ import {
   summarizeGrowthLedger,
 } from '../tools/social-growth/metrics.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from '../tools/social-growth/recommendations.mjs';
+import { buildPublishPreflight, formatPublishPreflightMarkdown } from '../tools/social-growth/preflight.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
 import { validateQueue, validateQueueItem } from '../tools/social-growth/validation.mjs';
 import {
@@ -666,6 +667,99 @@ test('daily growth run writes a weekly execution plan when a ledger exists', asy
     assert.ok(report.includes('Weekly execution plan:'));
     assert.ok(weeklyPlan.includes('Weekly X Growth Execution Plan'));
     assert.ok(weeklyPlan.includes('Unfilled slots: 18'));
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('publish preflight reports missing image and confirmation boundary', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-preflight-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录 — AI Agent 时代的函数式蓝图',
+        excerpt: '本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir: join(outDir, 'images'),
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+    const markdown = formatPublishPreflightMarkdown(preflight);
+
+    assert.equal(preflight.status, 'blocked');
+    assert.equal(preflight.image.ready, false);
+    assert.equal(preflight.image.hasOpenAiKey, false);
+    assert.ok(preflight.blockers.some((blocker) => blocker.includes('Image file is missing')));
+    assert.ok(preflight.browser.stopBefore.includes('final X Article publish click'));
+    assert.match(markdown, /OPENAI_API_KEY present: false/);
+    assert.doesNotMatch(preflight.image.command, /\n\+/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('publish preflight is ready when image and key exist', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-preflight-ready-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录 — AI Agent 时代的函数式蓝图',
+        excerpt: '本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    const imagePath = join(imageDir, `${queue.items[0].id}.png`);
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(imagePath, 'fake image');
+
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      id: queue.items[0].id,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      env: {
+        OPENAI_API_KEY: 'test-key',
+      },
+    });
+
+    assert.equal(preflight.status, 'ready');
+    assert.equal(preflight.blockers.length, 0);
+    assert.equal(preflight.image.ready, true);
+    assert.equal(preflight.image.hasOpenAiKey, true);
+    assert.match(preflight.browser.recordCommand, /social:mark-published/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

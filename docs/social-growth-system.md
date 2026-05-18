@@ -21,6 +21,7 @@ The code can automate safe local work:
 - prepare exact handoff text for Chrome;
 - export a publish package with image, X Article, short post, thread fallback, and checklist files;
 - validate each candidate against the X publishing quality gate before daily packages are exported;
+- run a publish preflight that checks image readiness and the public-action confirmation boundary;
 - run the local daily preparation loop in one command;
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
@@ -57,6 +58,7 @@ Core records:
 - `QualityGate`: deterministic checks for raw blog URLs, weak first-screen structure, duplicated short posts across articles, X Article link placement, image prompt requirements, and low-value follow-up replies.
 - `PublishQueue`: local draft queue of candidates to hand to Chrome.
 - `WeeklyExecutionPlan`: seven-day posting and metrics-capture schedule tied to the follower target.
+- `PublishPreflight`: the selected package, expected image path, image generation command, blockers, and browser stop points.
 - `MetricsSnapshot`: date, follower count, per-post interactions.
 - `GrowthReport`: follower delta, target progress, interaction totals, top posts.
 
@@ -142,6 +144,14 @@ npm run social:week -- --queue data/social-growth/queue.json --ledger data/socia
 ```
 
 This plan maps validated queue candidates to seven days of publish slots, keeps the pace visible, and warns when the queue does not contain enough validated candidates to sustain the 2-4 posts/day target. The expected healthy state before browser work is `21/21 passed` with `Unfilled slots: 0` for the default cadence.
+
+Run a publish preflight for the next slot:
+
+```bash
+npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md
+```
+
+The preflight writes the selected queue id, package path, expected image path, `gpt-image-2` generation command, and browser stop points. It is allowed to create the local package, but it must not publish, upload, reply, like, repost, follow, or edit.
 
 After a confirmed browser publish, write the public X post URL back to the queue:
 
@@ -265,24 +275,26 @@ Do not commit private analytics or account history.
 2. Run `npm run social:validate -- --queue data/social-growth/queue.json --format markdown`.
 3. Run `npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json`.
 4. Pick 2-4 strong queue items for the day from `data/social-growth/weekly-plan.md`.
-5. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
-6. Run `npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>`.
-7. Generate the image from `image-prompt.txt` with `gpt-image-2`.
-8. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
-9. Stop before publishing the X Article or thread and confirm the exact content and account.
-10. Publish only after confirmation.
-11. Use Chrome to prepare the short image-backed X post linking to the X Article.
-12. Stop before publishing the short post and confirm the exact content and account.
-13. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
-14. Stop before each public reply and confirm the exact content and account.
-15. Mark the published URL with `npm run social:mark-published`.
-16. Run `npm run social:metrics-template`.
-17. Use `npm run social:capture-metrics` when visible X text has been captured.
-18. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
-19. Run `npm run social:snapshot`.
-20. Run `npm run social:report -- --format markdown`.
-21. Run `npm run social:recommend -- --format markdown`.
-22. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+5. Run `npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md`.
+6. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
+7. Run `npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>`.
+8. Generate the image from `image-prompt.txt` with `gpt-image-2`.
+9. Re-run preflight and require `Status: ready`.
+10. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
+11. Stop before publishing the X Article or thread and confirm the exact content and account.
+12. Publish only after confirmation.
+13. Use Chrome to prepare the short image-backed X post linking to the X Article.
+14. Stop before publishing the short post and confirm the exact content and account.
+15. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
+16. Stop before each public reply and confirm the exact content and account.
+17. Mark the published URL with `npm run social:mark-published`.
+18. Run `npm run social:metrics-template`.
+19. Use `npm run social:capture-metrics` when visible X text has been captured.
+20. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
+21. Run `npm run social:snapshot`.
+22. Run `npm run social:report -- --format markdown`.
+23. Run `npm run social:recommend -- --format markdown`.
+24. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 For regular operation, replace steps 1-6 with:
 

@@ -36,6 +36,12 @@
       "prompt": "为什么 SEO 和性能优化文章生成出来的短帖都在讲 AI 性能优化？修掉。",
       "expected_output": "按文章标题/摘要/标签生成不同 topic frame；SEO、Agent Skill、Spec、React 等文章不能复用同一短帖；质量门能拦截跨文章重复短帖。",
       "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "准备发布 Day 1 Slot 1，但先检查图片和浏览器动作边界。",
+      "expected_output": "运行 social:preflight；输出选中的 package、gpt-image-2 生成命令、图片是否存在、OPENAI_API_KEY 状态、以及公开发布/上传/回复前必须停止确认。",
+      "files": []
     }
   ]
 }

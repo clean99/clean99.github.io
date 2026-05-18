@@ -19,6 +19,7 @@
     "social:package": "node tools/social-growth/cli.mjs package",
     "social:parse-x-text": "node tools/social-growth/cli.mjs parse-x-text",
     "social:plan": "node tools/social-growth/cli.mjs plan",
+    "social:preflight": "node tools/social-growth/cli.mjs preflight",
     "social:queue": "node tools/social-growth/cli.mjs queue",
     "social:recommend": "node tools/social-growth/cli.mjs recommend",
     "social:report": "node tools/social-growth/cli.mjs report",
