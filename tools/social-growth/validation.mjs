@@ -38,6 +38,15 @@ const CHINESE_MECHANISM_PATTERNS = [
   /ledger/i,
   /harness/i,
 ];
+const CHINESE_VISUAL_HANDOFF_PATTERNS = [
+  /图里/u,
+  /图中/u,
+  /流程图/u,
+  /判断框架/u,
+  /复盘框架/u,
+  /X Article/i,
+  /长文/u,
+];
 const VARIANT_PATTERNS = {
   'strong-thesis': [/不是.+而是/u, /真正/u, /很多人/u, /没有/u, /别再/u, /贵的是/u, /便宜/u],
   'research-utility': [/我发现/u, /步骤/u, /流程/u, /结构/u, /图里/u, /拆成/u, /总结/u],
@@ -116,6 +125,7 @@ export function formatValidationMarkdown(validation) {
     '',
     '- Short post sells the idea without raw blog URLs.',
     '- First screen contains a Chinese claim plus a concrete mechanism.',
+    '- Chinese short post sells the generated image or X Article before any blog link.',
     '- Queue does not reuse the same short post across different articles.',
     '- X Article carries the blog link at the end.',
     '- X Article does not contain heading-glued or table extraction fragments.',
@@ -169,6 +179,9 @@ function validateShortPost(item, errors, warnings) {
   }
   if (item.lang === 'zh' && !CHINESE_MECHANISM_PATTERNS.some((pattern) => pattern.test(shortPost))) {
     errors.push('Chinese shortPost needs a concrete mechanism in the first screen');
+  }
+  if (item.lang === 'zh' && !CHINESE_VISUAL_HANDOFF_PATTERNS.some((pattern) => pattern.test(shortPost))) {
+    errors.push('Chinese shortPost must sell the image-backed mechanism or X Article before the blog link');
   }
   if (!variantMatches(item.variant, shortPost)) {
     warnings.push(`shortPost does not strongly match ${item.variant} structure`);

@@ -186,6 +186,8 @@ Short post:
 - no raw blog URL;
 - one concrete reader payoff;
 - concrete mechanism within the first two lines;
+- use a creator-tested opening shape from `references/chinese-x-style.md`: strong judgment, useful discovery, or concrete case;
+- sell the generated image and X Article in the first screen; the first post should make the reader want the in-X long form before seeing the blog link;
 - 1-2 Chinese-readable hashtags;
 - image attached;
 - link to the X Article after it exists.
@@ -212,6 +214,7 @@ Image:
 - use `gpt-image-2`;
 - 1536x1024 landscape;
 - editorial infographic style;
+- include one scroll-stopper Chinese headline plus the mechanism the post claims;
 - one clear visual metaphor or loop;
 - readable on mobile;
 - no fake UI, platform logos, watermarks, or tiny paragraphs.
@@ -220,6 +223,7 @@ Quality gate:
 
 - reject raw blog URLs in the short post;
 - reject short posts that do not state a Chinese claim plus a concrete mechanism in the first screen;
+- reject short posts that merely say the blog exists without selling the image-backed mechanism or X Article;
 - reject duplicated short posts across different articles;
 - require the X Article to carry the blog URL at the end under `博客原文：`;
 - reject X Article extraction artifacts such as heading-glued fragments or Markdown table fragments in bullet points;

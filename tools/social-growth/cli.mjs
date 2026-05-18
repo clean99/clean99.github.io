@@ -209,6 +209,7 @@ if (command === 'articles') {
 } else if (command === 'status') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const profileText = await readOptionalText(args.profileText || 'data/social-growth/profile.local.txt');
   const status = await buildGrowthStatus({
     queue,
     ledger,
@@ -217,6 +218,7 @@ if (command === 'articles') {
     now: args.now ? new Date(args.now) : new Date(),
     imageDir: args.imageDir || 'output/imagegen',
     packageOutDir: args.packageOut || 'data/social-growth/packages',
+    profileText,
     ensurePackage: args.ensurePackage === 'true',
   });
   if (args.out) {

@@ -18,6 +18,28 @@ Do not imitate these creators' exact voice. Extract structure only.
 
 ## Patterns Worth Reusing
 
+### 2026-05-18 Creator-Derived Update
+
+From `@lxfater`:
+
+- Strong posts often start with a concrete discovery, ranked list, milestone, or surprising result before adding the link.
+- The technical content is packaged as practical utility: tool list, workflow, course order, article result, or what changed in day-to-day work.
+- Engagement-heavy posts often expose proof or stakes early: views, stars, cost, time, concrete artifact, or operational result.
+
+From `@lidangzzz`:
+
+- The strongest reusable structure is not the profanity; it is the compressed market map: a blunt claim, a concrete case, then many observable criteria.
+- Long posts create momentum by enumerating factors until the reader feels the model is complete.
+- The profile promise is extremely explicit. Readers know what topics the account repeatedly judges.
+
+Clean993 should borrow the structure, not the persona:
+
+- first line: strong claim or useful discovery;
+- second screen: concrete mechanism, proof marker, or diagnostic criteria;
+- image: diagram the mechanism, not decoration;
+- X Article: satisfy the click inside X;
+- blog link: only archive/full detail at the end of the X Article.
+
 ### Research Utility Pattern
 
 Observed in `@lxfater` style technical posts:
@@ -35,16 +57,13 @@ Use when the blog post is about AI tools, workflows, debugging, performance, or 
 Template:
 
 ```text
-我发现一个更靠谱的做法：<specific outcome>
+我发现 <topic> 最该先画成一张图。
 
-问题是：<pain>
+痛点不是<false frame>，而是<better frame>。
 
-核心步骤：
-1. <step>
-2. <step>
-3. <step>
+照这条线走：<mechanism>。
 
-图里是完整结构。
+图里是完整结构，长文放在 X Article。
 ```
 
 ### Strong Thesis Pattern
@@ -65,14 +84,9 @@ Template:
 ```text
 很多人把 <topic> 想错了。
 
-真正的问题不是 <false frame>，而是 <better frame>。
+真正值钱的不是<false frame>，而是<better frame>，并且能按 <mechanism> 复用。
 
-判断标准只有三个：
-1. <criterion>
-2. <criterion>
-3. <criterion>
-
-所以我的建议是：<actionable takeaway>
+图里是判断框架，长文放在 X Article。
 ```
 
 ### Case Story Pattern
@@ -80,16 +94,13 @@ Template:
 Use when there is a concrete project result:
 
 ```text
-我一开始以为问题是 <surface issue>。
+我以为 <topic> 一开始卡在<surface issue>。
 
 后来发现真正的瓶颈是 <root cause>。
 
-这件事给我的教训：
-1. <lesson>
-2. <lesson>
-3. <lesson>
+这类问题要按 <mechanism> 走，否则经验没法复用。
 
-详细过程我写成了长文。
+图里是复盘框架，长文放在 X Article。
 ```
 
 ## Rules for Clean993

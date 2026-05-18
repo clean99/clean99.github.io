@@ -414,9 +414,36 @@ test('generates article-specific Chinese X copy instead of repeating one templat
   assert.match(strongPosts[0].shortPost, /Agent Skill/);
   assert.match(strongPosts[1].shortPost, /技术博客 SEO/);
   assert.notEqual(strongPosts[0].shortPost, strongPosts[1].shortPost);
+  assert.match(strongPosts[0].shortPost, /图里是判断框架，长文放在 X Article/);
   assert.match(strongPosts[0].xArticle.body, /Skill 的价值不是多一段提示词/);
   assert.match(strongPosts[1].xArticle.body, /SEO 不是标签清单/);
   assert.equal(validateQueue(queue).status, 'pass');
+});
+
+test('Chinese short posts sell the image and X Article before the blog link', () => {
+  const queue = buildPublishQueue([
+    {
+      title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+      excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+      slug: 'Automated-AI-Performance-Optimization',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering', 'Web Performance'],
+      url: 'https://clean99.github.io/zh/automated-ai-performance/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  const item = queue.items[0];
+
+  assert.doesNotMatch(item.shortPost, /https?:\/\//i);
+  assert.match(item.shortPost, /很多人把「AI 性能优化」想错了/);
+  assert.match(item.shortPost, /真正值钱的不是让模型多给几条优化建议/);
+  assert.match(item.shortPost, /图里是判断框架，长文放在 X Article/);
+  assert.match(item.xArticle.body, /博客原文：https:\/\/clean99\.github\.io\/zh\/automated-ai-performance\//);
+  assert.match(item.media.prompt, /Scroll-stopper headline: AI 性能优化：不是建议，是验证闭环/);
+  assert.equal(validateQueueItem(item).status, 'pass');
 });
 
 test('filters heading-glued fragments from Chinese X Article extraction', () => {
@@ -960,8 +987,11 @@ test('growth status summarizes blocker, pace, and next commands', async () => {
     assert.equal(status.validation.status, 'pass');
     assert.equal(status.weeklyPlan.missingSlots, 18);
     assert.equal(status.preflight.status, 'blocked');
+    assert.equal(status.profileAudit.status, 'needs_work');
     assert.ok(status.nextActions.some((item) => item.action.includes('Generate the gpt-image-2 image')));
+    assert.ok(status.nextActions.some((item) => item.action.includes('profile promise')));
     assert.match(markdown, /Follower delta: 0/);
+    assert.match(markdown, /Profile Conversion/);
     assert.match(markdown, /social:image-brief/);
     assert.match(persisted, /Public X actions still require action-time confirmation/);
   } finally {
@@ -1049,10 +1079,19 @@ test('growth status is ready for browser confirmation when the selected image ex
       now: '2026-05-18T00:00:00.000Z',
       imageDir,
       packageOutDir: join(outDir, 'packages'),
+      profileText: [
+        'Clean99 | AI 工程化与前端性能',
+        '@Clean993',
+        '写 AI 工程化、前端性能、React 和测试。把真实工程问题压成可复用框架。',
+        'https://clean99.github.io',
+        'Pinned',
+        '30 Followers',
+      ].join('\n'),
       env: {},
     });
 
     assert.equal(status.status, 'ready_for_browser_confirmation');
+    assert.equal(status.profileAudit.status, 'pass');
     assert.equal(status.weeklyPlan.missingSlots, 0);
     assert.equal(status.preflight.status, 'ready');
     assert.equal(status.preflight.image.ready, true);

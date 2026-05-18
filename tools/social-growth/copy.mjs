@@ -279,17 +279,17 @@ export function sharpTake(article) {
 
 export function researchUtility(article) {
   const frame = articleFrame(article);
-  return clamp(`我把「${frame.topic}」拆成了一张可复用流程图。\n\n问题不是 ${frame.falseFrame}，而是 ${frame.betterFrame}。\n\n核心步骤：${compactSteps(frame.frameworkSteps, 3)}\n\n图里是完整结构。`, 220);
+  return clamp(`我发现「${frame.topic}」最该先画成一张图。\n\n痛点不是${frame.falseFrame}，而是${frame.betterFrame}。\n\n照这条线走：${frame.mechanism}。\n\n图里是完整结构，长文放在 X Article。`, 220);
 }
 
 export function strongThesis(article) {
   const frame = articleFrame(article);
-  return clamp(`很多人把「${frame.topic}」想错了。\n\n真正的问题不是 ${frame.falseFrame}，而是 ${frame.betterFrame}。\n\n我把它压成一个判断框架：${frame.mechanism}。`, 220);
+  return clamp(`很多人把「${frame.topic}」想错了。\n\n真正值钱的不是${frame.falseFrame}，而是${frame.betterFrame}，并且能按 ${frame.mechanism} 复用。\n\n图里是判断框架，长文放在 X Article。`, 220);
 }
 
 export function caseStory(article) {
   const frame = articleFrame(article);
-  return clamp(`我一开始以为「${frame.topic}」的问题是 ${frame.falseFrame}。\n\n后来发现真正的瓶颈是 ${frame.betterFrame}。\n\n这件事给我的教训：${frame.mechanism}。`, 220);
+  return clamp(`我以为「${frame.topic}」一开始卡在${frame.falseFrame}。\n\n后来发现根因是${frame.betterFrame}。\n\n这类问题要按 ${frame.mechanism} 走，否则经验没法复用。\n\n图里是复盘框架，长文放在 X Article。`, 220);
 }
 
 export function usefulLesson(article) {
@@ -462,8 +462,9 @@ export function buildImageBrief(article, variant) {
       `Primary request: Create a polished editorial infographic for a technical Chinese audience about "${article.title}".`,
       `Core message: ${title}`,
       `Diagram text to include exactly: "${subtitle}"`,
-      'First-screen payload: one large Chinese headline, one concrete proof/mechanism label, no body paragraphs.',
-      'Composition: one clear loop diagram with four labeled stages, a small ledger/checklist panel, and a performance waterfall hint; generous whitespace; high contrast; readable at mobile size.',
+      `Scroll-stopper headline: ${visualHook(frame, variant)}`,
+      'First-screen payload: one large Chinese headline, one concrete proof/mechanism label, and a visible reason to open the X Article; no body paragraphs.',
+      'Composition: one clear loop diagram with four labeled stages, a small ledger/checklist panel, and a proof marker that supports the post claim; generous whitespace; high contrast; readable at mobile size.',
       'Style: modern engineering publication, clean vector-like bitmap illustration, precise lines, restrained color palette, no mascots, no stock-photo people.',
       `Variant emphasis: ${variantMessage}`,
       'Constraints: no brand logos, no platform logos, no fake UI, no watermark, no tiny unreadable paragraphs.',
@@ -527,6 +528,13 @@ function compactSteps(steps, limit = 3) {
 
 function numberedSteps(steps, limit = 5) {
   return steps.slice(0, limit).map((step, index) => `${index + 1}. ${step}`).join('\n');
+}
+
+function visualHook(frame, variant) {
+  if (!frame) return 'Stop guessing. Measure the loop.';
+  if (variant === 'research-utility') return `${frame.topic}：把方法画出来`;
+  if (variant === 'case-story') return `${frame.topic}：从误判到根因`;
+  return `${frame.topic}：不是建议，是验证闭环`;
 }
 
 export function sentence(text) {

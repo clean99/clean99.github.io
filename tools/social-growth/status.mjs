@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { summarizeGrowthLedger } from './metrics.mjs';
 import { buildPublishPreflight } from './preflight.mjs';
+import { buildProfileAudit } from './profile.mjs';
 import { buildGrowthRecommendations } from './recommendations.mjs';
 import { buildWeeklyExecutionPlan } from './schedule.mjs';
 import { validateQueue } from './validation.mjs';
@@ -16,6 +17,7 @@ export async function buildGrowthStatus({
   now = new Date(),
   imageDir = 'output/imagegen',
   packageOutDir = 'data/social-growth/packages',
+  profileText = '',
   env = process.env,
   ensurePackage = false,
 } = {}) {
@@ -35,6 +37,11 @@ export async function buildGrowthStatus({
     packageOutDir,
     env,
     ensurePackage,
+  });
+  const profileAudit = await buildProfileAudit({
+    profileText,
+    queue,
+    generatedAt,
   });
   const recommendations = ledger ? buildGrowthRecommendations(ledger).recommendations : [];
   const status = statusName({ validation, weeklyPlan, preflight });
@@ -63,10 +70,12 @@ export async function buildGrowthStatus({
     } : null,
     summary,
     preflight,
+    profileAudit,
     nextActions: nextActions({
       validation,
       weeklyPlan,
       preflight,
+      profileAudit,
       recommendations,
       day,
       slot,
@@ -86,6 +95,14 @@ export function formatGrowthStatusMarkdown(status) {
   const planWarnings = status.weeklyPlan?.warnings?.length
     ? status.weeklyPlan.warnings.map((warning) => `- ${warning}`).join('\n')
     : '- No weekly plan warnings.';
+  const profile = status.profileAudit;
+  const profileFixes = profile?.checks?.filter((check) => check.status !== 'pass') || [];
+  const profileChecks = profile?.checks?.length
+    ? profile.checks.map((check) => {
+      const marker = check.status === 'pass' ? 'PASS' : 'FIX';
+      return `- ${marker}: ${check.message}`;
+    }).join('\n')
+    : '- No profile audit was generated.';
 
   return `# X Growth Status
 
@@ -127,6 +144,32 @@ ${planWarnings}
 Blockers:
 
 ${blockers}
+
+## Profile Conversion
+
+- Audit status: ${profile?.status || 'unknown'}
+- Display name: ${profile?.profile?.displayName || 'unknown'}
+- Bio: ${profile?.profile?.bio || 'missing'}
+- Link: ${profile?.profile?.link || 'missing'}
+- Pinned post detected: ${profile?.profile?.pinned ?? false}
+- Follower count visible: ${profile?.profile?.followers !== '' && profile?.profile?.followers !== undefined}
+- Blocking follow-conversion issues: ${profileFixes.length}
+
+Checks:
+
+${profileChecks}
+
+Suggested bio:
+
+\`\`\`text
+${profile?.suggestions?.bio || 'Run social:profile-audit after capturing profile text.'}
+\`\`\`
+
+Suggested pinned post:
+
+\`\`\`text
+${profile?.suggestions?.pinnedPost || 'Run social:profile-audit after capturing profile text.'}
+\`\`\`
 
 ## Next Actions
 
@@ -178,6 +221,7 @@ function nextActions({
   validation,
   weeklyPlan,
   preflight,
+  profileAudit,
   recommendations,
   day,
   slot,
@@ -213,6 +257,15 @@ function nextActions({
       priority: 'P0',
       action: 'Prepare the X Article and image-backed short post in Chrome, stopping before every public action for confirmation.',
       reason: 'Preflight has no blockers.',
+    });
+  }
+
+  if (profileAudit?.status === 'needs_work') {
+    const failedChecks = profileAudit.checks.filter((check) => check.status !== 'pass');
+    actions.push({
+      priority: 'P1',
+      action: 'Prepare a profile promise and pinned post update for Chrome confirmation before scaling distribution.',
+      reason: `${failedChecks.length} profile conversion checks need work; profile edits and pinned-post changes remain public actions requiring confirmation.`,
     });
   }
 
