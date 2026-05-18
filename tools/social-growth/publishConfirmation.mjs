@@ -5,7 +5,8 @@ import { findQueueItem } from './queue.mjs';
 const DEFAULT_OUT_PATH = 'data/social-growth/publish-confirmation.md';
 const ARTICLE_URL_PLACEHOLDER = '<x-article-url>';
 const THREAD_URL_PLACEHOLDER = '<x-thread-url>';
-const THREAD_STATUS_ID_PLACEHOLDER = '<x-thread-status-id>';
+const THREAD_STATUS_ID_PLACEHOLDER = 'THREAD_STATUS_ID';
+const X_WEB_INTENT_REFERENCE = 'https://docs.x.com/x-for-websites/web-intents/overview';
 const X_ARTICLE_META_PATTERNS = [
   /本文从/u,
   /本文记录/u,
@@ -179,6 +180,8 @@ ${packet.commands.prepareShortPost || '# No short-post command generated.'}
 
 Prepare remaining thread posts after the first post is public:
 
+Intent reference: ${X_WEB_INTENT_REFERENCE}
+
 ${threadReplyCommands}
 
 Prepare optional follow-up replies after the thread is complete:
@@ -271,7 +274,7 @@ function replyIntent({ label, text }) {
     label,
     text,
     url: `https://x.com/intent/tweet?in_reply_to=${THREAD_STATUS_ID_PLACEHOLDER}&text=${encodedText}`,
-    note: `Replace ${THREAD_STATUS_ID_PLACEHOLDER} with the status id from ${THREAD_URL_PLACEHOLDER}; stop before the final public Reply click.`,
+    note: `Replace ${THREAD_STATUS_ID_PLACEHOLDER} with the numeric status id from ${THREAD_URL_PLACEHOLDER}; stop before the final public Reply click.`,
   };
 }
 
