@@ -183,9 +183,7 @@ ${formatBrowserBlockers(brief.browserReadiness.blockers)}
 Command:
 
 \`\`\`bash
-${brief.browserReadinessCommand || buildBrowserReadinessCommand({ day: brief.day, slot: 1 })}
-${composeDraftResolutionCommand(brief)}
-${composeDraftStashCommand(brief)}
+${browserCommandBlock(brief)}
 \`\`\`
 
 ${manualPublishFallback}
@@ -292,6 +290,15 @@ function buildBrowserReadinessCommand({
   return args.join(' ');
 }
 
+function browserCommandBlock(brief) {
+  return [
+    brief.browserReadinessCommand || buildBrowserReadinessCommand({ day: brief.day, slot: 1 }),
+    loginRecoveryCommand(brief),
+    composeDraftResolutionCommand(brief),
+    composeDraftStashCommand(brief),
+  ].filter(Boolean).join('\n');
+}
+
 function composeDraftResolutionCommand(brief) {
   if (!brief.browserReadiness?.blockers?.some((item) => item.includes('different draft'))) return '';
   const args = [
@@ -302,6 +309,18 @@ function composeDraftResolutionCommand(brief) {
   const publishMode = brief.browserReadiness?.publishMode || selectedSlot(brief.dayReadiness, brief.selectedSlot)?.publishMode;
   if (publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
   args.push('--out data/social-growth/compose-draft-resolution.md');
+  return args.join(' ');
+}
+
+function loginRecoveryCommand(brief) {
+  if (brief.browserReadiness?.status !== 'needs_x_login') return '';
+  const args = [
+    'npm run social:login-recovery --',
+    `--day ${Number(brief.day || 1)}`,
+    `--slot ${Number(brief.selectedSlot || 1)}`,
+  ];
+  const publishMode = brief.browserReadiness?.publishMode || selectedSlot(brief.dayReadiness, brief.selectedSlot)?.publishMode;
+  if (publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
   return args.join(' ');
 }
 

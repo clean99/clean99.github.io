@@ -1559,6 +1559,7 @@ test('daily brief CLI reads stored browser probe before action order', async () 
     assert.equal(result.status, 0, result.stderr || result.stdout);
     assert.match(markdown, /Status: needs_x_login/);
     assert.match(markdown, /The Chrome profile used for publishing is not logged into X/);
+    assert.match(markdown, /social:login-recovery/);
     assert.match(markdown, /Manual Publish Fallback/);
     assert.match(markdown, /social:manual-publish-kit/);
     assert.match(markdown, /social:post-publish-recovery/);
