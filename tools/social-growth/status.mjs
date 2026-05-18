@@ -402,6 +402,8 @@ function buildManualPublishFallback({
     selectedSlot: commandStatus.selectedSlot,
     queueId: preflight?.selected?.id || '',
     publishMode,
+    batchIndexPath: manualPublishKitIndexPath(commandStatus.selectedSlot.day),
+    batchKitCommand: manualPublishKitsCommand(commandStatus),
     kitPath: 'data/social-growth/manual-publish-kit.md',
     kitCommand: '',
     recoveryCommand: '',
@@ -459,7 +461,12 @@ function manualPublishFallbackMarkdown(status) {
 
 Use this when the CDP publishing profile is still blocked but a normal Chrome profile is already logged into \`@Clean993\`. This creates a local copy/paste kit only; it is not permission to publish, upload media, reply, like, repost, follow, edit profile, or pin content.
 
+Batch ready-slot index:
+
+\`${fallback.batchIndexPath}\`
+
 \`\`\`bash
+${fallback.batchKitCommand}
 ${fallback.kitCommand}
 ${fallback.recoveryCommand}
 \`\`\`
@@ -551,6 +558,14 @@ function manualPublishKitCommand(status, preflight) {
   }
   const idArg = preflight?.selected?.id ? ` --id ${shellQuote(preflight.selected.id)}` : '';
   return cliCommand('manual-publish-kit', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)}${idArg} --out data/social-growth/manual-publish-kit.md`);
+}
+
+function manualPublishKitsCommand(status) {
+  return cliCommand('manual-publish-kits', `--day ${status.selectedSlot.day}${publishModeArgs(status)} --out ${manualPublishKitIndexPath(status.selectedSlot.day)}`);
+}
+
+function manualPublishKitIndexPath(day) {
+  return `data/social-growth/manual-publish-kits/day${Number(day || 1)}-ready-slots.md`;
 }
 
 function postPublishRecoveryCommand(status, preflight) {

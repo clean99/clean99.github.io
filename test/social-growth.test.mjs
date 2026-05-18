@@ -4189,6 +4189,8 @@ test('growth status surfaces blocking browser readiness before publish prep', as
     assert.ok(status.nextActions.some((item) => item.priority === 'P1' && item.reason.includes('After the current blocker is cleared')));
     assert.match(markdown, /Browser Readiness/);
     assert.match(markdown, /Manual Publish Fallback/);
+    assert.match(markdown, /manual-publish-kits\/day1-ready-slots\.md/);
+    assert.match(markdown, /cli\.mjs manual-publish-kits --day 1 --publishMode thread_fallback/);
     assert.match(markdown, /manual-publish-kit/);
     assert.match(markdown, /post-publish-recovery/);
     assert.match(markdown, /Chrome extension native pipe is closed/);
@@ -4266,6 +4268,8 @@ test('status CLI reads stored browser probe before reporting readiness', async (
     assert.match(markdown, /X Login Recovery/);
     assert.match(markdown, /Manual Publish Fallback/);
     assert.match(markdown, /cli\.mjs login-recovery --day 1 --slot 1 --publishMode thread_fallback/);
+    assert.match(markdown, /cli\.mjs manual-publish-kits --day 1 --publishMode thread_fallback/);
+    assert.match(markdown, /manual-publish-kits\/day1-ready-slots\.md/);
     assert.match(markdown, /cli\.mjs manual-publish-kit --day 1 --slot 1 --publishMode thread_fallback/);
     assert.match(markdown, /cli\.mjs post-publish-recovery --queue data\/social-growth\/queue\.json/);
     assert.match(markdown, /x-browser-cdp\.mjs --probe --json --probe-out data\/social-growth\/browser-probe\.local\.json --account '@Clean993'/);
