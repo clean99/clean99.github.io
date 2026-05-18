@@ -229,18 +229,26 @@ export function markQueueItemPublished(queue, {
   xArticleUrl,
   publishedAt = new Date().toISOString(),
 }) {
+  let found = false;
+  const items = queue.items.map((item) => {
+    if (item.id !== id) return item;
+    found = true;
+    return {
+      ...item,
+      status: 'published',
+      publishedAt,
+      xPostUrl,
+      xArticleUrl,
+    };
+  });
+
+  if (!found) {
+    throw new Error(`Queue item not found: ${id}`);
+  }
+
   return {
     ...queue,
-    items: queue.items.map((item) => {
-      if (item.id !== id) return item;
-      return {
-        ...item,
-        status: 'published',
-        publishedAt,
-        xPostUrl,
-        xArticleUrl,
-      };
-    }),
+    items,
   };
 }
 

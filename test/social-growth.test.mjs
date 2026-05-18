@@ -641,6 +641,14 @@ test('builds publish queue and composes handoff posts without losing the URL', (
   });
   assert.equal(updated.items[0].status, 'published');
   assert.equal(updated.items[0].xPostUrl, 'https://x.com/Clean993/status/1');
+  assert.throws(
+    () => markQueueItemPublished(queue, {
+      id: 'missing-queue-id',
+      xPostUrl: 'https://x.com/Clean993/status/404',
+      publishedAt: '2026-05-18T01:00:00.000Z',
+    }),
+    /Queue item not found: missing-queue-id/,
+  );
 });
 
 test('queue ids stay stable when newer articles are inserted', () => {
