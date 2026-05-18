@@ -1097,6 +1097,9 @@ test('x technical sharing brief packages source article and copy override templa
     assert.equal(brief.template.contentStatus, 'needs_x_technical_sharing');
     assert.equal(brief.algorithmResearchPath, '.agents/skills/x-growth-publishing/references/x-recommendation-system.md');
     assert.match(markdown, /Use recommendation research/);
+    assert.match(markdown, /Use installed community skills/);
+    assert.match(markdown, /humanizer-zh/);
+    assert.match(markdown, /marketing-psychology/);
     assert.match(markdown, /Observable problem/);
     assert.match(markdown, /X Native Frame/);
     assert.match(markdown, /Opening options/);
@@ -3302,6 +3305,8 @@ test('growth status surfaces blocking browser readiness before publish prep', as
     assert.equal(status.status, 'needs_chrome_extension_reconnect');
     assert.ok(status.nextActions.some((item) => item.action.includes('Fix browser readiness')));
     assert.ok(!status.nextActions.some((item) => item.priority === 'P0' && item.action.includes('thread first post')));
+    assert.ok(!status.nextActions.some((item) => item.priority === 'P0' && item.action.includes('Publish one confirmed')));
+    assert.ok(status.nextActions.some((item) => item.priority === 'P1' && item.reason.includes('After the current blocker is cleared')));
     assert.match(markdown, /Browser Readiness/);
     assert.match(markdown, /Chrome extension native pipe is closed/);
   } finally {

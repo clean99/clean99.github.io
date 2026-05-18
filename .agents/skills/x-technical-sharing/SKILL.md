@@ -186,6 +186,8 @@ Remove AI-smelling filler:
 - generic questions such as `你怎么看`.
 
 If the project-level `x-writing` community skill is available, use its `references/anti-patterns.md` as a cleanup checklist for rhythm, inflated vocabulary, formal transitions, and reframing cliches. Do not inherit its English-only examples blindly; Chinese technical specificity and this skill's output contract win.
+If the project-level `humanizer-zh` skill is available, run it after drafting and before `social:apply-copy`. It should remove Chinese AI-writing residue such as negative reframing, generic transitions, inflated slogans, and perfectly balanced template sentences.
+If the project-level `marketing-psychology` skill is available, use it before finalizing the first line and image headline. Keep only the psychological frame that is tied to the technical mechanism: a wrong belief, visible loss, status payoff, or decision pressure. Do not add generic persuasion language.
 
 ## X Article Structure
 

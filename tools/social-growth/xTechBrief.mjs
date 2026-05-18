@@ -12,6 +12,20 @@ const DEFAULT_BRIEF_DIR = 'data/social-growth/x-tech-briefs';
 const DEFAULT_TEMPLATE_DIR = 'data/social-growth/copy-overrides';
 const DEFAULT_SKILL_PATH = '.agents/skills/x-technical-sharing/SKILL.md';
 const DEFAULT_ALGORITHM_RESEARCH_PATH = '.agents/skills/x-growth-publishing/references/x-recommendation-system.md';
+const DEFAULT_COMMUNITY_SKILLS = [
+  {
+    path: '.agents/skills/humanizer-zh/SKILL.md',
+    use: 'final Chinese cleanup: remove AI-smelling patterns, negative reframing, inflated phrases, and template handoff lines',
+  },
+  {
+    path: '.agents/skills/marketing-psychology/SKILL.md',
+    use: 'first-screen hook audit: identify the reader belief, false signal, or concrete loss that makes the post worth opening',
+  },
+  {
+    path: '.agents/skills/marketing-ideas/SKILL.md',
+    use: 'growth experiment input: use only when expanding distribution experiments or follow-worthy topic angles',
+  },
+];
 
 export async function buildXTechnicalSharingBrief({
   articles,
@@ -49,6 +63,7 @@ export async function buildXTechnicalSharingBrief({
     generatedAt: toIsoString(now),
     skillPath,
     algorithmResearchPath,
+    communitySkills: DEFAULT_COMMUNITY_SKILLS,
     selected,
     article,
     frame,
@@ -88,6 +103,10 @@ Generated at: ${brief.generatedAt}
 Use skill: \`${brief.skillPath}\`
 
 Use recommendation research: \`${brief.algorithmResearchPath}\`
+
+Use installed community skills:
+
+${brief.communitySkills.map((skill) => `- \`${skill.path}\`: ${skill.use}`).join('\n')}
 
 ## Target Queue Item
 
@@ -194,6 +213,12 @@ Use \`x-technical-sharing\` to replace only these JSON fields:
 Keep the short post X-native: concrete Chinese claim, mechanism in the first two lines, no blog URL, image/X Article handoff, at most two hashtags.
 
 Keep the X Article causal: observable problem, cause, mechanism, tradeoff, validation, and the blog link only at the end under \`博客原文：\`.
+
+Run the community-skill pass before applying the JSON:
+
+1. Use \`marketing-psychology\` to audit the first line. It should make a concrete reader loss or false belief visible, not just sound clever.
+2. Use \`humanizer-zh\` as the last Chinese cleanup pass. Delete negative reframing, generic transitions, inflated phrases, and anything that reads like a template.
+3. Use \`marketing-ideas\` only when the package needs a new growth experiment or topic angle. Do not let it weaken the concrete technical mechanism.
 
 Use the growth feedback above as constraints, not decoration:
 

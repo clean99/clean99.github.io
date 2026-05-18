@@ -268,10 +268,12 @@ function nextActions({
   slot,
 }) {
   const actions = [];
+  const browserBlocked = Boolean(blockingBrowserStatus(browserReadiness));
+  const executionBlocked = preflight.status === 'blocked' || browserBlocked;
 
   if (preflight.status === 'blocked') {
     actions.push(...preflightActions(preflight, { day, slot }));
-  } else if (blockingBrowserStatus(browserReadiness)) {
+  } else if (browserBlocked) {
     actions.push({
       priority: 'P0',
       action: `Fix browser readiness before preparing public X editors: ${browserReadiness.status}.`,
@@ -322,10 +324,22 @@ function nextActions({
   }
 
   if (recommendations.length) {
-    actions.push(...recommendations.slice(0, 2));
+    actions.push(...deferActionsWhenBlocked(recommendations.slice(0, 2), executionBlocked));
   }
 
   return dedupeActions(actions);
+}
+
+function deferActionsWhenBlocked(actions, blocked) {
+  if (!blocked) return actions;
+  return actions.map((item) => {
+    if (item.priority !== 'P0') return item;
+    return {
+      ...item,
+      priority: 'P1',
+      reason: `After the current blocker is cleared: ${item.reason}`,
+    };
+  });
 }
 
 function summarizeBrowserReadiness(browserReadiness) {
