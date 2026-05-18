@@ -71,7 +71,7 @@ export function buildPublishConfirmation({
         : [],
       prepareFollowUpReplies: followUpReplyIntents(item.followUpReplies || []),
       recordPublished: publishMode === 'thread_fallback'
-        ? `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${item.id} --url ${THREAD_URL_PLACEHOLDER}`
+        ? `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${item.id} --url ${THREAD_URL_PLACEHOLDER} --reply-out data/social-growth/thread-reply-handoff.md`
         : (preflight.browser?.recordCommand || `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${item.id} --url <x-post-url> --article-url <x-article-url>`),
     },
     stopBefore: [
@@ -250,6 +250,81 @@ export async function writePublishConfirmation(packet, filePath = DEFAULT_OUT_PA
   return filePath;
 }
 
+export function buildThreadReplyHandoff({
+  queue,
+  id,
+  threadUrl,
+  generatedAt = new Date().toISOString(),
+} = {}) {
+  const item = findQueueItem(queue, id);
+  const resolvedThreadUrl = threadUrl || item.xPostUrl || '';
+  const statusId = extractXStatusId(resolvedThreadUrl);
+  const threadReplies = threadReplyIntents(item.threadFallback || [])
+    .map((intent) => materializeReplyIntent(intent, statusId));
+  const followUpReplies = followUpReplyIntents(item.followUpReplies || [])
+    .map((intent) => materializeReplyIntent(intent, statusId));
+
+  return {
+    generatedAt: toIsoString(generatedAt),
+    status: threadReplyHandoffStatus({ statusId, threadReplies, followUpReplies }),
+    queueId: item.id,
+    articleSlug: item.articleSlug,
+    threadUrl: resolvedThreadUrl,
+    statusId,
+    threadReplies,
+    followUpReplies,
+    boundary: 'Reply handoff only. Opening intent URLs may prefill replies, but every public Reply click still requires action-time confirmation in Chrome.',
+  };
+}
+
+export async function writeThreadReplyHandoff(handoff, filePath = 'data/social-growth/thread-reply-handoff.md') {
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${formatThreadReplyHandoffMarkdown(handoff).trimEnd()}\n`);
+  return filePath;
+}
+
+export function formatThreadReplyHandoffMarkdown(handoff) {
+  const threadReplies = formatReplyIntentCommands(
+    handoff.threadReplies || [],
+    'No remaining thread posts.',
+  );
+  const followUpReplies = formatReplyIntentCommands(
+    handoff.followUpReplies || [],
+    'No optional follow-up replies.',
+  );
+
+  return `# X Thread Reply Handoff
+
+Generated at: ${handoff.generatedAt}
+Status: ${handoff.status}
+
+## Source
+
+- Queue id: ${handoff.queueId}
+- Article slug: ${handoff.articleSlug}
+- Thread URL: ${handoff.threadUrl || 'missing'}
+- Status id: ${handoff.statusId || 'missing'}
+- Intent reference: ${X_WEB_INTENT_REFERENCE}
+
+## Remaining Thread Posts
+
+${threadReplies}
+
+## Optional Follow-up Replies
+
+${followUpReplies}
+
+## Boundary
+
+${handoff.boundary}
+`;
+}
+
+export function extractXStatusId(value) {
+  const match = String(value || '').match(/\/status(?:es)?\/(\d+)/i);
+  return match?.[1] || '';
+}
+
 function imagePostWithArticlePlaceholder(shortPost, articleUrlPlaceholder) {
   return `${shortPost.trim()}\n\n${articleUrlPlaceholder}`.trim();
 }
@@ -276,6 +351,21 @@ function replyIntent({ label, text }) {
     url: `https://x.com/intent/tweet?in_reply_to=${THREAD_STATUS_ID_PLACEHOLDER}&text=${encodedText}`,
     note: `Replace ${THREAD_STATUS_ID_PLACEHOLDER} with the numeric status id from ${THREAD_URL_PLACEHOLDER}; stop before the final public Reply click.`,
   };
+}
+
+function materializeReplyIntent(intent, statusId) {
+  if (!statusId) return intent;
+  return {
+    ...intent,
+    url: intent.url.replace(THREAD_STATUS_ID_PLACEHOLDER, statusId),
+    note: `Open this URL, confirm it is replying to ${statusId}, then stop before the final public Reply click.`,
+  };
+}
+
+function threadReplyHandoffStatus({ statusId, threadReplies, followUpReplies }) {
+  if (!statusId) return 'needs_status_id';
+  if (!threadReplies.length && !followUpReplies.length) return 'no_replies';
+  return 'ready_for_confirmation';
 }
 
 function formatReplyIntentCommands(items, emptyText) {

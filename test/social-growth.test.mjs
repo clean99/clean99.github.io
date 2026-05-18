@@ -83,8 +83,10 @@ import {
 } from '../tools/social-growth/imageBacklog.mjs';
 import { buildPublishPreflight, formatPublishPreflightMarkdown, registerPublishImage } from '../tools/social-growth/preflight.mjs';
 import {
+  buildThreadReplyHandoff,
   buildPublishConfirmation,
   formatPublishConfirmationMarkdown,
+  formatThreadReplyHandoffMarkdown,
   writePublishConfirmation,
 } from '../tools/social-growth/publishConfirmation.mjs';
 import {
@@ -2709,6 +2711,7 @@ test('publish confirmation uses thread fallback when X Article is unavailable', 
     assert.doesNotMatch(packet.content.imagePost, /<x-article-url>/);
     assert.match(packet.content.imagePost, /工作台一上 Tab/);
     assert.match(packet.commands.recordPublished, /<x-thread-url>/);
+    assert.match(packet.commands.recordPublished, /--reply-out data\/social-growth\/thread-reply-handoff\.md/);
     assert.equal(packet.commands.prepareThreadReplies.length, 2);
     assert.match(packet.commands.prepareThreadReplies[0].url, /https:\/\/x\.com\/intent\/tweet\?in_reply_to=THREAD_STATUS_ID&text=/);
     assert.match(decodeURIComponent(packet.commands.prepareThreadReplies[1].url), /完整过程/);
@@ -2722,6 +2725,45 @@ test('publish confirmation uses thread fallback when X Article is unavailable', 
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('thread reply handoff materializes reply intent URLs from a published thread URL', () => {
+  const queue = buildPublishQueue([
+    {
+      title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+      excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+      slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+      lang: 'zh',
+      tags: ['Frontend', 'Web Performance'],
+      url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  const publishedQueue = markQueueItemPublished(queue, {
+    id: queue.items[0].id,
+    xPostUrl: 'https://x.com/Clean993/status/1234567890123456789?s=20',
+    publishedAt: '2026-05-18T01:00:00.000Z',
+  });
+
+  const handoff = buildThreadReplyHandoff({
+    queue: publishedQueue,
+    id: queue.items[0].id,
+    threadUrl: 'https://x.com/Clean993/status/1234567890123456789?s=20',
+    generatedAt: '2026-05-18T01:00:00.000Z',
+  });
+  const markdown = formatThreadReplyHandoffMarkdown(handoff);
+
+  assert.equal(handoff.status, 'ready_for_confirmation');
+  assert.equal(handoff.statusId, '1234567890123456789');
+  assert.equal(handoff.threadReplies.length, 2);
+  assert.match(handoff.threadReplies[0].url, /in_reply_to=1234567890123456789/);
+  assert.doesNotMatch(handoff.threadReplies[0].url, /THREAD_STATUS_ID/);
+  assert.match(markdown, /X Thread Reply Handoff/);
+  assert.match(markdown, /Status id: 1234567890123456789/);
+  assert.match(markdown, /stop before the final public Reply click/);
 });
 
 test('publish confirmation packet requires copy review for article-summary framing', async () => {
@@ -3310,6 +3352,7 @@ test('growth status reflects thread fallback publishing mode', async () => {
     assert.match(markdown, /Publish mode: thread_fallback/);
     assert.match(markdown, /social:x-prep -- --day 1 --slot 1 --publishMode thread_fallback --xProfileDir '\/tmp\/x-profile'/);
     assert.match(markdown, /<x-thread-url>/);
+    assert.match(markdown, /--reply-out data\/social-growth\/thread-reply-handoff\.md/);
     assert.doesNotMatch(markdown, /--article-url <x-article-url>/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
@@ -3754,6 +3797,7 @@ test('mark-published CLI refreshes metrics template without losing captured fiel
       publishedAt: '2026-05-18T01:00:00.000Z',
     });
     const metricsPath = join(outDir, 'posts.local.json');
+    const replyOutPath = join(outDir, 'thread-reply-handoff.md');
     await writeJson(join(outDir, 'queue.json'), publishedQueue);
     await refreshMetricsTemplateFromQueue({
       queue: publishedQueue,
@@ -3773,10 +3817,12 @@ test('mark-published CLI refreshes metrics template without losing captured fiel
       metricsPath,
       '--metrics-date',
       '2026-05-19',
+      '--reply-out',
+      replyOutPath,
       '--id',
       queue.items[0].id,
       '--url',
-      'https://x.com/Clean993/status/1',
+      'https://x.com/Clean993/status/1234567890123456789',
       '--published-at',
       '2026-05-19T01:00:00.000Z',
     ], {
@@ -3788,12 +3834,15 @@ test('mark-published CLI refreshes metrics template without losing captured fiel
     assert.match(result.stdout, /Refreshed metrics template for 2 published posts/);
     const updatedQueue = JSON.parse(await readFile(join(outDir, 'queue.json'), 'utf8'));
     const updatedMetrics = JSON.parse(await readFile(metricsPath, 'utf8'));
+    const replyHandoff = await readFile(replyOutPath, 'utf8');
 
     assert.equal(updatedQueue.items[0].status, 'published');
     assert.equal(updatedMetrics.date, '2026-05-18');
     assert.equal(updatedMetrics.posts.length, 2);
     assert.equal(updatedMetrics.posts.find((post) => post.id === queue.items[1].id).metrics.views, '1200');
-    assert.equal(updatedMetrics.posts.find((post) => post.id === queue.items[0].id).url, 'https://x.com/Clean993/status/1');
+    assert.equal(updatedMetrics.posts.find((post) => post.id === queue.items[0].id).url, 'https://x.com/Clean993/status/1234567890123456789');
+    assert.match(replyHandoff, /X Thread Reply Handoff/);
+    assert.match(replyHandoff, /in_reply_to=1234567890123456789/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

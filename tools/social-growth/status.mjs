@@ -406,7 +406,7 @@ function publishModeArgs(status) {
 function recordCommand(status, preflight) {
   if (status.publishMode === 'thread_fallback') {
     const id = preflight?.selected?.id || '<queue-id>';
-    return `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${id} --url <x-thread-url>`;
+    return `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${id} --url <x-thread-url> --reply-out data/social-growth/thread-reply-handoff.md`;
   }
   return preflight?.browser?.recordCommand
     || 'npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>';

@@ -90,8 +90,10 @@ import {
   writeXPublishPrep,
 } from './xPrep.mjs';
 import {
+  buildThreadReplyHandoff,
   buildPublishConfirmation,
   formatPublishConfirmationMarkdown,
+  writeThreadReplyHandoff,
   writePublishConfirmation,
 } from './publishConfirmation.mjs';
 import {
@@ -883,6 +885,7 @@ if (command === 'articles') {
 } else if (command === 'mark-published') {
   const queuePath = args.queue || 'data/social-growth/queue.json';
   const metricsPath = args.metrics === 'false' ? null : (args.metrics || 'data/social-growth/posts.local.json');
+  const replyOutPath = args.replyOut === 'false' ? null : args.replyOut;
   const queue = await readJson(queuePath);
   const updated = markQueueItemPublished(queue, {
     id: requiredArg(args, 'id'),
@@ -899,6 +902,16 @@ if (command === 'articles') {
       date: args.metricsDate || args.date,
     });
     console.log(`Refreshed metrics template for ${metrics.publishedPosts} published posts in ${metrics.metricsPath}`);
+  }
+  if (replyOutPath) {
+    const replyHandoff = buildThreadReplyHandoff({
+      queue: updated,
+      id: args.id,
+      threadUrl: args.url,
+      generatedAt: args.publishedAt,
+    });
+    await writeThreadReplyHandoff(replyHandoff, replyOutPath);
+    console.log(`Wrote thread reply handoff to ${replyOutPath}`);
   }
 } else if (command === 'init-ledger') {
   const ledger = createLedger({
@@ -1016,7 +1029,7 @@ function printHelp() {
   npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md
   npm run social:confirmation -- --day 1 --slot 1 --out data/social-growth/publish-confirmation.md
   npm run social:register-image -- --day 1 --slot 1 --source /path/to/generated.png
-  npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --id <queue-id> --url <x-post-url>
+  npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out data/social-growth/thread-reply-handoff.md --id <queue-id> --url <x-post-url>
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt
   npm run social:metrics-cycle -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
