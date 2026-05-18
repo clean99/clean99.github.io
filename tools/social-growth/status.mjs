@@ -356,16 +356,17 @@ function loginRecoveryMarkdown(status, browserReadiness) {
   if (browserReadiness.status !== 'needs_x_login') return '';
   const profileArg = status.xProfileDir ? ` --profile ${shellQuote(status.xProfileDir)}` : '';
   const publishArgs = publishModeArgs(status);
+  const recoveryArgs = `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs}`;
 
   return `## X Login Recovery
 
-Run this to open or attach the publishing Chrome profile at the X compose/login page. It only probes browser state: no text input, no media upload, no publish click.
+Run this to open or attach the publishing Chrome profile at the X compose/login page and refresh local readiness files. It only probes browser state: no text input, no media upload, no publish click.
 
 \`\`\`bash
-${xBrowserCommand(`--probe --json --probe-out data/social-growth/browser-probe.local.json --account '@Clean993'${profileArg}`)}
+${cliCommand('login-recovery', recoveryArgs)}
 \`\`\`
 
-After logging in as @Clean993 in that Chrome window, rerun:
+After logging in as @Clean993 in that Chrome window, rerun the same command. If you need the lower-level steps:
 
 \`\`\`bash
 ${xBrowserCommand(`--probe --json --probe-out data/social-growth/browser-probe.local.json --account '@Clean993'${profileArg}`)}

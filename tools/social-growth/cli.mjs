@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { spawnSync } from 'node:child_process';
 import { loadArticles } from './articles.mjs';
 import { runSafeAutomationCycle } from './automation.mjs';
 import { parseXPostMetrics, parseXProfileMetrics, updateMetricsTemplateFromText } from './capture.mjs';
@@ -745,6 +746,9 @@ if (command === 'articles') {
   } else {
     console.log(formatImageBacklogMarkdown(backlog));
   }
+} else if (command === 'login-recovery') {
+  const result = await runLoginRecovery(args);
+  console.log(JSON.stringify(result, null, 2));
 } else if (command === 'x-prep') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -1009,6 +1013,156 @@ function browserProbeFromArgs(options = {}) {
   if (options.articleAvailable !== undefined) probe.articleAvailable = options.articleAvailable;
   if (options.mediaUpload !== undefined) probe.mediaUpload = options.mediaUpload;
   return probe;
+}
+
+async function runLoginRecovery(options = {}) {
+  const queue = await readJson(options.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(options.ledger || 'data/social-growth/ledger.json');
+  const profileText = await readOptionalText(options.profileText || 'data/social-growth/profile.local.txt');
+  const day = options.day || 1;
+  const slot = options.slot || 1;
+  const publishMode = options.publishMode || options.articleMode || 'thread_fallback';
+  const probePath = options.browserProbe || options.probeOut || 'data/social-growth/browser-probe.local.json';
+  const account = options.account || '@Clean993';
+  const profileDir = options.xProfileDir || options.profileDir;
+  let probeRun = {
+    skipped: options.skipProbe === 'true',
+    status: 'skipped',
+    stdout: '',
+    stderr: '',
+  };
+
+  if (options.skipProbe !== 'true') {
+    probeRun = runXBrowserProbe({
+      probePath,
+      account,
+      profileDir,
+      timeoutMs: options.timeoutMs || 30000,
+    });
+    if (probeRun.exitCode !== 0 && options.continueOnProbeError !== 'true') {
+      throw new Error(`X browser probe failed: ${probeRun.stderr || probeRun.stdout || `exit ${probeRun.exitCode}`}`);
+    }
+  }
+
+  const commonPreflight = {
+    queue,
+    ledger,
+    id: options.id,
+    day,
+    slot,
+    now: options.now ? new Date(options.now) : new Date(),
+    imageDir: options.imageDir || 'output/imagegen',
+    packageOutDir: options.packageOut || 'data/social-growth/packages',
+    ensurePackage: options.ensurePackage !== 'false',
+    preferReadyImage: options.preferReadyImage !== 'false',
+  };
+  const preflight = await buildPublishPreflight(commonPreflight);
+  const prep = await buildXPublishPrep(preflight, {
+    skillDir: options.skillDir,
+    bunCommand: options.bunCommand,
+    articleUrlPlaceholder: options.articleUrl || '<x-article-url>',
+    publishMode,
+    profileDir,
+  });
+  const xPrepPath = options.xPrepOut || 'data/social-growth/x-publish-prep.md';
+  await writeXPublishPrep(prep, xPrepPath);
+
+  const storedProbe = await readBrowserProbe(probePath);
+  const inputProbe = browserProbeFromArgs(options);
+  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
+  if (hasBrowserProbeValues(inputProbe)) effectiveProbe.generatedAt = preflight.generatedAt;
+  if (options.writeProbe !== 'false' && hasBrowserProbeValues(effectiveProbe)) {
+    await writeBrowserProbe(effectiveProbe, probePath);
+  }
+  const readiness = buildBrowserReadiness({
+    preflight,
+    xPrep: prep,
+    ...effectiveProbe,
+    profileDir,
+    generatedAt: preflight.generatedAt,
+  });
+  const browserReadinessPath = options.browserReadinessOut || 'data/social-growth/browser-readiness.md';
+  await writeBrowserReadiness(readiness, browserReadinessPath);
+
+  const status = await buildGrowthStatus({
+    queue,
+    ledger,
+    day,
+    slot,
+    now: options.now ? new Date(options.now) : new Date(),
+    imageDir: commonPreflight.imageDir,
+    packageOutDir: commonPreflight.packageOutDir,
+    profileText,
+    publishMode,
+    xProfileDir: profileDir,
+    browserReadiness: readiness,
+    ensurePackage: options.ensurePackage === 'true',
+    preferReadyImage: options.preferReadyImage === 'true',
+  });
+  const statusPath = options.statusOut || 'data/social-growth/status.md';
+  await writeGrowthStatus(status, statusPath);
+
+  return {
+    status: status.status,
+    publicActions: {
+      typedText: false,
+      uploadedMedia: false,
+      clickedSubmit: false,
+    },
+    probe: {
+      skipped: probeRun.skipped,
+      exitCode: probeRun.exitCode ?? 0,
+      status: probeRun.status,
+    },
+    browserReadiness: {
+      status: readiness.status,
+      blockers: readiness.blockers,
+    },
+    paths: {
+      browserProbe: probePath,
+      browserReadiness: browserReadinessPath,
+      status: statusPath,
+      xPublishPrep: xPrepPath,
+    },
+    next: status.nextActions[0] || null,
+  };
+}
+
+function runXBrowserProbe({
+  probePath,
+  account,
+  profileDir,
+  timeoutMs,
+}) {
+  const probeArgs = [
+    'tools/social-growth/x-browser-cdp.mjs',
+    '--probe',
+    '--json',
+    '--probe-out',
+    probePath,
+    '--account',
+    account,
+    '--timeout-ms',
+    String(timeoutMs),
+  ];
+  if (profileDir) probeArgs.push('--profile', profileDir);
+  const result = spawnSync(process.execPath, probeArgs, {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+  });
+  let parsed = null;
+  try {
+    parsed = JSON.parse(result.stdout || '{}');
+  } catch {
+    parsed = null;
+  }
+  return {
+    skipped: false,
+    exitCode: result.status ?? 1,
+    status: parsed?.status || 'unknown',
+    stdout: result.stdout,
+    stderr: result.stderr,
+  };
 }
 
 async function loadCliArticles(options = {}) {
