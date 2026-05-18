@@ -1285,6 +1285,7 @@ function browserProbeFromArgs(options = {}) {
   if (options.composeDraftText !== undefined) probe.composeDraftText = options.composeDraftText;
   if (options.xProfileDirectory !== undefined) probe.profileDirectory = options.xProfileDirectory;
   if (options.profileDirectory !== undefined) probe.profileDirectory = options.profileDirectory;
+  if (options.currentUrl !== undefined) probe.currentUrl = options.currentUrl;
   return probe;
 }
 

@@ -2060,6 +2060,7 @@ test('scheduled growth loop reads browser probe file into the run status', async
       articleAvailable: 'no',
       mediaUpload: 'blocked',
       profileDirectory: 'Profile 1',
+      currentUrl: 'https://x.com/compose/post',
       generatedAt: '2026-05-18T00:00:00.000Z',
     }, browserProbePath);
 
@@ -2122,11 +2123,13 @@ test('scheduled growth loop reads browser probe file into the run status', async
     assert.match(readinessReport, /Extension pipe: closed/);
     assert.match(readinessReport, /Media upload is blocked/);
     assert.match(readinessReport, /Chrome profile directory: Profile 1/);
+    assert.match(readinessReport, /Current URL: https:\/\/x\.com\/compose\/post/);
     assert.match(xPrepReport, /--profile-directory 'Profile 1'/);
     assert.equal(result.paths.browserProbe, browserProbePath);
     assert.equal(persistedProbe.extensionPipe, 'closed');
     assert.equal(persistedProbe.mediaUpload, 'blocked');
     assert.equal(persistedProbe.profileDirectory, 'Profile 1');
+    assert.equal(persistedProbe.currentUrl, 'https://x.com/compose/post');
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -4304,6 +4307,7 @@ test('status CLI reads stored browser probe before reporting readiness', async (
       articleAvailable: 'no',
       mediaUpload: 'unknown',
       profileDirectory: 'Profile 1',
+      currentUrl: 'https://x.com/i/flow/login?redirect_after_login=%2Fcompose%2Fpost',
     }, null, 2)}\n`);
     await writeFile(profilePath, [
       'Clean99 | AI 工程化与前端性能',
@@ -4343,6 +4347,7 @@ test('status CLI reads stored browser probe before reporting readiness', async (
     assert.match(markdown, /x-browser-cdp\.mjs --probe --json --probe-out data\/social-growth\/browser-probe\.local\.json --account '@Clean993' --profile-directory 'Profile 1'/);
     assert.match(markdown, /cli\.mjs browser-readiness --day 1 --slot 1 --publishMode thread_fallback --xProfileDirectory 'Profile 1'/);
     assert.match(markdown, /The Chrome profile used for publishing is not logged into X/);
+    assert.match(markdown, /Current URL: https:\/\/x\.com\/i\/flow\/login\?redirect_after_login=%2Fcompose%2Fpost/);
     assert.doesNotMatch(markdown, /Status: ready_for_browser_confirmation/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
@@ -4493,6 +4498,7 @@ test('login recovery command refreshes readiness files without public actions', 
       articleAvailable: 'no',
       mediaUpload: 'unknown',
       profileDirectory: 'Profile 1',
+      currentUrl: 'https://x.com/i/flow/login?redirect_after_login=%2Fcompose%2Fpost',
     }, null, 2)}\n`);
     await writeFile(profilePath, [
       'Clean99 | AI 工程化与前端性能',
@@ -4536,9 +4542,11 @@ test('login recovery command refreshes readiness files without public actions', 
     assert.match(statusMarkdown, /--xProfileDirectory 'Profile 1'/);
     assert.match(readinessMarkdown, /The Chrome profile used for publishing is not logged into X/);
     assert.match(readinessMarkdown, /Chrome profile directory: Profile 1/);
+    assert.match(readinessMarkdown, /Current URL: https:\/\/x\.com\/i\/flow\/login\?redirect_after_login=%2Fcompose%2Fpost/);
     assert.match(xPrepMarkdown, /Probe Browser Without Public Actions/);
     assert.match(xPrepMarkdown, /--profile-directory 'Profile 1'/);
     assert.equal(persistedProbe.profileDirectory, 'Profile 1');
+    assert.equal(persistedProbe.currentUrl, 'https://x.com/i/flow/login?redirect_after_login=%2Fcompose%2Fpost');
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

@@ -188,6 +188,7 @@ ${blockers}
 
 - Status: ${browserReadiness.status}
 - Blockers: ${browserReadiness.blockers.length}
+- Current URL: ${browserReadiness.currentUrl || 'unknown'}
 
 ${browserBlockers}
 
@@ -426,6 +427,7 @@ function buildManualPublishFallback({
 function summarizeBrowserReadiness(browserReadiness) {
   return {
     status: browserReadiness?.status || 'not_checked',
+    currentUrl: browserReadiness?.currentUrl || '',
     blockers: [...(browserReadiness?.blockers || [])],
   };
 }

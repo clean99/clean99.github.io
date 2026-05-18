@@ -244,6 +244,7 @@ function browserProbeRecordFromResult(result, expectedAccount) {
     ...(expectedAccount ? { expectedAccount } : {}),
     observedAccount: result.observedAccount,
     profileDirectory: result.profileDirectory,
+    currentUrl: result.currentUrl,
     chromeRunning: 'yes',
     loginState: result.editorReady
       ? 'logged_in'

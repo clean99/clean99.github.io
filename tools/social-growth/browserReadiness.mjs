@@ -15,6 +15,7 @@ const PROBE_FIELDS = [
   'articleAvailable',
   'mediaUpload',
   'profileDirectory',
+  'currentUrl',
   'composeDraftText',
   'generatedAt',
 ];
@@ -34,6 +35,7 @@ export function buildBrowserReadiness({
   composeDraftText,
   profileDir = xPrep?.skill?.profileDir || '',
   profileDirectory = xPrep?.skill?.profileDirectory || '',
+  currentUrl = '',
   generatedAt = preflight?.generatedAt || new Date().toISOString(),
 } = {}) {
   const signals = {
@@ -101,6 +103,7 @@ export function buildBrowserReadiness({
     publishMode,
     profileDir,
     profileDirectory,
+    currentUrl: String(currentUrl || '').trim(),
     selected: {
       id: preflight?.selected?.id || xPrep?.selected?.id || '',
       articleSlug: preflight?.selected?.articleSlug || xPrep?.selected?.articleSlug || '',
@@ -146,6 +149,7 @@ Status: ${readiness.status}
 - Observed account: ${readiness.observedAccount || 'unknown'}
 - Chrome profile dir: ${readiness.profileDir ? `\`${readiness.profileDir}\`` : 'default baoyu shared profile'}
 - Chrome profile directory: ${readiness.profileDirectory || 'default'}
+- Current URL: ${readiness.currentUrl || 'unknown'}
 
 ## Local Prep
 
@@ -332,6 +336,7 @@ function normalizeBrowserProbe(probe = {}) {
     normalized.composeDraftText = String(probe.composeDraftText === true ? '' : (probe.composeDraftText ?? '')).trim();
   }
   if (hasValue(probe.profileDirectory)) normalized.profileDirectory = String(probe.profileDirectory).trim();
+  if (hasValue(probe.currentUrl)) normalized.currentUrl = String(probe.currentUrl).trim();
   if (hasValue(probe.generatedAt)) normalized.generatedAt = toIsoString(probe.generatedAt);
   return normalized;
 }

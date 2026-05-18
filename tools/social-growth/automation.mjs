@@ -234,6 +234,7 @@ export async function runSafeAutomationCycle({
     mediaUpload: effectiveBrowserProbe.mediaUpload,
     profileDir: xProfileDir,
     profileDirectory: effectiveProfileDirectory,
+    currentUrl: effectiveBrowserProbe.currentUrl,
     generatedAt,
   });
   await writeBrowserReadiness(browserReadiness, browserReadinessPath);
