@@ -212,13 +212,13 @@ ${actions}
 ## Commands
 
 \`\`\`bash
-npm run social:daily -- --limit 5 --package-limit 3 --lang zh
-npm run social:validate -- --queue data/social-growth/queue.json --format markdown
-npm run social:preflight -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot} --out data/social-growth/publish-preflight.md
-npm run social:image-brief -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}
-npm run social:x-prep -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)} --out data/social-growth/x-publish-prep.md
-npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
-npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md
+${cliCommand('daily', '--limit 5 --package-limit 3 --lang zh')}
+${cliCommand('validate', '--queue data/social-growth/queue.json --format markdown')}
+${cliCommand('preflight', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot} --out data/social-growth/publish-preflight.md`)}
+${cliCommand('image-brief', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}`)}
+${cliCommand('x-prep', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)} --out data/social-growth/x-publish-prep.md`)}
+${cliCommand('profile-audit', '--profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md')}
+${cliCommand('profile-package', '--profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md')}
 ${recordCommand(status, preflight)}
 \`\`\`
 
@@ -362,15 +362,15 @@ function loginRecoveryMarkdown(status, browserReadiness) {
 Run this to open or attach the publishing Chrome profile at the X compose/login page. It only probes browser state: no text input, no media upload, no publish click.
 
 \`\`\`bash
-node tools/social-growth/x-browser-cdp.mjs --probe --json --probe-out data/social-growth/browser-probe.local.json --account '@Clean993'${profileArg}
+${xBrowserCommand(`--probe --json --probe-out data/social-growth/browser-probe.local.json --account '@Clean993'${profileArg}`)}
 \`\`\`
 
 After logging in as @Clean993 in that Chrome window, rerun:
 
 \`\`\`bash
-node tools/social-growth/x-browser-cdp.mjs --probe --json --probe-out data/social-growth/browser-probe.local.json --account '@Clean993'${profileArg}
-node tools/social-growth/cli.mjs browser-readiness --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/browser-readiness.md
-node tools/social-growth/cli.mjs status --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/status.md
+${xBrowserCommand(`--probe --json --probe-out data/social-growth/browser-probe.local.json --account '@Clean993'${profileArg}`)}
+${cliCommand('browser-readiness', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/browser-readiness.md`)}
+${cliCommand('status', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/status.md`)}
 \`\`\`
 
 `;
@@ -444,12 +444,23 @@ function publishModeArgs(status) {
 }
 
 function recordCommand(status, preflight) {
+  const id = shellQuote(preflight?.selected?.id || '<queue-id>');
   if (status.publishMode === 'thread_fallback') {
-    const id = preflight?.selected?.id || '<queue-id>';
-    return `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${id} --url <x-thread-url> --reply-out data/social-growth/thread-reply-handoff.md`;
+    return cliCommand('mark-published', `--queue data/social-growth/queue.json --id ${id} --url '<x-thread-url>' --reply-out data/social-growth/thread-reply-handoff.md`);
   }
-  return preflight?.browser?.recordCommand
-    || 'npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>';
+  return cliCommand('mark-published', `--queue data/social-growth/queue.json --id ${id} --url '<x-post-url>' --article-url '<x-article-url>'`);
+}
+
+function cliCommand(command, args = '') {
+  return nodeScriptCommand('tools/social-growth/cli.mjs', `${command}${args ? ` ${args}` : ''}`);
+}
+
+function xBrowserCommand(args = '') {
+  return nodeScriptCommand('tools/social-growth/x-browser-cdp.mjs', args);
+}
+
+function nodeScriptCommand(script, args = '') {
+  return `${shellQuote(process.execPath)} ${script}${args ? ` ${args}` : ''}`;
 }
 
 function shellQuote(value) {

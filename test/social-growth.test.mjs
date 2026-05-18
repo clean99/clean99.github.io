@@ -3303,10 +3303,11 @@ test('growth status summarizes blocker, pace, and next commands', async () => {
     assert.ok(status.nextActions.some((item) => item.action.includes('profile promise')));
     assert.match(markdown, /Follower delta: 0/);
     assert.match(markdown, /Profile Conversion/);
-    assert.match(markdown, /social:image-brief/);
-    assert.match(markdown, /social:x-prep/);
-    assert.match(markdown, /social:profile-audit/);
-    assert.match(markdown, /social:profile-package/);
+    assert.match(markdown, /cli\.mjs image-brief/);
+    assert.match(markdown, /cli\.mjs x-prep/);
+    assert.match(markdown, /cli\.mjs profile-audit/);
+    assert.match(markdown, /cli\.mjs profile-package/);
+    assert.doesNotMatch(markdown, /npm run/);
     assert.match(persisted, /Public X actions still require action-time confirmation/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
@@ -3411,8 +3412,9 @@ test('growth status is ready for browser confirmation when the selected image ex
     assert.equal(status.preflight.image.ready, true);
     assert.ok(status.nextActions.some((item) => item.action.includes('Prepare the X Article')));
     const markdown = formatGrowthStatusMarkdown(status);
-    assert.match(markdown, /social:x-prep/);
-    assert.match(markdown, /social:profile-package/);
+    assert.match(markdown, /cli\.mjs x-prep/);
+    assert.match(markdown, /cli\.mjs profile-package/);
+    assert.doesNotMatch(markdown, /npm run/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -3641,7 +3643,7 @@ test('growth status reflects thread fallback publishing mode', async () => {
     assert.equal(status.publishMode, 'thread_fallback');
     assert.ok(status.nextActions.some((item) => item.action.includes('thread first post')));
     assert.match(markdown, /Publish mode: thread_fallback/);
-    assert.match(markdown, /social:x-prep -- --day 1 --slot 1 --publishMode thread_fallback --xProfileDir '\/tmp\/x-profile'/);
+    assert.match(markdown, /cli\.mjs x-prep --day 1 --slot 1 --publishMode thread_fallback --xProfileDir '\/tmp\/x-profile'/);
     assert.match(markdown, /<x-thread-url>/);
     assert.match(markdown, /--reply-out data\/social-growth\/thread-reply-handoff\.md/);
     assert.doesNotMatch(markdown, /--article-url <x-article-url>/);
