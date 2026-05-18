@@ -206,15 +206,15 @@ async function readXPages(port) {
     .map((target) => ({
       title: target.title || '',
       url: target.url || '',
-      state: inferPageState(target),
+      state: inferXPageStateForDiagnostics(target),
     }));
 }
 
-function inferPageState(page) {
+export function inferXPageStateForDiagnostics(page) {
   const url = String(page.url || '');
   const title = String(page.title || '');
   if (/\/i\/flow\/login/.test(url) || /login/i.test(title)) return 'logged_out';
-  if (/\/compose\/post/.test(url) && /Home \/ X|X/i.test(title)) return 'compose_maybe_logged_in';
+  if (/\/compose\/post/.test(url) && /^Home \/ X$/i.test(title.trim())) return 'compose_maybe_logged_in';
   if (/\/home(?:$|[?#])/.test(url) || /Home \/ X/i.test(title)) return 'logged_in';
   return 'unknown';
 }

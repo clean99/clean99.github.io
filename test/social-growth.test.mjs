@@ -129,6 +129,7 @@ import {
 import {
   buildXProfileDiagnostics,
   formatXProfileDiagnosticsMarkdown,
+  inferXPageStateForDiagnostics,
   writeXProfileDiagnostics,
 } from '../tools/social-growth/xProfileDiagnostics.mjs';
 import { validateQueue, validateQueueItem } from '../tools/social-growth/validation.mjs';
@@ -2912,6 +2913,21 @@ test('x profile diagnostics lists Chrome profiles without public actions', async
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('x profile diagnostics does not treat generic compose URL titles as logged in', () => {
+  assert.equal(inferXPageStateForDiagnostics({
+    title: 'x.com/compose/post',
+    url: 'https://x.com/compose/post',
+  }), 'unknown');
+  assert.equal(inferXPageStateForDiagnostics({
+    title: 'Home / X',
+    url: 'https://x.com/compose/post',
+  }), 'compose_maybe_logged_in');
+  assert.equal(inferXPageStateForDiagnostics({
+    title: 'X. It’s what’s happening / X',
+    url: 'https://x.com/i/flow/login?redirect_after_login=%2Fcompose%2Fpost',
+  }), 'logged_out');
 });
 
 test('browser readiness surfaces missing bun runtime as an actionable blocker', async () => {
