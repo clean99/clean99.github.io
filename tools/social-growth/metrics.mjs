@@ -64,7 +64,7 @@ export function summarizeGrowthLedger(ledger) {
   const daysElapsed = elapsedDays(target.startDate, latest.date);
   const requiredDailyPace = targetFollowers / 7;
   const actualDailyPace = daysElapsed ? followerDelta / daysElapsed : 0;
-  const posts = snapshots.flatMap((snapshot) => snapshot.posts || []);
+  const posts = latestPostsFromSnapshots(snapshots);
   const totalInteractions = posts.reduce((sum, post) => sum + interactionTotal(post.metrics), 0);
   const totalViews = posts.reduce((sum, post) => sum + numberOrZero(post.metrics?.views), 0);
 
@@ -80,8 +80,25 @@ export function summarizeGrowthLedger(ledger) {
     totalInteractions,
     totalViews,
     interactionRate: totalViews ? totalInteractions / totalViews : 0,
+    posts,
     topPosts: rankPosts(posts).slice(0, 5),
   };
+}
+
+export function latestPostsFromSnapshots(snapshots = []) {
+  const latestById = new Map();
+
+  for (const snapshot of [...snapshots].sort((a, b) => a.date.localeCompare(b.date))) {
+    for (const post of snapshot.posts || []) {
+      if (!post.id) continue;
+      latestById.set(post.id, {
+        ...post,
+        snapshotDate: snapshot.date,
+      });
+    }
+  }
+
+  return [...latestById.values()];
 }
 
 export function rankPosts(posts) {

@@ -3,6 +3,7 @@ import { loadArticles } from './articles.mjs';
 import { buildDistributionCandidates } from './copy.mjs';
 import { runDailyGrowthPlan } from './daily.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
+import { buildGrowthRecommendations, formatRecommendationsMarkdown } from './recommendations.mjs';
 import {
   buildPublishQueue,
   findQueueItem,
@@ -42,6 +43,14 @@ if (command === 'articles') {
     console.log(formatMarkdownReport(ledger));
   } else {
     console.log(JSON.stringify(summarizeGrowthLedger(ledger), null, 2));
+  }
+} else if (command === 'recommend') {
+  const ledgerPath = args.ledger || 'data/social-growth/ledger.json';
+  const ledger = await readJson(ledgerPath);
+  if (args.format === 'markdown') {
+    console.log(formatRecommendationsMarkdown(ledger));
+  } else {
+    console.log(JSON.stringify(buildGrowthRecommendations(ledger), null, 2));
   }
 } else if (command === 'plan') {
   const articles = await loadArticles();
@@ -201,6 +210,7 @@ function printHelp() {
   npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
   npm run social:report -- --ledger data/social-growth/example-ledger.json
   npm run social:report -- --ledger data/social-growth/example-ledger.json --format markdown
+  npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
 `);
 }
 

@@ -13,7 +13,13 @@ import {
   formatMarkdownReport,
   updateLedgerSnapshot,
 } from '../tools/social-growth/ledger.mjs';
-import { parseCompactNumber, postScore, summarizeGrowthLedger } from '../tools/social-growth/metrics.mjs';
+import {
+  latestPostsFromSnapshots,
+  parseCompactNumber,
+  postScore,
+  summarizeGrowthLedger,
+} from '../tools/social-growth/metrics.mjs';
+import { buildGrowthRecommendations, formatRecommendationsMarkdown } from '../tools/social-growth/recommendations.mjs';
 import {
   buildPublishPackage,
   buildPublishQueue,
@@ -150,6 +156,61 @@ test('parses compact metrics and computes growth summary', () => {
   assert.equal(summary.daysElapsed, 3);
   assert.equal(summary.totalInteractions, 1215);
   assert.equal(summary.topPosts[0].id, 'a');
+});
+
+test('uses the latest post metrics per post instead of double-counting snapshots', () => {
+  const snapshots = [
+    {
+      date: '2026-05-18',
+      posts: [
+        {
+          id: 'same-post',
+          metrics: {
+            likes: 10,
+            views: 100,
+          },
+        },
+      ],
+    },
+    {
+      date: '2026-05-19',
+      posts: [
+        {
+          id: 'same-post',
+          metrics: {
+            likes: 15,
+            replies: 2,
+            views: 150,
+          },
+        },
+      ],
+    },
+  ];
+  const ledger = {
+    target: {
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    },
+    snapshots: [
+      {
+        date: '2026-05-18',
+        followers: 30,
+        posts: snapshots[0].posts,
+      },
+      {
+        date: '2026-05-19',
+        followers: 35,
+        posts: snapshots[1].posts,
+      },
+    ],
+  };
+
+  assert.equal(latestPostsFromSnapshots(snapshots)[0].metrics.likes, 15);
+  const summary = summarizeGrowthLedger(ledger);
+  assert.equal(summary.totalInteractions, 17);
+  assert.equal(summary.totalViews, 150);
+  assert.equal(summary.topPosts[0].score, 27);
 });
 
 test('frontmatter parser ignores inline comments outside quotes', () => {
@@ -493,4 +554,56 @@ test('creates ledger, replaces same-day snapshots, and renders markdown report',
   assert.equal(replaced.snapshots.length, 2);
   assert.equal(replaced.snapshots[1].followers, 190);
   assert.match(formatMarkdownReport(updated), /Follower delta: 80/);
+  assert.match(formatMarkdownReport(updated), /Growth Recommendations/);
+});
+
+test('builds growth recommendations from variant performance', () => {
+  const ledger = {
+    target: {
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    },
+    snapshots: [
+      {
+        date: '2026-05-18',
+        followers: 30,
+        posts: [],
+      },
+      {
+        date: '2026-05-19',
+        followers: 45,
+        posts: [
+          {
+            id: 'a',
+            articleSlug: 'A',
+            variant: 'strong-thesis',
+            metrics: {
+              views: 1000,
+              likes: 20,
+              replies: 4,
+              reposts: 2,
+              bookmarks: 3,
+              follows: 5,
+            },
+          },
+          {
+            id: 'b',
+            articleSlug: 'B',
+            variant: 'case-story',
+            metrics: {
+              views: 500,
+              likes: 15,
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  const result = buildGrowthRecommendations(ledger);
+
+  assert.equal(result.variantPerformance[0].key, 'strong-thesis');
+  assert.ok(result.recommendations.some((item) => item.action.includes('strong-thesis')));
+  assert.match(formatRecommendationsMarkdown(ledger), /Variant Performance/);
 });

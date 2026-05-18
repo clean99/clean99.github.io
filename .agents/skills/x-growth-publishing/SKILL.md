@@ -97,6 +97,10 @@ For single-item control:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
+17. Generate the next optimization decision:
+   ```bash
+   npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
+   ```
 
 Use the daily command for scheduled automation. It is allowed to prepare local artifacts and reports, but it must not publish, reply, like, repost, follow, or upload media without action-time confirmation.
 
@@ -147,6 +151,7 @@ Post Score = follows*25 + reposts*8 + quotes*8 + replies*6 + bookmarks*5 + likes
 
 After every snapshot:
 
+- run `npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown`;
 - double down on topics that create follows, replies, reposts, bookmarks, or profile clicks;
 - kill templates that only get impressions or likes without follower lift;
 - prefer posts that make a concrete technical claim and invite a serious reply;

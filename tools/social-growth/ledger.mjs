@@ -1,5 +1,6 @@
 import { readJson, writeJson } from './queue.mjs';
 import { normalizePostMetrics, summarizeGrowthLedger } from './metrics.mjs';
+import { formatRecommendationsMarkdown } from './recommendations.mjs';
 
 export const METRIC_FIELDS = [
   'views',
@@ -129,6 +130,8 @@ Target window: ${ledger.target?.startDate || 'n/a'} -> ${ledger.target?.endDate 
 ## Top Posts
 
 ${topPosts}
+
+${formatRecommendationsMarkdown(ledger).trim()}
 `;
 }
 

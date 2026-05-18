@@ -153,6 +153,12 @@ Generate a Markdown report:
 npm run social:report -- --ledger data/social-growth/example-ledger.json --format markdown
 ```
 
+Generate optimization recommendations:
+
+```bash
+npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
+```
+
 Validate code:
 
 ```bash
@@ -238,7 +244,8 @@ Do not commit private analytics or account history.
 15. Fill follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
 16. Run `npm run social:snapshot`.
 17. Run `npm run social:report -- --format markdown`.
-18. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+18. Run `npm run social:recommend -- --format markdown`.
+19. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 For regular operation, replace steps 1-4 with:
 
