@@ -295,17 +295,17 @@ function profileChecks({ profile, suggestions }) {
 function buildProfileSuggestions({ themes }) {
   const primaryThemes = themes.length ? themes.slice(0, 4).join(' / ') : 'AI 工程化 / 前端性能 / React / 测试';
   return {
-    displayName: 'Clean99 | AI 工程化与前端性能',
-    bio: `写 ${primaryThemes}。把真实工程问题压成可复用框架：指标、harness、验证、复盘。`,
+    displayName: 'Clean99 | AI 工程化 / 前端性能',
+    bio: `写 ${primaryThemes}。每篇尽量给清楚：问题、边界、指标、验证方法。`,
     link: 'https://clean99.github.io',
     pinnedPost: [
-      '我会持续写三类东西：',
+      '这里写工程里真实遇到的判断题。',
       '',
-      '1. AI Agent 怎么真正落到工程流程',
-      '2. 前端性能、React、测试里的可复用判断',
-      '3. 每篇长文提炼成能直接拿走的框架',
+      'AI Agent 怎么从 demo 变成流程；',
+      '前端性能、React、测试怎么用指标说话；',
+      '技术博客怎么写到能被搜到、被转发。',
       '',
-      '关注价值：少看口号，多拿方法。',
+      '我不会每天追热点。更想把一篇长文压成能复用的框架：问题、边界、验证方法。',
     ].join('\n'),
   };
 }

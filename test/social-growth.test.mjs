@@ -3742,6 +3742,10 @@ test('profile update package prepares browser-confirmed profile changes', async 
   assert.equal(profilePackage.status, 'needs_browser_confirmation');
   assert.equal(profilePackage.current.displayName, 'clean');
   assert.match(profilePackage.proposed.bio, /AI 工程化/);
+  assert.match(profilePackage.proposed.bio, /问题、边界、指标、验证方法/);
+  assert.ok(profilePackage.proposed.bio.length <= 160);
+  assert.match(profilePackage.proposed.pinnedPost, /真实遇到的判断题/);
+  assert.doesNotMatch(profilePackage.proposed.pinnedPost, /少看口号/);
   assert.match(markdown, /final profile save click/);
   assert.match(markdown, /Pinned post draft/);
   assert.match(markdown, /action-time confirmation/);
