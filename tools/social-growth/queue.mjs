@@ -38,6 +38,7 @@ export function queueItemFromCandidate(candidate, { createdAt, index = 0 } = {})
     xArticle: candidate.xArticle,
     media: candidate.media,
     threadFallback: candidate.threadFallback,
+    followUpReplies: candidate.followUpReplies,
     posts: candidate.posts,
     linkPostIndex: candidate.linkPostIndex,
     requiresBrowserConfirmation: candidate.requiresBrowserConfirmation,
@@ -72,6 +73,7 @@ export function prepareBrowserHandoff(item) {
     image: item.media,
     xArticle: item.xArticle,
     threadFallback: item.threadFallback,
+    followUpReplies: item.followUpReplies || [],
     shortPost: item.shortPost || composePublishPosts(item)[0],
     posts: composePublishPosts(item),
     stopBeforeFinalClick: true,
@@ -86,6 +88,7 @@ export function buildPublishPackage(item) {
       'image-prompt.txt': formatImagePrompt(handoff.image),
       'x-article.md': formatXArticle(handoff.xArticle),
       'thread-fallback.md': formatThreadFallback(handoff.threadFallback),
+      'follow-up-replies.md': formatFollowUpReplies(handoff.followUpReplies),
       'short-post.txt': handoff.shortPost,
       'browser-handoff.json': JSON.stringify(handoff, null, 2),
       'publish-checklist.md': formatPublishChecklist(item),
@@ -172,6 +175,13 @@ export function formatThreadFallback(posts = []) {
     .trim();
 }
 
+export function formatFollowUpReplies(replies = []) {
+  return replies
+    .map((reply, index) => [`## Reply ${index + 1}`, '', reply].join('\n'))
+    .join('\n\n')
+    .trim();
+}
+
 export function formatPublishChecklist(item) {
   return [
     `# Publish Package: ${item.id}`,
@@ -188,7 +198,9 @@ export function formatPublishChecklist(item) {
     '4. Publish the X Article only after confirmation.',
     '5. Create the short X post from `short-post.txt`, attach the image, and link to the X Article URL.',
     '6. Stop before the final short-post publish click and confirm the account/content.',
-    '7. Record the public URL with `social:mark-published`.',
+    '7. Prepare substantive follow-up replies from `follow-up-replies.md` only after the short post is public.',
+    '8. Stop before each public reply click and confirm the account/content.',
+    '9. Record the public URL with `social:mark-published`.',
     '',
     '## Boundary',
     '',

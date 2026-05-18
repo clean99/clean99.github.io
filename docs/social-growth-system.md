@@ -111,6 +111,7 @@ The package is written under `data/social-growth/packages/<queue-id>/` and conta
 - `x-article.md`;
 - `short-post.txt`;
 - `thread-fallback.md`;
+- `follow-up-replies.md`;
 - `browser-handoff.json`;
 - `publish-checklist.md`.
 
@@ -228,12 +229,14 @@ Do not commit private analytics or account history.
 8. Publish only after confirmation.
 9. Use Chrome to prepare the short image-backed X post linking to the X Article.
 10. Stop before publishing the short post and confirm the exact content and account.
-11. Mark the published URL with `npm run social:mark-published`.
-12. Run `npm run social:metrics-template`.
-13. Fill follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
-14. Run `npm run social:snapshot`.
-15. Run `npm run social:report -- --format markdown`.
-16. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+11. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
+12. Stop before each public reply and confirm the exact content and account.
+13. Mark the published URL with `npm run social:mark-published`.
+14. Run `npm run social:metrics-template`.
+15. Fill follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
+16. Run `npm run social:snapshot`.
+17. Run `npm run social:report -- --format markdown`.
+18. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 For regular operation, replace steps 1-4 with:
 
@@ -248,6 +251,8 @@ Then continue from image generation and browser confirmation.
 The browser layer should be thin. It should accept a `DistributionCandidate`, open X, fill the Article editor or composer, and stop before the final publish action.
 
 For the Chinese growth workflow, do not append `targetUrl` to the short post. Put the blog URL only at the end of `xArticle.body`, then link the short post to the published X Article URL.
+
+Follow-up replies are allowed only when they add technical detail to the user's own post. Do not use them as engagement bait, and stop before every public reply action.
 
 Do not put growth logic in the browser layer. The browser layer is only an executor. Article parsing, copy generation, UTM creation, and scoring stay in `tools/social-growth/`.
 

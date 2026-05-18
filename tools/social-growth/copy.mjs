@@ -34,6 +34,7 @@ export function buildDistributionCandidates(article, options = {}) {
       xArticle: buildXArticle(article, targetUrl),
       media: buildImageBrief(article, variant),
       threadFallback: buildThreadFallback(article, targetUrl),
+      followUpReplies: buildFollowUpReplies(article, variant),
       posts: [buildShortPost(article, variant)],
       linkPostIndex: null,
       requiresBrowserConfirmation: true,
@@ -201,6 +202,26 @@ export function buildThreadFallback(article, targetUrl) {
     clampPost(`${title}\n\nThe useful frame is measurement first, optimization second.`),
     clampPost('1. Pick a user-visible metric\n2. Build a harness\n3. Change one bottleneck per round\n4. Compare against the same baseline'),
     linkPost('Full post:', targetUrl),
+  ];
+}
+
+export function buildFollowUpReplies(article, variant) {
+  if (article.lang !== 'zh') {
+    return [
+      clampPost('The part I would not skip: keep the baseline stable. If the measurement changes between rounds, the optimization result is just noise.'),
+      clampPost('A reusable checklist:\n\n1. One user-visible metric\n2. One repeatable harness\n3. One bottleneck per round\n4. One ledger entry with the failed attempts included'),
+    ];
+  }
+
+  const variantReply = {
+    'research-utility': '图里最重要的不是流程箭头，而是 ledger。它强迫每一轮优化回答：这次改了什么、和哪个 baseline 比、失败 round 有没有被记录。',
+    'strong-thesis': '我判断 AI 工程提效是否靠谱，只看一个东西：它能不能留下可复验的证据链。没有 baseline 和 replay，模型越自信越危险。',
+    'case-story': '这个 case 的教训是：先别急着让 Agent 改代码。先把 measurement 固定住，否则你连“变快了”还是“测歪了”都分不清。',
+  }[variant] || '真正要复用的是 measurement -> change -> verify -> ledger 这个闭环，而不是某个 prompt。';
+
+  return [
+    clampPost(variantReply),
+    clampPost('如果你要把这个方法搬到自己的项目，先问三个问题：\n\n1. 用户能感知的指标是什么？\n2. harness 能不能重复跑？\n3. 每轮失败有没有被记录？'),
   ];
 }
 

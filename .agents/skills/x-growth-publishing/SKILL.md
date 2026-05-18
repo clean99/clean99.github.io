@@ -52,6 +52,7 @@ For single-item control:
    - `x-article.md`;
    - `short-post.txt`;
    - `thread-fallback.md`;
+   - `follow-up-replies.md`;
    - `browser-handoff.json`;
    - `publish-checklist.md`.
 5. Generate a `gpt-image-2` image from `image-prompt.txt`.
@@ -75,20 +76,22 @@ For single-item control:
    - use `short-post.txt`;
    - include the X Article URL, not the blog URL.
 9. Stop before the final post click and ask for confirmation.
-10. Record the published URL:
+10. After the short post is public, prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
+11. Stop before each public reply click and ask for confirmation.
+12. Record the published URL:
    ```bash
    npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>
    ```
-11. Prepare the metrics template:
+13. Prepare the metrics template:
    ```bash
    npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
    ```
-12. Fill `data/social-growth/posts.local.json` from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
-13. Record metrics twice per day:
+14. Fill `data/social-growth/posts.local.json` from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
+15. Record metrics twice per day:
    ```bash
    npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
    ```
-14. Review progress:
+16. Review progress:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
@@ -107,6 +110,13 @@ Short post:
 - image attached;
 - link to the X Article after it exists.
 - choose one structure from `references/chinese-x-style.md`: research utility, strong thesis, or case story.
+
+Follow-up replies:
+
+- add technical substance, not generic engagement bait;
+- expand the mechanism, checklist, or failure mode from the post;
+- no mass replies and no replies into unrelated viral threads;
+- every public reply still requires action-time confirmation.
 
 X Article:
 

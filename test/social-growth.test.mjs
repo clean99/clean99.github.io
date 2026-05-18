@@ -106,6 +106,8 @@ test('generates bounded X distribution candidates', () => {
   assert.equal(candidates[2].linkPostIndex, null);
   assert.ok(candidates[0].xArticle.body.includes('Full blog post:'));
   assert.equal(candidates[0].media.model, 'gpt-image-2');
+  assert.equal(candidates[0].followUpReplies.length, 2);
+  assert.ok(candidates[0].followUpReplies.every((reply) => reply.length <= 260));
   assert.ok(candidates[0].threadFallback[2].includes('https://clean99.github.io'));
 });
 
@@ -219,15 +221,18 @@ test('exports a browser publish package with image, article, and checklist artif
   assert.ok(publishPackage.files['image-prompt.txt'].includes('Model: gpt-image-2'));
   assert.ok(publishPackage.files['x-article.md'].includes('博客原文：'));
   assert.ok(!publishPackage.files['short-post.txt'].includes('https://clean99.github.io'));
+  assert.ok(publishPackage.files['follow-up-replies.md'].includes('Reply 1'));
   assert.ok(publishPackage.files['publish-checklist.md'].includes('Stop before the final'));
 
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-package-'));
   try {
     const written = await writePublishPackage(item, { outDir });
-    assert.equal(written.files.length, 6);
+    assert.equal(written.files.length, 7);
     const prompt = await readFile(join(written.packageDir, 'image-prompt.txt'), 'utf8');
+    const replies = await readFile(join(written.packageDir, 'follow-up-replies.md'), 'utf8');
     const checklist = await readFile(join(written.packageDir, 'publish-checklist.md'), 'utf8');
     assert.ok(prompt.includes('1536x1024'));
+    assert.ok(replies.includes('Reply 2'));
     assert.ok(checklist.includes(item.id));
   } finally {
     await rm(outDir, { recursive: true, force: true });
