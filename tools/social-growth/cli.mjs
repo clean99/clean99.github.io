@@ -39,6 +39,11 @@ import {
   writeEngagementPlan,
   writeEngagementSearchPlan,
 } from './engagement.mjs';
+import {
+  buildGrowthExperimentPlan,
+  formatGrowthExperimentPlanMarkdown,
+  writeGrowthExperimentPlan,
+} from './experimentPlan.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
 import {
   buildPublishPreflight,
@@ -150,6 +155,23 @@ if (command === 'articles') {
     console.log(formatGrowthFunnelMarkdown(ledger));
   } else {
     console.log(JSON.stringify(buildGrowthFunnel(ledger), null, 2));
+  }
+} else if (command === 'experiments') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const plan = buildGrowthExperimentPlan({
+    queue,
+    ledger,
+    now: args.now ? new Date(args.now) : new Date(),
+    limit: args.limit || 3,
+  });
+  if (args.out) {
+    await writeGrowthExperimentPlan(plan, args.out);
+    console.log(`Wrote X growth experiment plan to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(plan, null, 2));
+  } else {
+    console.log(formatGrowthExperimentPlanMarkdown(plan));
   }
 } else if (command === 'profile-audit') {
   const queue = args.queue === 'false' ? null : await readJson(args.queue || 'data/social-growth/queue.json');
@@ -335,6 +357,7 @@ if (command === 'articles') {
     growthReportPath: args.growthReport || 'data/social-growth/growth-report.md',
     recommendationsPath: args.recommendations || 'data/social-growth/recommendations.md',
     funnelPath: args.funnelOut || 'data/social-growth/funnel.md',
+    experimentPlanPath: args.experimentOut || 'data/social-growth/experiment-plan.md',
     scheduledReportPath: args.out || 'data/social-growth/scheduled-run.md',
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
     imageBacklogPath: args.imageBacklogOut || 'data/social-growth/image-backlog.md',
@@ -988,6 +1011,7 @@ function printHelp() {
   npm run social:report -- --ledger data/social-growth/example-ledger.json --format markdown
   npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
   npm run social:funnel -- --ledger data/social-growth/ledger.json --format markdown
+  npm run social:experiments -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/experiment-plan.md
   npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
   npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md
   npm run social:validate -- --queue data/social-growth/queue.json --format markdown

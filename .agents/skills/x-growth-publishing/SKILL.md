@@ -48,6 +48,7 @@ It writes `data/social-growth/browser-readiness.md` as the browser probe handoff
 It also reads and updates `data/social-growth/browser-probe.local.json` when browser signals are provided, so recurring safe automation keeps the last known Chrome blocker instead of reverting to unknown.
 It writes `data/social-growth/engagement-search.md` with read-only X search URLs for finding relevant technical threads.
 It writes `data/social-growth/engagement-plan.md` from copied relevant thread opportunities when available; missing opportunities are a capture task, not an automation blocker.
+It writes `data/social-growth/experiment-plan.md` to turn the current Algorithm Lens into concrete hypotheses, candidate queue ids, edit focus, success metrics, and stop conditions for the next publish package.
 It writes `data/social-growth/daily-brief.md` as the single operator-facing action order across publish readiness, engagement, metrics, conversion funnel, and profile conversion.
 
 For day-level readiness across all publish slots, run:
@@ -321,7 +322,12 @@ For single-item control:
    ```bash
    npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
    ```
-28. Regenerate the week-level plan after each queue or ledger update:
+29. Generate the next experiment plan:
+   ```bash
+   npm run social:experiments -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/experiment-plan.md
+   ```
+   Use this to decide what the next copy override should change: first-line hook, image prompt, thread replies, profile promise, or winner scaling. This is local-only planning, not permission to publish.
+30. Regenerate the week-level plan after each queue or ledger update:
    ```bash
    npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/weekly-plan.md
    ```

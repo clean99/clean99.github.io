@@ -2,6 +2,11 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { runSafeAutomationCycle } from './automation.mjs';
 import { runPostPublishMetricsCycle } from './metricsCycle.mjs';
+import { readJson } from './queue.mjs';
+import {
+  buildGrowthExperimentPlan,
+  writeGrowthExperimentPlan,
+} from './experimentPlan.mjs';
 
 const DEFAULT_QUEUE_PATH = 'data/social-growth/queue.json';
 const DEFAULT_PACKAGE_DIR = 'data/social-growth/packages';
@@ -21,6 +26,7 @@ const DEFAULT_METRICS_CYCLE_PATH = 'data/social-growth/metrics-cycle.md';
 const DEFAULT_GROWTH_REPORT_PATH = 'data/social-growth/growth-report.md';
 const DEFAULT_RECOMMENDATIONS_PATH = 'data/social-growth/recommendations.md';
 const DEFAULT_FUNNEL_PATH = 'data/social-growth/funnel.md';
+const DEFAULT_EXPERIMENT_PLAN_PATH = 'data/social-growth/experiment-plan.md';
 const DEFAULT_SCHEDULED_REPORT_PATH = 'data/social-growth/scheduled-run.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
 const DEFAULT_IMAGE_BACKLOG_PATH = 'data/social-growth/image-backlog.md';
@@ -56,6 +62,7 @@ export async function runScheduledGrowthLoop({
   growthReportPath = DEFAULT_GROWTH_REPORT_PATH,
   recommendationsPath = DEFAULT_RECOMMENDATIONS_PATH,
   funnelPath = DEFAULT_FUNNEL_PATH,
+  experimentPlanPath = DEFAULT_EXPERIMENT_PLAN_PATH,
   scheduledReportPath = DEFAULT_SCHEDULED_REPORT_PATH,
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
   imageBacklogPath = DEFAULT_IMAGE_BACKLOG_PATH,
@@ -135,6 +142,12 @@ export async function runScheduledGrowthLoop({
     now,
     snapshot: true,
   });
+  const experimentPlan = buildGrowthExperimentPlan({
+    queue: await readJson(queuePath),
+    ledger: await readJson(ledgerPath),
+    now,
+  });
+  await writeGrowthExperimentPlan(experimentPlan, experimentPlanPath);
   const result = {
     generatedAt,
     status: scheduledStatus(automation.status, metrics.status),
@@ -146,6 +159,11 @@ export async function runScheduledGrowthLoop({
       publishConfirmation: automation.publishConfirmation,
       browserReadiness: automation.browserReadiness,
       engagement: automation.engagement,
+      experimentPlan: {
+        status: experimentPlan.status,
+        experiments: experimentPlan.experiments.length,
+        metricToMove: experimentPlan.algorithmLens.metricToMove,
+      },
     },
     metrics: {
       status: metrics.status,
@@ -159,6 +177,7 @@ export async function runScheduledGrowthLoop({
       growthReport: growthReportPath,
       recommendations: recommendationsPath,
       funnel: funnelPath,
+      experimentPlan: experimentPlanPath,
       scheduledReport: scheduledReportPath,
     },
     boundary: [
@@ -248,6 +267,13 @@ ${confirmationIssues}
 - Growth report: \`${result.paths.growthReport}\`
 - Recommendations: \`${result.paths.recommendations}\`
 - Funnel report: \`${result.paths.funnel}\`
+- Experiment plan: \`${result.paths.experimentPlan}\`
+
+## Experiment Plan
+
+- Status: ${result.automation.experimentPlan?.status || 'unknown'}
+- Experiments: ${result.automation.experimentPlan?.experiments ?? 'unknown'}
+- Metric to move: ${result.automation.experimentPlan?.metricToMove || 'unknown'}
 
 ## Next Action
 

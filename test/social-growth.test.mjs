@@ -44,6 +44,11 @@ import {
   writeEngagementSearchPlan,
 } from '../tools/social-growth/engagement.mjs';
 import {
+  buildGrowthExperimentPlan,
+  formatGrowthExperimentPlanMarkdown,
+  writeGrowthExperimentPlan,
+} from '../tools/social-growth/experimentPlan.mjs';
+import {
   buildGrowthFunnel,
   formatGrowthFunnelMarkdown,
 } from '../tools/social-growth/funnel.mjs';
@@ -426,6 +431,60 @@ test('growth funnel treats follows as conversion even when profile clicks are un
 
   assert.equal(funnel.status, 'converting');
   assert.equal(funnel.posts[0].bottleneck, 'converting');
+});
+
+test('growth experiment plan turns the algorithm lens into measurable next experiments', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-experiments-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 2,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+    const plan = buildGrowthExperimentPlan({
+      queue,
+      ledger,
+      now: '2026-05-18T00:00:00.000Z',
+      limit: 2,
+    });
+    const markdown = formatGrowthExperimentPlanMarkdown(plan);
+    const writtenPath = await writeGrowthExperimentPlan(plan, join(outDir, 'experiment-plan.md'));
+    const persisted = await readFile(writtenPath, 'utf8');
+
+    assert.equal(plan.status, 'ready');
+    assert.equal(plan.algorithmLens.stage, 'candidate_entry');
+    assert.equal(plan.experiments.length, 2);
+    assert.equal(plan.experiments[0].successMetric, 'published_posts');
+    assert.ok(plan.experiments[0].editFocus.includes('public URL recording'));
+    assert.match(plan.commands.brief, /social:x-tech-brief/);
+    assert.match(markdown, /X Growth Experiment Plan/);
+    assert.match(markdown, /Minimum evidence/);
+    assert.match(persisted, /Local experiment planning only/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
 });
 
 test('parses visible X profile and post metrics text', () => {
@@ -1490,6 +1549,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       growthReportPath: join(outDir, 'growth-report.md'),
       recommendationsPath: join(outDir, 'recommendations.md'),
       funnelPath: join(outDir, 'funnel.md'),
+      experimentPlanPath: join(outDir, 'experiment-plan.md'),
       scheduledReportPath: join(outDir, 'scheduled-run.md'),
       imageBriefDir: join(outDir, 'image-briefs'),
       imageBacklogPath: join(outDir, 'image-backlog.md'),
@@ -1516,6 +1576,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const funnelReport = await readFile(join(outDir, 'funnel.md'), 'utf8');
     const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
     const browserReadiness = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
+    const experimentPlan = await readFile(join(outDir, 'experiment-plan.md'), 'utf8');
 
     assert.equal(result.status, 'ready_for_browser_confirmation');
     assert.equal(result.automation.status, 'ready_for_browser_confirmation');
@@ -1523,6 +1584,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.automation.profileConversion.status, 'pass');
     assert.equal(result.automation.publishConfirmation.status, 'ready_for_confirmation');
     assert.equal(result.automation.browserReadiness.status, 'needs_browser_probe');
+    assert.equal(result.automation.experimentPlan.status, 'ready');
     assert.equal(result.automation.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.selected.id, expectedQueue.items[0].id);
@@ -1536,11 +1598,13 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Content review: pass/);
     assert.match(scheduledReport, /Profile Conversion/);
     assert.match(scheduledReport, /Funnel report/);
+    assert.match(scheduledReport, /Experiment plan/);
     assert.match(scheduledReport, /safe for recurring execution/);
     assert.match(metricsReport, /No browser publish/);
     assert.match(funnelReport, /X Growth Funnel/);
     assert.match(imageBacklog, /Images missing: 2/);
     assert.match(browserReadiness, /X Browser Readiness/);
+    assert.match(experimentPlan, /X Growth Experiment Plan/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -1616,6 +1680,7 @@ test('scheduled growth loop reads browser probe file into the run status', async
       growthReportPath: join(outDir, 'growth-report.md'),
       recommendationsPath: join(outDir, 'recommendations.md'),
       funnelPath: join(outDir, 'funnel.md'),
+      experimentPlanPath: join(outDir, 'experiment-plan.md'),
       scheduledReportPath: join(outDir, 'scheduled-run.md'),
       imageBriefDir: join(outDir, 'image-briefs'),
       imageBacklogPath: join(outDir, 'image-backlog.md'),
