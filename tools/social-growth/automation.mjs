@@ -342,6 +342,8 @@ export async function runSafeAutomationCycle({
     xProfileDirectory,
     publishMode,
     browserReadiness,
+    loginHandoff,
+    loginHandoffPath,
     engagementLimit,
     env,
   });

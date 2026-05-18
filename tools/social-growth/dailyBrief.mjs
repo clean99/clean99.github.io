@@ -36,6 +36,8 @@ export async function buildDailyExecutionBrief({
   xProfileDirectory,
   publishMode,
   browserReadiness = null,
+  loginHandoff = null,
+  loginHandoffPath = 'data/social-growth/login-handoff.md',
   engagementLimit = 5,
   env = process.env,
 } = {}) {
@@ -129,6 +131,7 @@ export async function buildDailyExecutionBrief({
     profileAudit,
     profileUpdatePackage,
     browserReadiness: browserSummary,
+    loginHandoff: summarizeLoginHandoffForBrief(loginHandoff, loginHandoffPath),
     browserReadinessCommand,
     manualPublishFallback,
     actionItems,
@@ -148,6 +151,7 @@ export function formatDailyExecutionBriefMarkdown(brief) {
     : '- No publish slots for this day.';
   const blockedSlotFixes = formatBlockedSlotFixes(brief.dayReadiness);
   const manualPublishFallback = formatManualPublishFallback(brief.manualPublishFallback);
+  const loginHandoff = formatLoginHandoffForBrief(brief.loginHandoff, brief.browserReadiness);
   const actions = brief.actionItems.length
     ? brief.actionItems.map((item) => `- ${item.priority}: ${item.action}\n  Reason: ${item.reason}`).join('\n')
     : '- No actions.';
@@ -197,6 +201,7 @@ Command:
 ${browserCommandBlock(brief)}
 \`\`\`
 
+${loginHandoff}
 ${manualPublishFallback}
 ## Engagement
 
@@ -376,6 +381,89 @@ function browserCommandBlock(brief) {
     composeDraftResolutionCommand(brief),
     composeDraftStashCommand(brief),
   ].filter(Boolean).join('\n');
+}
+
+function summarizeLoginHandoffForBrief(handoff, path) {
+  if (!handoff) {
+    return {
+      status: 'not_generated',
+      path,
+      blocker: '',
+      publishingProfile: null,
+      alternateProfiles: [],
+      recoveryCheckCommand: '',
+    };
+  }
+  return {
+    status: handoff.status,
+    path,
+    blocker: handoff.blocker || '',
+    publishingProfile: handoff.publishingProfile || null,
+    alternateProfiles: handoff.alternateProfiles || [],
+    recoveryCheckCommand: handoff.recoveryCheckCommand || '',
+  };
+}
+
+function formatLoginHandoffForBrief(handoff, browserReadiness) {
+  if (browserReadiness?.status !== 'needs_x_login') return '';
+  if (!handoff || handoff.status === 'not_generated') {
+    return `## Login Handoff
+
+- Report: \`${handoff?.path || 'data/social-growth/login-handoff.md'}\`
+- Status: not_generated
+
+Run \`social:scheduled-run\` or \`social:automation\` to refresh the full login handoff before trying alternate Chrome profiles.
+
+`;
+  }
+
+  const publishing = handoff.publishingProfile || {};
+  const alternates = handoff.alternateProfiles || [];
+  const lockedAlternates = alternates.filter((profile) => profile.requiresChromeClose);
+  const firstAlternate = alternates[0] || null;
+  const firstAlternateCommand = firstAlternate?.loginRecoveryCommand
+    ? `
+First alternate profile command:
+
+\`\`\`bash
+${firstAlternate.loginRecoveryCommand}
+\`\`\`
+`
+    : '';
+  const closeChromeNote = lockedAlternates.length
+    ? `- Locked normal Chrome profiles: ${lockedAlternates.map((profile) => profile.profileDirectory).join(', ')}. Close normal Chrome before using those profile commands.`
+    : '- Locked normal Chrome profiles: none detected.';
+
+  return `## Login Handoff
+
+- Report: \`${handoff.path}\`
+- Status: ${handoff.status}
+- Publishing profile: ${publishing.profileDirectory || 'default'} (${publishing.state || 'unknown'})
+- Current URL: ${publishing.currentUrl || 'unknown'}
+- Alternate profiles: ${alternates.length}
+${closeChromeNote}
+
+After logging into \`@Clean993\` in the publishing Chrome window, run:
+
+\`\`\`bash
+${publishing.loginRecoveryCommand || loginRecoveryFallback(browserReadiness)}
+\`\`\`
+${firstAlternateCommand}
+After login is recovered, rerun:
+
+\`\`\`bash
+${handoff.recoveryCheckCommand || 'npm run social:scheduled-run -- --day today --slot 1 --publishMode thread_fallback'}
+\`\`\`
+
+`;
+}
+
+function loginRecoveryFallback(browserReadiness) {
+  const args = ['npm run social:login-recovery --'];
+  if (browserReadiness?.publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
+  if (browserReadiness?.profileDir) args.push(`--xProfileDir ${shellQuote(browserReadiness.profileDir)}`);
+  if (browserReadiness?.profileDirectory) args.push(`--xProfileDirectory ${shellQuote(browserReadiness.profileDirectory)}`);
+  return args.join(' ');
 }
 
 function composeDraftResolutionCommand(brief) {

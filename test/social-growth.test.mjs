@@ -1611,14 +1611,35 @@ test('daily execution brief lists manual fallback commands for every ready slot'
         status: 'needs_x_login',
         blockers: ['The Chrome profile used for publishing is not logged into X.'],
       },
+      loginHandoff: {
+        status: 'needs_x_login',
+        blocker: 'The Chrome profile used for publishing is not logged into X.',
+        publishingProfile: {
+          profileDirectory: 'Profile 1',
+          state: 'debuggable',
+          currentUrl: 'https://x.com/i/flow/login?redirect_after_login=%2Fcompose%2Fpost',
+          loginRecoveryCommand: 'node tools/social-growth/cli.mjs login-recovery --day 1 --slot 1 --publish-mode thread_fallback --x-profile-directory Profile\\ 1',
+        },
+        alternateProfiles: [{
+          profileDir: '/Users/test/Library/Application Support/Google/Chrome',
+          profileDirectory: 'Profile 3',
+          requiresChromeClose: true,
+          loginRecoveryCommand: 'node tools/social-growth/cli.mjs login-recovery --day 1 --slot 1 --x-profile-dir /Users/test/Chrome --x-profile-directory Profile\\ 3',
+        }],
+        recoveryCheckCommand: 'node tools/social-growth/cli.mjs scheduled-run --day 1 --slot 1 --publish-mode thread_fallback --x-profile-directory Profile\\ 1',
+      },
       env: {},
     });
     const markdown = formatDailyExecutionBriefMarkdown(brief);
 
     assert.equal(brief.manualPublishFallback.available, true);
+    assert.equal(brief.loginHandoff.status, 'needs_x_login');
     assert.equal(brief.manualPublishFallback.items.length, brief.dayReadiness.readySlots);
     assert.ok(brief.manualPublishFallback.items.length > 1);
     assert.equal(brief.manualPublishFallback.batchUrlTemplatePath, 'data/social-growth/manual-publish-kits/day1-published-urls.json');
+    assert.match(markdown, /Login Handoff/);
+    assert.match(markdown, /Locked normal Chrome profiles: Profile 3/);
+    assert.match(markdown, /scheduled-run --day 1 --slot 1/);
     assert.match(markdown, /manual-publish-kits\/day1-slot1-/);
     assert.match(markdown, /manual-publish-kits\/day1-slot2-/);
     assert.match(markdown, /manual-publish-kits\/day1-ready-slots\.md/);
