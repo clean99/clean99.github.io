@@ -1770,6 +1770,9 @@ async function runPostPublishRecoveryBatch(options = {}) {
   const replyOutDir = options.replyOutDir === 'false'
     ? null
     : (options.replyOutDir || 'data/social-growth/thread-replies');
+  const launchWindowDir = options.launchWindowDir === 'false'
+    ? null
+    : (options.launchWindowDir || 'data/social-growth/launch-windows');
   const template = await readJson(inputPath);
   const queue = await readJson(queuePath);
   const publishedAt = options.publishedAt || new Date().toISOString();
@@ -1805,6 +1808,7 @@ async function runPostPublishRecoveryBatch(options = {}) {
       },
       metricsTemplate: null,
       replyHandoffs: [],
+      launchWindows: [],
       metricsCycle: null,
     };
   }
@@ -1850,6 +1854,41 @@ async function runPostPublishRecoveryBatch(options = {}) {
       });
     }
   }
+  const launchWindows = [];
+  if (launchWindowDir) {
+    for (const item of normalizedItems) {
+      const launchWindowPath = `${launchWindowDir}/${safePathSegment(item.id)}.md`;
+      const launchWindow = buildLaunchWindowPlan({
+        queue: updatedQueue,
+        id: item.id,
+        xPostUrl: item.xPostUrl,
+        publishedAt: item.publishedAt,
+        generatedAt: item.publishedAt,
+        queuePath,
+        ledgerPath,
+        metricsPath: metricsPath || 'data/social-growth/posts.local.json',
+        profileTextPath: options.profileText || 'data/social-growth/profile.local.txt',
+        postTextDir: options.postTextDir || 'data/social-growth/post-texts',
+        replyOutPath: replyOutDir
+          ? `${replyOutDir}/${safePathSegment(item.id)}.md`
+          : 'data/social-growth/thread-reply-handoff.md',
+        cycleOutPath: options.cycleOut || 'data/social-growth/metrics-cycle.md',
+        growthReportPath: options.growthReportOut || 'data/social-growth/growth-report.md',
+        recommendationsPath: options.recommendationsOut || 'data/social-growth/recommendations.md',
+        funnelPath: options.funnelOut || 'data/social-growth/funnel.md',
+        account: options.account || '@Clean993',
+        xProfileDir: options.xProfileDir || options.profileDir,
+        xProfileDirectory: options.xProfileDirectory || options.profileDirectory,
+      });
+      await writeLaunchWindowPlan(launchWindow, launchWindowPath);
+      launchWindows.push({
+        id: item.id,
+        path: launchWindowPath,
+        status: launchWindow.status,
+        checkpoints: launchWindow.checkpoints.length,
+      });
+    }
+  }
 
   const metricsCycle = options.metricsCycle === 'false'
     ? null
@@ -1891,6 +1930,7 @@ async function runPostPublishRecoveryBatch(options = {}) {
     },
     metricsTemplate: refreshedMetrics,
     replyHandoffs,
+    launchWindows,
     metricsCycle,
   };
 }

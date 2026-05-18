@@ -5794,6 +5794,7 @@ test('post-publish recovery batch marks filled URLs and skips blank slots', asyn
     const queuePath = join(outDir, 'queue.json');
     const metricsPath = join(outDir, 'posts.local.json');
     const replyOutDir = join(outDir, 'thread-replies');
+    const launchWindowDir = join(outDir, 'launch-windows');
     const inputPath = join(outDir, 'published-urls.json');
     const template = {
       version: 1,
@@ -5829,6 +5830,7 @@ test('post-publish recovery batch marks filled URLs and skips blank slots', asyn
       '--metrics', metricsPath,
       '--metrics-date', '2026-05-19',
       '--reply-out-dir', replyOutDir,
+      '--launch-window-dir', launchWindowDir,
       '--metrics-cycle', 'false',
     ], {
       cwd: process.cwd(),
@@ -5841,10 +5843,14 @@ test('post-publish recovery batch marks filled URLs and skips blank slots', asyn
     const metrics = JSON.parse(await readFile(metricsPath, 'utf8'));
     const firstReplyHandoff = await readFile(join(replyOutDir, `${queue.items[0].id}.md`), 'utf8');
     const secondReplyHandoff = await readFile(join(replyOutDir, `${queue.items[1].id}.md`), 'utf8');
+    const firstLaunchWindow = await readFile(join(launchWindowDir, `${queue.items[0].id}.md`), 'utf8');
+    const secondLaunchWindow = await readFile(join(launchWindowDir, `${queue.items[1].id}.md`), 'utf8');
 
     assert.equal(payload.status, 'published');
     assert.equal(payload.recovered, 2);
     assert.equal(payload.pending, 1);
+    assert.equal(payload.launchWindows.length, 2);
+    assert.equal(payload.launchWindows[0].status, 'ready_for_early_tracking');
     assert.equal(payload.publicActions.typedText, false);
     assert.equal(updatedQueue.items[0].status, 'published');
     assert.equal(updatedQueue.items[0].xPostUrl, 'https://x.com/Clean993/status/1111111111111111111');
@@ -5855,6 +5861,9 @@ test('post-publish recovery batch marks filled URLs and skips blank slots', asyn
     assert.equal(metrics.posts[0].url, 'https://x.com/Clean993/status/1111111111111111111');
     assert.match(firstReplyHandoff, /in_reply_to=1111111111111111111/);
     assert.match(secondReplyHandoff, /in_reply_to=2222222222222222222/);
+    assert.match(firstLaunchWindow, /Status: ready_for_early_tracking/);
+    assert.match(firstLaunchWindow, /2026-05-19T01:15:00.000Z/);
+    assert.match(secondLaunchWindow, /2026-05-19T02:15:00.000Z/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
