@@ -124,6 +124,7 @@ export async function runScheduledGrowthLoop({
     automation: {
       status: automation.status,
       blockers: automation.blockers,
+      profileConversion: automation.profileConversion,
       engagement: automation.engagement,
     },
     metrics: {
@@ -155,6 +156,9 @@ export function formatScheduledRunReport(result) {
   const blockers = result.automation.blockers.length
     ? result.automation.blockers.map((blocker) => `- ${blocker}`).join('\n')
     : '- No local blockers.';
+  const profileIssues = result.automation.profileConversion?.issues?.length
+    ? result.automation.profileConversion.issues.map((issue) => `- ${issue}`).join('\n')
+    : '- No profile conversion issues.';
 
   return `# Scheduled X Growth Run
 
@@ -184,6 +188,13 @@ Status: ${result.status}
 Blockers:
 
 ${blockers}
+
+## Profile Conversion
+
+- Status: ${result.automation.profileConversion?.status || 'unknown'}
+- Issues: ${result.automation.profileConversion?.failedChecks ?? 'unknown'}
+
+${profileIssues}
 
 ## Metrics
 

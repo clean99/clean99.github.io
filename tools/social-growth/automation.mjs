@@ -209,10 +209,8 @@ export async function runSafeAutomationCycle({
     blockers: dedupe([
       ...preflight.blockers,
       ...xPublishPrep.blockers,
-      ...profileAudit.checks
-        .filter((check) => check.status !== 'pass')
-        .map((check) => check.message),
     ]),
+    profileConversion: summarizeProfileConversion(profileAudit),
     paths: {
       queue: queuePath,
       dailyReport: dailyReportPath,
@@ -253,6 +251,9 @@ export function formatAutomationReport(result) {
   const blockers = result.blockers.length
     ? result.blockers.map((blocker) => `- ${blocker}`).join('\n')
     : '- No local blockers.';
+  const profileIssues = result.profileConversion?.issues?.length
+    ? result.profileConversion.issues.map((issue) => `- ${issue}`).join('\n')
+    : '- No profile conversion issues.';
 
   return `# X Growth Automation Run
 
@@ -289,6 +290,13 @@ Status: ${result.status}
 - Captured opportunities: ${result.engagement.capturedOpportunities}
 - Ready reply candidates: ${result.engagement.readyCandidates}
 
+## Profile Conversion
+
+- Status: ${result.profileConversion?.status || 'unknown'}
+- Issues: ${result.profileConversion?.failedChecks ?? 'unknown'}
+
+${profileIssues}
+
 ## Daily Brief
 
 - Status: ${result.dailyBrief.status}
@@ -318,4 +326,16 @@ function toIsoString(value) {
 
 function dedupe(items) {
   return [...new Set(items)];
+}
+
+function summarizeProfileConversion(profileAudit) {
+  const issues = (profileAudit?.checks || [])
+    .filter((check) => check.status !== 'pass')
+    .map((check) => check.message);
+
+  return {
+    status: profileAudit?.status || 'unknown',
+    failedChecks: issues.length,
+    issues,
+  };
 }

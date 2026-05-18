@@ -279,6 +279,7 @@ if (command === 'articles') {
     status: result.status,
     selected: result.selected,
     blockers: result.blockers,
+    profileConversion: result.profileConversion,
     engagement: result.engagement,
     paths: result.paths,
   }, null, 2));

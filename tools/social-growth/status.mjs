@@ -220,7 +220,6 @@ function statusName({ validation, weeklyPlan, preflight }) {
   if (validation.status !== 'pass' && (!weeklyPlan || !weeklyPlan.candidates.availableValidatedDrafts)) return 'blocked_quality';
   if (!weeklyPlan) return 'blocked_no_ledger';
   if (preflight.status === 'blocked') return 'blocked_preflight';
-  if (weeklyPlan.candidates.missingSlots > 0) return 'needs_candidates';
   return 'ready_for_browser_confirmation';
 }
 
@@ -235,11 +234,13 @@ function nextActions({
 }) {
   const actions = [];
 
-  if (validation.status !== 'pass') {
+  if (preflight.status === 'blocked') {
+    actions.push(...preflightActions(preflight, { day, slot }));
+  } else {
     actions.push({
       priority: 'P0',
-      action: 'Fix queue candidates that failed the publishing quality gate before opening Chrome.',
-      reason: `${validation.failed} queue items failed validation.`,
+      action: 'Prepare the X Article and image-backed short post in Chrome, stopping before every public action for confirmation.',
+      reason: 'Preflight has no blockers.',
     });
   }
 
@@ -249,21 +250,22 @@ function nextActions({
       action: 'Initialize or restore the growth ledger, then regenerate the weekly plan.',
       reason: 'Weekly pacing cannot be computed without a ledger.',
     });
-  } else if (weeklyPlan.candidates.missingSlots > 0) {
+  }
+
+  if (validation.status !== 'pass') {
+    const hasReadySelection = preflight.status !== 'blocked';
     actions.push({
-      priority: 'P0',
-      action: 'Run the daily queue generator or add more Chinese blog candidates to fill the weekly cadence.',
-      reason: `${weeklyPlan.candidates.missingSlots} publish slots are unfilled.`,
+      priority: hasReadySelection ? 'P2' : 'P0',
+      action: 'Fix queue candidates that failed the publishing quality gate.',
+      reason: `${validation.failed} queue items failed validation; ${validation.passed} items are still usable now.`,
     });
   }
 
-  if (preflight.status === 'blocked') {
-    actions.push(...preflightActions(preflight, { day, slot }));
-  } else {
+  if (weeklyPlan?.candidates?.missingSlots > 0) {
     actions.push({
-      priority: 'P0',
-      action: 'Prepare the X Article and image-backed short post in Chrome, stopping before every public action for confirmation.',
-      reason: 'Preflight has no blockers.',
+      priority: preflight.status === 'blocked' ? 'P1' : 'P2',
+      action: 'Add or improve more Chinese blog candidates to fill the weekly cadence.',
+      reason: `${weeklyPlan.candidates.missingSlots} later publish slots are unfilled; this should not block a ready current slot.`,
     });
   }
 

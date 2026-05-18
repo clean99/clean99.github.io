@@ -1277,7 +1277,9 @@ test('safe automation cycle prepares local artifacts without public X actions', 
 
     assert.equal(result.status, 'blocked_preflight');
     assert.match(result.blockers.join('\n'), /Image file is missing/);
-    assert.match(result.blockers.join('\n'), /pin a post/);
+    assert.ok(!result.blockers.join('\n').includes('pin a post'));
+    assert.equal(result.profileConversion.status, 'needs_work');
+    assert.match(result.profileConversion.issues.join('\n'), /pin a post/);
     assert.ok(result.paths.imageBrief.endsWith('.md'));
     assert.equal(result.paths.dailyBrief, join(outDir, 'daily-brief.md'));
     assert.equal(result.paths.xPublishPrep, join(outDir, 'x-publish-prep.md'));
@@ -1291,6 +1293,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(report, /X publish prep/);
     assert.match(report, /Engagement plan/);
     assert.match(report, /Profile update package/);
+    assert.match(report, /Profile Conversion/);
     assert.match(status, /Profile Conversion/);
     assert.match(preflight, /Status: blocked/);
     assert.match(profileAudit, /Status: needs_work/);
@@ -1384,9 +1387,10 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const metricsReport = await readFile(join(outDir, 'metrics-cycle.md'), 'utf8');
     const funnelReport = await readFile(join(outDir, 'funnel.md'), 'utf8');
 
-    assert.equal(result.status, 'needs_candidates');
-    assert.equal(result.automation.status, 'needs_candidates');
+    assert.equal(result.status, 'ready_for_browser_confirmation');
+    assert.equal(result.automation.status, 'ready_for_browser_confirmation');
     assert.equal(result.metrics.status, 'needs_published_posts');
+    assert.equal(result.automation.profileConversion.status, 'pass');
     assert.equal(result.automation.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.selected.id, expectedQueue.items[0].id);
@@ -1394,6 +1398,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Daily brief/);
     assert.match(scheduledReport, /Engagement search/);
     assert.match(scheduledReport, /Engagement plan/);
+    assert.match(scheduledReport, /Profile Conversion/);
     assert.match(scheduledReport, /Funnel report/);
     assert.match(scheduledReport, /safe for recurring execution/);
     assert.match(metricsReport, /No browser publish/);
