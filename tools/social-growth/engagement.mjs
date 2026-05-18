@@ -3,7 +3,9 @@ import { basename, dirname, extname, join } from 'node:path';
 
 const DEFAULT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
 const DEFAULT_ENGAGEMENT_PLAN_PATH = 'data/social-growth/engagement-plan.md';
+const DEFAULT_ENGAGEMENT_SEARCH_PATH = 'data/social-growth/engagement-search.md';
 const REPLY_MAX_CHARS = 260;
+const DEFAULT_SEARCH_LIMIT = 8;
 const LOW_VALUE_PATTERNS = [
   /求关注/u,
   /关注我/u,
@@ -111,6 +113,84 @@ export async function writeEngagementPlan(plan, filePath = DEFAULT_ENGAGEMENT_PL
   await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, `${formatEngagementPlanMarkdown(plan).trimEnd()}\n`);
   return filePath;
+}
+
+export function buildEngagementSearchPlan({
+  queue,
+  now = new Date(),
+  limit = DEFAULT_SEARCH_LIMIT,
+  daysBack = 7,
+} = {}) {
+  const generatedAt = toIsoString(now);
+  const items = (queue?.items || []).filter((item) => item.status !== 'published');
+  const topicScores = scoreQueueTopics(items)
+    .slice(0, Math.max(1, Number(limit || DEFAULT_SEARCH_LIMIT)));
+  const since = dateDaysBefore(now, Number(daysBack || 7));
+  const searches = topicScores
+    .flatMap((topic) => buildSearchesForTopic(topic, since))
+    .slice(0, Number(limit || DEFAULT_SEARCH_LIMIT));
+
+  return {
+    version: 1,
+    generatedAt,
+    status: searches.length ? 'ready_for_read_only_search' : 'needs_queue',
+    since,
+    queueCandidates: items.length,
+    searchCount: searches.length,
+    searches,
+    captureDirectory: DEFAULT_OPPORTUNITY_DIR,
+    boundary: 'Read-only discovery only. Opening a search URL is allowed; replying, liking, reposting, following, quoting, or posting still requires action-time confirmation.',
+  };
+}
+
+export async function writeEngagementSearchPlan(plan, filePath = DEFAULT_ENGAGEMENT_SEARCH_PATH) {
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${formatEngagementSearchPlanMarkdown(plan).trimEnd()}\n`);
+  return filePath;
+}
+
+export function formatEngagementSearchPlanMarkdown(plan) {
+  const searches = plan.searches.length
+    ? plan.searches.map(formatSearchItem).join('\n\n')
+    : '- No search queries. Generate or restore the Chinese queue first.';
+
+  return `# X Engagement Search Plan
+
+Generated at: ${plan.generatedAt}
+Status: ${plan.status}
+
+## Scope
+
+- Draft queue candidates: ${plan.queueCandidates}
+- Search queries: ${plan.searchCount}
+- Since: ${plan.since}
+
+Use these searches to find relevant Chinese technical threads before building the reply plan.
+
+## Queries
+
+${searches}
+
+## Capture
+
+For each useful thread, copy visible thread text into:
+
+\`\`\`text
+${plan.captureDirectory}/<short-name>.txt
+\`\`\`
+
+Then run:
+
+\`\`\`bash
+npm run social:engagement -- --opportunities ${plan.captureDirectory} --out data/social-growth/engagement-plan.md
+\`\`\`
+
+Capture only threads where a reply can add a mechanism, proof caveat, checklist, or correction. Skip trends, outrage, giveaways, job posts, and generic engagement bait.
+
+## Boundary
+
+${plan.boundary}
+`;
 }
 
 export function formatEngagementPlanMarkdown(plan) {
@@ -344,6 +424,84 @@ ${item.draftReply}
 \`\`\``;
 }
 
+function formatSearchItem(item, index) {
+  return `### ${index + 1}. ${item.topic}
+
+- Query: \`${item.query}\`
+- Open: ${item.url}
+- Why: ${item.reason}
+- Queue anchors: ${item.queueIds.join(', ')}
+- Capture target: \`${item.captureHint}\``;
+}
+
+function scoreQueueTopics(items) {
+  const groups = new Map();
+  for (const item of items) {
+    const itemText = [
+      item.articleSlug,
+      item.shortPost,
+      item.xArticle?.title,
+      item.xArticle?.body,
+      item.media?.prompt,
+    ].join('\n');
+
+    for (const rule of TECH_TOPIC_RULES) {
+      const matches = countPatternMatches(itemText, rule.patterns);
+      if (!matches) continue;
+
+      const group = groups.get(rule.label) || {
+        label: rule.label,
+        keywords: rule.keywords,
+        score: 0,
+        queueIds: [],
+      };
+      group.score += matches;
+      group.queueIds.push(item.id);
+      groups.set(rule.label, group);
+    }
+  }
+
+  return [...groups.values()]
+    .map((group) => ({
+      ...group,
+      queueIds: [...new Set(group.queueIds)].slice(0, 5),
+    }))
+    .sort((a, b) => b.score - a.score || a.label.localeCompare(b.label));
+}
+
+function buildSearchesForTopic(topic, since) {
+  const keywordPairs = searchKeywordPairs(topic.keywords);
+  return keywordPairs.map((keywords, index) => {
+    const query = `${keywords.join(' ')} since:${since} lang:zh -filter:replies`;
+    return {
+      topic: topic.label,
+      query,
+      url: xSearchUrl(query),
+      reason: `Find recent Chinese ${topic.label} threads that match current queue anchors.`,
+      queueIds: topic.queueIds,
+      captureHint: `${DEFAULT_OPPORTUNITY_DIR}/${topicSlug(topic.label)}-${index + 1}.txt`,
+    };
+  });
+}
+
+function searchKeywordPairs(keywords) {
+  const cleaned = keywords.filter((keyword) => !/[A-Za-z]+-[A-Za-z]+/.test(keyword));
+  if (cleaned.length <= 2) return [cleaned];
+  return [
+    cleaned.slice(0, 3),
+    [cleaned[0], cleaned[3] || cleaned[1], cleaned[4] || cleaned[2]].filter(Boolean),
+  ];
+}
+
+function xSearchUrl(query) {
+  const params = new URLSearchParams({
+    q: query,
+    src: 'typed_query',
+    f: 'live',
+  });
+  return `https://x.com/search?${params.toString()}`;
+}
+
 function planStatus({ ready, opportunityTexts, items }) {
   if (!items.length) return 'needs_queue';
   if (!opportunityTexts.length) return 'needs_opportunity_capture';
@@ -397,10 +555,30 @@ function clamp(value, max) {
 }
 
 function safeId(value) {
-  return String(value || 'opportunity').replace(/[^A-Za-z0-9._=-]+/g, '-');
+  const cleaned = String(value || 'opportunity')
+    .replace(/[^A-Za-z0-9._=-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return cleaned || 'opportunity';
+}
+
+function topicSlug(label) {
+  return {
+    'AI 工程化': 'ai-engineering',
+    前端性能: 'frontend-performance',
+    React: 'react',
+    测试与验证: 'testing-verification',
+    '技术博客 SEO': 'technical-blog-seo',
+    'Spec-Driven Coding': 'spec-driven-coding',
+  }[label] || safeId(label);
 }
 
 function toIsoString(value) {
   if (value instanceof Date) return value.toISOString();
   return new Date(value).toISOString();
+}
+
+function dateDaysBefore(value, days) {
+  const date = value instanceof Date ? value : new Date(value);
+  const copy = new Date(date.getTime() - Math.max(0, days) * 86_400_000);
+  return copy.toISOString().slice(0, 10);
 }

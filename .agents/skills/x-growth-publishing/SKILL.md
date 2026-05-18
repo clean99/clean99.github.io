@@ -40,6 +40,7 @@ npm run social:automation -- --day 1 --slot 1
 This safe automation cycle creates or refreshes `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, writes `data/social-growth/daily-run.md`, writes `data/social-growth/weekly-plan.md` when the ledger exists, writes `data/social-growth/status.md`, writes `data/social-growth/publish-preflight.md`, writes `data/social-growth/profile-audit.md`, and writes `data/social-growth/automation-run.md`.
 It also writes `data/social-growth/profile-update.md` when profile conversion needs a browser handoff for display name, bio, link, or pinned post.
 It writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` commands that can prefill Chrome for the X Article and image-backed short post while preserving the final confirmation boundary.
+It writes `data/social-growth/engagement-search.md` with read-only X search URLs for finding relevant technical threads.
 It writes `data/social-growth/engagement-plan.md` from copied relevant thread opportunities when available; missing opportunities are a capture task, not an automation blocker.
 
 For day-level readiness across all publish slots, run:
@@ -267,6 +268,12 @@ npm run social:scheduled-run -- --day 1 --slot 1
 This combines safe local publishing preparation with read-only metrics-cycle parsing and writes `data/social-growth/scheduled-run.md`.
 
 For selective distribution into relevant technical conversations, capture copied visible X thread text into `data/social-growth/engagement-opportunities/*.txt`, then run:
+
+```bash
+npm run social:engagement-search -- --out data/social-growth/engagement-search.md
+```
+
+Open only the read-only search URLs from that file to find candidate threads. Then save copied visible X thread text into `data/social-growth/engagement-opportunities/*.txt` and run:
 
 ```bash
 npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md

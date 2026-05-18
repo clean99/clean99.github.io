@@ -23,9 +23,12 @@ import { expandQueueOptionsForWeeklyCoverage, runDailyGrowthPlan, selectPackageI
 import { buildDayReadiness, formatDayReadinessMarkdown, writeDayReadiness } from '../tools/social-growth/dayReadiness.mjs';
 import {
   buildEngagementPlan,
+  buildEngagementSearchPlan,
   formatEngagementPlanMarkdown,
+  formatEngagementSearchPlanMarkdown,
   readEngagementOpportunityTexts,
   writeEngagementPlan,
+  writeEngagementSearchPlan,
 } from '../tools/social-growth/engagement.mjs';
 import {
   appendSnapshot,
@@ -840,6 +843,56 @@ test('engagement plan asks for captured opportunities before browser work', () =
   assert.match(plan.boundary, /Do not reply/);
 });
 
+test('engagement search plan creates read-only X searches from queue topics', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-engagement-search-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+      {
+        title: 'React Performance Optimization',
+        excerpt: 'React 性能优化要先定位 render、network 和 interaction 成本。',
+        slug: 'React-Performance-Optimization',
+        lang: 'zh',
+        tags: ['React', 'Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/react-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 2,
+    });
+    const plan = buildEngagementSearchPlan({
+      queue,
+      now: '2026-05-18T00:00:00.000Z',
+      limit: 4,
+      daysBack: 3,
+    });
+    const markdown = formatEngagementSearchPlanMarkdown(plan);
+    const outPath = join(outDir, 'engagement-search.md');
+    await writeEngagementSearchPlan(plan, outPath);
+    const persisted = await readFile(outPath, 'utf8');
+
+    assert.equal(plan.status, 'ready_for_read_only_search');
+    assert.equal(plan.since, '2026-05-15');
+    assert.ok(plan.searches.length <= 4);
+    assert.ok(plan.searches.some((item) => item.topic === 'AI 工程化'));
+    assert.ok(plan.searches.every((item) => item.url.startsWith('https://x.com/search?')));
+    assert.ok(plan.searches.every((item) => item.query.includes('lang:zh')));
+    assert.ok(plan.searches.every((item) => item.captureHint.includes('engagement-opportunities')));
+    assert.match(markdown, /Read-only discovery/);
+    assert.match(persisted, /X Engagement Search Plan/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('daily growth run writes queue, packages, and a browser-safe report', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-'));
   try {
@@ -981,6 +1034,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
+      engagementSearchPath: join(outDir, 'engagement-search.md'),
       xSkillDir: skillDir,
       xBunCommand: 'bun',
       packageLimit: 2,
@@ -998,6 +1052,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const profileAudit = await readFile(join(outDir, 'profile-audit.md'), 'utf8');
     const profileUpdate = await readFile(join(outDir, 'profile-update.md'), 'utf8');
     const xPrep = await readFile(join(outDir, 'x-publish-prep.md'), 'utf8');
+    const engagementSearch = await readFile(join(outDir, 'engagement-search.md'), 'utf8');
     const engagementPlan = await readFile(join(outDir, 'engagement-plan.md'), 'utf8');
 
     assert.equal(result.status, 'blocked_preflight');
@@ -1005,7 +1060,9 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(result.blockers.join('\n'), /pin a post/);
     assert.ok(result.paths.imageBrief.endsWith('.md'));
     assert.equal(result.paths.xPublishPrep, join(outDir, 'x-publish-prep.md'));
+    assert.equal(result.paths.engagementSearch, join(outDir, 'engagement-search.md'));
     assert.equal(result.paths.engagementPlan, join(outDir, 'engagement-plan.md'));
+    assert.equal(result.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.engagement.status, 'needs_opportunity_capture');
     assert.match(report, /No public X action was performed/);
     assert.match(report, /X publish prep/);
@@ -1016,6 +1073,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(profileAudit, /Status: needs_work/);
     assert.match(profileUpdate, /final profile save click/);
     assert.match(xPrep, /baoyu-post-to-x Bridge/);
+    assert.match(engagementSearch, /X Engagement Search Plan/);
     assert.match(engagementPlan, /needs_opportunity_capture/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
@@ -1086,6 +1144,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
+      engagementSearchPath: join(outDir, 'engagement-search.md'),
       xSkillDir: skillDir,
       xBunCommand: 'bun',
       queueOptions: {
@@ -1102,9 +1161,11 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.status, 'needs_candidates');
     assert.equal(result.automation.status, 'needs_candidates');
     assert.equal(result.metrics.status, 'needs_published_posts');
+    assert.equal(result.automation.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.selected.id, expectedQueue.items[0].id);
     assert.match(scheduledReport, /Scheduled X Growth Run/);
+    assert.match(scheduledReport, /Engagement search/);
     assert.match(scheduledReport, /Engagement plan/);
     assert.match(scheduledReport, /safe for recurring execution/);
     assert.match(metricsReport, /No browser publish/);

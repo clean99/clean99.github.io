@@ -8,8 +8,10 @@ import {
 } from './imageBrief.mjs';
 import {
   buildEngagementPlan,
+  buildEngagementSearchPlan,
   readEngagementOpportunityTexts,
   writeEngagementPlan,
+  writeEngagementSearchPlan,
 } from './engagement.mjs';
 import { readJson } from './queue.mjs';
 import {
@@ -49,6 +51,7 @@ const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
 const DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
 const DEFAULT_ENGAGEMENT_PLAN_PATH = 'data/social-growth/engagement-plan.md';
+const DEFAULT_ENGAGEMENT_SEARCH_PATH = 'data/social-growth/engagement-search.md';
 
 export async function runSafeAutomationCycle({
   articles,
@@ -72,6 +75,7 @@ export async function runSafeAutomationCycle({
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
+  engagementSearchPath = DEFAULT_ENGAGEMENT_SEARCH_PATH,
   engagementLimit = 5,
   xSkillDir,
   xBunCommand,
@@ -143,6 +147,12 @@ export async function runSafeAutomationCycle({
   await writeXPublishPrep(xPublishPrep, xPublishPrepPath);
 
   const engagementOpportunities = await readEngagementOpportunityTexts(engagementOpportunityDir);
+  const engagementSearch = buildEngagementSearchPlan({
+    queue,
+    now,
+    limit: engagementLimit,
+  });
+  await writeEngagementSearchPlan(engagementSearch, engagementSearchPath);
   const engagementPlan = buildEngagementPlan({
     queue,
     opportunityTexts: engagementOpportunities,
@@ -188,11 +198,14 @@ export async function runSafeAutomationCycle({
       profileUpdate: profileUpdatePath,
       imageBrief: imageBriefOutPath,
       xPublishPrep: xPublishPrepPath,
+      engagementSearch: engagementSearchPath,
       engagementPlan: engagementPlanPath,
       automationReport: automationReportPath,
     },
     engagement: {
       status: engagementPlan.status,
+      searchStatus: engagementSearch.status,
+      searchQueries: engagementSearch.searchCount,
       readyCandidates: engagementPlan.selectedCount,
       capturedOpportunities: engagementPlan.opportunityCount,
     },
@@ -231,11 +244,14 @@ Status: ${result.status}
 - Profile update package: \`${result.paths.profileUpdate}\`
 - Image brief: \`${result.paths.imageBrief || 'not generated'}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
+- Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
 
 ## Engagement
 
 - Status: ${result.engagement.status}
+- Search status: ${result.engagement.searchStatus}
+- Search queries: ${result.engagement.searchQueries}
 - Captured opportunities: ${result.engagement.capturedOpportunities}
 - Ready reply candidates: ${result.engagement.readyCandidates}
 

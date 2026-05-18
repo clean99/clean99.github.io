@@ -18,9 +18,12 @@ import {
 } from './dayReadiness.mjs';
 import {
   buildEngagementPlan,
+  buildEngagementSearchPlan,
   formatEngagementPlanMarkdown,
+  formatEngagementSearchPlanMarkdown,
   readEngagementOpportunityTexts,
   writeEngagementPlan,
+  writeEngagementSearchPlan,
 } from './engagement.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
 import {
@@ -242,6 +245,7 @@ if (command === 'articles') {
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
     engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
     engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
+    engagementSearchPath: args.engagementSearchOut || 'data/social-growth/engagement-search.md',
     engagementLimit: args.engagementLimit || 5,
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
@@ -291,6 +295,7 @@ if (command === 'articles') {
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
     engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
     engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
+    engagementSearchPath: args.engagementSearchOut || 'data/social-growth/engagement-search.md',
     engagementLimit: args.engagementLimit || 5,
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
@@ -349,6 +354,22 @@ if (command === 'articles') {
     console.log(JSON.stringify(plan, null, 2));
   } else {
     console.log(formatEngagementPlanMarkdown(plan));
+  }
+} else if (command === 'engagement-search') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const plan = buildEngagementSearchPlan({
+    queue,
+    now: args.now ? new Date(args.now) : new Date(),
+    limit: args.limit || 8,
+    daysBack: args.daysBack || 7,
+  });
+  if (args.out) {
+    await writeEngagementSearchPlan(plan, args.out);
+    console.log(`Wrote X engagement search plan to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(plan, null, 2));
+  } else {
+    console.log(formatEngagementSearchPlanMarkdown(plan));
   }
 } else if (command === 'copy-template') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
@@ -718,6 +739,7 @@ function printHelp() {
   npm run social:automation -- --day 1 --slot 1
   npm run social:scheduled-run -- --day 1 --slot 1
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
+  npm run social:engagement-search -- --out data/social-growth/engagement-search.md
   npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md
   npm run social:copy-template -- --day 1 --slot 1
   npm run social:x-tech-brief -- --day 1 --slot 1
