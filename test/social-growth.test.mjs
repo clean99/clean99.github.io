@@ -661,6 +661,42 @@ test('Chinese short posts sell the image and X Article before the blog link', ()
   assert.equal(validateQueueItem(item).status, 'pass');
 });
 
+test('distinguishes workspace tab performance from AI performance loop copy', () => {
+  const queue = buildPublishQueue([
+    {
+      title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+      excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+      slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+      lang: 'zh',
+      tags: ['Frontend', 'Web Performance', 'Software Engineering', 'React'],
+      url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+    },
+    {
+      title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+      excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+      slug: 'Automated-AI-Performance-Optimization',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering', 'Web Performance'],
+      url: 'https://clean99.github.io/zh/automated-ai-performance/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 2,
+  });
+
+  const workspace = queue.items.find((item) => item.articleSlug === 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure' && item.variant === 'strong-thesis');
+  const aiLoop = queue.items.find((item) => item.articleSlug === 'Automated-AI-Performance-Optimization' && item.variant === 'strong-thesis');
+
+  assert.match(workspace.shortPost, /Workspace Tab 性能/);
+  assert.match(workspace.shortPost, /first load、hot switch 和 background pressure/);
+  assert.match(workspace.xArticle.body, /strict FMP、tab-switch probe 和 stress gate/);
+  assert.match(workspace.media.prompt, /Workspace Tab 性能/);
+  assert.match(aiLoop.shortPost, /AI 性能优化/);
+  assert.notEqual(workspace.shortPost, aiLoop.shortPost);
+  assert.equal(validateQueue(queue).status, 'pass');
+});
+
 test('filters heading-glued fragments from Chinese X Article extraction', () => {
   const points = extractKeyPoints([
     '本文从第一性原理出发，拆解性能优化的自动化闭环。',

@@ -161,6 +161,27 @@ const ARTICLE_FRAMES = [
     },
   },
   {
+    pattern: /Workspace v2 Tab System 性能|Tab System 性能|Hot Switch|Background Pressure|热切换|后台任务|后台压力/i,
+    frame: {
+      topic: 'Workspace Tab 性能',
+      falseFrame: '只盯一个 FMP 数字或者无限保活 tab',
+      betterFrame: '把 first load、hot switch 和 background pressure 分成三套指标',
+      mechanism: 'path -> metric -> scheduler -> gate',
+      imageTitle: 'Workspace Tab 性能分层',
+      diagramText: 'first load -> hot switch -> background pressure -> gates',
+      coreClaim: 'Workspace Tab 性能优化不是追一个总分，而是让不同用户路径各自有指标、调度和防回归 gate。',
+      failureMode: '如果把首屏、热切换和后台压力混在一起，漂亮数字会掩盖用户看得见的卡顿。',
+      readerPayoff: '把复杂工作台性能拆成可验证的路径模型',
+      frameworkSteps: [
+        '先区分 first load、hot switch 和 background pressure。',
+        '为每条用户路径定义自己的可感知指标。',
+        '把不属于当前前台路径的资源延后或降级。',
+        '用 warm pool 和 foreground scheduler 控制热切换。',
+        '最后用 strict FMP、tab-switch probe 和 stress gate 分别验收。',
+      ],
+    },
+  },
+  {
     pattern: /性能|FMP|performance|harness|ledger|优化/i,
     frame: {
       topic: 'AI 性能优化',
