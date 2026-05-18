@@ -131,6 +131,7 @@ import {
 const command = process.argv[2] || 'help';
 const args = parseArgs(process.argv.slice(3));
 const DEFAULT_LANG = 'zh';
+await normalizeScheduleArgs(args);
 
 if (command === 'articles') {
   const articles = await loadCliArticles(args);
@@ -1032,6 +1033,49 @@ function parseArgs(rawArgs) {
   return parsed;
 }
 
+async function normalizeScheduleArgs(options) {
+  if (!isAutoDayToken(options.day)) return;
+  const ledger = await readJson(options.ledger || 'data/social-growth/ledger.json');
+  options.day = dayFromLedger(ledger, {
+    now: options.now ? new Date(options.now) : new Date(),
+    timezone: options.timezone || 'Asia/Singapore',
+  });
+}
+
+function isAutoDayToken(value) {
+  return ['today', 'current', 'auto'].includes(String(value || '').toLowerCase());
+}
+
+function dayFromLedger(ledger, { now = new Date(), timezone = 'Asia/Singapore' } = {}) {
+  const startDate = ledger?.target?.startDate || ledger?.snapshots?.[0]?.date;
+  if (!startDate) {
+    throw new Error('Cannot resolve --day today because ledger has no target.startDate or first snapshot date');
+  }
+  const today = dateInTimezone(now, timezone);
+  const offset = daysBetweenDateOnly(startDate, today);
+  return Math.max(1, offset + 1);
+}
+
+function dateInTimezone(value, timezone) {
+  const parts = new Intl.DateTimeFormat('en', {
+    timeZone: timezone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(value instanceof Date ? value : new Date(value));
+  const byType = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${byType.year}-${byType.month}-${byType.day}`;
+}
+
+function daysBetweenDateOnly(startDate, endDate) {
+  const start = Date.parse(`${startDate}T00:00:00.000Z`);
+  const end = Date.parse(`${endDate}T00:00:00.000Z`);
+  if (Number.isNaN(start) || Number.isNaN(end)) {
+    throw new Error(`Invalid date while resolving --day today: ${startDate}, ${endDate}`);
+  }
+  return Math.floor((end - start) / 86400000);
+}
+
 function toCamelKey(key) {
   return key.replace(/-([a-z])/g, (_, char) => char.toUpperCase());
 }
@@ -1546,6 +1590,7 @@ function printHelp() {
   npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:daily -- --limit 5 --package-limit 3
   npm run social:automation -- --day 1 --slot 1
+  npm run social:automation -- --day today --slot 1
   npm run social:scheduled-run -- --day 1 --slot 1
   npm run social:x-profile-diagnostics -- --out data/social-growth/x-profile-diagnostics.md
   npm run social:browser-readiness -- --day 1 --slot 1 --out data/social-growth/browser-readiness.md

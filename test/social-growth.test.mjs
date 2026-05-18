@@ -3141,6 +3141,56 @@ test('day readiness summarizes all daily publish slots without public actions', 
   }
 });
 
+test('CLI resolves --day today from the ledger start date in project timezone', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-day-today-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const queuePath = join(outDir, 'queue.json');
+    const ledgerPath = join(outDir, 'ledger.json');
+    await writeJson(queuePath, queue);
+    await writeJson(ledgerPath, createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+
+    const result = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'day-readiness',
+      '--queue', queuePath,
+      '--ledger', ledgerPath,
+      '--day', 'today',
+      '--now', '2026-05-19T03:00:00.000Z',
+      '--format', 'json',
+      '--ensure-package', 'false',
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const payload = JSON.parse(result.stdout);
+
+    assert.equal(payload.day, 2);
+    assert.equal(payload.date, '2026-05-19');
+    assert.equal(payload.cumulativeFollowerTarget, 286);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('day readiness carries thread fallback and profile args into slot commands', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-day-readiness-thread-'));
   try {

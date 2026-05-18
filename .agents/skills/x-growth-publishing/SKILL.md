@@ -48,7 +48,7 @@ Before optimizing metrics, queue selection, engagement, or follow conversion, re
 For the normal daily loop, start with:
 
 ```bash
-npm run social:automation -- --day 1 --slot 1
+npm run social:automation -- --day today --slot 1
 ```
 
 This safe automation cycle creates or refreshes `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, writes `data/social-growth/daily-run.md`, writes `data/social-growth/weekly-plan.md` when the ledger exists, writes `data/social-growth/status.md`, writes `data/social-growth/publish-preflight.md`, writes `data/social-growth/profile-audit.md`, and writes `data/social-growth/automation-run.md`.
@@ -65,7 +65,7 @@ It writes `data/social-growth/daily-brief.md` as the single operator-facing acti
 For day-level readiness across all publish slots, run:
 
 ```bash
-npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
+npm run social:day-readiness -- --day today --out data/social-growth/day-readiness.md
 ```
 
 This does not open Chrome. It summarizes each slot's image readiness, publish preflight, `baoyu-post-to-x` handoff status, blockers, and exact slot commands.
@@ -73,7 +73,7 @@ This does not open Chrome. It summarizes each slot's image readiness, publish pr
 For the day-level operator runbook, run:
 
 ```bash
-npm run social:daily-brief -- --day 1 --out data/social-growth/daily-brief.md
+npm run social:daily-brief -- --day today --out data/social-growth/daily-brief.md
 ```
 
 Use this before browser work. It combines publish readiness, read-only engagement search, reply-candidate status, metrics capture readiness, profile conversion, and a prioritized action order.
