@@ -16,6 +16,7 @@
     "social:copy-template": "node tools/social-growth/cli.mjs copy-template",
     "social:capture-metrics": "node tools/social-growth/cli.mjs capture-metrics",
     "social:confirmation": "node tools/social-growth/cli.mjs confirmation",
+    "social:compose-draft-resolution": "node tools/social-growth/cli.mjs compose-draft-resolution",
     "social:daily": "node tools/social-growth/cli.mjs daily",
     "social:daily-brief": "node tools/social-growth/cli.mjs daily-brief",
     "social:day-readiness": "node tools/social-growth/cli.mjs day-readiness",

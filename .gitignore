@@ -13,6 +13,8 @@ data/social-growth/*.local.json
 data/social-growth/*.local.txt
 data/social-growth/automation-run.md
 data/social-growth/browser-readiness.md
+data/social-growth/compose-draft-resolution.md
+data/social-growth/compose-drafts/
 data/social-growth/copy-overrides/
 data/social-growth/copy-override.md
 data/social-growth/daily-brief.md

@@ -27,6 +27,11 @@ import {
   writeBrowserReadiness,
 } from './browserReadiness.mjs';
 import {
+  buildComposeDraftResolution,
+  formatComposeDraftResolutionMarkdown,
+  writeComposeDraftResolution,
+} from './composeDraftResolution.mjs';
+import {
   buildDayReadiness,
   formatDayReadinessMarkdown,
   writeDayReadiness,
@@ -903,6 +908,59 @@ if (command === 'articles') {
   } else {
     console.log(formatBrowserReadinessMarkdown(readiness));
   }
+} else if (command === 'compose-draft-resolution') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const publishMode = args.publishMode || args.articleMode || 'thread_fallback';
+  const preflight = await buildPublishPreflight({
+    queue,
+    ledger,
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    ensurePackage: args.ensurePackage !== 'false',
+    preferReadyImage: args.preferReadyImage !== 'false',
+  });
+  const prep = await buildXPublishPrep(preflight, {
+    skillDir: args.skillDir,
+    bunCommand: args.bunCommand,
+    articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
+    publishMode,
+    profileDir: args.xProfileDir || args.profileDir,
+    profileDirectory: args.xProfileDirectory || args.profileDirectory,
+  });
+  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
+  const storedProbe = await readBrowserProbe(probePath);
+  const inputProbe = browserProbeFromArgs(args);
+  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
+  const readiness = buildBrowserReadiness({
+    preflight,
+    xPrep: prep,
+    ...effectiveProbe,
+    profileDir: args.xProfileDir || args.profileDir,
+    profileDirectory: args.xProfileDirectory || args.profileDirectory,
+    generatedAt: preflight.generatedAt,
+  });
+  const resolution = buildComposeDraftResolution({
+    queue,
+    browserProbe: effectiveProbe,
+    browserReadiness: readiness,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    publishMode,
+    generatedAt: preflight.generatedAt,
+  });
+  if (args.out) {
+    await writeComposeDraftResolution(resolution, args.out);
+    console.log(`Wrote X compose draft resolution to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(resolution, null, 2));
+  } else {
+    console.log(formatComposeDraftResolutionMarkdown(resolution));
+  }
 } else if (command === 'confirmation') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -1681,6 +1739,7 @@ function printHelp() {
   npm run social:scheduled-run -- --day today --slot 1
   npm run social:x-profile-diagnostics -- --out data/social-growth/x-profile-diagnostics.md
   npm run social:browser-readiness -- --day today --slot 1 --out data/social-growth/browser-readiness.md
+  npm run social:compose-draft-resolution -- --day today --slot 1 --out data/social-growth/compose-draft-resolution.md
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
   npm run social:daily-brief -- --day 1 --out data/social-growth/daily-brief.md
   npm run social:engagement-search -- --out data/social-growth/engagement-search.md

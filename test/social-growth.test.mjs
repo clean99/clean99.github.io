@@ -29,6 +29,11 @@ import {
   writeBrowserProbe,
 } from '../tools/social-growth/browserReadiness.mjs';
 import {
+  buildComposeDraftResolution,
+  formatComposeDraftResolutionMarkdown,
+  writeComposeDraftResolution,
+} from '../tools/social-growth/composeDraftResolution.mjs';
+import {
   buildDailyExecutionBrief,
   formatDailyExecutionBriefMarkdown,
   writeDailyExecutionBrief,
@@ -2995,6 +3000,103 @@ test('browser readiness accepts an X compose draft that matches the selected fir
   assert.equal(readiness.status, 'ready_for_browser_confirmation');
   assert.equal(readiness.composeDraft.status, 'matches_selected');
   assert.deepEqual(readiness.blockers, []);
+});
+
+test('compose draft resolution maps an existing draft to a queue item', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-compose-resolution-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 2,
+    });
+    const draftText = [
+      'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+      '',
+      '先按 path -> metric -> scheduler -> gate 看一遍：场景、指标、动作、证据哪一项缺了，结论都不稳。',
+    ].join('\n');
+    const readiness = buildBrowserReadiness({
+      preflight: {
+        generatedAt: '2026-05-18T00:00:00.000Z',
+        status: 'ready',
+        selected: {
+          id: queue.items.find((item) => item.id.startsWith('Agent-Skills'))?.id,
+          articleSlug: 'Agent-Skills',
+        },
+        image: {
+          outputPath: 'output/imagegen/Agent-Skills__zh__strong-thesis.png',
+          ready: true,
+        },
+        browser: {
+          handoff: {
+            threadFallback: ['Agent Skill 设计，先别急着看一个总分。'],
+          },
+        },
+      },
+      xPrep: {
+        status: 'ready',
+        publishMode: 'thread_fallback',
+        thread: {
+          firstPost: 'Agent Skill 设计，先别急着看一个总分。',
+          replies: [],
+        },
+        skill: {
+          browserHandoff: 'cdp',
+        },
+      },
+      expectedAccount: '@Clean993',
+      observedAccount: '@Clean993',
+      chromeRunning: 'yes',
+      extensionInstalled: 'yes',
+      nativeHost: 'yes',
+      extensionPipe: 'yes',
+      loginState: 'logged_in',
+      articleAvailable: 'no',
+      mediaUpload: 'yes',
+      composeDraftText: draftText,
+    });
+    const resolution = buildComposeDraftResolution({
+      queue,
+      browserProbe: {
+        composeDraftText: draftText,
+      },
+      browserReadiness: readiness,
+      day: 2,
+      slot: 1,
+      publishMode: 'thread_fallback',
+      generatedAt: '2026-05-18T00:00:00.000Z',
+    });
+    const markdown = formatComposeDraftResolutionMarkdown(resolution);
+    const written = await writeComposeDraftResolution(resolution, join(outDir, 'compose-draft-resolution.md'));
+    const persisted = await readFile(written, 'utf8');
+
+    assert.equal(resolution.status, 'needs_resolution');
+    assert.ok(resolution.match.item.id.startsWith('Workspace-v2-Tab-System-Performance'));
+    assert.match(resolution.commands.afterPublishingExistingDraft, /post-publish-recovery/);
+    assert.match(markdown, /Likely Queue Match/);
+    assert.match(markdown, /Workspace-v2-Tab-System-Performance/);
+    assert.match(persisted, /X Compose Draft Resolution/);
+    assert.match(persisted, /Do not overwrite it with the selected package/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
 });
 
 test('publish confirmation packet combines copy, commands, and public action stop points', async () => {

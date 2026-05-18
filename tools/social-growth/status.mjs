@@ -232,6 +232,7 @@ ${cliCommand('validate', '--queue data/social-growth/queue.json --format markdow
 ${cliCommand('preflight', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot} --out data/social-growth/publish-preflight.md`)}
 ${cliCommand('image-brief', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}`)}
 ${cliCommand('x-prep', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)} --out data/social-growth/x-publish-prep.md`)}
+${composeDraftResolutionCommand(status)}
 ${manualPublishKitCommand(status, preflight)}
 ${postPublishRecoveryCommand(status, preflight)}
 ${cliCommand('profile-audit', '--profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md')}
@@ -544,16 +545,27 @@ function recordCommand(status, preflight) {
 }
 
 function manualPublishKitCommand(status, preflight) {
+  if (!status.manualPublishFallback?.available && blockingBrowserStatus(status.browserReadiness)) {
+    return '# Publish handoff commands are hidden until browser readiness blockers are resolved.';
+  }
   const idArg = preflight?.selected?.id ? ` --id ${shellQuote(preflight.selected.id)}` : '';
   return cliCommand('manual-publish-kit', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)}${idArg} --out data/social-growth/manual-publish-kit.md`);
 }
 
 function postPublishRecoveryCommand(status, preflight) {
+  if (!status.manualPublishFallback?.available && blockingBrowserStatus(status.browserReadiness)) {
+    return '# Post-publish recovery is available only after a confirmed public X URL exists.';
+  }
   const id = shellQuote(preflight?.selected?.id || '<queue-id>');
   if (status.publishMode === 'thread_fallback') {
     return cliCommand('post-publish-recovery', `--queue data/social-growth/queue.json --id ${id} --url '<x-thread-url>' --reply-out data/social-growth/thread-reply-handoff.md`);
   }
   return cliCommand('post-publish-recovery', `--queue data/social-growth/queue.json --id ${id} --url '<x-post-url>' --article-url '<x-article-url>' --reply-out data/social-growth/thread-reply-handoff.md`);
+}
+
+function composeDraftResolutionCommand(status) {
+  if (!status.browserReadiness?.blockers?.some((item) => item.includes('different draft'))) return '';
+  return cliCommand('compose-draft-resolution', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)} --out data/social-growth/compose-draft-resolution.md`);
 }
 
 function cliCommand(command, args = '') {
