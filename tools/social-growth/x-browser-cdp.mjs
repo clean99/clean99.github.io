@@ -47,9 +47,15 @@ async function preparePost({
   submit = false,
   timeoutMs = DEFAULT_TIMEOUT_MS,
   profileDir = defaultProfileDir(),
+  profileDirectory = '',
   chromePath = '',
 }) {
-  const session = await connectCompose({ timeoutMs, profileDir, chromePath });
+  const session = await connectCompose({
+    timeoutMs,
+    profileDir,
+    profileDirectory,
+    chromePath,
+  });
   const { cdp, chrome } = session;
 
   try {
@@ -84,12 +90,18 @@ async function preparePost({
 async function probeBrowser({
   timeoutMs = DEFAULT_TIMEOUT_MS,
   profileDir = defaultProfileDir(),
+  profileDirectory = '',
   chromePath = '',
   json = false,
   probeOut = '',
   expectedAccount = '',
 }) {
-  const session = await connectCompose({ timeoutMs, profileDir, chromePath });
+  const session = await connectCompose({
+    timeoutMs,
+    profileDir,
+    profileDirectory,
+    chromePath,
+  });
   const { cdp, chrome } = session;
 
   try {
@@ -112,6 +124,7 @@ async function probeBrowser({
     const result = {
       status: blockers.length ? 'blocked' : 'ready',
       profileDir: session.profileDir,
+      profileDirectory: session.profileDirectory,
       currentUrl,
       attachedToExistingChrome: Boolean(session.existingPort),
       editorReady,
@@ -145,6 +158,7 @@ async function captureVisibleText({
   textOut = '',
   timeoutMs = DEFAULT_TIMEOUT_MS,
   profileDir = defaultProfileDir(),
+  profileDirectory = '',
   chromePath = '',
   json = false,
 }) {
@@ -152,6 +166,7 @@ async function captureVisibleText({
   const session = await connectCompose({
     timeoutMs,
     profileDir,
+    profileDirectory,
     chromePath,
     initialUrl: targetUrl,
     requireCompose: false,
@@ -172,6 +187,7 @@ async function captureVisibleText({
     const result = {
       status: text.trim() ? 'captured' : 'empty',
       requestedUrl: targetUrl,
+      profileDirectory: session.profileDirectory,
       currentUrl,
       textOut,
       textLength: text.length,
@@ -217,6 +233,7 @@ function browserProbeRecordFromResult(result, expectedAccount) {
   return {
     ...(expectedAccount ? { expectedAccount } : {}),
     observedAccount: result.observedAccount,
+    profileDirectory: result.profileDirectory,
     chromeRunning: 'yes',
     loginState: result.editorReady
       ? 'logged_in'
@@ -241,11 +258,13 @@ function dropEmpty(input) {
 async function connectCompose({
   timeoutMs = DEFAULT_TIMEOUT_MS,
   profileDir = defaultProfileDir(),
+  profileDirectory = '',
   chromePath = '',
   initialUrl = X_COMPOSE_URL,
   requireCompose = true,
 }) {
   const resolvedProfileDir = profileDir || defaultProfileDir();
+  const resolvedProfileDirectory = String(profileDirectory || process.env.BAOYU_CHROME_PROFILE_DIRECTORY || process.env.X_BROWSER_PROFILE_DIRECTORY || '').trim();
   await mkdir(resolvedProfileDir, { recursive: true });
   const candidatePort = await findExistingDebugPort(resolvedProfileDir);
   const existingPort = candidatePort && await isDebugPortAlive(candidatePort) ? candidatePort : null;
@@ -256,6 +275,7 @@ async function connectCompose({
     chrome = launchChrome({
       chromePath: chromePath || findChromePath(),
       profileDir: resolvedProfileDir,
+      profileDirectory: resolvedProfileDirectory,
       port,
       url: initialUrl,
     });
@@ -279,6 +299,7 @@ async function connectCompose({
       port,
       existingPort,
       profileDir: resolvedProfileDir,
+      profileDirectory: resolvedProfileDirectory,
       target,
     };
   } catch (error) {
@@ -478,16 +499,20 @@ function readProcessList() {
   });
 }
 
-function launchChrome({ chromePath, profileDir, port, url }) {
+function launchChrome({ chromePath, profileDir, profileDirectory, port, url }) {
   if (!chromePath) throw new Error('Chrome not found. Pass --chrome-path or install Chrome.');
-  return spawn(chromePath, [
+  const args = [
     `--remote-debugging-port=${port}`,
     `--user-data-dir=${profileDir}`,
     '--no-first-run',
     '--no-default-browser-check',
     '--start-maximized',
     url,
-  ], {
+  ];
+  if (profileDirectory) {
+    args.splice(2, 0, `--profile-directory=${profileDirectory}`);
+  }
+  return spawn(chromePath, args, {
     detached: true,
     stdio: 'ignore',
   });
@@ -606,6 +631,7 @@ function parseArgs(args) {
     timeoutMs: DEFAULT_TIMEOUT_MS,
     timeoutProvided: false,
     profileDir: '',
+    profileDirectory: '',
     chromePath: '',
     help: false,
   };
@@ -633,6 +659,8 @@ function parseArgs(args) {
       options.submit = true;
     } else if (arg === '--profile' && args[index + 1]) {
       options.profileDir = args[++index];
+    } else if (arg === '--profile-directory' && args[index + 1]) {
+      options.profileDirectory = args[++index];
     } else if (arg === '--chrome-path' && args[index + 1]) {
       options.chromePath = args[++index];
     } else if (arg === '--timeout-ms' && args[index + 1]) {
@@ -654,6 +682,7 @@ function printProbeResult(result) {
 
 Status: ${result.status}
 Profile: ${result.profileDir}
+Chrome profile directory: ${result.profileDirectory || 'default'}
 Current URL: ${result.currentUrl}
 Attached to existing Chrome: ${result.attachedToExistingChrome ? 'yes' : 'no'}
 Editor ready: ${result.editorReady ? 'yes' : 'no'}
@@ -681,6 +710,8 @@ Options:
   --account <handle>   Expected X account handle for probe state
   --image <path>       Add image through file input; repeat for multiple images
   --profile <dir>      Chrome profile directory
+  --profile-directory <name>
+                       Chrome profile name inside --profile, e.g. "Profile 1"
   --chrome-path <path> Chrome executable path
   --timeout-ms <ms>    Wait timeout
   --submit             Click the public post button

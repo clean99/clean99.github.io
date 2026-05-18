@@ -30,6 +30,7 @@ export async function buildDailyExecutionBrief({
   xSkillDir,
   xBunCommand,
   xProfileDir,
+  xProfileDirectory,
   publishMode,
   browserReadiness = null,
   engagementLimit = 5,
@@ -47,6 +48,7 @@ export async function buildDailyExecutionBrief({
     xSkillDir,
     xBunCommand,
     xProfileDir,
+    xProfileDirectory,
     publishMode,
     env,
   });
@@ -88,6 +90,7 @@ export async function buildDailyExecutionBrief({
     slot,
     publishMode: browserReadiness?.publishMode || selectedSlot(dayReadiness, slot)?.publishMode || publishMode,
     profileDir: xProfileDir || browserReadiness?.profileDir,
+    profileDirectory: xProfileDirectory || browserReadiness?.profileDirectory,
   });
 
   return {
@@ -262,6 +265,7 @@ function buildBrowserReadinessCommand({
   slot,
   publishMode,
   profileDir,
+  profileDirectory,
 } = {}) {
   const args = [
     'npm run social:browser-readiness --',
@@ -270,6 +274,7 @@ function buildBrowserReadinessCommand({
   ];
   if (publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
   if (profileDir) args.push(`--xProfileDir ${shellQuote(profileDir)}`);
+  if (profileDirectory) args.push(`--xProfileDirectory ${shellQuote(profileDirectory)}`);
   args.push('--out data/social-growth/browser-readiness.md');
   return args.join(' ');
 }

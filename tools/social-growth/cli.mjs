@@ -122,6 +122,11 @@ import {
   refreshMetricsTemplateFromQueue,
   runPostPublishMetricsCycle,
 } from './metricsCycle.mjs';
+import {
+  buildXProfileDiagnostics,
+  formatXProfileDiagnosticsMarkdown,
+  writeXProfileDiagnostics,
+} from './xProfileDiagnostics.mjs';
 
 const command = process.argv[2] || 'help';
 const args = parseArgs(process.argv.slice(3));
@@ -317,6 +322,7 @@ if (command === 'articles') {
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
     xProfileDir: args.xProfileDir || args.profileDir,
+    xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
     publishMode: args.publishMode || args.articleMode,
     browserProbe: browserProbeFromArgs(args),
     preferReadyImage: args.preferReadyImage === 'true',
@@ -380,6 +386,7 @@ if (command === 'articles') {
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
     xProfileDir: args.xProfileDir || args.profileDir,
+    xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
     publishMode: args.publishMode || args.articleMode,
     browserProbe: browserProbeFromArgs(args),
     preferReadyImage: args.preferReadyImage !== 'false',
@@ -414,6 +421,7 @@ if (command === 'articles') {
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
     xProfileDir: args.xProfileDir || args.profileDir,
+    xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
     publishMode: args.publishMode || args.articleMode,
   });
   if (args.out) {
@@ -444,6 +452,7 @@ if (command === 'articles') {
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
     xProfileDir: args.xProfileDir || args.profileDir,
+    xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
     publishMode: args.publishMode || args.articleMode,
     engagementLimit: args.engagementLimit || args.limit || 5,
     env: process.env,
@@ -654,6 +663,7 @@ if (command === 'articles') {
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
     publishMode,
     profileDir: args.xProfileDir || args.profileDir,
+    profileDirectory: args.xProfileDirectory || args.profileDirectory,
   });
   const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
   const storedProbe = await readBrowserProbe(probePath);
@@ -668,6 +678,7 @@ if (command === 'articles') {
     xPrep: prep,
     ...effectiveProbe,
     profileDir: args.xProfileDir || args.profileDir,
+    profileDirectory: args.xProfileDirectory || args.profileDirectory,
     generatedAt: preflight.generatedAt,
   });
   const status = await buildGrowthStatus({
@@ -681,6 +692,7 @@ if (command === 'articles') {
     profileText,
     publishMode,
     xProfileDir: args.xProfileDir || args.profileDir,
+    xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
     browserReadiness,
     ensurePackage: args.ensurePackage === 'true',
     preferReadyImage: args.preferReadyImage === 'true',
@@ -749,6 +761,20 @@ if (command === 'articles') {
 } else if (command === 'login-recovery') {
   const result = await runLoginRecovery(args);
   console.log(JSON.stringify(result, null, 2));
+} else if (command === 'x-profile-diagnostics') {
+  const diagnostics = await buildXProfileDiagnostics({
+    profileDir: args.xProfileDir || args.profileDir,
+    debugPort: args.debugPort,
+    generatedAt: args.now ? new Date(args.now) : new Date(),
+  });
+  if (args.out) {
+    await writeXProfileDiagnostics(diagnostics, args.out);
+    console.log(`Wrote X profile diagnostics to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(diagnostics, null, 2));
+  } else {
+    console.log(formatXProfileDiagnosticsMarkdown(diagnostics));
+  }
 } else if (command === 'browser-metrics-capture') {
   const result = await runBrowserMetricsCapture(args);
   console.log(JSON.stringify(result, null, 2));
@@ -773,6 +799,7 @@ if (command === 'articles') {
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
     publishMode: args.publishMode || args.articleMode,
     profileDir: args.xProfileDir || args.profileDir,
+    profileDirectory: args.xProfileDirectory || args.profileDirectory,
   });
   if (args.out) {
     await writeXPublishPrep(prep, args.out);
@@ -803,6 +830,7 @@ if (command === 'articles') {
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
     publishMode: args.publishMode || args.articleMode,
     profileDir: args.xProfileDir || args.profileDir,
+    profileDirectory: args.xProfileDirectory || args.profileDirectory,
   });
   const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
   const storedProbe = await readBrowserProbe(probePath);
@@ -817,6 +845,7 @@ if (command === 'articles') {
     xPrep: prep,
     ...effectiveProbe,
     profileDir: args.xProfileDir || args.profileDir,
+    profileDirectory: args.xProfileDirectory || args.profileDirectory,
     generatedAt: preflight.generatedAt,
   });
   if (args.out) {
@@ -1015,6 +1044,8 @@ function browserProbeFromArgs(options = {}) {
   if (options.loginState !== undefined) probe.loginState = options.loginState;
   if (options.articleAvailable !== undefined) probe.articleAvailable = options.articleAvailable;
   if (options.mediaUpload !== undefined) probe.mediaUpload = options.mediaUpload;
+  if (options.xProfileDirectory !== undefined) probe.profileDirectory = options.xProfileDirectory;
+  if (options.profileDirectory !== undefined) probe.profileDirectory = options.profileDirectory;
   return probe;
 }
 
@@ -1028,6 +1059,7 @@ async function runLoginRecovery(options = {}) {
   const probePath = options.browserProbe || options.probeOut || 'data/social-growth/browser-probe.local.json';
   const account = options.account || '@Clean993';
   const profileDir = options.xProfileDir || options.profileDir;
+  const profileDirectory = options.xProfileDirectory || options.profileDirectory;
   let probeRun = {
     skipped: options.skipProbe === 'true',
     status: 'skipped',
@@ -1040,6 +1072,7 @@ async function runLoginRecovery(options = {}) {
       probePath,
       account,
       profileDir,
+      profileDirectory,
       timeoutMs: options.timeoutMs || 30000,
     });
     if (probeRun.exitCode !== 0 && options.continueOnProbeError !== 'true') {
@@ -1066,6 +1099,7 @@ async function runLoginRecovery(options = {}) {
     articleUrlPlaceholder: options.articleUrl || '<x-article-url>',
     publishMode,
     profileDir,
+    profileDirectory,
   });
   const xPrepPath = options.xPrepOut || 'data/social-growth/x-publish-prep.md';
   await writeXPublishPrep(prep, xPrepPath);
@@ -1082,6 +1116,7 @@ async function runLoginRecovery(options = {}) {
     xPrep: prep,
     ...effectiveProbe,
     profileDir,
+    profileDirectory,
     generatedAt: preflight.generatedAt,
   });
   const browserReadinessPath = options.browserReadinessOut || 'data/social-growth/browser-readiness.md';
@@ -1098,6 +1133,7 @@ async function runLoginRecovery(options = {}) {
     profileText,
     publishMode,
     xProfileDir: profileDir,
+    xProfileDirectory: profileDirectory,
     browserReadiness: readiness,
     ensurePackage: options.ensurePackage === 'true',
     preferReadyImage: options.preferReadyImage === 'true',
@@ -1135,6 +1171,7 @@ function runXBrowserProbe({
   probePath,
   account,
   profileDir,
+  profileDirectory,
   timeoutMs,
 }) {
   const probeArgs = [
@@ -1149,6 +1186,7 @@ function runXBrowserProbe({
     String(timeoutMs),
   ];
   if (profileDir) probeArgs.push('--profile', profileDir);
+  if (profileDirectory) probeArgs.push('--profile-directory', profileDirectory);
   const result = spawnSync(process.execPath, probeArgs, {
     cwd: process.cwd(),
     encoding: 'utf8',
@@ -1176,6 +1214,7 @@ async function runBrowserMetricsCapture(options = {}) {
   const postTextDir = options.postTextDir || 'data/social-growth/post-texts';
   const account = options.account || '@Clean993';
   const profileDir = options.xProfileDir || options.profileDir;
+  const profileDirectory = options.xProfileDirectory || options.profileDirectory;
   const skipBrowser = booleanOption(options.skipBrowser);
   const continueOnCaptureError = booleanOption(options.continueOnCaptureError);
   const queue = await readJson(queuePath);
@@ -1192,6 +1231,7 @@ async function runBrowserMetricsCapture(options = {}) {
       url: `https://x.com/${String(account).replace(/^@/, '')}`,
       textOut: profileTextPath,
       profileDir,
+      profileDirectory,
       timeoutMs: options.timeoutMs || 30000,
       label: 'profile',
     }));
@@ -1200,6 +1240,7 @@ async function runBrowserMetricsCapture(options = {}) {
         url: post.url,
         textOut: `${postTextDir}/${post.id}.txt`,
         profileDir,
+        profileDirectory,
         timeoutMs: options.timeoutMs || 30000,
         label: post.id,
       }));
@@ -1268,6 +1309,7 @@ function runXBrowserRead({
   url,
   textOut,
   profileDir,
+  profileDirectory,
   timeoutMs,
   label,
 }) {
@@ -1282,6 +1324,7 @@ function runXBrowserRead({
     String(timeoutMs),
   ];
   if (profileDir) readArgs.push('--profile', profileDir);
+  if (profileDirectory) readArgs.push('--profile-directory', profileDirectory);
   const result = spawnSync(process.execPath, readArgs, {
     cwd: process.cwd(),
     encoding: 'utf8',
@@ -1340,6 +1383,7 @@ function printHelp() {
   npm run social:daily -- --limit 5 --package-limit 3
   npm run social:automation -- --day 1 --slot 1
   npm run social:scheduled-run -- --day 1 --slot 1
+  npm run social:x-profile-diagnostics -- --out data/social-growth/x-profile-diagnostics.md
   npm run social:browser-readiness -- --day 1 --slot 1 --out data/social-growth/browser-readiness.md
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
   npm run social:daily-brief -- --day 1 --out data/social-growth/daily-brief.md

@@ -107,6 +107,11 @@ import {
   formatXTechnicalSharingBriefMarkdown,
   writeXTechnicalSharingBrief,
 } from '../tools/social-growth/xTechBrief.mjs';
+import {
+  buildXProfileDiagnostics,
+  formatXProfileDiagnosticsMarkdown,
+  writeXProfileDiagnostics,
+} from '../tools/social-growth/xProfileDiagnostics.mjs';
 import { validateQueue, validateQueueItem } from '../tools/social-growth/validation.mjs';
 import {
   buildPublishPackage,
@@ -2363,6 +2368,7 @@ test('x publish prep bridges selected package to baoyu-post-to-x commands', asyn
       bunCommand: 'bun',
       articleUrlPlaceholder: 'https://x.com/Clean993/articles/123',
       profileDir: '/tmp/x-profile',
+      profileDirectory: 'Profile 1',
     });
     const markdown = formatXPublishPrepMarkdown(prep);
     const writtenPath = await writeXPublishPrep(prep, join(outDir, 'x-publish-prep.md'));
@@ -2373,17 +2379,21 @@ test('x publish prep bridges selected package to baoyu-post-to-x commands', asyn
     assert.match(prep.commands.prepareArticle, /x-article\.ts/);
     assert.match(prep.commands.prepareArticle, /--cover/);
     assert.match(prep.commands.prepareArticle, /--profile '\/tmp\/x-profile'/);
+    assert.match(prep.commands.prepareArticle, /--profile-directory 'Profile 1'/);
     assert.match(prep.commands.probeBrowser, /x-browser-cdp\.mjs'/);
     assert.match(prep.commands.probeBrowser, /--probe --json/);
     assert.match(prep.commands.probeBrowser, /--profile '\/tmp\/x-profile'/);
+    assert.match(prep.commands.probeBrowser, /--profile-directory 'Profile 1'/);
     assert.match(prep.commands.recordBrowserProbe, /--probe-out 'data\/social-growth\/browser-probe\.local\.json'/);
     assert.match(prep.commands.recordBrowserProbe, /--account '@Clean993'/);
     assert.match(prep.commands.prepareShortPost, /x-browser-cdp\.mjs/);
     assert.match(prep.commands.prepareShortPost, /--image/);
     assert.match(prep.commands.prepareShortPost, /--profile '\/tmp\/x-profile'/);
+    assert.match(prep.commands.prepareShortPost, /--profile-directory 'Profile 1'/);
     assert.match(markdown, /X Browser Handoff/);
     assert.match(markdown, /Probe Browser Without Public Actions/);
     assert.match(markdown, /Chrome profile: `\/tmp\/x-profile`/);
+    assert.match(markdown, /Chrome profile directory: `Profile 1`/);
     assert.match(markdown, /Stop before the final public post click/);
     assert.match(persisted, /ARTICLE_URL='https:\/\/x\.com\/Clean993\/articles\/123'/);
   } finally {
@@ -2529,7 +2539,59 @@ test('project x browser cdp handoff exposes a non-publishing help command', () =
   assert.match(result.stdout, /--read-url/);
   assert.match(result.stdout, /--text-out/);
   assert.match(result.stdout, /--account/);
+  assert.match(result.stdout, /--profile-directory/);
   assert.match(result.stdout, /stops before final publish/);
+});
+
+test('x profile diagnostics lists Chrome profiles without public actions', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-x-profile-diagnostics-'));
+  try {
+    const profileDir = join(outDir, 'chrome-profile');
+    await mkdir(join(profileDir, 'Default'), { recursive: true });
+    await mkdir(join(profileDir, 'Profile 1'), { recursive: true });
+    await writeFile(join(profileDir, 'Local State'), `${JSON.stringify({
+      profile: {
+        last_used: 'Profile 1',
+        profiles_order: ['Default', 'Profile 1'],
+        info_cache: {
+          Default: {
+            name: 'Your Chrome',
+            user_name: 'feng.xu@example.com',
+          },
+          'Profile 1': {
+            name: 'felix',
+            user_name: 'felix@example.com',
+          },
+        },
+      },
+    }, null, 2)}\n`);
+    await writeFile(join(profileDir, 'Default', 'Preferences'), `${JSON.stringify({
+      account_info: [{ email: 'feng.xu@example.com' }],
+    })}\n`);
+    await writeFile(join(profileDir, 'Profile 1', 'Preferences'), `${JSON.stringify({
+      account_info: [{ email: 'felix@example.com' }],
+    })}\n`);
+
+    const diagnostics = await buildXProfileDiagnostics({
+      profileDir,
+      generatedAt: '2026-05-18T00:00:00.000Z',
+    });
+    const markdown = formatXProfileDiagnosticsMarkdown(diagnostics);
+    const writtenPath = await writeXProfileDiagnostics(diagnostics, join(outDir, 'diagnostics.md'));
+    const persisted = await readFile(writtenPath, 'utf8');
+
+    assert.equal(diagnostics.publicActions.typedText, false);
+    assert.equal(diagnostics.publicActions.uploadedMedia, false);
+    assert.equal(diagnostics.publicActions.clickedSubmit, false);
+    assert.deepEqual(diagnostics.profiles.map((profile) => profile.id), ['Default', 'Profile 1']);
+    assert.equal(diagnostics.profiles[1].isLastUsed, true);
+    assert.equal(diagnostics.profiles[1].accountHint, 'f***@example.com');
+    assert.match(markdown, /--xProfileDirectory 'Profile 1'/);
+    assert.match(markdown, /Read-only diagnostics only/);
+    assert.match(persisted, /X Profile Diagnostics/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
 });
 
 test('browser readiness surfaces missing bun runtime as an actionable blocker', async () => {

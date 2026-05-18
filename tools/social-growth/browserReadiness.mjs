@@ -14,6 +14,7 @@ const PROBE_FIELDS = [
   'loginState',
   'articleAvailable',
   'mediaUpload',
+  'profileDirectory',
   'generatedAt',
 ];
 
@@ -30,6 +31,7 @@ export function buildBrowserReadiness({
   articleAvailable = UNKNOWN,
   mediaUpload = UNKNOWN,
   profileDir = xPrep?.skill?.profileDir || '',
+  profileDirectory = xPrep?.skill?.profileDirectory || '',
   generatedAt = preflight?.generatedAt || new Date().toISOString(),
 } = {}) {
   const signals = {
@@ -89,6 +91,7 @@ export function buildBrowserReadiness({
     observedAccount,
     publishMode,
     profileDir,
+    profileDirectory,
     selected: {
       id: preflight?.selected?.id || xPrep?.selected?.id || '',
       articleSlug: preflight?.selected?.articleSlug || xPrep?.selected?.articleSlug || '',
@@ -101,7 +104,7 @@ export function buildBrowserReadiness({
     },
     signals,
     blockers,
-    nextActions: nextActions({ blockers, signals, publishMode, profileDir }),
+    nextActions: nextActions({ blockers, signals, publishMode, profileDir, profileDirectory }),
     boundary: 'Readiness only. Do not publish, upload media, reply, like, repost, follow, edit profile, pin content, or click final X buttons without action-time confirmation.',
   };
 }
@@ -132,6 +135,7 @@ Status: ${readiness.status}
 - Expected account: ${readiness.expectedAccount}
 - Observed account: ${readiness.observedAccount || 'unknown'}
 - Chrome profile dir: ${readiness.profileDir ? `\`${readiness.profileDir}\`` : 'default baoyu shared profile'}
+- Chrome profile directory: ${readiness.profileDirectory || 'default'}
 
 ## Local Prep
 

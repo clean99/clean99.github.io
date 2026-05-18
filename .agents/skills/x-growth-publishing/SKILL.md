@@ -197,6 +197,17 @@ npm run social:x-prep -- --day 1 --slot 1 --publishMode thread_fallback --xProfi
 ```
 
 Do not point this at a profile that is currently locked by another running Chrome unless you have verified the helper can reuse it.
+If the user-data dir has multiple Chrome profiles, diagnose them before asking the user to log in again:
+
+```bash
+npm run social:x-profile-diagnostics -- --out data/social-growth/x-profile-diagnostics.md
+```
+
+Then make the intended Chrome profile explicit:
+
+```bash
+npm run social:login-recovery -- --day 1 --slot 1 --publishMode thread_fallback --xProfileDirectory "Profile 1"
+```
 
 Before opening Chrome for a public-action handoff, run or update the browser readiness report:
 

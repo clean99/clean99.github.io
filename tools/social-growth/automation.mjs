@@ -110,6 +110,7 @@ export async function runSafeAutomationCycle({
   xSkillDir,
   xBunCommand,
   xProfileDir,
+  xProfileDirectory,
   publishMode,
   browserProbe = {},
   preferReadyImage = false,
@@ -192,6 +193,7 @@ export async function runSafeAutomationCycle({
     skillDir: xSkillDir,
     bunCommand: xBunCommand,
     profileDir: xProfileDir,
+    profileDirectory: xProfileDirectory,
     publishMode,
   });
   await writeXPublishPrep(xPublishPrep, xPublishPrepPath);
@@ -214,6 +216,7 @@ export async function runSafeAutomationCycle({
     articleAvailable: effectiveBrowserProbe.articleAvailable,
     mediaUpload: effectiveBrowserProbe.mediaUpload,
     profileDir: xProfileDir,
+    profileDirectory: xProfileDirectory || effectiveBrowserProbe.profileDirectory,
     generatedAt,
   });
   await writeBrowserReadiness(browserReadiness, browserReadinessPath);
@@ -251,6 +254,7 @@ export async function runSafeAutomationCycle({
     profileText,
     publishMode,
     xProfileDir,
+    xProfileDirectory,
     browserReadiness,
     env,
     ensurePackage: false,
@@ -277,6 +281,7 @@ export async function runSafeAutomationCycle({
     xSkillDir,
     xBunCommand,
     xProfileDir,
+    xProfileDirectory,
     publishMode,
     browserReadiness,
     engagementLimit,

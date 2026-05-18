@@ -17,6 +17,7 @@ export async function buildDayReadiness({
   xSkillDir,
   xBunCommand,
   xProfileDir,
+  xProfileDirectory,
   publishMode,
   env = process.env,
 } = {}) {
@@ -45,6 +46,7 @@ export async function buildDayReadiness({
       skillDir: xSkillDir,
       bunCommand: xBunCommand,
       profileDir: xProfileDir,
+      profileDirectory: xProfileDirectory,
       publishMode,
     });
 
@@ -67,7 +69,7 @@ export async function buildDayReadiness({
       commands: {
         imageBrief: `npm run social:image-brief -- --day ${Number(day)} --slot ${slotNumber}`,
         preflight: `npm run social:preflight -- --day ${Number(day)} --slot ${slotNumber} --out ${slotArtifactPath('publish-preflight', day, slotNumber)}`,
-        xPrep: `npm run social:x-prep -- --day ${Number(day)} --slot ${slotNumber}${publishArgs(xPrep.publishMode, xProfileDir)} --out ${slotArtifactPath('x-publish-prep', day, slotNumber)}`,
+        xPrep: `npm run social:x-prep -- --day ${Number(day)} --slot ${slotNumber}${publishArgs(xPrep.publishMode, xProfileDir, xProfileDirectory)} --out ${slotArtifactPath('x-publish-prep', day, slotNumber)}`,
       },
     });
   }
@@ -155,10 +157,11 @@ function dedupe(items) {
   return [...new Set(items)];
 }
 
-function publishArgs(publishMode, profileDir) {
+function publishArgs(publishMode, profileDir, profileDirectory) {
   const args = [];
   if (publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
   if (profileDir) args.push(`--xProfileDir ${shellQuote(profileDir)}`);
+  if (profileDirectory) args.push(`--xProfileDirectory ${shellQuote(profileDirectory)}`);
   return args.length ? ` ${args.join(' ')}` : '';
 }
 

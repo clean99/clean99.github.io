@@ -29,6 +29,7 @@
     "social:image-backlog": "node tools/social-growth/cli.mjs image-backlog",
     "social:image-brief": "node tools/social-growth/cli.mjs image-brief",
     "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",
+    "social:login-recovery": "node tools/social-growth/cli.mjs login-recovery",
     "social:mark-published": "node tools/social-growth/cli.mjs mark-published",
     "social:metrics-cycle": "node tools/social-growth/cli.mjs metrics-cycle",
     "social:metrics-template": "node tools/social-growth/cli.mjs metrics-template",
@@ -47,6 +48,7 @@
     "social:status": "node tools/social-growth/cli.mjs status",
     "social:validate": "node tools/social-growth/cli.mjs validate",
     "social:week": "node tools/social-growth/cli.mjs week",
+    "social:x-profile-diagnostics": "node tools/social-growth/cli.mjs x-profile-diagnostics",
     "social:x-tech-brief": "node tools/social-growth/cli.mjs x-tech-brief",
     "social:x-prep": "node tools/social-growth/cli.mjs x-prep",
     "test": "node --test test/social-growth.test.mjs"

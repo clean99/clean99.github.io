@@ -15,6 +15,7 @@ export async function buildXPublishPrep(preflight, {
   articleUrlPlaceholder = '<x-article-url>',
   publishMode = 'x_article',
   profileDir,
+  profileDirectory,
   browserProbePath = DEFAULT_BROWSER_PROBE_PATH,
   expectedAccount = '@Clean993',
   runtimeResolver = resolveBunCommand,
@@ -40,6 +41,8 @@ export async function buildXPublishPrep(preflight, {
   const threadReplies = threadFallback.slice(1);
   const blockers = [...(preflight.blockers || [])];
   const profileArg = profileDir ? ` --profile ${shellQuote(profileDir)}` : '';
+  const profileDirectoryArg = profileDirectory ? ` --profile-directory ${shellQuote(profileDirectory)}` : '';
+  const browserProfileArgs = `${profileArg}${profileDirectoryArg}`;
   const runtime = resolvedPublishMode === 'x_article'
     ? await runtimeResolver(bunCommand)
     : { command: null, status: 'not_required', blocker: null };
@@ -85,21 +88,22 @@ export async function buildXPublishPrep(preflight, {
       browserRuntimeStatus: browserRuntime.status,
       scripts,
       profileDir,
+      profileDirectory,
     },
     commands: {
-      probeBrowser: `${browserRuntime.command} ${shellQuote(scripts.regularPost)} --probe --json${profileArg}`,
-      recordBrowserProbe: `${browserRuntime.command} ${shellQuote(scripts.regularPost)} --probe --json --probe-out ${shellQuote(browserProbePath)} --account ${shellQuote(expectedAccount)}${profileArg}`,
+      probeBrowser: `${browserRuntime.command} ${shellQuote(scripts.regularPost)} --probe --json${browserProfileArgs}`,
+      recordBrowserProbe: `${browserRuntime.command} ${shellQuote(scripts.regularPost)} --probe --json --probe-out ${shellQuote(browserProbePath)} --account ${shellQuote(expectedAccount)}${browserProfileArgs}`,
       prepareArticle: resolvedPublishMode === 'x_article'
-        ? `${articleCommand} ${shellQuote(scripts.article)} ${shellQuote(files.xArticle)} --cover ${shellQuote(files.image)}${profileArg}`
+        ? `${articleCommand} ${shellQuote(scripts.article)} ${shellQuote(files.xArticle)} --cover ${shellQuote(files.image)}${browserProfileArgs}`
         : '# X Article is unavailable for this account. Use the thread fallback command below.',
       prepareShortPost: resolvedPublishMode === 'x_article'
         ? [
           `ARTICLE_URL=${shellQuote(articleUrlPlaceholder)}`,
           `SHORT_POST="$(cat ${shellQuote(files.shortPost)}; printf '\\n\\n%s' "$ARTICLE_URL")"`,
-          `${browserRuntime.command} ${shellQuote(scripts.regularPost)} "$SHORT_POST" --image ${shellQuote(files.image)}${profileArg}`,
+          `${browserRuntime.command} ${shellQuote(scripts.regularPost)} "$SHORT_POST" --image ${shellQuote(files.image)}${browserProfileArgs}`,
         ].join('\n')
-        : `${browserRuntime.command} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${profileArg}`,
-      prepareThreadFirstPost: `${browserRuntime.command} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${profileArg}`,
+        : `${browserRuntime.command} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${browserProfileArgs}`,
+      prepareThreadFirstPost: `${browserRuntime.command} ${shellQuote(scripts.regularPost)} ${shellQuote(threadFirstPost)} --image ${shellQuote(files.image)}${browserProfileArgs}`,
     },
     boundary: [
       'The baoyu-post-to-x scripts may open Chrome and fill editors.',
@@ -142,6 +146,7 @@ Status: ${prep.status}
 - X Article runtime status: ${prep.skill.runtimeStatus}
 - X Article script: \`${prep.skill.scripts.article}\`
 - Chrome profile: ${prep.skill.profileDir ? `\`${prep.skill.profileDir}\`` : 'default baoyu shared profile'}
+- Chrome profile directory: ${prep.skill.profileDirectory ? `\`${prep.skill.profileDirectory}\`` : 'default'}
 
 ## Local Blockers
 

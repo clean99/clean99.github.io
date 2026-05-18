@@ -20,6 +20,7 @@ export async function buildGrowthStatus({
   profileText = '',
   publishMode = 'x_article',
   xProfileDir,
+  xProfileDirectory,
   browserReadiness = null,
   env = process.env,
   ensurePackage = false,
@@ -86,6 +87,7 @@ export async function buildGrowthStatus({
     profileAudit,
     publishMode: resolvedPublishMode,
     xProfileDir,
+    xProfileDirectory,
     nextActions: nextActions({
       validation,
       weeklyPlan,
@@ -355,6 +357,7 @@ function summarizeBrowserReadiness(browserReadiness) {
 function loginRecoveryMarkdown(status, browserReadiness) {
   if (browserReadiness.status !== 'needs_x_login') return '';
   const profileArg = status.xProfileDir ? ` --profile ${shellQuote(status.xProfileDir)}` : '';
+  const profileDirectoryArg = status.xProfileDirectory ? ` --profile-directory ${shellQuote(status.xProfileDirectory)}` : '';
   const publishArgs = publishModeArgs(status);
   const recoveryArgs = `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs}`;
 
@@ -369,7 +372,7 @@ ${cliCommand('login-recovery', recoveryArgs)}
 After logging in as @Clean993 in that Chrome window, rerun the same command. If you need the lower-level steps:
 
 \`\`\`bash
-${xBrowserCommand(`--probe --json --probe-out data/social-growth/browser-probe.local.json --account '@Clean993'${profileArg}`)}
+${xBrowserCommand(`--probe --json --probe-out data/social-growth/browser-probe.local.json --account '@Clean993'${profileArg}${profileDirectoryArg}`)}
 ${cliCommand('browser-readiness', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/browser-readiness.md`)}
 ${cliCommand('status', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/status.md`)}
 \`\`\`
@@ -441,6 +444,7 @@ function publishModeArgs(status) {
   const args = [];
   if (status.publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
   if (status.xProfileDir) args.push(`--xProfileDir ${shellQuote(status.xProfileDir)}`);
+  if (status.xProfileDirectory) args.push(`--xProfileDirectory ${shellQuote(status.xProfileDirectory)}`);
   return args.length ? ` ${args.join(' ')}` : '';
 }
 
