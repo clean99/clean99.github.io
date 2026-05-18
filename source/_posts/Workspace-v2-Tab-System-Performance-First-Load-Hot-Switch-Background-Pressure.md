@@ -9,6 +9,10 @@ i18n_key: Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-P
 
 After the tab system was introduced, Workspace no longer had only one foreground page. Users can keep multiple workstreams, subapps, and objects open, while the host may keep more routes, runtimes, iframes, SDKs, and background tasks alive. Performance is therefore no longer one question of "is this page slow?" It is three separate user paths.
 
+![workspace tab system demo](/img/workspace-v2-tab-system/workspace-tab-system-demo.svg)
+
+*Figure 0: A generic workbench using browser-like tabs. The performance problem starts because multiple work items can stay open, while only the focused tab should stay interactive and own foreground resources.*
+
 | Path | Problem | Metric And Acceptance Standard |
 | --- | --- | --- |
 | First Load / FMP | When users enter Workspace or a subapp for the first time, they only need the current page, but network and main-thread budget may be spent on future paths, non-current subapps, or low-priority SDKs. | route FMP, critical-resource waterfall, first-screen APIs. A win must show a blocker moving earlier, disappearing, or shrinking, and final FMP must improve. |

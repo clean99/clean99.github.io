@@ -9,6 +9,10 @@ i18n_key: Workspace-v2-Tab-System-Browser-Grade-Tabs
 
 Workspace v2 changes the workbench from a single-page, single-context product into a workspace that can hold multiple workstreams, sub-application views, and ticket objects at the same time. From the user's perspective, the expected experience is close to a browser: several tasks stay open, switching back keeps state, refresh and shared links still land on the right business page, and a modal opened by one sub-application cannot cover another tab.
 
+![workspace tab system demo](/img/workspace-v2-tab-system/workspace-tab-system-demo.svg)
+
+*Figure 0: A generic workbench using browser-like tabs. Users keep several work items open, switch back without reload, and only the focused tab owns URL, overlays, events, and foreground CPU.*
+
 Business goals:
 
 | Goal | User Experience |

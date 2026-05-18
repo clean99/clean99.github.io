@@ -74,6 +74,9 @@ permalink: zh/YYYY/MM/DD/Full-English-Title/
 6. Add visuals:
    - Use Mermaid for architecture/flow diagrams when static diagrams are enough.
    - Use image files only when the post benefits from real visual evidence or generated illustrations.
+   - For articles based on internal or domain-specific products, add an early audience-orientation visual before deep architecture, metrics, or implementation sections.
+   - That visual should answer what the product or workflow looks like, who uses it, what action the user takes, where the technical mechanism appears, and why the later metrics matter.
+   - Prefer generic product mockups or scenario diagrams over internal screenshots; avoid internal names, URLs, secrets, and operational identifiers.
    - Verify referenced image files exist.
 7. Review before publishing:
    - No WIP/TODO/FIXME/placeholders.
@@ -81,6 +84,7 @@ permalink: zh/YYYY/MM/DD/Full-English-Title/
    - No broken markdown tables or code fences.
    - No private tokens, cookies, raw log IDs, or unrelated internal details.
    - The first viewport should explain the reader value, not the drafting or cleanup process.
+   - If the article depends on business context unfamiliar to public readers, the first viewport includes a product or scenario visual, not only architecture or metric diagrams.
    - If adapting a skill/workflow, the article should teach the workflow's control loop and proof rules before showing long code blocks.
    - `npm run build` succeeds.
 8. Commit:
