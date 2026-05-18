@@ -44,6 +44,70 @@ Why it is useful here: it gives a standard fallback workflow for real-browser sn
 
 Current blocker: the wrapper requires `npx`, which is absent in this environment.
 
+## Installed Globally
+
+These skills are installed under `$HOME/.codex/skills/` and are available as advisory layers for this project. They are not copied into `.agents/skills/` because the global install is already active in Codex.
+
+### `x-article-editor`
+
+- Local path: `$HOME/.codex/skills/x-article-editor`
+- Use: audit X Article title, opening, skimmability, argument flow, and cover-image concept before applying a copy override.
+- Boundary: advisory only. Its final copy is not publishable until it passes `x-technical-sharing`, `humanizer-zh`, and the local quality gate.
+
+### `x-trends`
+
+- Local path: `$HOME/.codex/skills/x-trends`
+- Use: public, no-login trend checks before queue expansion or timing decisions.
+- Boundary: use trend signals as topic intelligence only; do not trend-jack generic topics or perform X account actions.
+
+### `last30days`
+
+- Local path: `$HOME/.codex/skills/last30days`
+- Use: weekly topic intelligence from recent public discussion, objections, and proof points.
+- Boundary: read-only research. Do not use optional X cookies or any publish/interaction path from the skill.
+
+### `tweet-writer`
+
+- Local path: `$HOME/.codex/skills/tweet-writer`
+- Use: outside hook and thread critique.
+- Boundary: reject generic viral formulas, clickbait, and English Twitter defaults before the local Chinese quality gate.
+
+### `de-ai-ify`
+
+- Local path: `$HOME/.codex/skills/de-ai-ify`
+- Use: extra cleanup pass when copy still sounds translated, corporate, or generated.
+- Boundary: for Chinese copy, `humanizer-zh` remains the stricter final authority.
+
+### `product-marketing`
+
+- Local path: `$HOME/.codex/skills/product-marketing`
+- Use: maintain `.agents/product-marketing.md` as the shared positioning file for Clean993.
+- Boundary: account positioning only; do not scatter profile promise or target-reader rules across individual queue items.
+
+### `copy-editing`
+
+- Local path: `$HOME/.codex/skills/copy-editing`
+- Use: focused critique pass for short posts, X Articles, image headlines, and profile copy.
+- Boundary: preserve the technical claim; cut vagueness, filler, and weak CTAs.
+
+### `blog-writing-guide`
+
+- Local path: `$HOME/.codex/skills/blog-writing-guide`
+- Use: technical-writing quality bar for specificity, senior-engineer usefulness, and banned AI/corporate wording.
+- Boundary: ignore Sentry-specific brand voice where it conflicts with Clean993.
+
+### `prompt-optimizer`
+
+- Local path: `$HOME/.codex/skills/prompt-optimizer`
+- Use: improve reusable prompts for image generation, copy override, browser handoff, and automation runs.
+- Boundary: keep prompt contracts explicit and eval-driven; do not loosen public-action boundaries.
+
+### `community-marketing`
+
+- Local path: `$HOME/.codex/skills/community-marketing`
+- Use: relationship-loop and non-spam engagement strategy.
+- Boundary: translate recommendations into small manual engagement targets and local metrics; no mass replies, DMs, follows, or account actions.
+
 ## Rejected for This System
 
 - Twitter/X API automation skills: conflicts with the explicit no-X-API constraint.
