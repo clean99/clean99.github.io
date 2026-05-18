@@ -118,6 +118,10 @@ import {
   parseProfileText,
   writeProfileAudit,
 } from '../tools/social-growth/profile.mjs';
+import {
+  buildPublicActionChecklist,
+  formatPublicActionChecklistMarkdown,
+} from '../tools/social-growth/publicActionChecklist.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
 import { runScheduledGrowthLoop } from '../tools/social-growth/scheduledRun.mjs';
 import { buildGrowthStatus, formatGrowthStatusMarkdown, writeGrowthStatus } from '../tools/social-growth/status.mjs';
@@ -1933,6 +1937,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const preflight = await readFile(join(outDir, 'publish-preflight.md'), 'utf8');
     const profileAudit = await readFile(join(outDir, 'profile-audit.md'), 'utf8');
     const profileUpdate = await readFile(join(outDir, 'profile-update.md'), 'utf8');
+    const publicActionChecklist = await readFile(join(outDir, 'public-action-checklist.md'), 'utf8');
     const xPrep = await readFile(join(outDir, 'x-publish-prep.md'), 'utf8');
     const confirmation = await readFile(join(outDir, 'publish-confirmation.md'), 'utf8');
     const launchWindow = await readFile(join(outDir, 'launch-window.md'), 'utf8');
@@ -1962,6 +1967,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.equal(result.paths.browserReadiness, join(outDir, 'browser-readiness.md'));
     assert.equal(result.paths.profileDiagnostics, join(outDir, 'x-profile-diagnostics.md'));
     assert.equal(result.paths.loginHandoff, join(outDir, 'login-handoff.md'));
+    assert.equal(result.paths.publicActionChecklist, join(outDir, 'public-action-checklist.md'));
     assert.equal(result.paths.engagementSearch, join(outDir, 'engagement-search.md'));
     assert.equal(result.paths.engagementCaptureTemplate, join(outDir, 'engagement-opportunities/_capture-template.md'));
     assert.equal(result.paths.engagementPlan, join(outDir, 'engagement-plan.md'));
@@ -1975,6 +1981,8 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.equal(result.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.manualPublishKits.status, 'no_ready_slots');
     assert.equal(result.manualPublishKits.readyKits, 0);
+    assert.equal(result.publicActionChecklist.status, 'pending_confirmation');
+    assert.equal(result.publicActionChecklist.actionCount, 3);
     assert.match(report, /No public X action was performed/);
     assert.match(report, /Daily brief/);
     assert.match(dailyBrief, /Daily X Growth Brief/);
@@ -1992,12 +2000,16 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(report, /Engagement plan/);
     assert.match(report, /Engagement capture template/);
     assert.match(report, /Manual publish kits/);
+    assert.match(report, /Public action checklist/);
     assert.match(report, /Profile update package/);
     assert.match(report, /Profile Conversion/);
     assert.match(status, /Profile Conversion/);
     assert.match(preflight, /Status: blocked/);
     assert.match(profileAudit, /Status: needs_work/);
     assert.match(profileUpdate, /final profile save click/);
+    assert.match(publicActionChecklist, /Public X Action Checklist/);
+    assert.match(publicActionChecklist, /final profile save click/);
+    assert.match(publicActionChecklist, /Prohibited Automation/);
     assert.match(xPrep, /X Browser Handoff/);
     assert.match(confirmation, /X Publish Confirmation Packet/);
     assert.match(launchWindow, /X Launch Window Plan/);
@@ -2111,6 +2123,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const launchWindow = await readFile(join(outDir, 'launch-window.md'), 'utf8');
     const browserReadiness = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
     const engagementCaptureTemplate = await readFile(join(outDir, 'engagement-opportunities/_capture-template.md'), 'utf8');
+    const publicActionChecklist = await readFile(join(outDir, 'public-action-checklist.md'), 'utf8');
     const experimentPlan = await readFile(join(outDir, 'experiment-plan.md'), 'utf8');
     const manualPublishKits = await readFile(join(outDir, 'manual-publish-kits/day1-ready-slots.md'), 'utf8');
 
@@ -2128,6 +2141,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.automation.manualPublishKits.status, 'ready_for_manual_confirmation');
     assert.equal(result.automation.manualPublishKits.readyKits, 1);
+    assert.equal(result.automation.publicActionChecklist.status, 'pending_confirmation');
+    assert.equal(result.automation.publicActionChecklist.actionCount, 1);
     assert.equal(result.selected.id, expectedQueue.items[0].id);
     assert.match(scheduledReport, /Scheduled X Growth Run/);
     assert.match(scheduledReport, /Daily brief/);
@@ -2136,6 +2151,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Engagement capture template/);
     assert.match(scheduledReport, /Engagement plan/);
     assert.match(scheduledReport, /Manual publish kits ready: 1\/3/);
+    assert.match(scheduledReport, /Public actions pending confirmation: 1/);
     assert.match(scheduledReport, /Publish confirmation/);
     assert.match(scheduledReport, /Launch window/);
     assert.match(scheduledReport, /Browser readiness/);
@@ -2156,6 +2172,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(browserReadiness, /X Browser Readiness/);
     assert.match(engagementCaptureTemplate, /X Engagement Capture Template/);
     assert.match(engagementCaptureTemplate, /do not reply, like, repost/);
+    assert.match(publicActionChecklist, /Public X Action Checklist/);
+    assert.match(publicActionChecklist, /final public publish click/);
     assert.match(manualPublishKits, /Manual X Publish Kits/);
     assert.match(manualPublishKits, /Ready slots: 1\/3/);
     assert.match(manualPublishKits, /post-publish-recovery/);
@@ -3964,6 +3982,47 @@ test('manual publish kits CLI writes all ready fallback kits and an index', asyn
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('public action checklist centralizes confirmation boundaries', async () => {
+  const checklist = buildPublicActionChecklist({
+    generatedAt: '2026-05-18T00:00:00.000Z',
+    manualPublishKits: {
+      entries: [{
+        id: 'Agent-Skills__zh__strong-thesis',
+        status: 'ready_for_manual_confirmation',
+        path: 'data/social-growth/manual-publish-kits/day1-slot1-Agent-Skills.md',
+        recoveryCommand: 'npm run social:post-publish-recovery -- --url <x-thread-url>',
+      }],
+    },
+    profileUpdate: {
+      status: 'needs_browser_confirmation',
+    },
+    engagementPlan: {
+      opportunities: [{
+        id: 'ai-thread',
+        sourcePath: 'data/social-growth/engagement-opportunities/ai-thread.txt',
+        queueId: 'Agent-Skills__zh__strong-thesis',
+        browserAction: {
+          stopBefore: 'final public Reply click',
+        },
+      }],
+    },
+    browserReadiness: {
+      status: 'needs_x_login',
+    },
+  });
+  const markdown = formatPublicActionChecklistMarkdown(checklist);
+
+  assert.equal(checklist.status, 'blocked_until_x_login');
+  assert.equal(checklist.actionCount, 5);
+  assert.equal(checklist.blockedByLogin, true);
+  assert.ok(checklist.actions.every((item) => item.status === 'needs_action_time_confirmation'));
+  assert.match(markdown, /final public publish click/);
+  assert.match(markdown, /final profile save click/);
+  assert.match(markdown, /final public Reply click/);
+  assert.match(markdown, /Prohibited Automation/);
+  assert.match(markdown, /post-publish recovery after a confirmed public X status URL/);
 });
 
 test('manual publish URL template maps ready kits to fillable published URL records', () => {

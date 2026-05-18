@@ -40,6 +40,10 @@ import {
   writeProfileUpdatePackage,
 } from './profile.mjs';
 import {
+  buildPublicActionChecklist,
+  writePublicActionChecklist,
+} from './publicActionChecklist.mjs';
+import {
   buildXProfileDiagnostics,
   writeXProfileDiagnostics,
 } from './xProfileDiagnostics.mjs';
@@ -124,6 +128,7 @@ export async function runSafeAutomationCycle({
   postTextDir = DEFAULT_POST_TEXT_DIR,
   profileAuditPath = DEFAULT_PROFILE_AUDIT_PATH,
   profileUpdatePath = DEFAULT_PROFILE_UPDATE_PATH,
+  publicActionChecklistPath = '',
   automationReportPath = DEFAULT_AUTOMATION_REPORT_PATH,
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
   imageBacklogPath = DEFAULT_IMAGE_BACKLOG_PATH,
@@ -162,6 +167,8 @@ export async function runSafeAutomationCycle({
   }
 
   const generatedAt = toIsoString(now);
+  const resolvedPublicActionChecklistPath = publicActionChecklistPath
+    || join(dirname(automationReportPath), 'public-action-checklist.md');
   const daily = await runDailyGrowthPlan({
     articles,
     now,
@@ -388,6 +395,15 @@ export async function runSafeAutomationCycle({
     indexPath: manualPublishKitIndexOutPath,
     env,
   });
+  const publicActionChecklist = buildPublicActionChecklist({
+    generatedAt,
+    publishConfirmation,
+    manualPublishKits,
+    profileUpdate,
+    engagementPlan,
+    browserReadiness,
+  });
+  await writePublicActionChecklist(publicActionChecklist, resolvedPublicActionChecklistPath);
 
   const result = {
     generatedAt,
@@ -418,6 +434,7 @@ export async function runSafeAutomationCycle({
       preflight: preflightPath,
       profileAudit: profileAuditPath,
       profileUpdate: profileUpdatePath,
+      publicActionChecklist: resolvedPublicActionChecklistPath,
       imageBrief: imageBriefOutPath,
       imageBacklog: imageBacklogPath,
       xPublishPrep: xPublishPrepPath,
@@ -462,6 +479,11 @@ export async function runSafeAutomationCycle({
       indexPath: manualPublishKits.indexPath,
       urlTemplatePath: manualPublishKits.urlTemplatePath,
     },
+    publicActionChecklist: {
+      status: publicActionChecklist.status,
+      actionCount: publicActionChecklist.actionCount,
+      blockedByLogin: publicActionChecklist.blockedByLogin,
+    },
     boundary: 'No public X action was performed. Chrome publishing, media upload, profile edits, replies, likes, reposts, follows, and final publish clicks still require action-time confirmation.',
   };
   await writeAutomationReport(result, automationReportPath);
@@ -502,6 +524,7 @@ Status: ${result.status}
 - Preflight: \`${result.paths.preflight}\`
 - Profile audit: \`${result.paths.profileAudit}\`
 - Profile update package: \`${result.paths.profileUpdate}\`
+- Public action checklist: \`${result.paths.publicActionChecklist}\`
 - Image brief: \`${result.paths.imageBrief || 'not generated'}\`
 - Image backlog: \`${result.paths.imageBacklog || 'not generated'}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
@@ -583,6 +606,13 @@ ${confirmationIssues}
 - Ready kits: ${result.manualPublishKits?.readyKits ?? 'unknown'}/${result.manualPublishKits?.totalSlots ?? 'unknown'}
 - Index: \`${result.manualPublishKits?.indexPath || 'not generated'}\`
 - URL template: \`${result.manualPublishKits?.urlTemplatePath || 'not generated'}\`
+
+## Public Action Checklist
+
+- Status: ${result.publicActionChecklist?.status || 'unknown'}
+- Pending public actions: ${result.publicActionChecklist?.actionCount ?? 'unknown'}
+- Blocked by X login: ${result.publicActionChecklist?.blockedByLogin ?? 'unknown'}
+- Report: \`${result.paths.publicActionChecklist}\`
 
 ## Local Blockers
 

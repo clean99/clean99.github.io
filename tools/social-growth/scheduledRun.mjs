@@ -58,6 +58,7 @@ export async function runScheduledGrowthLoop({
   postTextDir = DEFAULT_POST_TEXT_DIR,
   profileAuditPath = DEFAULT_PROFILE_AUDIT_PATH,
   profileUpdatePath = DEFAULT_PROFILE_UPDATE_PATH,
+  publicActionChecklistPath = '',
   automationReportPath = DEFAULT_AUTOMATION_REPORT_PATH,
   metricsCyclePath = DEFAULT_METRICS_CYCLE_PATH,
   growthReportPath = DEFAULT_GROWTH_REPORT_PATH,
@@ -96,6 +97,8 @@ export async function runScheduledGrowthLoop({
   env = process.env,
 } = {}) {
   const generatedAt = toIsoString(now);
+  const resolvedPublicActionChecklistPath = publicActionChecklistPath
+    || join(dirname(automationReportPath), 'public-action-checklist.md');
   const automation = await runSafeAutomationCycle({
     articles,
     now,
@@ -114,6 +117,7 @@ export async function runScheduledGrowthLoop({
     postTextDir,
     profileAuditPath,
     profileUpdatePath,
+    publicActionChecklistPath: resolvedPublicActionChecklistPath,
     automationReportPath,
     imageBriefDir,
     imageBacklogPath,
@@ -183,6 +187,7 @@ export async function runScheduledGrowthLoop({
       launchWindow: automation.launchWindow,
       engagement: automation.engagement,
       manualPublishKits: automation.manualPublishKits,
+      publicActionChecklist: automation.publicActionChecklist,
       manualPublishUrls,
       experimentPlan: {
         status: experimentPlan.status,
@@ -260,12 +265,14 @@ Status: ${result.status}
 - Profile diagnostics recommendations: ${result.automation.profileDiagnostics?.recommendations ?? 'unknown'}
 - Login handoff status: ${result.automation.loginHandoff?.status || 'unknown'}
 - Launch window status: ${result.automation.launchWindow?.status || 'unknown'}
+- Public action checklist: \`${result.paths.publicActionChecklist || 'not generated'}\`
 - Engagement search status: ${result.automation.engagement?.searchStatus || 'unknown'}
 - Engagement capture template status: ${result.automation.engagement?.captureTemplateStatus || 'unknown'}
 - Engagement capture targets: ${result.automation.engagement?.captureTargets ?? 'unknown'}
 - Engagement status: ${result.automation.engagement?.status || 'unknown'}
 - Ready reply candidates: ${result.automation.engagement?.readyCandidates ?? 'unknown'}
 - Manual publish kits ready: ${result.automation.manualPublishKits?.readyKits ?? 'unknown'}/${result.automation.manualPublishKits?.totalSlots ?? 'unknown'}
+- Public actions pending confirmation: ${result.automation.publicActionChecklist?.actionCount ?? 'unknown'}
 - Manual publish URLs filled: ${result.automation.manualPublishUrls?.filled ?? 'unknown'}/${result.automation.manualPublishUrls?.total ?? 'unknown'}
 
 Blockers:
