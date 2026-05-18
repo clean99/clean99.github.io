@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 
 const DEFAULT_OUT_PATH = 'data/social-growth/compose-draft-resolution.md';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
+const DEFAULT_STASH_DIR = 'data/social-growth/compose-drafts';
 
 export function buildComposeDraftResolution({
   queue,
@@ -48,6 +49,7 @@ export function buildComposeDraftResolution({
       imageBriefForExistingDraft: bestMatch
         ? imageBriefCommand(bestMatch.item.id)
         : '',
+      stashCurrentDraft: composeDraftStashCommand({ day, slot, publishMode }),
       status: statusCommand({ day, slot, publishMode }),
     },
     boundary: 'This is a local resolution runbook only. Do not publish, discard drafts, upload media, reply, like, repost, follow, edit profile, pin content, or click final X buttons without action-time confirmation in Chrome.',
@@ -88,6 +90,14 @@ Status: ${resolution.status}
 ${resolution.draft.text || 'No compose draft captured.'}
 \`\`\`
 
+## Local Draft Backup
+
+Before discarding the compose tab in Chrome, save the captured draft locally:
+
+\`\`\`bash
+${resolution.commands.stashCurrentDraft}
+\`\`\`
+
 ## Selected Package Waiting Behind It
 
 - Day: ${resolution.selected.day}
@@ -103,7 +113,7 @@ ${matchLines}
 ## Safe Resolution Paths
 
 1. If this existing draft should be published, review it in Chrome and stop before every public button until action-time confirmation. Do not overwrite it with the selected package.
-2. If this existing draft should not be published, discard it in Chrome only after confirming that losing the draft is acceptable. Then rerun browser readiness.
+2. If this existing draft should not be published, run the local backup command above, then discard it in Chrome only after confirming that losing the draft is acceptable. Then rerun browser readiness.
 3. If you are unsure, leave the compose tab untouched. The selected package must stay blocked until the existing draft is resolved.
 
 ## Existing Draft Publishability
@@ -129,6 +139,73 @@ export async function writeComposeDraftResolution(resolution, filePath = DEFAULT
   await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, `${formatComposeDraftResolutionMarkdown(resolution).trimEnd()}\n`);
   return filePath;
+}
+
+export function formatComposeDraftStashMarkdown(resolution) {
+  const match = resolution.match;
+  const matchText = match
+    ? [
+      `- Queue id: ${match.item.id}`,
+      `- Queue status: ${match.item.status || 'unknown'}`,
+      `- Article slug: ${match.item.articleSlug || 'unknown'}`,
+      `- Variant: ${match.item.variant || 'unknown'}`,
+      `- Confidence: ${match.confidence}`,
+      `- Draft matches queue first post: ${yesNo(match.draftMatchesFirstPost)}`,
+      `- Image ready: ${yesNo(match.image.ready)}`,
+      `- Expected image: \`${match.image.path}\``,
+    ].join('\n')
+    : '- No queue item matched this draft.';
+  const recovery = resolution.commands.afterPublishingExistingDraft
+    ? resolution.commands.afterPublishingExistingDraft
+    : '# No recovery command because the draft did not match a queue item.';
+
+  return `# X Compose Draft Local Stash
+
+Generated at: ${resolution.generatedAt}
+Status: ${resolution.status}
+
+## Draft Text
+
+\`\`\`text
+${resolution.draft.text || 'No compose draft captured.'}
+\`\`\`
+
+## Matched Queue Item
+
+${matchText}
+
+## Selected Package Waiting Behind It
+
+- Day: ${resolution.selected.day}
+- Slot: ${resolution.selected.slot}
+- Queue id: ${resolution.selected.id || 'unknown'}
+- Article slug: ${resolution.selected.articleSlug || 'unknown'}
+
+## Recovery Command If This Draft Later Goes Public
+
+\`\`\`bash
+${recovery}
+\`\`\`
+
+## Boundary
+
+This file is a local backup only. It is not permission to publish, upload media, reply, like, repost, follow, edit profile, pin content, discard browser drafts, or click final X buttons.
+`;
+}
+
+export async function writeComposeDraftStash(resolution, {
+  filePath = '',
+  outDir = DEFAULT_STASH_DIR,
+} = {}) {
+  const targetPath = filePath || composeDraftStashPath(resolution, outDir);
+  await mkdir(dirname(targetPath), { recursive: true });
+  await writeFile(targetPath, `${formatComposeDraftStashMarkdown(resolution).trimEnd()}\n`);
+  return targetPath;
+}
+
+function composeDraftStashPath(resolution, outDir) {
+  const matchId = resolution.match?.item?.id || 'unmatched';
+  return join(outDir, `${safePathSegment(resolution.generatedAt)}__${safePathSegment(matchId)}.md`);
 }
 
 function formatPublishability(match, resolution) {
@@ -283,6 +360,10 @@ function postPublishRecoveryCommand(id, publishMode) {
 
 function imageBriefCommand(id) {
   return `${nodeCommand()} tools/social-growth/cli.mjs image-brief --id ${shellQuote(id)}`;
+}
+
+function composeDraftStashCommand({ day, slot, publishMode }) {
+  return `${nodeCommand()} tools/social-growth/cli.mjs compose-draft-stash --day ${Number(day || 1)} --slot ${Number(slot || 1)}${publishModeArg(publishMode)} --out-dir data/social-growth/compose-drafts`;
 }
 
 function browserReadinessCommand({ day, slot, publishMode }) {

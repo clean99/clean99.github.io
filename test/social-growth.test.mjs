@@ -31,6 +31,7 @@ import {
 import {
   buildComposeDraftResolution,
   formatComposeDraftResolutionMarkdown,
+  writeComposeDraftStash,
   writeComposeDraftResolution,
 } from '../tools/social-growth/composeDraftResolution.mjs';
 import {
@@ -3090,6 +3091,10 @@ test('compose draft resolution maps an existing draft to a queue item', async ()
     const markdown = formatComposeDraftResolutionMarkdown(resolution);
     const written = await writeComposeDraftResolution(resolution, join(outDir, 'compose-draft-resolution.md'));
     const persisted = await readFile(written, 'utf8');
+    const stashPath = await writeComposeDraftStash(resolution, {
+      outDir: join(outDir, 'compose-drafts'),
+    });
+    const stashed = await readFile(stashPath, 'utf8');
 
     assert.equal(resolution.status, 'needs_resolution');
     assert.ok(resolution.match.item.id.startsWith('Workspace-v2-Tab-System-Performance'));
@@ -3098,8 +3103,10 @@ test('compose draft resolution maps an existing draft to a queue item', async ()
     assert.equal(resolution.match.draftMatchesFirstPost, false);
     assert.match(resolution.commands.afterPublishingExistingDraft, /post-publish-recovery/);
     assert.match(resolution.commands.imageBriefForExistingDraft, /image-brief --id/);
+    assert.match(resolution.commands.stashCurrentDraft, /compose-draft-stash/);
     assert.match(markdown, /Likely Queue Match/);
     assert.match(markdown, /Workspace-v2-Tab-System-Performance/);
+    assert.match(markdown, /Local Draft Backup/);
     assert.match(markdown, /Existing Draft Publishability/);
     assert.match(markdown, /Image ready for matched item: no/);
     assert.match(markdown, /Image ready: no/);
@@ -3108,6 +3115,9 @@ test('compose draft resolution maps an existing draft to a queue item', async ()
     assert.match(markdown, /do not treat this existing draft as a healthy growth slot/);
     assert.match(persisted, /X Compose Draft Resolution/);
     assert.match(persisted, /Do not overwrite it with the selected package/);
+    assert.match(stashed, /X Compose Draft Local Stash/);
+    assert.match(stashed, /Workspace v2 Tab System 性能优化/);
+    assert.match(stashed, /Recovery Command If This Draft Later Goes Public/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

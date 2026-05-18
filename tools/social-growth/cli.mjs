@@ -29,6 +29,7 @@ import {
 import {
   buildComposeDraftResolution,
   formatComposeDraftResolutionMarkdown,
+  writeComposeDraftStash,
   writeComposeDraftResolution,
 } from './composeDraftResolution.mjs';
 import {
@@ -909,51 +910,7 @@ if (command === 'articles') {
     console.log(formatBrowserReadinessMarkdown(readiness));
   }
 } else if (command === 'compose-draft-resolution') {
-  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
-  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
-  const publishMode = args.publishMode || args.articleMode || 'thread_fallback';
-  const preflight = await buildPublishPreflight({
-    queue,
-    ledger,
-    id: args.id,
-    day: args.day || 1,
-    slot: args.slot || 1,
-    now: args.now ? new Date(args.now) : new Date(),
-    imageDir: args.imageDir || 'output/imagegen',
-    packageOutDir: args.packageOut || 'data/social-growth/packages',
-    ensurePackage: args.ensurePackage !== 'false',
-    preferReadyImage: args.preferReadyImage !== 'false',
-  });
-  const prep = await buildXPublishPrep(preflight, {
-    skillDir: args.skillDir,
-    bunCommand: args.bunCommand,
-    articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
-    publishMode,
-    profileDir: args.xProfileDir || args.profileDir,
-    profileDirectory: args.xProfileDirectory || args.profileDirectory,
-  });
-  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
-  const storedProbe = await readBrowserProbe(probePath);
-  const inputProbe = browserProbeFromArgs(args);
-  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
-  const readiness = buildBrowserReadiness({
-    preflight,
-    xPrep: prep,
-    ...effectiveProbe,
-    profileDir: args.xProfileDir || args.profileDir,
-    profileDirectory: args.xProfileDirectory || args.profileDirectory,
-    generatedAt: preflight.generatedAt,
-  });
-  const resolution = buildComposeDraftResolution({
-    queue,
-    browserProbe: effectiveProbe,
-    browserReadiness: readiness,
-    day: args.day || 1,
-    slot: args.slot || 1,
-    publishMode,
-    imageDir: args.imageDir || 'output/imagegen',
-    generatedAt: preflight.generatedAt,
-  });
+  const { resolution } = await buildComposeDraftResolutionFromCli(args);
   if (args.out) {
     await writeComposeDraftResolution(resolution, args.out);
     console.log(`Wrote X compose draft resolution to ${args.out}`);
@@ -962,6 +919,13 @@ if (command === 'articles') {
   } else {
     console.log(formatComposeDraftResolutionMarkdown(resolution));
   }
+} else if (command === 'compose-draft-stash') {
+  const { resolution } = await buildComposeDraftResolutionFromCli(args);
+  const targetPath = await writeComposeDraftStash(resolution, {
+    filePath: args.out || '',
+    outDir: args.outDir || 'data/social-growth/compose-drafts',
+  });
+  console.log(`Wrote X compose draft local stash to ${targetPath}`);
 } else if (command === 'confirmation') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -1741,6 +1705,7 @@ function printHelp() {
   npm run social:x-profile-diagnostics -- --out data/social-growth/x-profile-diagnostics.md
   npm run social:browser-readiness -- --day today --slot 1 --out data/social-growth/browser-readiness.md
   npm run social:compose-draft-resolution -- --day today --slot 1 --out data/social-growth/compose-draft-resolution.md
+  npm run social:compose-draft-stash -- --day today --slot 1 --out-dir data/social-growth/compose-drafts
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
   npm run social:daily-brief -- --day 1 --out data/social-growth/daily-brief.md
   npm run social:engagement-search -- --out data/social-growth/engagement-search.md
@@ -1783,6 +1748,63 @@ function requiredArg(options, key) {
     throw new Error(`Missing required argument: --${key}`);
   }
   return options[key];
+}
+
+async function buildComposeDraftResolutionFromCli(options) {
+  const queue = await readJson(options.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(options.ledger || 'data/social-growth/ledger.json');
+  const publishMode = options.publishMode || options.articleMode || 'thread_fallback';
+  const preflight = await buildPublishPreflight({
+    queue,
+    ledger,
+    id: options.id,
+    day: options.day || 1,
+    slot: options.slot || 1,
+    now: options.now ? new Date(options.now) : new Date(),
+    imageDir: options.imageDir || 'output/imagegen',
+    packageOutDir: options.packageOut || 'data/social-growth/packages',
+    ensurePackage: options.ensurePackage !== 'false',
+    preferReadyImage: options.preferReadyImage !== 'false',
+  });
+  const prep = await buildXPublishPrep(preflight, {
+    skillDir: options.skillDir,
+    bunCommand: options.bunCommand,
+    articleUrlPlaceholder: options.articleUrl || '<x-article-url>',
+    publishMode,
+    profileDir: options.xProfileDir || options.profileDir,
+    profileDirectory: options.xProfileDirectory || options.profileDirectory,
+  });
+  const probePath = options.browserProbe || options.probeOut || 'data/social-growth/browser-probe.local.json';
+  const storedProbe = await readBrowserProbe(probePath);
+  const inputProbe = browserProbeFromArgs(options);
+  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
+  const readiness = buildBrowserReadiness({
+    preflight,
+    xPrep: prep,
+    ...effectiveProbe,
+    profileDir: options.xProfileDir || options.profileDir,
+    profileDirectory: options.xProfileDirectory || options.profileDirectory,
+    generatedAt: preflight.generatedAt,
+  });
+  const resolution = buildComposeDraftResolution({
+    queue,
+    browserProbe: effectiveProbe,
+    browserReadiness: readiness,
+    day: options.day || 1,
+    slot: options.slot || 1,
+    publishMode,
+    imageDir: options.imageDir || 'output/imagegen',
+    generatedAt: preflight.generatedAt,
+  });
+
+  return {
+    queue,
+    ledger,
+    preflight,
+    prep,
+    readiness,
+    resolution,
+  };
 }
 
 async function readText(filePath) {

@@ -232,6 +232,15 @@ Before opening Chrome for a public-action handoff, run or update the browser rea
 npm run social:browser-readiness -- --day today --slot 1 --publishMode thread_fallback --out data/social-growth/browser-readiness.md
 ```
 
+If browser readiness reports that the compose editor already contains a different draft, do not overwrite it. Resolve and back it up locally first:
+
+```bash
+npm run social:compose-draft-resolution -- --day today --slot 1 --publishMode thread_fallback --out data/social-growth/compose-draft-resolution.md
+npm run social:compose-draft-stash -- --day today --slot 1 --publishMode thread_fallback --out-dir data/social-growth/compose-drafts
+```
+
+The resolver maps the existing draft back to a likely queue item, checks whether it matches the quality-gated first post, checks whether the matched image is ready, reports same-article alternate images, and gives either a post-publish recovery command or a safe discard path. The stash command is local-only and does not touch Chrome; use it before asking for confirmation to discard the browser draft.
+
 If Chrome probing has already observed facts, record them explicitly:
 
 ```bash
