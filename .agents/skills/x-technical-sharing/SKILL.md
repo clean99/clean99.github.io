@@ -188,6 +188,9 @@ Remove AI-smelling filler:
 If the project-level `x-writing` community skill is available, use its `references/anti-patterns.md` as a cleanup checklist for rhythm, inflated vocabulary, formal transitions, and reframing cliches. Do not inherit its English-only examples blindly; Chinese technical specificity and this skill's output contract win.
 If the project-level `humanizer-zh` skill is available, run it after drafting and before `social:apply-copy`. It should remove Chinese AI-writing residue such as negative reframing, generic transitions, inflated slogans, and perfectly balanced template sentences.
 If the project-level `marketing-psychology` skill is available, use it before finalizing the first line and image headline. Keep only the psychological frame that is tied to the technical mechanism: a wrong belief, visible loss, status payoff, or decision pressure. Do not add generic persuasion language.
+If the community `copy-editing` skill is available, use it as a focused critique pass, not a rewrite engine. Preserve the technical mechanism and edit for clarity, specificity, proof, and reader action.
+If the community `blog-writing-guide` skill is available, borrow its quality bar for technical usefulness and banned corporate/AI wording. Do not import Sentry-specific brand voice into Clean993 copy.
+If the community `prompt-optimizer` skill is available, use it when rewriting reusable image prompts or copy-override prompts. Keep the output contract strict: only the allowed JSON fields may change.
 
 ## X Article Structure
 
