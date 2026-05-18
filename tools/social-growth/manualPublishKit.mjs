@@ -155,6 +155,36 @@ export function manualPublishKitIndexPath({
   return join(outDir, `day${Number(day || 1)}-ready-slots.md`);
 }
 
+export function manualPublishUrlTemplatePath({
+  day,
+  outDir = DEFAULT_BATCH_DIR,
+} = {}) {
+  return join(outDir, `day${Number(day || 1)}-published-urls.json`);
+}
+
+export function buildManualPublishUrlTemplate({
+  generatedAt = new Date().toISOString(),
+  day = 1,
+  date = '',
+  kits = [],
+} = {}) {
+  return {
+    version: 1,
+    generatedAt,
+    status: kits.length ? 'ready_for_url_capture' : 'no_ready_slots',
+    day: Number(day || 1),
+    date,
+    items: kits.map((entry) => ({
+      slot: Number(entry.slot || 1),
+      id: entry.id,
+      url: '',
+      articleUrl: '',
+      publishedAt: '',
+    })),
+    boundary: 'Fill only after manual Chrome publication has been confirmed. This file is for local queue/metrics recovery and performs no public X actions.',
+  };
+}
+
 export function buildManualPublishKitIndex({
   generatedAt = new Date().toISOString(),
   day = 1,
@@ -162,7 +192,14 @@ export function buildManualPublishKitIndex({
   readySlots = 0,
   totalSlots = 0,
   kits = [],
+  urlTemplatePath = '',
+  batchRecoveryCommand = '',
 } = {}) {
+  const recoveryCommand = batchRecoveryCommand || (
+    urlTemplatePath
+      ? `npm run social:post-publish-recovery-batch -- --input ${shellQuote(urlTemplatePath)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies`
+      : ''
+  );
   return {
     generatedAt,
     status: kits.length ? 'ready_for_manual_confirmation' : 'no_ready_slots',
@@ -171,6 +208,10 @@ export function buildManualPublishKitIndex({
     readySlots: numberOrDefault(readySlots, kits.length),
     totalSlots: numberOrDefault(totalSlots, kits.length),
     kits,
+    batchRecovery: {
+      urlTemplatePath,
+      command: recoveryCommand,
+    },
     boundary: 'Manual publish kits only. Publishing, uploading media, replying, liking, reposting, following, editing the profile, and pinning content still require action-time confirmation in Chrome.',
   };
 }
@@ -179,6 +220,7 @@ export function formatManualPublishKitIndexMarkdown(index) {
   const kits = index.kits.length
     ? index.kits.map(formatManualKitEntry).join('\n\n')
     : '- No ready manual publish kits were generated.';
+  const batchRecovery = formatBatchRecovery(index);
 
   return `# Manual X Publish Kits
 
@@ -192,10 +234,20 @@ Ready slots: ${index.readySlots}/${index.totalSlots}
 
 ${kits}
 
+## Batch Recovery
+
+${batchRecovery}
+
 ## Boundary
 
 ${index.boundary}
 `;
+}
+
+export async function writeManualPublishUrlTemplate(template, filePath) {
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${JSON.stringify(template, null, 2)}\n`);
+  return filePath;
 }
 
 export async function writeManualPublishKitIndex(index, filePath) {
@@ -217,6 +269,25 @@ After confirmed publication:
 \`\`\`bash
 ${entry.recoveryCommand}
 \`\`\``;
+}
+
+function formatBatchRecovery(index) {
+  if (!index.kits?.length) {
+    return '- Not available because no ready kits were generated.';
+  }
+  return `1. After confirmed publication, fill \`url\` for each published item in \`${index.batchRecovery.urlTemplatePath}\`.
+2. Leave unpublished items blank.
+3. Run the batch recovery command:
+
+\`\`\`bash
+${index.batchRecovery.command}
+\`\`\``;
+}
+
+function shellQuote(value) {
+  const text = String(value);
+  if (/^[A-Za-z0-9_./:=+-]+$/.test(text)) return text;
+  return `'${text.replace(/'/g, "'\\''")}'`;
 }
 
 function safePathSegment(value) {

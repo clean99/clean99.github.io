@@ -97,6 +97,7 @@ import {
 } from '../tools/social-growth/publishConfirmation.mjs';
 import {
   buildManualPublishKit,
+  buildManualPublishUrlTemplate,
   formatManualPublishKitMarkdown,
 } from '../tools/social-growth/manualPublishKit.mjs';
 import {
@@ -3534,11 +3535,18 @@ test('manual publish kits CLI writes all ready fallback kits and an index', asyn
     const firstKitPath = join(kitDir, `day1-slot1-${plannedSlots[0].item.id}.md`);
     const secondKitPath = join(kitDir, `day1-slot2-${plannedSlots[1].item.id}.md`);
     const indexMarkdown = await readFile(indexPath, 'utf8');
+    const urlTemplate = JSON.parse(await readFile(join(kitDir, 'day1-published-urls.json'), 'utf8'));
     const firstKit = await readFile(firstKitPath, 'utf8');
     const secondKit = await readFile(secondKitPath, 'utf8');
 
     assert.match(indexMarkdown, /Manual X Publish Kits/);
     assert.match(indexMarkdown, /Ready slots: 2\/3/);
+    assert.match(indexMarkdown, /Batch Recovery/);
+    assert.match(indexMarkdown, /post-publish-recovery-batch/);
+    assert.equal(urlTemplate.status, 'ready_for_url_capture');
+    assert.equal(urlTemplate.items.length, 2);
+    assert.equal(urlTemplate.items[0].id, plannedSlots[0].item.id);
+    assert.equal(urlTemplate.items[0].url, '');
     assert.ok(indexMarkdown.includes(firstKitPath));
     assert.ok(indexMarkdown.includes(secondKitPath));
     assert.match(indexMarkdown, /post-publish-recovery/);
@@ -3550,6 +3558,38 @@ test('manual publish kits CLI writes all ready fallback kits and an index', asyn
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('manual publish URL template maps ready kits to fillable published URL records', () => {
+  const template = buildManualPublishUrlTemplate({
+    generatedAt: '2026-05-19T00:00:00.000Z',
+    day: 2,
+    date: '2026-05-19',
+    kits: [
+      { slot: 1, id: 'Agent-Skills__zh__strong-thesis' },
+      { slot: 2, id: 'Spec-Driven-Coding__zh__case-story' },
+    ],
+  });
+
+  assert.equal(template.status, 'ready_for_url_capture');
+  assert.equal(template.day, 2);
+  assert.deepEqual(template.items, [
+    {
+      slot: 1,
+      id: 'Agent-Skills__zh__strong-thesis',
+      url: '',
+      articleUrl: '',
+      publishedAt: '',
+    },
+    {
+      slot: 2,
+      id: 'Spec-Driven-Coding__zh__case-story',
+      url: '',
+      articleUrl: '',
+      publishedAt: '',
+    },
+  ]);
+  assert.match(template.boundary, /performs no public X actions/);
 });
 
 test('thread reply handoff materializes reply intent URLs from a published thread URL', () => {
@@ -5298,6 +5338,151 @@ test('post-publish recovery marks a manually published X URL and runs local metr
     assert.equal(metrics.posts[0].metrics.follows, '3');
     assert.equal(ledger.snapshots[1].followers, 33);
     assert.match(replyHandoff, /in_reply_to=1234567890123456789/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('post-publish recovery batch marks filled URLs and skips blank slots', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-post-publish-recovery-batch-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+      {
+        title: 'Spec Driven Coding',
+        excerpt: '复杂改动需要先固定意图、边界和验收标准。',
+        slug: 'Spec-Driven-Coding',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/spec-driven-coding/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 2,
+    });
+    const queuePath = join(outDir, 'queue.json');
+    const metricsPath = join(outDir, 'posts.local.json');
+    const replyOutDir = join(outDir, 'thread-replies');
+    const inputPath = join(outDir, 'published-urls.json');
+    const template = {
+      version: 1,
+      items: [
+        {
+          slot: 1,
+          id: queue.items[0].id,
+          url: 'https://twitter.com/Clean993/status/1111111111111111111?s=20',
+          articleUrl: 'https://x.com/Clean993/articles/agent-skills',
+          publishedAt: '2026-05-19T01:00:00.000Z',
+        },
+        {
+          slot: 2,
+          id: queue.items[1].id,
+          url: 'https://mobile.x.com/Clean993/status/2222222222222222222',
+          publishedAt: '2026-05-19T02:00:00.000Z',
+        },
+        {
+          slot: 3,
+          id: queue.items[2].id,
+          url: '',
+        },
+      ],
+    };
+    await writeJson(queuePath, queue);
+    await writeJson(inputPath, template);
+
+    const result = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'post-publish-recovery-batch',
+      '--input', inputPath,
+      '--queue', queuePath,
+      '--metrics', metricsPath,
+      '--metrics-date', '2026-05-19',
+      '--reply-out-dir', replyOutDir,
+      '--metrics-cycle', 'false',
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const payload = JSON.parse(result.stdout);
+    const updatedQueue = JSON.parse(await readFile(queuePath, 'utf8'));
+    const metrics = JSON.parse(await readFile(metricsPath, 'utf8'));
+    const firstReplyHandoff = await readFile(join(replyOutDir, `${queue.items[0].id}.md`), 'utf8');
+    const secondReplyHandoff = await readFile(join(replyOutDir, `${queue.items[1].id}.md`), 'utf8');
+
+    assert.equal(payload.status, 'published');
+    assert.equal(payload.recovered, 2);
+    assert.equal(payload.pending, 1);
+    assert.equal(payload.publicActions.typedText, false);
+    assert.equal(updatedQueue.items[0].status, 'published');
+    assert.equal(updatedQueue.items[0].xPostUrl, 'https://x.com/Clean993/status/1111111111111111111');
+    assert.equal(updatedQueue.items[0].xArticleUrl, 'https://x.com/Clean993/articles/agent-skills');
+    assert.equal(updatedQueue.items[1].xPostUrl, 'https://x.com/Clean993/status/2222222222222222222');
+    assert.equal(updatedQueue.items[2].status, 'draft');
+    assert.equal(metrics.posts.length, 2);
+    assert.equal(metrics.posts[0].url, 'https://x.com/Clean993/status/1111111111111111111');
+    assert.match(firstReplyHandoff, /in_reply_to=1111111111111111111/);
+    assert.match(secondReplyHandoff, /in_reply_to=2222222222222222222/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('post-publish recovery batch rejects invalid URLs before mutating queue', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-post-publish-recovery-batch-invalid-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '有用的系统',
+        excerpt: '一个有用的系统，核心是保持数据模型足够小。',
+        slug: 'Useful-Systems',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const queuePath = join(outDir, 'queue.json');
+    const inputPath = join(outDir, 'published-urls.json');
+    await writeJson(queuePath, queue);
+    await writeJson(inputPath, {
+      version: 1,
+      items: [
+        {
+          slot: 1,
+          id: queue.items[0].id,
+          url: 'https://example.com/Clean993/status/123',
+        },
+      ],
+    });
+
+    const result = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'post-publish-recovery-batch',
+      '--input', inputPath,
+      '--queue', queuePath,
+      '--metrics-cycle', 'false',
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+    const unchangedQueue = JSON.parse(await readFile(queuePath, 'utf8'));
+
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /Invalid X status URL host/);
+    assert.equal(unchangedQueue.items[0].status, 'draft');
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

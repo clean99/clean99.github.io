@@ -219,6 +219,19 @@ npm run social:manual-publish-kit -- --day today --slot 1 --publishMode thread_f
 ```
 
 This kit is local-only. It contains the first post, image path, remaining thread posts, the preferred `post-publish-recovery` command, and metrics copy targets. It is not permission to publish, upload media, reply, like, repost, follow, edit profile, or pin content.
+For multiple ready manual slots, prefer the batch kit index:
+
+```bash
+npm run social:manual-publish-kits -- --day today --publishMode thread_fallback --out data/social-growth/manual-publish-kits/day<N>-ready-slots.md
+```
+
+After each confirmed manual publication, paste the public X status URL into `data/social-growth/manual-publish-kits/day<N>-published-urls.json`. Leave unpublished slots blank, then run:
+
+```bash
+npm run social:post-publish-recovery-batch -- --input data/social-growth/manual-publish-kits/day<N>-published-urls.json
+```
+
+This batch recovery is local-only. It validates X status URLs, marks queue items as published, refreshes `posts.local.json`, and writes per-post reply handoffs. It must not publish, upload media, reply, like, repost, follow, edit profile, or pin content.
 If the default `baoyu-post-to-x` browser opens without the expected X login, pass a persistent logged-in profile directory:
 
 ```bash
@@ -344,6 +357,11 @@ For single-item control:
    npm run social:post-publish-recovery -- --day today --slot 1 --url <x-post-url>
    ```
    This validates the public X status URL, marks the selected queue item as published, refreshes the metrics template, writes the reply handoff, and runs the read-only metrics cycle from local copied text by default. It does not open Chrome unless `--skip-browser false` is explicitly passed.
+   For multiple manually confirmed posts from the same day, fill the batch URL template and run:
+   ```bash
+   npm run social:post-publish-recovery-batch -- --input data/social-growth/manual-publish-kits/day<N>-published-urls.json
+   ```
+   The batch command validates every filled URL before mutating the queue, skips blank slots, refreshes the metrics template once, and writes reply handoffs under `data/social-growth/thread-replies/`.
 19. Prepare the metrics template:
    ```bash
    npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json

@@ -56,10 +56,13 @@ import {
 import {
   buildManualPublishKit,
   buildManualPublishKitIndex,
+  buildManualPublishUrlTemplate,
   manualPublishKitIndexPath,
   manualPublishKitPath,
+  manualPublishUrlTemplatePath,
   writeManualPublishKit,
   writeManualPublishKitIndex,
+  writeManualPublishUrlTemplate,
 } from './manualPublishKit.mjs';
 
 const DEFAULT_QUEUE_PATH = 'data/social-growth/queue.json';
@@ -354,6 +357,7 @@ export async function runSafeAutomationCycle({
       engagementSearch: engagementSearchPath,
       engagementPlan: engagementPlanPath,
       manualPublishKitIndex: manualPublishKits.indexPath,
+      manualPublishUrlTemplate: manualPublishKits.urlTemplatePath,
       automationReport: automationReportPath,
     },
     engagement: {
@@ -380,6 +384,7 @@ export async function runSafeAutomationCycle({
       readyKits: manualPublishKits.entries.length,
       totalSlots: manualPublishKits.index.totalSlots,
       indexPath: manualPublishKits.indexPath,
+      urlTemplatePath: manualPublishKits.urlTemplatePath,
     },
     boundary: 'No public X action was performed. Chrome publishing, media upload, profile edits, replies, likes, reposts, follows, and final publish clicks still require action-time confirmation.',
   };
@@ -430,6 +435,7 @@ Status: ${result.status}
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
 - Manual publish kits: \`${result.paths.manualPublishKitIndex}\`
+- Manual publish URL template: \`${result.paths.manualPublishUrlTemplate}\`
 
 ## Engagement
 
@@ -479,6 +485,7 @@ ${confirmationIssues}
 - Status: ${result.manualPublishKits?.status || 'unknown'}
 - Ready kits: ${result.manualPublishKits?.readyKits ?? 'unknown'}/${result.manualPublishKits?.totalSlots ?? 'unknown'}
 - Index: \`${result.manualPublishKits?.indexPath || 'not generated'}\`
+- URL template: \`${result.manualPublishKits?.urlTemplatePath || 'not generated'}\`
 
 ## Local Blockers
 
@@ -560,6 +567,7 @@ async function writeReadyManualPublishKits({
   postTextDir,
   outDir,
   indexPath,
+  urlTemplatePath,
   env,
 } = {}) {
   const entries = [];
@@ -622,7 +630,19 @@ async function writeReadyManualPublishKits({
     readySlots: dayReadiness?.readySlots || 0,
     totalSlots: dayReadiness?.totalSlots || 0,
     kits: entries,
+    urlTemplatePath: urlTemplatePath || manualPublishUrlTemplatePath({
+      day: dayReadiness?.day || 1,
+      outDir,
+    }),
   });
+  const resolvedUrlTemplatePath = index.batchRecovery.urlTemplatePath;
+  const urlTemplate = buildManualPublishUrlTemplate({
+    generatedAt: dayReadiness?.generatedAt || toIsoString(now),
+    day: dayReadiness?.day || 1,
+    date: dayReadiness?.date || '',
+    kits: entries,
+  });
+  await writeManualPublishUrlTemplate(urlTemplate, resolvedUrlTemplatePath);
   const resolvedIndexPath = indexPath || manualPublishKitIndexPath({
     day: index.day,
     outDir,
@@ -632,6 +652,7 @@ async function writeReadyManualPublishKits({
   return {
     index,
     indexPath: resolvedIndexPath,
+    urlTemplatePath: resolvedUrlTemplatePath,
     entries,
   };
 }

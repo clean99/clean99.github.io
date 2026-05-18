@@ -105,11 +105,14 @@ import {
 } from './publishConfirmation.mjs';
 import {
   buildManualPublishKitIndex,
+  buildManualPublishUrlTemplate,
   buildManualPublishKit,
   formatManualPublishKitMarkdown,
   manualPublishKitIndexPath,
   manualPublishKitPath,
+  manualPublishUrlTemplatePath,
   writeManualPublishKitIndex,
+  writeManualPublishUrlTemplate,
   writeManualPublishKit,
 } from './manualPublishKit.mjs';
 import {
@@ -838,6 +841,9 @@ if (command === 'articles') {
 } else if (command === 'post-publish-recovery') {
   const result = await runPostPublishRecovery(args);
   console.log(JSON.stringify(result, null, 2));
+} else if (command === 'post-publish-recovery-batch') {
+  const result = await runPostPublishRecoveryBatch(args);
+  console.log(JSON.stringify(result, null, 2));
 } else if (command === 'x-prep') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -1032,16 +1038,31 @@ if (command === 'articles') {
     readySlots: dayReadiness.readySlots,
     totalSlots: dayReadiness.totalSlots,
     kits: entries,
+    urlTemplatePath: args.urlTemplate || manualPublishUrlTemplatePath({
+      day: dayReadiness.day,
+      outDir,
+    }),
   });
+  const urlTemplatePath = index.batchRecovery.urlTemplatePath;
+  const urlTemplate = buildManualPublishUrlTemplate({
+    generatedAt: dayReadiness.generatedAt,
+    day: dayReadiness.day,
+    date: dayReadiness.date,
+    kits: entries,
+  });
+  await writeManualPublishUrlTemplate(urlTemplate, urlTemplatePath);
   const indexPath = args.out || manualPublishKitIndexPath({
     day: dayReadiness.day,
     outDir,
   });
   await writeManualPublishKitIndex(index, indexPath);
   if (args.format === 'json') {
-    console.log(JSON.stringify(index, null, 2));
+    console.log(JSON.stringify({
+      ...index,
+      urlTemplatePath,
+    }, null, 2));
   } else {
-    console.log(`Wrote ${entries.length} manual X publish kit(s) and index to ${indexPath}`);
+    console.log(`Wrote ${entries.length} manual X publish kit(s), URL template, and index to ${indexPath}`);
   }
 } else if (command === 'register-image') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
@@ -1591,6 +1612,167 @@ async function runPostPublishRecovery(options = {}) {
   };
 }
 
+async function runPostPublishRecoveryBatch(options = {}) {
+  const inputPath = requiredArg(options, 'input');
+  const queuePath = options.queue || 'data/social-growth/queue.json';
+  const ledgerPath = options.ledger || 'data/social-growth/ledger.json';
+  const metricsPath = options.metrics === 'false'
+    ? null
+    : (options.metrics || options.metricsPath || 'data/social-growth/posts.local.json');
+  const replyOutDir = options.replyOutDir === 'false'
+    ? null
+    : (options.replyOutDir || 'data/social-growth/thread-replies');
+  const template = await readJson(inputPath);
+  const queue = await readJson(queuePath);
+  const publishedAt = options.publishedAt || new Date().toISOString();
+  const recoveryItems = normalizeBatchRecoveryItems(template.items || [], publishedAt);
+  const pendingItems = recoveryItems.filter((item) => !item.url);
+  const publishableItems = recoveryItems.filter((item) => item.url);
+
+  assertNoDuplicateRecoveryIds(publishableItems);
+  const normalizedItems = publishableItems.map((item) => ({
+    ...item,
+    xPostUrl: normalizeXStatusUrl(item.url),
+  }));
+  for (const item of normalizedItems) {
+    findQueueItem(queue, item.id);
+  }
+
+  if (!normalizedItems.length) {
+    return {
+      status: 'no_urls',
+      inputPath,
+      recovered: 0,
+      pending: pendingItems.length,
+      recoveredItems: [],
+      pendingItems: pendingItems.map((item) => ({ slot: item.slot, id: item.id })),
+      publicActions: {
+        typedText: false,
+        uploadedMedia: false,
+        clickedSubmit: false,
+      },
+      queue: {
+        path: queuePath,
+        updated: false,
+      },
+      metricsTemplate: null,
+      replyHandoffs: [],
+      metricsCycle: null,
+    };
+  }
+
+  let updatedQueue = queue;
+  for (const item of normalizedItems) {
+    updatedQueue = markQueueItemPublished(updatedQueue, {
+      id: item.id,
+      xPostUrl: item.xPostUrl,
+      xArticleUrl: item.articleUrl,
+      publishedAt: item.publishedAt,
+    });
+  }
+  await writeJson(queuePath, updatedQueue);
+
+  const metricsDate = options.metricsDate
+    || options.date
+    || (options.now ? new Date(options.now).toISOString().slice(0, 10) : undefined);
+  const refreshedMetrics = metricsPath
+    ? await refreshMetricsTemplateFromQueue({
+      queue: updatedQueue,
+      metricsPath,
+      date: metricsDate,
+    })
+    : null;
+
+  const replyHandoffs = [];
+  if (replyOutDir) {
+    for (const item of normalizedItems) {
+      const replyOutPath = `${replyOutDir}/${safePathSegment(item.id)}.md`;
+      const replyHandoff = buildThreadReplyHandoff({
+        queue: updatedQueue,
+        id: item.id,
+        threadUrl: item.xPostUrl,
+        generatedAt: item.publishedAt,
+      });
+      await writeThreadReplyHandoff(replyHandoff, replyOutPath);
+      replyHandoffs.push({
+        id: item.id,
+        path: replyOutPath,
+        status: replyHandoff.status,
+        statusId: replyHandoff.statusId,
+      });
+    }
+  }
+
+  const metricsCycle = options.metricsCycle === 'false'
+    ? null
+    : await runBrowserMetricsCapture({
+      ...options,
+      queue: queuePath,
+      ledger: ledgerPath,
+      metrics: metricsPath || undefined,
+      skipBrowser: options.skipBrowser === undefined ? true : options.skipBrowser,
+      profileText: options.profileText || 'data/social-growth/profile.local.txt',
+      postTextDir: options.postTextDir || 'data/social-growth/post-texts',
+      cycleOut: options.cycleOut || 'data/social-growth/metrics-cycle.md',
+      growthReportOut: options.growthReportOut || 'data/social-growth/growth-report.md',
+      recommendationsOut: options.recommendationsOut || 'data/social-growth/recommendations.md',
+      funnelOut: options.funnelOut || 'data/social-growth/funnel.md',
+    });
+
+  return {
+    status: metricsCycle?.status || 'published',
+    inputPath,
+    recovered: normalizedItems.length,
+    pending: pendingItems.length,
+    recoveredItems: normalizedItems.map((item) => ({
+      slot: item.slot,
+      id: item.id,
+      xPostUrl: item.xPostUrl,
+      articleUrl: item.articleUrl || '',
+      publishedAt: item.publishedAt,
+    })),
+    pendingItems: pendingItems.map((item) => ({ slot: item.slot, id: item.id })),
+    publicActions: {
+      typedText: false,
+      uploadedMedia: false,
+      clickedSubmit: false,
+    },
+    queue: {
+      path: queuePath,
+      updated: true,
+    },
+    metricsTemplate: refreshedMetrics,
+    replyHandoffs,
+    metricsCycle,
+  };
+}
+
+function normalizeBatchRecoveryItems(items, defaultPublishedAt) {
+  return items.map((item = {}, index) => {
+    const url = String(item.url || item.xPostUrl || '').trim();
+    if (url && !item.id) {
+      throw new Error(`Missing id for recovery item at index ${index}`);
+    }
+    return {
+      slot: Number(item.slot || 0),
+      id: item.id,
+      url,
+      articleUrl: item.articleUrl || item.xArticleUrl || '',
+      publishedAt: item.publishedAt || defaultPublishedAt,
+    };
+  }).filter((item) => item.id);
+}
+
+function assertNoDuplicateRecoveryIds(items) {
+  const seen = new Set();
+  for (const item of items) {
+    if (seen.has(item.id)) {
+      throw new Error(`Duplicate recovery item id: ${item.id}`);
+    }
+    seen.add(item.id);
+  }
+}
+
 async function selectRecoveryQueueItem({
   queue,
   ledgerPath,
@@ -1764,6 +1946,7 @@ function printHelp() {
   npm run social:register-image -- --day today --slot 1 --source /path/to/generated.png
   npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out data/social-growth/thread-reply-handoff.md --id <queue-id> --url <x-post-url>
   npm run social:post-publish-recovery -- --day today --slot 1 --url <x-post-url>
+  npm run social:post-publish-recovery-batch -- --input data/social-growth/manual-publish-kits/day1-published-urls.json
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt
   npm run social:browser-metrics-capture -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --metrics data/social-growth/posts.local.json
