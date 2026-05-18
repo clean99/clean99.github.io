@@ -460,7 +460,11 @@ if (command === 'articles') {
   const metrics = await readOptionalJson(args.metrics || 'data/social-growth/posts.local.json');
   const profileText = await readOptionalText(args.profileText || 'data/social-growth/profile.local.txt');
   const opportunityTexts = await readEngagementOpportunityTexts(args.opportunities || 'data/social-growth/engagement-opportunities');
-  const publishMode = args.publishMode || args.articleMode;
+  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
+  const storedProbe = await readBrowserProbe(probePath);
+  const inputProbe = browserProbeFromArgs(args);
+  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
+  const publishMode = args.publishMode || args.articleMode || inferPublishModeFromProbe(effectiveProbe);
   const preflight = await buildPublishPreflight({
     queue,
     ledger,
@@ -481,10 +485,6 @@ if (command === 'articles') {
     profileDir: args.xProfileDir || args.profileDir,
     profileDirectory: args.xProfileDirectory || args.profileDirectory,
   });
-  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
-  const storedProbe = await readBrowserProbe(probePath);
-  const inputProbe = browserProbeFromArgs(args);
-  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
   if (hasBrowserProbeValues(inputProbe)) effectiveProbe.generatedAt = preflight.generatedAt;
   if (args.writeProbe !== 'false' && hasBrowserProbeValues(effectiveProbe)) {
     await writeBrowserProbe(effectiveProbe, probePath);
@@ -1515,6 +1515,12 @@ async function runBrowserMetricsCapture(options = {}) {
       funnel: metricsCycle.funnelPath,
     },
   };
+}
+
+function inferPublishModeFromProbe(probe = {}) {
+  return String(probe.articleAvailable || '').toLowerCase() === 'no'
+    ? 'thread_fallback'
+    : undefined;
 }
 
 async function runPostPublishRecovery(options = {}) {

@@ -1622,7 +1622,6 @@ test('daily brief CLI reads stored browser probe before action order', async () 
       '--profile-text', profilePath,
       '--image-dir', imageDir,
       '--package-out', join(outDir, 'packages'),
-      '--publishMode', 'thread_fallback',
       '--out', briefPath,
     ], {
       cwd: process.cwd(),
@@ -1637,6 +1636,9 @@ test('daily brief CLI reads stored browser probe before action order', async () 
     assert.match(markdown, /Manual Publish Fallback/);
     assert.match(markdown, /social:manual-publish-kit/);
     assert.match(markdown, /social:post-publish-recovery/);
+    assert.match(markdown, /--publishMode thread_fallback/);
+    assert.match(markdown, /<x-thread-url>/);
+    assert.doesNotMatch(markdown, /<x-article-url>/);
     assert.doesNotMatch(markdown, /P0: Fix 1 blocked publish slot/);
     assert.doesNotMatch(markdown, /Status: ready_to_publish/);
   } finally {
