@@ -1196,6 +1196,8 @@ test('growth status summarizes blocker, pace, and next commands', async () => {
     assert.match(markdown, /Profile Conversion/);
     assert.match(markdown, /social:image-brief/);
     assert.match(markdown, /social:x-prep/);
+    assert.match(markdown, /social:profile-audit/);
+    assert.match(markdown, /social:profile-package/);
     assert.match(persisted, /Public X actions still require action-time confirmation/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
@@ -1299,7 +1301,9 @@ test('growth status is ready for browser confirmation when the selected image ex
     assert.equal(status.preflight.status, 'ready');
     assert.equal(status.preflight.image.ready, true);
     assert.ok(status.nextActions.some((item) => item.action.includes('Prepare the X Article')));
-    assert.match(formatGrowthStatusMarkdown(status), /social:x-prep/);
+    const markdown = formatGrowthStatusMarkdown(status);
+    assert.match(markdown, /social:x-prep/);
+    assert.match(markdown, /social:profile-package/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

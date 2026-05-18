@@ -185,6 +185,8 @@ npm run social:validate -- --queue data/social-growth/queue.json --format markdo
 npm run social:preflight -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot} --out data/social-growth/publish-preflight.md
 npm run social:image-brief -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}
 npm run social:x-prep -- --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot} --out data/social-growth/x-publish-prep.md
+npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
+npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md
 ${preflight?.browser?.recordCommand || 'npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>'}
 \`\`\`
 
