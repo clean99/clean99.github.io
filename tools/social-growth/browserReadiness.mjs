@@ -15,6 +15,7 @@ const PROBE_FIELDS = [
   'articleAvailable',
   'mediaUpload',
   'profileDirectory',
+  'composeDraftText',
   'generatedAt',
 ];
 
@@ -30,6 +31,7 @@ export function buildBrowserReadiness({
   loginState = UNKNOWN,
   articleAvailable = UNKNOWN,
   mediaUpload = UNKNOWN,
+  composeDraftText,
   profileDir = xPrep?.skill?.profileDir || '',
   profileDirectory = xPrep?.skill?.profileDirectory || '',
   generatedAt = preflight?.generatedAt || new Date().toISOString(),
@@ -44,6 +46,10 @@ export function buildBrowserReadiness({
     mediaUpload: normalizeSignal(mediaUpload),
   };
   const publishMode = xPrep?.publishMode || 'x_article';
+  const composeDraft = buildComposeDraft({
+    composeDraftText,
+    expectedTexts: selectedComposeDraftTexts({ preflight, xPrep, publishMode }),
+  });
   const cdpHandoffReady = xPrep?.status === 'ready' && (
     xPrep?.skill?.browserHandoff === 'cdp'
     || xPrep?.skill?.name === 'baoyu-post-to-x'
@@ -77,6 +83,9 @@ export function buildBrowserReadiness({
   if (observedAccount && !sameAccount(observedAccount, expectedAccount)) {
     blockers.push(`Chrome is logged into ${observedAccount}, not ${expectedAccount}.`);
   }
+  if (composeDraft.status === 'different') {
+    blockers.push('X compose already contains a different draft; save, publish after confirmation, or discard it before writing the selected package.');
+  }
   if (signals.articleAvailable === 'no' && publishMode !== 'thread_fallback') {
     blockers.push('X Article editor is unavailable; use thread fallback mode.');
   }
@@ -103,6 +112,7 @@ export function buildBrowserReadiness({
       xPrepStatus: xPrep?.status || UNKNOWN,
     },
     signals,
+    composeDraft,
     blockers,
     nextActions: nextActions({ blockers, signals, publishMode, profileDir, profileDirectory }),
     boundary: 'Readiness only. Do not publish, upload media, reply, like, repost, follow, edit profile, pin content, or click final X buttons without action-time confirmation.',
@@ -152,6 +162,12 @@ Status: ${readiness.status}
 - X Article editor available: ${readiness.signals.articleAvailable}
 - Media upload: ${readiness.signals.mediaUpload}
 
+## Compose Draft
+
+- Status: ${readiness.composeDraft.status}
+- Preview: ${readiness.composeDraft.preview || 'none'}
+- Expected selected first post: ${readiness.composeDraft.expectedPreview || 'unknown'}
+
 ## Blockers
 
 ${blockers}
@@ -196,14 +212,15 @@ export function mergeBrowserProbe(...probes) {
   for (const probe of probes) {
     const normalized = normalizeBrowserProbe(probe || {});
     for (const field of PROBE_FIELDS) {
-      if (hasValue(normalized[field])) merged[field] = normalized[field];
+      if (probeFieldHasValue(normalized, field)) merged[field] = normalized[field];
     }
   }
   return merged;
 }
 
 export function hasBrowserProbeValues(probe = {}) {
-  return PROBE_FIELDS.some((field) => field !== 'generatedAt' && hasValue(probe[field]));
+  const normalized = normalizeBrowserProbe(probe);
+  return PROBE_FIELDS.some((field) => field !== 'generatedAt' && probeFieldHasValue(normalized, field));
 }
 
 function readinessStatus({ blockers, signals, observedAccount, publishMode }) {
@@ -216,6 +233,7 @@ function readinessStatus({ blockers, signals, observedAccount, publishMode }) {
   if (blockers.some((item) => item.includes('native pipe'))) return 'needs_chrome_extension_reconnect';
   if (blockers.some((item) => item.includes('Chrome is not running'))) return 'needs_chrome_launch';
   if (blockers.some((item) => item.includes('Extension') || item.includes('native host'))) return 'blocked_chrome_extension';
+  if (blockers.some((item) => item.includes('different draft'))) return 'needs_compose_draft_resolution';
   if (blockers.some((item) => item.includes('not logged into X') || item.includes('not @'))) return 'needs_x_login';
   if (blockers.some((item) => item.includes('X Article') && publishMode !== 'thread_fallback')) return 'needs_thread_fallback';
   if (blockers.some((item) => item.includes('Media upload'))) return 'needs_media_upload_permission';
@@ -244,6 +262,13 @@ function nextActions({ blockers, signals, publishMode, profileDir }) {
       priority: 'P0',
       action: 'Install bun or rerun the X prep command with --bunCommand pointing to an executable Bun command.',
       reason: 'The X Article helper cannot run its TypeScript scripts without a Bun runtime.',
+    });
+  }
+  if (blockers.some((item) => item.includes('different draft'))) {
+    actions.push({
+      priority: 'P0',
+      action: 'Resolve the existing X compose draft before preparing the selected package.',
+      reason: 'The automation must not overwrite a draft that does not match the selected queue item.',
     });
   }
   if (blockers.some((item) => item.includes('not logged into X'))) {
@@ -303,8 +328,94 @@ function normalizeBrowserProbe(probe = {}) {
   for (const field of ['chromeRunning', 'extensionInstalled', 'nativeHost', 'extensionPipe', 'loginState', 'articleAvailable', 'mediaUpload']) {
     if (hasValue(probe[field])) normalized[field] = normalizeSignal(probe[field]);
   }
+  if (Object.prototype.hasOwnProperty.call(probe, 'composeDraftText')) {
+    normalized.composeDraftText = String(probe.composeDraftText === true ? '' : (probe.composeDraftText ?? '')).trim();
+  }
   if (hasValue(probe.generatedAt)) normalized.generatedAt = toIsoString(probe.generatedAt);
   return normalized;
+}
+
+function probeFieldHasValue(probe, field) {
+  if (field === 'composeDraftText') {
+    return Object.prototype.hasOwnProperty.call(probe, field);
+  }
+  return hasValue(probe[field]);
+}
+
+function selectedComposeDraftTexts({ preflight, xPrep, publishMode }) {
+  const handoff = preflight?.browser?.handoff || {};
+  const texts = [];
+  if (publishMode === 'thread_fallback') {
+    texts.push(
+      xPrep?.thread?.firstPost,
+      handoff.threadFallback?.[0],
+      handoff.shortPost,
+    );
+  } else {
+    texts.push(
+      handoff.shortPost,
+      xPrep?.thread?.firstPost,
+    );
+  }
+  return uniqueNonEmpty(texts);
+}
+
+function buildComposeDraft({ composeDraftText, expectedTexts = [] } = {}) {
+  if (composeDraftText === undefined || composeDraftText === null) {
+    return {
+      status: 'unknown',
+      hasText: false,
+      preview: '',
+      expectedPreview: previewText(expectedTexts[0] || ''),
+    };
+  }
+
+  const text = String(composeDraftText).trim();
+  if (!text) {
+    return {
+      status: 'empty',
+      hasText: false,
+      preview: '',
+      expectedPreview: previewText(expectedTexts[0] || ''),
+    };
+  }
+
+  const matches = expectedTexts.some((expected) => draftMatchesExpected(text, expected));
+  return {
+    status: matches ? 'matches_selected' : 'different',
+    hasText: true,
+    preview: previewText(text),
+    expectedPreview: previewText(expectedTexts[0] || ''),
+  };
+}
+
+function draftMatchesExpected(draft, expected) {
+  const normalizedDraft = normalizeDraft(draft);
+  const normalizedExpected = normalizeDraft(expected);
+  if (!normalizedDraft || !normalizedExpected) return false;
+  return normalizedDraft === normalizedExpected || normalizedDraft.startsWith(`${normalizedExpected} `);
+}
+
+function normalizeDraft(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function previewText(value, limit = 96) {
+  const normalized = normalizeDraft(value);
+  if (normalized.length <= limit) return normalized;
+  return `${normalized.slice(0, limit - 3)}...`;
+}
+
+function uniqueNonEmpty(values) {
+  const seen = new Set();
+  const output = [];
+  for (const value of values) {
+    const normalized = normalizeDraft(value);
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    output.push(String(value).trim());
+  }
+  return output;
 }
 
 function hasValue(value) {

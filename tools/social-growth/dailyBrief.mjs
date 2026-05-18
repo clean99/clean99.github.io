@@ -294,7 +294,8 @@ function buildManualPublishFallback({
   browserReadiness,
   slot,
 } = {}) {
-  const browserBlocked = blockingBrowserIssues(browserReadiness).length > 0;
+  const browserBlockers = blockingBrowserIssues(browserReadiness);
+  const browserBlocked = browserBlockers.length > 0;
   const selected = selectedReadySlot(dayReadiness, slot);
   const base = {
     available: false,
@@ -305,6 +306,7 @@ function buildManualPublishFallback({
     recoveryCommand: '',
     reason: '',
   };
+  if (browserBlockers.some((item) => item.includes('different draft'))) return base;
   if (!browserBlocked || !selected) return base;
 
   return {
@@ -384,9 +386,12 @@ function buildActionItems({
     });
   }
   if (browserBlockers.length) {
+    const hasDraftBlocker = browserBlockers.some((item) => item.includes('different draft'));
     actions.push({
       priority: 'P0',
-      action: `Fix browser readiness before preparing public X editors: ${browserReadiness.status}.`,
+      action: hasDraftBlocker
+        ? 'Resolve the existing X compose draft before preparing public X editors.'
+        : `Fix browser readiness before preparing public X editors: ${browserReadiness.status}.`,
       reason: browserBlockers.join(' '),
     });
     if (manualPublishFallback?.available) {

@@ -2873,6 +2873,130 @@ test('browser readiness asks for thread fallback when X Article editor is unavai
   assert.match(markdown, /Status: needs_thread_fallback/);
 });
 
+test('browser readiness blocks a mismatched X compose draft', () => {
+  const firstPost = [
+    'Agent Skill 设计，先别急着看一个总分。',
+    '',
+    '没有契约的 Skill 只是长提示词，越堆越难复用。',
+  ].join('\n');
+  const readiness = buildBrowserReadiness({
+    preflight: {
+      generatedAt: '2026-05-18T00:00:00.000Z',
+      status: 'ready',
+      selected: {
+        id: 'Agent-Skills__zh__strong-thesis',
+        articleSlug: 'Agent-Skills',
+      },
+      image: {
+        outputPath: 'output/imagegen/Agent-Skills__zh__strong-thesis.png',
+        ready: true,
+      },
+      browser: {
+        handoff: {
+          threadFallback: [firstPost],
+          shortPost: firstPost,
+        },
+      },
+    },
+    xPrep: {
+      status: 'ready',
+      publishMode: 'thread_fallback',
+      selected: {
+        id: 'Agent-Skills__zh__strong-thesis',
+        articleSlug: 'Agent-Skills',
+      },
+      thread: {
+        firstPost,
+        replies: [],
+      },
+      files: {
+        image: 'output/imagegen/Agent-Skills__zh__strong-thesis.png',
+      },
+      skill: {
+        browserHandoff: 'cdp',
+      },
+    },
+    expectedAccount: '@Clean993',
+    observedAccount: '@Clean993',
+    chromeRunning: 'yes',
+    extensionInstalled: 'yes',
+    nativeHost: 'yes',
+    extensionPipe: 'yes',
+    loginState: 'logged_in',
+    articleAvailable: 'no',
+    mediaUpload: 'yes',
+    composeDraftText: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+  });
+  const markdown = formatBrowserReadinessMarkdown(readiness);
+
+  assert.equal(readiness.status, 'needs_compose_draft_resolution');
+  assert.equal(readiness.composeDraft.status, 'different');
+  assert.ok(readiness.blockers.some((item) => item.includes('different draft')));
+  assert.ok(readiness.nextActions.some((item) => item.action.includes('Resolve the existing X compose draft')));
+  assert.match(markdown, /Compose Draft/);
+  assert.match(markdown, /Status: different/);
+});
+
+test('browser readiness accepts an X compose draft that matches the selected first post', () => {
+  const firstPost = [
+    'Agent Skill 设计，先别急着看一个总分。',
+    '',
+    '没有契约的 Skill 只是长提示词，越堆越难复用。',
+  ].join('\n');
+  const readiness = buildBrowserReadiness({
+    preflight: {
+      generatedAt: '2026-05-18T00:00:00.000Z',
+      status: 'ready',
+      selected: {
+        id: 'Agent-Skills__zh__strong-thesis',
+        articleSlug: 'Agent-Skills',
+      },
+      image: {
+        outputPath: 'output/imagegen/Agent-Skills__zh__strong-thesis.png',
+        ready: true,
+      },
+      browser: {
+        handoff: {
+          threadFallback: [firstPost],
+          shortPost: firstPost,
+        },
+      },
+    },
+    xPrep: {
+      status: 'ready',
+      publishMode: 'thread_fallback',
+      selected: {
+        id: 'Agent-Skills__zh__strong-thesis',
+        articleSlug: 'Agent-Skills',
+      },
+      thread: {
+        firstPost,
+        replies: [],
+      },
+      files: {
+        image: 'output/imagegen/Agent-Skills__zh__strong-thesis.png',
+      },
+      skill: {
+        browserHandoff: 'cdp',
+      },
+    },
+    expectedAccount: '@Clean993',
+    observedAccount: '@Clean993',
+    chromeRunning: 'yes',
+    extensionInstalled: 'yes',
+    nativeHost: 'yes',
+    extensionPipe: 'yes',
+    loginState: 'logged_in',
+    articleAvailable: 'no',
+    mediaUpload: 'yes',
+    composeDraftText: `${firstPost}\n\n#AI`,
+  });
+
+  assert.equal(readiness.status, 'ready_for_browser_confirmation');
+  assert.equal(readiness.composeDraft.status, 'matches_selected');
+  assert.deepEqual(readiness.blockers, []);
+});
+
 test('publish confirmation packet combines copy, commands, and public action stop points', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-confirmation-'));
   try {
@@ -3832,6 +3956,106 @@ test('status CLI reads stored browser probe before reporting readiness', async (
     assert.match(markdown, /cli\.mjs browser-readiness --day 1 --slot 1 --publishMode thread_fallback/);
     assert.match(markdown, /The Chrome profile used for publishing is not logged into X/);
     assert.doesNotMatch(markdown, /Status: ready_for_browser_confirmation/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('status and daily brief CLIs block stored mismatched compose drafts', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-compose-draft-cli-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(imageDir, `${queue.items[0].id}.png`), 'fake image');
+    const queuePath = join(outDir, 'queue.json');
+    const ledgerPath = join(outDir, 'ledger.json');
+    const probePath = join(outDir, 'browser-probe.local.json');
+    const profilePath = join(outDir, 'profile.txt');
+    const statusPath = join(outDir, 'status.md');
+    const briefPath = join(outDir, 'daily-brief.md');
+    await writeJson(queuePath, queue);
+    await writeJson(ledgerPath, createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+    await writeFile(probePath, `${JSON.stringify({
+      expectedAccount: '@Clean993',
+      observedAccount: '@Clean993',
+      chromeRunning: 'yes',
+      extensionInstalled: 'yes',
+      nativeHost: 'yes',
+      extensionPipe: 'yes',
+      loginState: 'logged_in',
+      articleAvailable: 'no',
+      mediaUpload: 'ready',
+      composeDraftText: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+    }, null, 2)}\n`);
+    await writeFile(profilePath, [
+      'Clean99 | AI 工程化与前端性能',
+      '@Clean993',
+      '写 AI 工程化、前端性能、React 和测试。把真实工程问题压成可复用框架。',
+      'https://clean99.github.io',
+      'Pinned',
+      '30 Followers',
+    ].join('\n'));
+
+    const commonArgs = [
+      '--queue', queuePath,
+      '--ledger', ledgerPath,
+      '--browser-probe', probePath,
+      '--profile-text', profilePath,
+      '--image-dir', imageDir,
+      '--package-out', join(outDir, 'packages'),
+      '--publishMode', 'thread_fallback',
+    ];
+    const statusResult = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'status',
+      ...commonArgs,
+      '--out', statusPath,
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+    const briefResult = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'daily-brief',
+      ...commonArgs,
+      '--out', briefPath,
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+    const statusMarkdown = await readFile(statusPath, 'utf8');
+    const briefMarkdown = await readFile(briefPath, 'utf8');
+    const persistedProbe = await readBrowserProbe(probePath);
+
+    assert.equal(statusResult.status, 0, statusResult.stderr || statusResult.stdout);
+    assert.equal(briefResult.status, 0, briefResult.stderr || briefResult.stdout);
+    assert.equal(persistedProbe.composeDraftText, 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路');
+    assert.match(statusMarkdown, /Status: needs_compose_draft_resolution/);
+    assert.match(statusMarkdown, /X compose already contains a different draft/);
+    assert.match(briefMarkdown, /Status: needs_compose_draft_resolution/);
+    assert.match(briefMarkdown, /Resolve the existing X compose draft/);
+    assert.doesNotMatch(statusMarkdown, /Manual Publish Fallback/);
+    assert.doesNotMatch(briefMarkdown, /Manual Publish Fallback/);
+    assert.doesNotMatch(statusMarkdown, /Status: ready_for_browser_confirmation/);
+    assert.doesNotMatch(briefMarkdown, /Status: ready_to_publish/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

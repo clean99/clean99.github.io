@@ -1177,6 +1177,7 @@ function browserProbeFromArgs(options = {}) {
   if (options.loginState !== undefined) probe.loginState = options.loginState;
   if (options.articleAvailable !== undefined) probe.articleAvailable = options.articleAvailable;
   if (options.mediaUpload !== undefined) probe.mediaUpload = options.mediaUpload;
+  if (options.composeDraftText !== undefined) probe.composeDraftText = options.composeDraftText;
   if (options.xProfileDirectory !== undefined) probe.profileDirectory = options.xProfileDirectory;
   if (options.profileDirectory !== undefined) probe.profileDirectory = options.profileDirectory;
   return probe;

@@ -295,9 +295,12 @@ function nextActions({
   if (preflight.status === 'blocked') {
     actions.push(...preflightActions(preflight, { day, slot }));
   } else if (browserBlocked) {
+    const hasDraftBlocker = browserReadiness.blockers.some((item) => item.includes('different draft'));
     actions.push({
       priority: 'P0',
-      action: `Fix browser readiness before preparing public X editors: ${browserReadiness.status}.`,
+      action: hasDraftBlocker
+        ? 'Resolve the existing X compose draft before preparing public X editors.'
+        : `Fix browser readiness before preparing public X editors: ${browserReadiness.status}.`,
       reason: browserReadiness.blockers.join(' ') || 'Browser readiness is blocking the selected publish slot.',
     });
     if (manualPublishFallback?.available) {
@@ -403,6 +406,7 @@ function buildManualPublishFallback({
     reason: '',
   };
   if (!browserBlocked || !localPackageReady) return base;
+  if (browserReadiness.blockers.some((item) => item.includes('different draft'))) return base;
 
   return {
     ...base,

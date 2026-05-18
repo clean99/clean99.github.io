@@ -62,13 +62,21 @@ async function preparePost({
     await waitForEditor(cdp, timeoutMs);
 
     if (text) {
-      await cdp.evaluate(`
-        const editor = document.querySelector('[data-testid="tweetTextarea_0"]');
-        if (editor) {
-          editor.focus();
-          document.execCommand('insertText', false, ${JSON.stringify(text)});
-        }
-      `);
+      const existingDraft = await readComposeDraft(cdp);
+      if (existingDraft && !draftMatchesExpected(existingDraft, text)) {
+        throw new Error('X compose already contains a different draft. Save, publish after confirmation, or discard it before running this handoff.');
+      }
+      if (draftMatchesExpected(existingDraft, text)) {
+        console.log('[x-browser-cdp] Existing compose draft already matches the requested text.');
+      } else {
+        await cdp.evaluate(`
+          const editor = document.querySelector('[data-testid="tweetTextarea_0"]');
+          if (editor) {
+            editor.focus();
+            document.execCommand('insertText', false, ${JSON.stringify(text)});
+          }
+        `);
+      }
     }
 
     for (const image of images) {
@@ -109,6 +117,7 @@ async function probeBrowser({
     const fileInputReady = await hasFileInput(cdp);
     const loginPromptVisible = await hasLoginPrompt(cdp);
     const account = await detectAccount(cdp);
+    const composeDraftText = editorReady ? await readComposeDraft(cdp) : '';
     const currentUrl = await cdp.evaluate(`window.location.href`);
     const blockers = [];
 
@@ -131,6 +140,7 @@ async function probeBrowser({
       fileInputReady,
       loginPromptVisible,
       observedAccount: account,
+      composeDraftText,
       publicActions: {
         typedText: false,
         uploadedMedia: false,
@@ -241,6 +251,7 @@ function browserProbeRecordFromResult(result, expectedAccount) {
     mediaUpload: result.fileInputReady
       ? 'ready'
       : result.editorReady ? 'blocked' : 'unknown',
+    composeDraftText: result.composeDraftText || '',
     generatedAt: new Date().toISOString(),
   };
 }
@@ -248,6 +259,10 @@ function browserProbeRecordFromResult(result, expectedAccount) {
 function dropEmpty(input) {
   const output = {};
   for (const [key, value] of Object.entries(input)) {
+    if (key === 'composeDraftText') {
+      output[key] = String(value ?? '');
+      continue;
+    }
     if (value !== undefined && value !== null && String(value).trim() !== '') {
       output[key] = value;
     }
@@ -427,6 +442,36 @@ async function detectAccount(cdp) {
     })()
   `).catch(() => '');
   return String(value || '').trim();
+}
+
+async function readComposeDraft(cdp) {
+  const value = await cdp.evaluate(`
+    (() => {
+      const editor = document.querySelector('[data-testid="tweetTextarea_0"]');
+      if (!editor) return '';
+      const text = editor.innerText || editor.textContent || '';
+      const placeholder = editor.getAttribute('aria-label') || '';
+      return text === placeholder ? '' : text;
+    })()
+  `).catch(() => '');
+  return String(value || '').trim();
+}
+
+function draftMatchesExpected(draft, expected) {
+  const normalizedDraft = normalizeDraft(draft);
+  const normalizedExpected = normalizeDraft(expected);
+  if (!normalizedDraft || !normalizedExpected) return false;
+  return normalizedDraft === normalizedExpected || normalizedDraft.startsWith(`${normalizedExpected} `);
+}
+
+function normalizeDraft(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim();
+}
+
+function previewText(value, limit = 96) {
+  const normalized = normalizeDraft(value);
+  if (normalized.length <= limit) return normalized;
+  return `${normalized.slice(0, limit - 3)}...`;
 }
 
 async function waitForImageCount(cdp, expectedCount) {
@@ -688,6 +733,7 @@ Attached to existing Chrome: ${result.attachedToExistingChrome ? 'yes' : 'no'}
 Editor ready: ${result.editorReady ? 'yes' : 'no'}
 Image file input ready: ${result.fileInputReady ? 'yes' : 'no'}
 Observed account: ${result.observedAccount || 'unknown'}
+Compose draft: ${result.composeDraftText ? previewText(result.composeDraftText) : 'empty or not captured'}
 
 Public actions: no text typed, no media uploaded, no submit clicked.
 
