@@ -10,6 +10,7 @@ Use this skill to turn blog posts into a repeatable Chinese-audience X growth lo
 The system goal is one-week follower growth, currently `+1000 followers` from the baseline recorded in `data/social-growth/ledger.json`.
 
 Before writing copy, read `references/chinese-x-style.md` when the user asks to improve Chinese X style, mentions Chinese creators, or asks why a post is not attractive.
+Before optimizing metrics, queue selection, engagement, or follow conversion, read `references/x-recommendation-system.md`. It translates the public X recommender architecture into Clean993's measurable funnel: candidate entry, hydration, multi-action prediction, negative feedback, author diversity, profile handoff, and winner scaling.
 
 ## Hard Boundaries
 
@@ -365,6 +366,20 @@ Article-specific frames:
 - do not reuse the same AI/performance frame for every article;
 - infer a topic frame from the title, excerpt, and tags, for example Agent Skill, Spec-Driven Coding, SEO, Error Boundary, React performance, React Server Component, or testing;
 - if no specific frame matches, use the generic engineering-judgment frame and let the duplicate-post quality gate catch overuse.
+
+## X Recommendation Model
+
+Use `references/x-recommendation-system.md` as the durable research base. The practical model is:
+
+- candidate entry: publish eligible Chinese technical content that can enter the right graph/topic pools;
+- hydration: make post text, image, language, author promise, and topic unambiguous;
+- multi-action prediction: optimize for replies, reposts, quotes, bookmarks, profile clicks, and follows, not only likes or PV;
+- negative feedback: avoid duplicate templates, rage bait, mass replies, and generic engagement bait;
+- diversity/fatigue: rotate topics and variants instead of flooding the same frame;
+- profile handoff: turn profile clicks into follows through bio and pinned-post promise;
+- winner scaling: reuse the winning mechanism with new surface wording.
+
+Do not claim fixed public action weights. The public X/xAI sources describe weighted multi-action prediction, but they do not provide a universal production formula we can trust for every account or viewer.
 
 ## Optimization Loop
 

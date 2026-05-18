@@ -11,6 +11,7 @@ import { buildGrowthRecommendations } from './recommendations.mjs';
 const DEFAULT_BRIEF_DIR = 'data/social-growth/x-tech-briefs';
 const DEFAULT_TEMPLATE_DIR = 'data/social-growth/copy-overrides';
 const DEFAULT_SKILL_PATH = '.agents/skills/x-technical-sharing/SKILL.md';
+const DEFAULT_ALGORITHM_RESEARCH_PATH = '.agents/skills/x-growth-publishing/references/x-recommendation-system.md';
 
 export async function buildXTechnicalSharingBrief({
   articles,
@@ -23,6 +24,7 @@ export async function buildXTechnicalSharingBrief({
   briefPath,
   templatePath,
   skillPath = DEFAULT_SKILL_PATH,
+  algorithmResearchPath = DEFAULT_ALGORITHM_RESEARCH_PATH,
 } = {}) {
   if (!Array.isArray(articles)) {
     throw new Error('articles array is required');
@@ -46,6 +48,7 @@ export async function buildXTechnicalSharingBrief({
   const brief = {
     generatedAt: toIsoString(now),
     skillPath,
+    algorithmResearchPath,
     selected,
     article,
     frame,
@@ -83,6 +86,8 @@ export function formatXTechnicalSharingBriefMarkdown(brief) {
 Generated at: ${brief.generatedAt}
 
 Use skill: \`${brief.skillPath}\`
+
+Use recommendation research: \`${brief.algorithmResearchPath}\`
 
 ## Target Queue Item
 

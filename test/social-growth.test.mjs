@@ -933,6 +933,8 @@ test('x technical sharing brief packages source article and copy override templa
     assert.equal(brief.article.absolutePath, article.absolutePath);
     assert.equal(brief.template.source, 'x-technical-sharing');
     assert.equal(brief.template.contentStatus, 'needs_x_technical_sharing');
+    assert.equal(brief.algorithmResearchPath, '.agents/skills/x-growth-publishing/references/x-recommendation-system.md');
+    assert.match(markdown, /Use recommendation research/);
     assert.match(markdown, /Observable problem/);
     assert.match(markdown, /X Native Frame/);
     assert.match(markdown, /Opening options/);
