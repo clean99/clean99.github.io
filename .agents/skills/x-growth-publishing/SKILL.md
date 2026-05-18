@@ -27,12 +27,18 @@ Before writing copy, read `references/chinese-x-style.md` when the user asks to 
 For the normal daily loop, start with:
 
 ```bash
-npm run social:daily -- --limit 5 --package-limit 3 --lang zh
+npm run social:automation -- --day 1 --slot 1
 ```
 
-This creates `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, writes `data/social-growth/daily-run.md`, and writes `data/social-growth/weekly-plan.md` when the ledger exists.
+This safe automation cycle creates or refreshes `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, writes `data/social-growth/daily-run.md`, writes `data/social-growth/weekly-plan.md` when the ledger exists, writes `data/social-growth/status.md`, writes `data/social-growth/publish-preflight.md`, writes `data/social-growth/profile-audit.md`, and writes `data/social-growth/automation-run.md`.
 
-Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate. When the ledger exists, the daily command expands the queue enough to cover the default 7-day, 3-posts/day cadence, capped by available Chinese articles.
+Automation is still local-only: it must not publish, upload media, reply, like, repost, follow, or edit the X profile. Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate. When the ledger exists, the daily command inside automation expands the queue enough to cover the default 7-day, 3-posts/day cadence, capped by available Chinese articles.
+
+If you only need the lower-level preparation step, run:
+
+```bash
+npm run social:daily -- --limit 5 --package-limit 3 --lang zh
+```
 
 Before opening Chrome, check the queue:
 

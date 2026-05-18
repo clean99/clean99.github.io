@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { loadArticles } from './articles.mjs';
+import { runSafeAutomationCycle } from './automation.mjs';
 import { parseXPostMetrics, parseXProfileMetrics, updateMetricsTemplateFromText } from './capture.mjs';
 import { buildDistributionCandidates } from './copy.mjs';
 import { runDailyGrowthPlan } from './daily.mjs';
@@ -165,6 +166,42 @@ if (command === 'articles') {
     },
   });
   console.log(JSON.stringify(result, null, 2));
+} else if (command === 'automation') {
+  const articles = await loadArticles();
+  const result = await runSafeAutomationCycle({
+    articles,
+    now: args.now ? new Date(args.now) : new Date(),
+    day: args.day || 1,
+    slot: args.slot || 1,
+    queuePath: args.queue || 'data/social-growth/queue.json',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    dailyReportPath: args.report || 'data/social-growth/daily-run.md',
+    weeklyPlanPath: args.weeklyPlan || 'data/social-growth/weekly-plan.md',
+    ledgerPath: args.ledger || 'data/social-growth/ledger.json',
+    metricsPath: args.metrics || 'data/social-growth/posts.local.json',
+    statusPath: args.statusOut || 'data/social-growth/status.md',
+    preflightPath: args.preflightOut || 'data/social-growth/publish-preflight.md',
+    profileTextPath: args.profileText || 'data/social-growth/profile.local.txt',
+    profileAuditPath: args.profileAuditOut || 'data/social-growth/profile-audit.md',
+    automationReportPath: args.out || 'data/social-growth/automation-run.md',
+    imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
+    imageDir: args.imageDir || 'output/imagegen',
+    packageLimit: args.packageLimit || 3,
+    weeklyDays: args.days || 7,
+    weeklyPostsPerDay: args.postsPerDay || 3,
+    queueOptions: {
+      limit: args.limit || 5,
+      lang: args.lang || DEFAULT_LANG,
+      campaign: args.campaign,
+    },
+  });
+  console.log(JSON.stringify({
+    generatedAt: result.generatedAt,
+    status: result.status,
+    selected: result.selected,
+    blockers: result.blockers,
+    paths: result.paths,
+  }, null, 2));
 } else if (command === 'week') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -378,6 +415,7 @@ function printHelp() {
   npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:daily -- --limit 5 --package-limit 3
+  npm run social:automation -- --day 1 --slot 1
   npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json
   npm run social:status -- --day 1 --slot 1 --out data/social-growth/status.md
   npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md

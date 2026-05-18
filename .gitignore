@@ -11,6 +11,7 @@ tmp
 CLAUDE.md
 data/social-growth/*.local.json
 data/social-growth/*.local.txt
+data/social-growth/automation-run.md
 data/social-growth/daily-run.md
 data/social-growth/image-briefs/
 data/social-growth/ledger.json

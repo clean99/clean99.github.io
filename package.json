@@ -9,6 +9,7 @@
     "lint": "node tools/social-growth/lint.mjs",
     "server": "hexo server",
     "social:articles": "node tools/social-growth/cli.mjs articles",
+    "social:automation": "node tools/social-growth/cli.mjs automation",
     "social:capture-metrics": "node tools/social-growth/cli.mjs capture-metrics",
     "social:daily": "node tools/social-growth/cli.mjs daily",
     "social:draft": "node tools/social-growth/cli.mjs draft",

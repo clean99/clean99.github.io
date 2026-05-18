@@ -58,6 +58,22 @@ It also states that the 2026-05-15 update added a runnable retrieval-to-ranking 
 
 ## Practical Content Rules
 
+## Algorithm-to-System Rules
+
+The local system should behave like a small experimental recommender-facing publishing loop, not like a bulk poster.
+
+| Open recommendation concept | Source signal | Local system rule |
+| --- | --- | --- |
+| Candidate sourcing | Home Mixer candidate generation, Thunder in-network, Phoenix out-of-network retrieval | Keep a narrow technical topic graph so new posts can enter the right in-network and out-of-network pools. |
+| Feature/query hydration | user action history, followed topics, impression history, author/post metadata | Use consistent tags, repeated topic vocabulary, image alt/prompt language, and profile promise. |
+| Multi-action prediction | favorite, reply, repost, quote, click, profile click, dwell, follow author, and negative actions | Score local results by follows, profile clicks, bookmarks, reposts, quotes, replies, and views; do not optimize for likes alone. |
+| Negative actions | not interested, block, mute, report, visibility filters | Ban mass replies, duplicated templates, off-topic trend hijacking, and engagement bait. |
+| Author diversity | repeated author attenuation and feed diversity constraints | Use 2-4 high-quality posts/day, spaced slots, and avoid burst posting. |
+| Previously seen/dedup filters | seen/served and duplicate filtering | Do not repost near-identical short posts; force article-diverse daily packages. |
+| Social proof | second-degree engagement and conversation context | Prefer substantive replies to relevant technical threads only when they add mechanism, proof, or a concrete correction. |
+
+This is why the implementation has a quality gate before browser work. The gate is not copy taste theater; it prevents actions that would create ranking debt.
+
 ### 1. Win Candidate Entry Before Optimizing Ranking
 
 A post cannot rank if it never enters candidate pools. For this blog, candidate entry comes from:
@@ -81,6 +97,8 @@ Action:
 - write posts that invite a technical reply without begging for engagement;
 - make one concrete claim per post;
 - include a reusable frame, checklist, or diagnostic heuristic worth bookmarking;
+- attach an image that explains the mechanism faster than text;
+- put the full reasoning into an X Article before sending the reader to the blog;
 - use replies to add depth to your own post, not filler.
 
 ### 3. Avoid Negative Feedback
@@ -130,6 +148,14 @@ Daily operating loop:
 4. Record followers and interactions twice per day.
 5. Promote winning themes, kill weak templates fast.
 
+Safe automation loop:
+
+1. Run `npm run social:automation -- --day 1 --slot 1`.
+2. Read `data/social-growth/automation-run.md` and `data/social-growth/status.md`.
+3. If image generation is blocked, generate/register the `gpt-image-2` PNG from the image brief.
+4. Only then open Chrome for the X Article/image-backed post, stopping before public actions.
+5. After confirmed publishing, mark URLs and snapshot metrics.
+
 The system should optimize toward:
 
 - follower delta;
@@ -145,4 +171,3 @@ It should not optimize toward:
 - likes without follower lift;
 - generic replies;
 - short-term reach bought with off-topic controversy.
-

@@ -25,6 +25,7 @@ The code can automate safe local work:
 - export an image brief with the exact `gpt-image-2` prompt, visual review checklist, expected output path, and register command;
 - write a single growth status dashboard that combines follower pace, queue coverage, publish preflight, blockers, and next commands;
 - run the local daily preparation loop in one command;
+- run a safe Codex automation cycle that refreshes local artifacts, status, preflight, image brief, and profile audit without public X actions;
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
 - audit the X profile's follower-conversion signals from copied visible profile text;
@@ -91,6 +92,23 @@ This writes:
 The daily exporter prefers one strong variant per article before exporting extra variants from the same article. This avoids spending a day's slots on three near-duplicate posts.
 It exports only items that pass the local quality gate.
 When a ledger exists, the daily command expands the article limit as needed to cover the default 7-day, 3-posts/day cadence, capped by available Chinese articles.
+
+Run the full safe automation cycle for Codex or a recurring job:
+
+```bash
+npm run social:automation -- --day 1 --slot 1
+```
+
+This performs only local work:
+
+- refreshes the Chinese queue, daily report, weekly plan, packages, and metrics template;
+- writes `data/social-growth/profile-audit.md` from copied visible profile text;
+- writes `data/social-growth/publish-preflight.md`;
+- writes or refreshes the selected `data/social-growth/image-briefs/*.md`;
+- writes `data/social-growth/status.md`;
+- writes `data/social-growth/automation-run.md`.
+
+It is the preferred recurring entry point. It still does not publish, upload media, reply, like, repost, follow, or edit the X profile. If the output says image generation is blocked, generate or register the PNG first, then rerun preflight before opening Chrome.
 
 Draft X candidates for one post:
 
@@ -237,6 +255,14 @@ Generate optimization recommendations:
 npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
 ```
 
+The recommendation notes behind these rules live in:
+
+```text
+docs/x-recommendation-notes.md
+```
+
+That document maps the public X recommendation architecture into local rules: candidate entry, topic consistency, high-intent interactions, negative-feedback avoidance, author diversity, deduplication, profile clicks, and follower lift.
+
 Validate code:
 
 ```bash
@@ -337,7 +363,7 @@ Do not commit private analytics or account history.
 For regular operation, replace steps 1-6 with:
 
 ```bash
-npm run social:daily -- --limit 5 --package-limit 3 --lang zh
+npm run social:automation -- --day 1 --slot 1
 ```
 
 Then continue from image generation and browser confirmation.

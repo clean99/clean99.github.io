@@ -4,6 +4,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { articleFromMarkdown, addUtm, parseFrontmatter } from '../tools/social-growth/articles.mjs';
+import { runSafeAutomationCycle } from '../tools/social-growth/automation.mjs';
 import {
   applyCapturedMetrics,
   parseXPostMetrics,
@@ -596,6 +597,84 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
     assert.ok(report.includes('Metrics Capture'));
     assert.ok(report.includes('social:capture-metrics'));
     assert.ok(!shortPost.includes('https://clean99.github.io'));
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('safe automation cycle prepares local artifacts without public X actions', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-automation-'));
+  try {
+    await writeJson(join(outDir, 'ledger.json'), createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+    await writeFile(join(outDir, 'profile.local.txt'), [
+      'clean',
+      '@Clean993',
+      'Software Engineer at Tiktok',
+      'Singaporeclean99.github.io',
+      '30 Followers',
+    ].join('\n'));
+
+    const result = await runSafeAutomationCycle({
+      articles: [
+        {
+          title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+          excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+          slug: 'Automated-AI-Performance-Optimization',
+          lang: 'zh',
+          tags: ['AI', 'Software Engineering', 'Web Performance'],
+          url: 'https://clean99.github.io/zh/automated-ai-performance/',
+        },
+        {
+          title: 'Agent Skills 探索实录 — AI Agent 时代的函数式蓝图',
+          excerpt: '本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践。',
+          slug: 'Agent-Skills',
+          lang: 'zh',
+          tags: ['AI', 'Software Engineering'],
+          url: 'https://clean99.github.io/zh/agent-skills/',
+        },
+      ],
+      now: '2026-05-18T00:00:00.000Z',
+      day: 1,
+      slot: 1,
+      queuePath: join(outDir, 'queue.json'),
+      packageOutDir: join(outDir, 'packages'),
+      dailyReportPath: join(outDir, 'daily-run.md'),
+      weeklyPlanPath: join(outDir, 'weekly-plan.md'),
+      ledgerPath: join(outDir, 'ledger.json'),
+      metricsPath: join(outDir, 'posts.local.json'),
+      statusPath: join(outDir, 'status.md'),
+      preflightPath: join(outDir, 'publish-preflight.md'),
+      profileTextPath: join(outDir, 'profile.local.txt'),
+      profileAuditPath: join(outDir, 'profile-audit.md'),
+      automationReportPath: join(outDir, 'automation-run.md'),
+      imageBriefDir: join(outDir, 'image-briefs'),
+      imageDir: join(outDir, 'images'),
+      packageLimit: 2,
+      queueOptions: {
+        limit: 2,
+        lang: 'zh',
+        campaign: 'test',
+      },
+      env: {},
+    });
+
+    const report = await readFile(join(outDir, 'automation-run.md'), 'utf8');
+    const status = await readFile(join(outDir, 'status.md'), 'utf8');
+    const preflight = await readFile(join(outDir, 'publish-preflight.md'), 'utf8');
+    const profileAudit = await readFile(join(outDir, 'profile-audit.md'), 'utf8');
+
+    assert.equal(result.status, 'blocked_preflight');
+    assert.match(result.blockers.join('\n'), /Image file is missing/);
+    assert.match(result.blockers.join('\n'), /pin a post/);
+    assert.ok(result.paths.imageBrief.endsWith('.md'));
+    assert.match(report, /No public X action was performed/);
+    assert.match(status, /Profile Conversion/);
+    assert.match(preflight, /Status: blocked/);
+    assert.match(profileAudit, /Status: needs_work/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
