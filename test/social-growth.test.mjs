@@ -63,6 +63,11 @@ import {
 } from '../tools/social-growth/imageBrief.mjs';
 import { buildPublishPreflight, formatPublishPreflightMarkdown, registerPublishImage } from '../tools/social-growth/preflight.mjs';
 import {
+  buildPublishConfirmation,
+  formatPublishConfirmationMarkdown,
+  writePublishConfirmation,
+} from '../tools/social-growth/publishConfirmation.mjs';
+import {
   buildProfileAudit,
   buildProfileUpdatePackage,
   formatProfileUpdatePackageMarkdown,
@@ -1287,6 +1292,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       imageBriefDir: join(outDir, 'image-briefs'),
       imageDir: join(outDir, 'images'),
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
+      publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
@@ -1308,6 +1314,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const profileAudit = await readFile(join(outDir, 'profile-audit.md'), 'utf8');
     const profileUpdate = await readFile(join(outDir, 'profile-update.md'), 'utf8');
     const xPrep = await readFile(join(outDir, 'x-publish-prep.md'), 'utf8');
+    const confirmation = await readFile(join(outDir, 'publish-confirmation.md'), 'utf8');
     const engagementSearch = await readFile(join(outDir, 'engagement-search.md'), 'utf8');
     const engagementPlan = await readFile(join(outDir, 'engagement-plan.md'), 'utf8');
 
@@ -1319,6 +1326,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.ok(result.paths.imageBrief.endsWith('.md'));
     assert.equal(result.paths.dailyBrief, join(outDir, 'daily-brief.md'));
     assert.equal(result.paths.xPublishPrep, join(outDir, 'x-publish-prep.md'));
+    assert.equal(result.paths.publishConfirmation, join(outDir, 'publish-confirmation.md'));
     assert.equal(result.paths.engagementSearch, join(outDir, 'engagement-search.md'));
     assert.equal(result.paths.engagementPlan, join(outDir, 'engagement-plan.md'));
     assert.equal(result.engagement.searchStatus, 'ready_for_read_only_search');
@@ -1335,6 +1343,9 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(profileAudit, /Status: needs_work/);
     assert.match(profileUpdate, /final profile save click/);
     assert.match(xPrep, /baoyu-post-to-x Bridge/);
+    assert.match(confirmation, /X Publish Confirmation Packet/);
+    assert.match(confirmation, /X Article To Review/);
+    assert.match(confirmation, /Image-backed Short Post To Review/);
     assert.match(engagementSearch, /X Engagement Search Plan/);
     assert.match(engagementPlan, /needs_opportunity_capture/);
   } finally {
@@ -1406,6 +1417,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       imageBriefDir: join(outDir, 'image-briefs'),
       imageDir,
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
+      publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
@@ -1434,6 +1446,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Daily brief/);
     assert.match(scheduledReport, /Engagement search/);
     assert.match(scheduledReport, /Engagement plan/);
+    assert.match(scheduledReport, /Publish confirmation/);
     assert.match(scheduledReport, /Profile Conversion/);
     assert.match(scheduledReport, /Funnel report/);
     assert.match(scheduledReport, /safe for recurring execution/);
@@ -1827,6 +1840,73 @@ test('x publish prep bridges selected package to baoyu-post-to-x commands', asyn
     assert.match(markdown, /baoyu-post-to-x Bridge/);
     assert.match(markdown, /Stop before the final public post click/);
     assert.match(persisted, /ARTICLE_URL='https:\/\/x\.com\/Clean993\/articles\/123'/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('publish confirmation packet combines copy, commands, and public action stop points', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-confirmation-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    const imagePath = join(imageDir, `${queue.items[0].id}.png`);
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-article.ts'), '// test script');
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(imagePath, 'fake image');
+
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      id: queue.items[0].id,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+    const prep = await buildXPublishPrep(preflight, {
+      skillDir,
+      bunCommand: 'bun',
+    });
+    const packet = buildPublishConfirmation({
+      queue,
+      preflight,
+      xPublishPrep: prep,
+    });
+    const markdown = formatPublishConfirmationMarkdown(packet);
+    const writtenPath = await writePublishConfirmation(packet, join(outDir, 'publish-confirmation.md'));
+    const persisted = await readFile(writtenPath, 'utf8');
+
+    assert.equal(packet.status, 'ready_for_confirmation');
+    assert.equal(packet.blockers.length, 0);
+    assert.match(packet.content.imagePost, /<x-article-url>/);
+    assert.match(markdown, /X Publish Confirmation Packet/);
+    assert.match(markdown, /Confirm the Chrome account is `@Clean993`/);
+    assert.match(markdown, /X Article To Review/);
+    assert.match(markdown, /Image-backed Short Post To Review/);
+    assert.match(markdown, /final image-backed short-post publish click/);
+    assert.match(markdown, /social:mark-published/);
+    assert.match(persisted, /This file is not permission to perform public X actions/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

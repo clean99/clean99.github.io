@@ -40,6 +40,7 @@ npm run social:automation -- --day 1 --slot 1
 This safe automation cycle creates or refreshes `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, writes `data/social-growth/daily-run.md`, writes `data/social-growth/weekly-plan.md` when the ledger exists, writes `data/social-growth/status.md`, writes `data/social-growth/publish-preflight.md`, writes `data/social-growth/profile-audit.md`, and writes `data/social-growth/automation-run.md`.
 It also writes `data/social-growth/profile-update.md` when profile conversion needs a browser handoff for display name, bio, link, or pinned post.
 It writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` commands that can prefill Chrome for the X Article and image-backed short post while preserving the final confirmation boundary.
+It writes `data/social-growth/publish-confirmation.md` with the exact X Article, image-backed short post, follow-up replies, fallback thread, browser prep commands, and public-action stop points for action-time review.
 It writes `data/social-growth/engagement-search.md` with read-only X search URLs for finding relevant technical threads.
 It writes `data/social-growth/engagement-plan.md` from copied relevant thread opportunities when available; missing opportunities are a capture task, not an automation blocker.
 It writes `data/social-growth/daily-brief.md` as the single operator-facing action order across publish readiness, engagement, metrics, conversion funnel, and profile conversion.
@@ -211,60 +212,65 @@ For single-item control:
    ```bash
    npm run social:x-prep -- --id <queue-id> --out data/social-growth/x-publish-prep.md
    ```
-11. In Chrome, prepare the X Article first. If X Article publishing is unavailable for the account, fall back to a thread using `thread-fallback.md`:
+11. Generate the confirmation packet:
+   ```bash
+   npm run social:confirmation -- --id <queue-id> --out data/social-growth/publish-confirmation.md
+   ```
+   Review this file before every browser publish/upload/reply step. It is not permission to perform public X actions.
+12. In Chrome, prepare the X Article first. If X Article publishing is unavailable for the account, fall back to a thread using `thread-fallback.md`:
    - title: `xArticle.title`;
    - body: `xArticle.body`;
    - attach the generated image when the UI supports it.
-12. Stop before the final Article publish click and ask for confirmation.
-13. After the X Article or thread is public, create the short X post:
+13. Stop before the final Article publish click and ask for confirmation.
+14. After the X Article or thread is public, create the short X post:
    - attach the generated image;
    - use `short-post.txt`;
    - include the X Article URL, not the blog URL.
-14. Stop before the final post click and ask for confirmation.
-15. After the short post is public, prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
-16. Stop before each public reply click and ask for confirmation.
-17. Record the published URL:
+15. Stop before the final post click and ask for confirmation.
+16. After the short post is public, prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
+17. Stop before each public reply click and ask for confirmation.
+18. Record the published URL:
    ```bash
    npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>
    ```
-18. Prepare the metrics template:
+19. Prepare the metrics template:
    ```bash
    npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
    ```
-19. Capture read-only visible X text into the metrics template when available:
+20. Capture read-only visible X text into the metrics template when available:
    ```bash
    npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
    ```
-20. Audit profile conversion from copied visible profile text:
+21. Audit profile conversion from copied visible profile text:
    ```bash
    npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
    ```
    Treat profile edits, link edits, and pinned-post changes as public account actions requiring action-time confirmation.
-21. Prepare the profile update handoff when the audit says `needs_work`:
+22. Prepare the profile update handoff when the audit says `needs_work`:
    ```bash
    npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md
    ```
    Use the package only to prepare Chrome fields. Stop before profile save, pinned-post publish, and pin confirmation.
-22. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
-23. Prefer the consolidated post-publish metrics cycle when copied visible profile/post text is available:
+23. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
+24. Prefer the consolidated post-publish metrics cycle when copied visible profile/post text is available:
    ```bash
    npm run social:metrics-cycle -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
    ```
    This parses read-only local text, writes `metrics-cycle.md`, writes a growth report and recommendations, and appends a ledger snapshot only when follower count is present.
-24. Record metrics twice per day if you are not using `social:metrics-cycle`:
+25. Record metrics twice per day if you are not using `social:metrics-cycle`:
    ```bash
    npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
    ```
-25. Review progress:
+26. Review progress:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
-26. Diagnose the conversion funnel:
+27. Diagnose the conversion funnel:
    ```bash
    npm run social:funnel -- --ledger data/social-growth/ledger.json --format markdown
    ```
    This separates weak reach, weak interaction, weak profile handoff, and weak follow conversion. Fix the bottleneck before scaling more posts.
-27. Generate the next optimization decision:
+28. Generate the next optimization decision:
    ```bash
    npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
    ```

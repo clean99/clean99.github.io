@@ -132,6 +132,7 @@ This performs only local work:
 - writes `data/social-growth/daily-brief.md` as the operator-facing action order for the day;
 - writes or refreshes the selected `data/social-growth/image-briefs/*.md`;
 - writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` Chrome prefill commands;
+- writes `data/social-growth/publish-confirmation.md` with the exact X Article, image-backed short post, follow-up replies, commands, and stop-before-public-action checklist;
 - writes `data/social-growth/engagement-search.md` with read-only X search URLs for finding relevant threads;
 - writes `data/social-growth/engagement-plan.md` from copied thread opportunities when available;
 - writes `data/social-growth/status.md`;
@@ -339,6 +340,14 @@ npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-pre
 ```
 
 This writes commands for preparing the X Article and the follow-up image post in Chrome. It does not publish; final public clicks still require confirmation.
+
+Write the browser confirmation packet:
+
+```bash
+npm run social:confirmation -- --day 1 --slot 1 --out data/social-growth/publish-confirmation.md
+```
+
+This combines the selected X Article, image-backed short post with an `<x-article-url>` placeholder, follow-up replies, fallback thread, browser prep commands, stop points, and the `social:mark-published` command. Use it as the action-time review packet before any browser publish/upload/reply step.
 
 After a confirmed browser publish, write the public X post URL back to the queue:
 

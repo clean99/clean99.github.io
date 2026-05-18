@@ -37,6 +37,10 @@ import {
   buildXPublishPrep,
   writeXPublishPrep,
 } from './xPrep.mjs';
+import {
+  buildPublishConfirmation,
+  writePublishConfirmation,
+} from './publishConfirmation.mjs';
 
 const DEFAULT_QUEUE_PATH = 'data/social-growth/queue.json';
 const DEFAULT_PACKAGE_DIR = 'data/social-growth/packages';
@@ -54,6 +58,7 @@ const DEFAULT_AUTOMATION_REPORT_PATH = 'data/social-growth/automation-run.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
+const DEFAULT_PUBLISH_CONFIRMATION_PATH = 'data/social-growth/publish-confirmation.md';
 const DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
 const DEFAULT_ENGAGEMENT_PLAN_PATH = 'data/social-growth/engagement-plan.md';
 const DEFAULT_ENGAGEMENT_SEARCH_PATH = 'data/social-growth/engagement-search.md';
@@ -79,6 +84,7 @@ export async function runSafeAutomationCycle({
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
   imageDir = DEFAULT_IMAGE_DIR,
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
+  publishConfirmationPath = DEFAULT_PUBLISH_CONFIRMATION_PATH,
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
   engagementSearchPath = DEFAULT_ENGAGEMENT_SEARCH_PATH,
@@ -153,6 +159,13 @@ export async function runSafeAutomationCycle({
     bunCommand: xBunCommand,
   });
   await writeXPublishPrep(xPublishPrep, xPublishPrepPath);
+  const publishConfirmation = buildPublishConfirmation({
+    queue,
+    preflight,
+    xPublishPrep,
+    generatedAt,
+  });
+  await writePublishConfirmation(publishConfirmation, publishConfirmationPath);
 
   const engagementOpportunities = await readEngagementOpportunityTexts(engagementOpportunityDir);
   const engagementSearch = buildEngagementSearchPlan({
@@ -223,6 +236,7 @@ export async function runSafeAutomationCycle({
       profileUpdate: profileUpdatePath,
       imageBrief: imageBriefOutPath,
       xPublishPrep: xPublishPrepPath,
+      publishConfirmation: publishConfirmationPath,
       engagementSearch: engagementSearchPath,
       engagementPlan: engagementPlanPath,
       automationReport: automationReportPath,
@@ -279,6 +293,7 @@ Status: ${result.status}
 - Profile update package: \`${result.paths.profileUpdate}\`
 - Image brief: \`${result.paths.imageBrief || 'not generated'}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
+- Publish confirmation: \`${result.paths.publishConfirmation}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
 

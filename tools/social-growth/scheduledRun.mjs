@@ -25,6 +25,7 @@ const DEFAULT_SCHEDULED_REPORT_PATH = 'data/social-growth/scheduled-run.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
+const DEFAULT_PUBLISH_CONFIRMATION_PATH = 'data/social-growth/publish-confirmation.md';
 const DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
 const DEFAULT_ENGAGEMENT_PLAN_PATH = 'data/social-growth/engagement-plan.md';
 const DEFAULT_ENGAGEMENT_SEARCH_PATH = 'data/social-growth/engagement-search.md';
@@ -56,6 +57,7 @@ export async function runScheduledGrowthLoop({
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
   imageDir = DEFAULT_IMAGE_DIR,
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
+  publishConfirmationPath = DEFAULT_PUBLISH_CONFIRMATION_PATH,
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
   engagementSearchPath = DEFAULT_ENGAGEMENT_SEARCH_PATH,
@@ -91,6 +93,7 @@ export async function runScheduledGrowthLoop({
     imageBriefDir,
     imageDir,
     xPublishPrepPath,
+    publishConfirmationPath,
     engagementOpportunityDir,
     engagementPlanPath,
     engagementSearchPath,
@@ -179,6 +182,7 @@ Status: ${result.status}
 - Status dashboard: \`${result.paths.status}\`
 - Preflight: \`${result.paths.preflight}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
+- Publish confirmation: \`${result.paths.publishConfirmation}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
 - Engagement search status: ${result.automation.engagement?.searchStatus || 'unknown'}

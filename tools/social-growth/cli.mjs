@@ -71,6 +71,11 @@ import {
   writeXPublishPrep,
 } from './xPrep.mjs';
 import {
+  buildPublishConfirmation,
+  formatPublishConfirmationMarkdown,
+  writePublishConfirmation,
+} from './publishConfirmation.mjs';
+import {
   buildXTechnicalSharingBrief,
   writeXTechnicalSharingBrief,
 } from './xTechBrief.mjs';
@@ -312,6 +317,7 @@ if (command === 'articles') {
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
     imageDir: args.imageDir || 'output/imagegen',
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
+    publishConfirmationPath: args.confirmationOut || 'data/social-growth/publish-confirmation.md',
     engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
     engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
     engagementSearchPath: args.engagementSearchOut || 'data/social-growth/engagement-search.md',
@@ -641,6 +647,40 @@ if (command === 'articles') {
   } else {
     console.log(formatXPublishPrepMarkdown(prep));
   }
+} else if (command === 'confirmation') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const preflight = await buildPublishPreflight({
+    queue,
+    ledger,
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    ensurePackage: args.ensurePackage !== 'false',
+    preferReadyImage: args.preferReadyImage !== 'false',
+  });
+  const prep = await buildXPublishPrep(preflight, {
+    skillDir: args.skillDir,
+    bunCommand: args.bunCommand || 'npx -y bun',
+    articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
+  });
+  const packet = buildPublishConfirmation({
+    queue,
+    preflight,
+    xPublishPrep: prep,
+    generatedAt: preflight.generatedAt,
+  });
+  if (args.out) {
+    await writePublishConfirmation(packet, args.out);
+    console.log(`Wrote X publish confirmation packet to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(packet, null, 2));
+  } else {
+    console.log(formatPublishConfirmationMarkdown(packet));
+  }
 } else if (command === 'register-image') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -812,6 +852,7 @@ function printHelp() {
   npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md
   npm run social:image-brief -- --day 1 --slot 1
   npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md
+  npm run social:confirmation -- --day 1 --slot 1 --out data/social-growth/publish-confirmation.md
   npm run social:register-image -- --day 1 --slot 1 --source /path/to/generated.png
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt
