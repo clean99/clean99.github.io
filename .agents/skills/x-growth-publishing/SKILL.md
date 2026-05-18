@@ -153,20 +153,25 @@ For single-item control:
    ```bash
    npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
    ```
-19. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
-20. Record metrics twice per day:
+19. Audit profile conversion from copied visible profile text:
+   ```bash
+   npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
+   ```
+   Treat profile edits, link edits, and pinned-post changes as public account actions requiring action-time confirmation.
+20. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
+21. Record metrics twice per day:
    ```bash
    npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
    ```
-21. Review progress:
+22. Review progress:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
-22. Generate the next optimization decision:
+23. Generate the next optimization decision:
    ```bash
    npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
    ```
-23. Regenerate the week-level plan after each queue or ledger update:
+24. Regenerate the week-level plan after each queue or ledger update:
    ```bash
    npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/weekly-plan.md
    ```
@@ -238,6 +243,7 @@ Post Score = follows*25 + reposts*8 + quotes*8 + replies*6 + bookmarks*5 + likes
 After every snapshot:
 
 - run `npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown`;
+- run `npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md` after profile text is captured;
 - double down on topics that create follows, replies, reposts, bookmarks, or profile clicks;
 - kill templates that only get impressions or likes without follower lift;
 - prefer posts that make a concrete technical claim and invite a serious reply;

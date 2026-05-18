@@ -33,6 +33,12 @@ import {
   writeImageBrief,
 } from '../tools/social-growth/imageBrief.mjs';
 import { buildPublishPreflight, formatPublishPreflightMarkdown, registerPublishImage } from '../tools/social-growth/preflight.mjs';
+import {
+  buildProfileAudit,
+  formatProfileAuditMarkdown,
+  parseProfileText,
+  writeProfileAudit,
+} from '../tools/social-growth/profile.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
 import { buildGrowthStatus, formatGrowthStatusMarkdown, writeGrowthStatus } from '../tools/social-growth/status.mjs';
 import { validateQueue, validateQueueItem } from '../tools/social-growth/validation.mjs';
@@ -804,6 +810,75 @@ test('image brief exports prompt, visual checks, and register command', async ()
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('profile audit turns visible profile text into conversion checks', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-profile-audit-'));
+  try {
+    const profileText = [
+      'Clean99',
+      '@Clean993',
+      '写 AI 工程化、前端性能、React 和测试。',
+      'https://clean99.github.io',
+      '30 Following',
+      '30 Followers',
+      'Pinned',
+    ].join('\n');
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+      {
+        title: 'React Performance Optimization',
+        excerpt: '先定位 render、网络和交互成本真正落在哪一层。',
+        slug: 'React-Performance',
+        lang: 'zh',
+        tags: ['React', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/react-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 2,
+    });
+    const parsed = parseProfileText(profileText);
+    const audit = await buildProfileAudit({
+      profileText,
+      queue,
+      generatedAt: '2026-05-18T00:00:00.000Z',
+    });
+    const markdown = formatProfileAuditMarkdown(audit);
+    const writtenPath = await writeProfileAudit(audit, join(outDir, 'profile-audit.md'));
+    const persisted = await readFile(writtenPath, 'utf8');
+
+    assert.equal(parsed.handle, '@Clean993');
+    assert.equal(parsed.followers, 30);
+    assert.equal(parsed.pinned, true);
+    assert.equal(audit.status, 'pass');
+    assert.ok(audit.themes.includes('AI 工程化'));
+    assert.ok(audit.themes.includes('前端性能'));
+    assert.match(markdown, /Suggested Profile Copy/);
+    assert.match(persisted, /Do not edit X profile/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('profile audit flags missing captured profile conversion signals', async () => {
+  const audit = await buildProfileAudit({
+    profileText: '',
+    queue: { items: [] },
+    generatedAt: '2026-05-18T00:00:00.000Z',
+  });
+
+  assert.equal(audit.status, 'needs_work');
+  assert.ok(audit.checks.some((check) => check.status === 'fail' && check.message.includes('copy visible X profile text')));
+  assert.ok(audit.checks.some((check) => check.status === 'fail' && check.message.includes('pin a post')));
 });
 
 test('growth status summarizes blocker, pace, and next commands', async () => {

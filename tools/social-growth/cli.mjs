@@ -11,6 +11,12 @@ import {
   writePublishPreflight,
 } from './preflight.mjs';
 import {
+  buildProfileAudit,
+  formatProfileAuditMarkdown,
+  readOptionalText,
+  writeProfileAudit,
+} from './profile.mjs';
+import {
   buildImageBrief,
   imageBriefPath,
   writeImageBrief,
@@ -74,6 +80,22 @@ if (command === 'articles') {
     console.log(formatRecommendationsMarkdown(ledger));
   } else {
     console.log(JSON.stringify(buildGrowthRecommendations(ledger), null, 2));
+  }
+} else if (command === 'profile-audit') {
+  const queue = args.queue === 'false' ? null : await readJson(args.queue || 'data/social-growth/queue.json');
+  const profileText = await readOptionalText(args.profileText || 'data/social-growth/profile.local.txt');
+  const audit = await buildProfileAudit({
+    profileText,
+    queue,
+    generatedAt: args.now ? new Date(args.now) : new Date(),
+  });
+  if (args.out) {
+    await writeProfileAudit(audit, args.out);
+    console.log(`Wrote X profile conversion audit to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(audit, null, 2));
+  } else {
+    console.log(formatProfileAuditMarkdown(audit));
   }
 } else if (command === 'validate') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
@@ -367,6 +389,7 @@ function printHelp() {
   npm run social:report -- --ledger data/social-growth/example-ledger.json
   npm run social:report -- --ledger data/social-growth/example-ledger.json --format markdown
   npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
+  npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
   npm run social:validate -- --queue data/social-growth/queue.json --format markdown
 `);
 }

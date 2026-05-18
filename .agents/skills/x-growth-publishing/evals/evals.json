@@ -60,6 +60,12 @@
       "prompt": "今天自动化跑完后告诉我整个 X 增长系统卡在哪里、下一步该做什么。",
       "expected_output": "运行 social:status 或生成等价状态面板；汇总 follower pace、quality gate、weekly coverage、publish preflight、image readiness、blockers 和 next commands；不进入公开发布。",
       "files": []
+    },
+    {
+      "id": 11,
+      "prompt": "我已经复制了 Clean993 主页可见文本，检查主页能不能把 profile click 转成 follow。",
+      "expected_output": "运行 social:profile-audit 或生成等价审计；检查 profile promise、blog link、pinned post、follower count；给出建议 display name/bio/pinned post；不修改 X 主页。",
+      "files": []
     }
   ]
 }

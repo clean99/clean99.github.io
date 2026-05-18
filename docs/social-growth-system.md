@@ -27,6 +27,7 @@ The code can automate safe local work:
 - run the local daily preparation loop in one command;
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
+- audit the X profile's follower-conversion signals from copied visible profile text;
 - produce `gpt-image-2` image prompts for each candidate;
 - produce an X Article draft before the blog link;
 - mark published X URLs back into the queue;
@@ -198,6 +199,14 @@ Parse read-only visible text copied from X into the metrics template:
 npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
 ```
 
+Audit the profile conversion surface from copied visible profile text:
+
+```bash
+npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
+```
+
+This is local guidance only. It checks whether the visible profile text has a clear technical promise, a blog link, a pinned post, and a readable follower count. Editing the profile, link, or pinned post is a public account change and still requires action-time confirmation in Chrome.
+
 Initialize a one-week follower ledger:
 
 ```bash
@@ -261,6 +270,7 @@ Use `data/social-growth/example-ledger.json` as the shape. Real local data shoul
 - `data/social-growth/ledger.json`
 - `data/social-growth/*.local.json`
 - `data/social-growth/*.local.txt`
+- `data/social-growth/profile-audit.md`
 - `data/social-growth/queue.json`
 - `data/social-growth/post-texts/`
 - `data/social-growth/snapshots/`
