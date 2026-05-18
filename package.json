@@ -23,6 +23,7 @@
     "social:flow-dry-run": "node tools/social-growth/cli.mjs flow-dry-run",
     "social:funnel": "node tools/social-growth/cli.mjs funnel",
     "social:handoff": "node tools/social-growth/cli.mjs handoff",
+    "social:image-backlog": "node tools/social-growth/cli.mjs image-backlog",
     "social:image-brief": "node tools/social-growth/cli.mjs image-brief",
     "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",
     "social:mark-published": "node tools/social-growth/cli.mjs mark-published",

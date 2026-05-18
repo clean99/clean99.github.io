@@ -61,6 +61,11 @@ import {
   imageBriefPath,
   writeImageBrief,
 } from '../tools/social-growth/imageBrief.mjs';
+import {
+  buildImageBacklog,
+  formatImageBacklogMarkdown,
+  writeImageBacklog,
+} from '../tools/social-growth/imageBacklog.mjs';
 import { buildPublishPreflight, formatPublishPreflightMarkdown, registerPublishImage } from '../tools/social-growth/preflight.mjs';
 import {
   buildPublishConfirmation,
@@ -1334,6 +1339,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       profileUpdatePath: join(outDir, 'profile-update.md'),
       automationReportPath: join(outDir, 'automation-run.md'),
       imageBriefDir: join(outDir, 'image-briefs'),
+      imageBacklogPath: join(outDir, 'image-backlog.md'),
       imageDir: join(outDir, 'images'),
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
       publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
@@ -1359,6 +1365,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const profileUpdate = await readFile(join(outDir, 'profile-update.md'), 'utf8');
     const xPrep = await readFile(join(outDir, 'x-publish-prep.md'), 'utf8');
     const confirmation = await readFile(join(outDir, 'publish-confirmation.md'), 'utf8');
+    const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
     const engagementSearch = await readFile(join(outDir, 'engagement-search.md'), 'utf8');
     const engagementPlan = await readFile(join(outDir, 'engagement-plan.md'), 'utf8');
 
@@ -1368,6 +1375,9 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.equal(result.profileConversion.status, 'needs_work');
     assert.match(result.profileConversion.issues.join('\n'), /pin a post/);
     assert.ok(result.paths.imageBrief.endsWith('.md'));
+    assert.equal(result.paths.imageBacklog, join(outDir, 'image-backlog.md'));
+    assert.equal(result.imageBacklog.status, 'needs_images');
+    assert.equal(result.imageBacklog.missingImages, 3);
     assert.equal(result.paths.dailyBrief, join(outDir, 'daily-brief.md'));
     assert.equal(result.paths.xPublishPrep, join(outDir, 'x-publish-prep.md'));
     assert.equal(result.paths.publishConfirmation, join(outDir, 'publish-confirmation.md'));
@@ -1379,6 +1389,9 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(report, /Daily brief/);
     assert.match(dailyBrief, /Daily X Growth Brief/);
     assert.match(report, /X publish prep/);
+    assert.match(report, /Image backlog/);
+    assert.match(imageBacklog, /X Image Backlog/);
+    assert.match(imageBacklog, /social:register-image/);
     assert.match(report, /Engagement plan/);
     assert.match(report, /Profile update package/);
     assert.match(report, /Profile Conversion/);
@@ -1459,6 +1472,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       funnelPath: join(outDir, 'funnel.md'),
       scheduledReportPath: join(outDir, 'scheduled-run.md'),
       imageBriefDir: join(outDir, 'image-briefs'),
+      imageBacklogPath: join(outDir, 'image-backlog.md'),
       imageDir,
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
       publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
@@ -1478,6 +1492,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const scheduledReport = await readFile(join(outDir, 'scheduled-run.md'), 'utf8');
     const metricsReport = await readFile(join(outDir, 'metrics-cycle.md'), 'utf8');
     const funnelReport = await readFile(join(outDir, 'funnel.md'), 'utf8');
+    const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
 
     assert.equal(result.status, 'ready_for_browser_confirmation');
     assert.equal(result.automation.status, 'ready_for_browser_confirmation');
@@ -1489,6 +1504,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.selected.id, expectedQueue.items[0].id);
     assert.match(scheduledReport, /Scheduled X Growth Run/);
     assert.match(scheduledReport, /Daily brief/);
+    assert.match(scheduledReport, /Image backlog/);
     assert.match(scheduledReport, /Engagement search/);
     assert.match(scheduledReport, /Engagement plan/);
     assert.match(scheduledReport, /Publish confirmation/);
@@ -1498,6 +1514,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /safe for recurring execution/);
     assert.match(metricsReport, /No browser publish/);
     assert.match(funnelReport, /X Growth Funnel/);
+    assert.match(imageBacklog, /Images missing: 2/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -1824,6 +1841,76 @@ test('image brief exports prompt, visual checks, and register command', async ()
     assert.match(markdown, /--source '\/tmp\/generated.png'/);
     assert.match(markdown, /Do not open Chrome for publishing until preflight is ready/);
     assert.match(persisted, /Short Post First Screen/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('image backlog lists missing weekly slot images without browser actions', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-image-backlog-'));
+  try {
+    const articles = [
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '这篇文章讨论的是让每一轮修改都能被同一个 harness 复验。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+      {
+        title: 'Vibe Coding VS Spec-Driven Coding',
+        excerpt: '复杂改动需要先固定意图、边界和验收标准。',
+        slug: 'Spec-Driven-Coding',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/spec/',
+      },
+    ];
+    const queue = buildPublishQueue(articles, {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 3,
+    });
+    const imageDir = join(outDir, 'images');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(imageDir, `${queue.items[0].id}.png`), 'fake image');
+
+    const backlog = await buildImageBacklog({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      day: 1,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      sourcePlaceholder: '/tmp/generated.png',
+    });
+    const markdown = formatImageBacklogMarkdown(backlog);
+    const writtenPath = await writeImageBacklog(backlog, join(outDir, 'image-backlog.md'));
+    const persisted = await readFile(writtenPath, 'utf8');
+
+    assert.equal(backlog.status, 'needs_images');
+    assert.equal(backlog.totals.totalSlots, 3);
+    assert.equal(backlog.totals.readyImages, 1);
+    assert.equal(backlog.totals.missingImages, 2);
+    assert.equal(backlog.entries.length, 2);
+    assert.match(markdown, /X Image Backlog/);
+    assert.match(markdown, /social:image-brief -- --id/);
+    assert.match(markdown, /social:register-image -- --id/);
+    assert.match(markdown, /--source '\/tmp\/generated.png'/);
+    assert.match(persisted, /Do not upload media or publish on X/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

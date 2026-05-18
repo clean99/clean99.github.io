@@ -23,6 +23,7 @@ const DEFAULT_RECOMMENDATIONS_PATH = 'data/social-growth/recommendations.md';
 const DEFAULT_FUNNEL_PATH = 'data/social-growth/funnel.md';
 const DEFAULT_SCHEDULED_REPORT_PATH = 'data/social-growth/scheduled-run.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
+const DEFAULT_IMAGE_BACKLOG_PATH = 'data/social-growth/image-backlog.md';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
 const DEFAULT_PUBLISH_CONFIRMATION_PATH = 'data/social-growth/publish-confirmation.md';
@@ -55,6 +56,7 @@ export async function runScheduledGrowthLoop({
   funnelPath = DEFAULT_FUNNEL_PATH,
   scheduledReportPath = DEFAULT_SCHEDULED_REPORT_PATH,
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
+  imageBacklogPath = DEFAULT_IMAGE_BACKLOG_PATH,
   imageDir = DEFAULT_IMAGE_DIR,
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
   publishConfirmationPath = DEFAULT_PUBLISH_CONFIRMATION_PATH,
@@ -91,6 +93,7 @@ export async function runScheduledGrowthLoop({
     profileUpdatePath,
     automationReportPath,
     imageBriefDir,
+    imageBacklogPath,
     imageDir,
     xPublishPrepPath,
     publishConfirmationPath,
@@ -185,6 +188,7 @@ Status: ${result.status}
 - Daily brief: \`${result.paths.dailyBrief}\`
 - Status dashboard: \`${result.paths.status}\`
 - Preflight: \`${result.paths.preflight}\`
+- Image backlog: \`${result.paths.imageBacklog || 'not generated'}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
 - Publish confirmation: \`${result.paths.publishConfirmation}\`
 - Engagement search: \`${result.paths.engagementSearch}\`

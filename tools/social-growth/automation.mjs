@@ -11,6 +11,10 @@ import {
   writeImageBrief,
 } from './imageBrief.mjs';
 import {
+  buildImageBacklog,
+  writeImageBacklog,
+} from './imageBacklog.mjs';
+import {
   buildEngagementPlan,
   buildEngagementSearchPlan,
   readEngagementOpportunityTexts,
@@ -56,6 +60,7 @@ const DEFAULT_PROFILE_AUDIT_PATH = 'data/social-growth/profile-audit.md';
 const DEFAULT_PROFILE_UPDATE_PATH = 'data/social-growth/profile-update.md';
 const DEFAULT_AUTOMATION_REPORT_PATH = 'data/social-growth/automation-run.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
+const DEFAULT_IMAGE_BACKLOG_PATH = 'data/social-growth/image-backlog.md';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
 const DEFAULT_PUBLISH_CONFIRMATION_PATH = 'data/social-growth/publish-confirmation.md';
@@ -82,6 +87,7 @@ export async function runSafeAutomationCycle({
   profileUpdatePath = DEFAULT_PROFILE_UPDATE_PATH,
   automationReportPath = DEFAULT_AUTOMATION_REPORT_PATH,
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
+  imageBacklogPath = DEFAULT_IMAGE_BACKLOG_PATH,
   imageDir = DEFAULT_IMAGE_DIR,
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
   publishConfirmationPath = DEFAULT_PUBLISH_CONFIRMATION_PATH,
@@ -154,6 +160,19 @@ export async function runSafeAutomationCycle({
     imageBriefOutPath = imageBriefPath(imageBrief, imageBriefDir);
     await writeImageBrief(imageBrief, imageBriefOutPath);
   }
+  const imageBacklog = await buildImageBacklog({
+    queue,
+    ledger,
+    day,
+    now,
+    imageDir,
+    packageOutDir,
+    ensurePackage: true,
+    sourcePlaceholder: '/absolute/path/to/generated.png',
+    env,
+  });
+  await writeImageBacklog(imageBacklog, imageBacklogPath);
+
   const xPublishPrep = await buildXPublishPrep(preflight, {
     skillDir: xSkillDir,
     bunCommand: xBunCommand,
@@ -240,6 +259,7 @@ export async function runSafeAutomationCycle({
       profileAudit: profileAuditPath,
       profileUpdate: profileUpdatePath,
       imageBrief: imageBriefOutPath,
+      imageBacklog: imageBacklogPath,
       xPublishPrep: xPublishPrepPath,
       publishConfirmation: publishConfirmationPath,
       engagementSearch: engagementSearchPath,
@@ -258,6 +278,12 @@ export async function runSafeAutomationCycle({
       readySlots: dailyBrief.dayReadiness.readySlots,
       totalSlots: dailyBrief.dayReadiness.totalSlots,
       actionItems: dailyBrief.actionItems.length,
+    },
+    imageBacklog: {
+      status: imageBacklog.status,
+      missingImages: imageBacklog.totals.missingImages,
+      readyImages: imageBacklog.totals.readyImages,
+      listedEntries: imageBacklog.totals.listedEntries,
     },
     boundary: 'No public X action was performed. Chrome publishing, media upload, profile edits, replies, likes, reposts, follows, and final publish clicks still require action-time confirmation.',
   };
@@ -300,6 +326,7 @@ Status: ${result.status}
 - Profile audit: \`${result.paths.profileAudit}\`
 - Profile update package: \`${result.paths.profileUpdate}\`
 - Image brief: \`${result.paths.imageBrief || 'not generated'}\`
+- Image backlog: \`${result.paths.imageBacklog || 'not generated'}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
 - Publish confirmation: \`${result.paths.publishConfirmation}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
@@ -334,6 +361,13 @@ ${confirmationIssues}
 - Status: ${result.dailyBrief.status}
 - Ready slots: ${result.dailyBrief.readySlots}/${result.dailyBrief.totalSlots}
 - Action items: ${result.dailyBrief.actionItems}
+
+## Image Backlog
+
+- Status: ${result.imageBacklog?.status || 'unknown'}
+- Images ready: ${result.imageBacklog?.readyImages ?? 'unknown'}
+- Images missing: ${result.imageBacklog?.missingImages ?? 'unknown'}
+- Entries listed: ${result.imageBacklog?.listedEntries ?? 'unknown'}
 
 ## Local Blockers
 

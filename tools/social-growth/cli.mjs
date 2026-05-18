@@ -51,6 +51,11 @@ import {
   imageBriefPath,
   writeImageBrief,
 } from './imageBrief.mjs';
+import {
+  buildImageBacklog,
+  formatImageBacklogMarkdown,
+  writeImageBacklog,
+} from './imageBacklog.mjs';
 import { runXGrowthDryRun } from './flowDryRun.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from './recommendations.mjs';
 import { buildGrowthFunnel, formatGrowthFunnelMarkdown } from './funnel.mjs';
@@ -261,8 +266,10 @@ if (command === 'articles') {
     profileUpdatePath: args.profileUpdateOut || 'data/social-growth/profile-update.md',
     automationReportPath: args.out || 'data/social-growth/automation-run.md',
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
+    imageBacklogPath: args.imageBacklogOut || 'data/social-growth/image-backlog.md',
     imageDir: args.imageDir || 'output/imagegen',
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
+    publishConfirmationPath: args.confirmationOut || 'data/social-growth/publish-confirmation.md',
     engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
     engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
     engagementSearchPath: args.engagementSearchOut || 'data/social-growth/engagement-search.md',
@@ -315,6 +322,7 @@ if (command === 'articles') {
     funnelPath: args.funnelOut || 'data/social-growth/funnel.md',
     scheduledReportPath: args.out || 'data/social-growth/scheduled-run.md',
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
+    imageBacklogPath: args.imageBacklogOut || 'data/social-growth/image-backlog.md',
     imageDir: args.imageDir || 'output/imagegen',
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
     publishConfirmationPath: args.confirmationOut || 'data/social-growth/publish-confirmation.md',
@@ -619,6 +627,31 @@ if (command === 'articles') {
     imageReady: brief.image.ready,
     blockers: brief.blockers,
   }, null, 2));
+} else if (command === 'image-backlog') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const backlog = await buildImageBacklog({
+    queue,
+    ledger,
+    day: args.day,
+    days: args.days || 7,
+    postsPerDay: args.postsPerDay || 3,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    includeReady: args.includeReady === 'true',
+    limit: args.limit,
+    ensurePackage: args.ensurePackage !== 'false',
+    sourcePlaceholder: args.source || '/absolute/path/to/generated.png',
+  });
+  if (args.out) {
+    await writeImageBacklog(backlog, args.out);
+    console.log(`Wrote X image backlog to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(backlog, null, 2));
+  } else {
+    console.log(formatImageBacklogMarkdown(backlog));
+  }
 } else if (command === 'x-prep') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -851,6 +884,7 @@ function printHelp() {
   npm run social:status -- --day 1 --slot 1 --out data/social-growth/status.md
   npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md
   npm run social:image-brief -- --day 1 --slot 1
+  npm run social:image-backlog -- --day 1 --out data/social-growth/image-backlog.md
   npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md
   npm run social:confirmation -- --day 1 --slot 1 --out data/social-growth/publish-confirmation.md
   npm run social:register-image -- --day 1 --slot 1 --source /path/to/generated.png
