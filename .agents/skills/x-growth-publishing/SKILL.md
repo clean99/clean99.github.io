@@ -31,6 +31,7 @@ Before optimizing metrics, queue selection, engagement, or follow conversion, re
 - Use the installed community `marketing-ideas` skill only when the queue needs new growth experiments, topic angles, or distribution tactics beyond the current X Article/image/thread package. Translate ideas into local queue/metric experiments; do not turn it into automatic public action.
 - Use `humanizer` as a final style cleanup pass when copy feels AI-written. Its most relevant rule for this workflow is to remove negative parallelism such as `不是 X，而是 Y`, inflated words, and template handoff lines. If that skill is not loaded in the current session, apply the same rule manually.
 - Use the community `x-writing` skill as a style reference, not as the publishing controller. Its useful parts are first-line hook discipline, one-sentence-per-line X formatting, specificity checks, and `references/anti-patterns.md`. Keep our Chinese technical constraints, image-first packaging, thread fallback, metrics ledger, and browser confirmation boundary as the source of truth.
+- Use the installed community `x-mastery-mentor` skill as a Chinese X growth and review reference when diagnosing hooks, topic selection, profile positioning, or account-stage tactics. It is not the publishing controller: do not follow its checkpoint/confirmation rules when they conflict with this skill's local automation, browser metrics, and public-action boundary.
 - Use the community `social` skill for platform-native content calendars, repurposing angles, and engagement ideas. Treat it as strategy input only; this skill still owns queue ids, browser readiness, metrics capture, and public-action confirmation.
 - Use the community `content-strategy` skill before queue expansion when the backlog needs topic pillars, audience jobs, or a searchable/shareable split.
 - Use the community `analytics` skill when changing measurement names, UTM conventions, attribution fields, or funnel diagnostics. Keep `data/social-growth/ledger.json` as the canonical local data store.
@@ -297,6 +298,11 @@ For single-item control:
    ```bash
    npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
    ```
+   Prefer the browser-backed read-only capture when Chrome is logged into X:
+   ```bash
+   npm run social:browser-metrics-capture -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --metrics data/social-growth/posts.local.json
+   ```
+   This opens profile/post URLs and writes visible text into local files before running the metrics cycle. It must not type text, upload media, click public buttons, reply, like, repost, follow, edit, or publish.
 21. Audit profile conversion from copied visible profile text:
    ```bash
    npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md

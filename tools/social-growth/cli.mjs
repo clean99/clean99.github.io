@@ -749,6 +749,9 @@ if (command === 'articles') {
 } else if (command === 'login-recovery') {
   const result = await runLoginRecovery(args);
   console.log(JSON.stringify(result, null, 2));
+} else if (command === 'browser-metrics-capture') {
+  const result = await runBrowserMetricsCapture(args);
+  console.log(JSON.stringify(result, null, 2));
 } else if (command === 'x-prep') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -1165,6 +1168,141 @@ function runXBrowserProbe({
   };
 }
 
+async function runBrowserMetricsCapture(options = {}) {
+  const queuePath = options.queue || 'data/social-growth/queue.json';
+  const ledgerPath = options.ledger || 'data/social-growth/ledger.json';
+  const metricsPath = options.metrics || options.metricsPath || 'data/social-growth/posts.local.json';
+  const profileTextPath = options.profileText || 'data/social-growth/profile.local.txt';
+  const postTextDir = options.postTextDir || 'data/social-growth/post-texts';
+  const account = options.account || '@Clean993';
+  const profileDir = options.xProfileDir || options.profileDir;
+  const skipBrowser = booleanOption(options.skipBrowser);
+  const continueOnCaptureError = booleanOption(options.continueOnCaptureError);
+  const queue = await readJson(queuePath);
+  const publishedPosts = (queue.items || [])
+    .filter((item) => item.status === 'published' && item.xPostUrl)
+    .map((item) => ({
+      id: item.id,
+      url: item.xPostUrl,
+    }));
+  const captureRuns = [];
+
+  if (!skipBrowser) {
+    captureRuns.push(runXBrowserRead({
+      url: `https://x.com/${String(account).replace(/^@/, '')}`,
+      textOut: profileTextPath,
+      profileDir,
+      timeoutMs: options.timeoutMs || 30000,
+      label: 'profile',
+    }));
+    for (const post of publishedPosts) {
+      captureRuns.push(runXBrowserRead({
+        url: post.url,
+        textOut: `${postTextDir}/${post.id}.txt`,
+        profileDir,
+        timeoutMs: options.timeoutMs || 30000,
+        label: post.id,
+      }));
+    }
+    const failed = captureRuns.filter((run) => run.exitCode !== 0);
+    if (failed.length && !continueOnCaptureError) {
+      throw new Error(`Browser metrics capture failed: ${failed.map((run) => `${run.label}: ${run.stderr || run.stdout || run.exitCode}`).join('; ')}`);
+    }
+  }
+
+  const metricsCycle = await runPostPublishMetricsCycle({
+    queuePath,
+    ledgerPath,
+    metricsPath,
+    profileTextPath,
+    postTextDir,
+    cycleReportPath: options.cycleOut || 'data/social-growth/metrics-cycle.md',
+    growthReportPath: options.growthReportOut || 'data/social-growth/growth-report.md',
+    recommendationsPath: options.recommendationsOut || 'data/social-growth/recommendations.md',
+    funnelPath: options.funnelOut || 'data/social-growth/funnel.md',
+    snapshot: options.snapshot !== 'false',
+    now: options.now ? new Date(options.now) : new Date(),
+  });
+
+  return {
+    status: metricsCycle.status,
+    publicActions: {
+      typedText: false,
+      uploadedMedia: false,
+      clickedSubmit: false,
+    },
+    capture: {
+      skipped: skipBrowser,
+      profileUrl: `https://x.com/${String(account).replace(/^@/, '')}`,
+      profileTextPath,
+      publishedPosts: publishedPosts.length,
+      postTextDir,
+      runs: captureRuns.map((run) => ({
+        label: run.label,
+        exitCode: run.exitCode,
+        status: run.status,
+        textOut: run.textOut,
+      })),
+    },
+    metrics: {
+      followers: metricsCycle.followers || '',
+      publishedPosts: metricsCycle.publishedPosts,
+      capturedPostTexts: metricsCycle.capturedPostTexts,
+      readiness: metricsCycle.readiness,
+    },
+    paths: {
+      metrics: metricsPath,
+      cycleReport: metricsCycle.cycleReportPath,
+      growthReport: metricsCycle.growthReportPath,
+      recommendations: metricsCycle.recommendationsPath,
+      funnel: metricsCycle.funnelPath,
+    },
+  };
+}
+
+function booleanOption(value) {
+  return value === true || value === 'true';
+}
+
+function runXBrowserRead({
+  url,
+  textOut,
+  profileDir,
+  timeoutMs,
+  label,
+}) {
+  const readArgs = [
+    'tools/social-growth/x-browser-cdp.mjs',
+    '--read-url',
+    url,
+    '--text-out',
+    textOut,
+    '--json',
+    '--timeout-ms',
+    String(timeoutMs),
+  ];
+  if (profileDir) readArgs.push('--profile', profileDir);
+  const result = spawnSync(process.execPath, readArgs, {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+  });
+  let parsed = null;
+  try {
+    parsed = JSON.parse(result.stdout || '{}');
+  } catch {
+    parsed = null;
+  }
+  return {
+    label,
+    url,
+    textOut,
+    exitCode: result.status ?? 1,
+    status: parsed?.status || 'unknown',
+    stdout: result.stdout,
+    stderr: result.stderr,
+  };
+}
+
 async function loadCliArticles(options = {}) {
   return loadArticles({
     includeUntracked: options.includeUntracked === 'true',
@@ -1222,6 +1360,7 @@ function printHelp() {
   npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out data/social-growth/thread-reply-handoff.md --id <queue-id> --url <x-post-url>
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt
+  npm run social:browser-metrics-capture -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --metrics data/social-growth/posts.local.json
   npm run social:metrics-cycle -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
   npm run social:parse-x-text -- --kind profile --input data/social-growth/profile.local.txt
   npm run social:init-ledger -- --followers 1234 --out data/social-growth/ledger.json

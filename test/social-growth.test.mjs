@@ -2526,6 +2526,8 @@ test('project x browser cdp handoff exposes a non-publishing help command', () =
   assert.match(result.stdout, /--probe/);
   assert.match(result.stdout, /--json/);
   assert.match(result.stdout, /--probe-out/);
+  assert.match(result.stdout, /--read-url/);
+  assert.match(result.stdout, /--text-out/);
   assert.match(result.stdout, /--account/);
   assert.match(result.stdout, /stops before final publish/);
 });
@@ -4313,6 +4315,78 @@ test('post-publish metrics cycle captures text, snapshots ledger, and writes rep
     assert.match(recommendations, /Growth Recommendations/);
     assert.match(funnel, /Status: converting/);
     assert.match(cycleReport, /Funnel report/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('browser metrics capture can run read-only metrics cycle without opening Chrome', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-browser-metrics-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '有用的系统',
+        excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+        slug: 'Useful-Systems',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const publishedQueue = markQueueItemPublished(queue, {
+      id: queue.items[0].id,
+      xPostUrl: 'https://x.com/Clean993/status/1',
+      publishedAt: '2026-05-18T01:00:00.000Z',
+    });
+    const queuePath = join(outDir, 'queue.json');
+    const ledgerPath = join(outDir, 'ledger.json');
+    const metricsPath = join(outDir, 'posts.local.json');
+    const profileTextPath = join(outDir, 'profile.local.txt');
+    const postTextDir = join(outDir, 'post-texts');
+    await writeJson(queuePath, publishedQueue);
+    await writeJson(ledgerPath, createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+    await mkdir(postTextDir);
+    await writeFile(profileTextPath, 'Clean993\n32 Followers\n');
+    await writeFile(join(postTextDir, `${queue.items[0].id}.txt`), 'Views\n450\nLikes\n8\nReplies\n1\nReposts\n1\nBookmarks\n2\nNew follows\n2\n');
+
+    const result = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'browser-metrics-capture',
+      '--queue', queuePath,
+      '--ledger', ledgerPath,
+      '--metrics', metricsPath,
+      '--profile-text', profileTextPath,
+      '--post-text-dir', postTextDir,
+      '--cycle-out', join(outDir, 'metrics-cycle.md'),
+      '--growth-report-out', join(outDir, 'growth-report.md'),
+      '--recommendations-out', join(outDir, 'recommendations.md'),
+      '--funnel-out', join(outDir, 'funnel.md'),
+      '--skip-browser', 'true',
+      '--now', '2026-05-19T00:00:00.000Z',
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 0);
+    const payload = JSON.parse(result.stdout);
+    const ledger = JSON.parse(await readFile(ledgerPath, 'utf8'));
+
+    assert.equal(payload.status, 'snapshotted');
+    assert.equal(payload.capture.skipped, true);
+    assert.equal(payload.publicActions.typedText, false);
+    assert.equal(payload.publicActions.uploadedMedia, false);
+    assert.equal(payload.publicActions.clickedSubmit, false);
+    assert.equal(payload.metrics.followers, '32');
+    assert.equal(payload.metrics.capturedPostTexts, 1);
+    assert.equal(ledger.snapshots[1].followers, 32);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

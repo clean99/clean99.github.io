@@ -29,6 +29,11 @@ async function main() {
     await probeBrowser(options);
     return;
   }
+  if (options.readUrl) {
+    if (!options.timeoutProvided) options.timeoutMs = DEFAULT_PROBE_TIMEOUT_MS;
+    await captureVisibleText(options);
+    return;
+  }
   if (!options.text && !options.images.length) {
     throw new Error('Provide text or at least one image.');
   }
@@ -135,6 +140,60 @@ async function probeBrowser({
   }
 }
 
+async function captureVisibleText({
+  readUrl,
+  textOut = '',
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  profileDir = defaultProfileDir(),
+  chromePath = '',
+  json = false,
+}) {
+  const targetUrl = normalizeReadUrl(readUrl);
+  const session = await connectCompose({
+    timeoutMs,
+    profileDir,
+    chromePath,
+    initialUrl: targetUrl,
+    requireCompose: false,
+  });
+  const { cdp, chrome } = session;
+
+  try {
+    await cdp.send('Page.navigate', { url: targetUrl });
+    await waitForDocument(cdp, Math.min(timeoutMs, 30_000));
+    const text = await waitForVisibleText(cdp, Math.min(timeoutMs, 30_000));
+    const currentUrl = await cdp.evaluate(`window.location.href`).catch(() => targetUrl);
+
+    if (textOut) {
+      await mkdir(dirname(textOut), { recursive: true });
+      await writeFile(textOut, `${text.trimEnd()}\n`);
+    }
+
+    const result = {
+      status: text.trim() ? 'captured' : 'empty',
+      requestedUrl: targetUrl,
+      currentUrl,
+      textOut,
+      textLength: text.length,
+      attachedToExistingChrome: Boolean(session.existingPort),
+      publicActions: {
+        typedText: false,
+        uploadedMedia: false,
+        clickedSubmit: false,
+      },
+    };
+
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(`[x-browser-cdp] Captured ${text.length} visible characters from ${currentUrl}.`);
+    }
+  } finally {
+    cdp.close();
+    if (chrome) chrome.unref();
+  }
+}
+
 async function writeProbeRecord(filePath, record) {
   const previous = await readJsonFile(filePath);
   const merged = dropEmpty({
@@ -183,6 +242,8 @@ async function connectCompose({
   timeoutMs = DEFAULT_TIMEOUT_MS,
   profileDir = defaultProfileDir(),
   chromePath = '',
+  initialUrl = X_COMPOSE_URL,
+  requireCompose = true,
 }) {
   const resolvedProfileDir = profileDir || defaultProfileDir();
   await mkdir(resolvedProfileDir, { recursive: true });
@@ -196,7 +257,7 @@ async function connectCompose({
       chromePath: chromePath || findChromePath(),
       profileDir: resolvedProfileDir,
       port,
-      url: X_COMPOSE_URL,
+      url: initialUrl,
     });
   }
 
@@ -207,7 +268,11 @@ async function connectCompose({
     await cdp.send('Runtime.enable');
     await cdp.send('DOM.enable');
     await cdp.send('Page.enable');
-    await ensureComposePage(cdp, timeoutMs);
+    if (requireCompose) {
+      await ensureComposePage(cdp, timeoutMs);
+    } else {
+      await waitForDocument(cdp, Math.min(timeoutMs, 30_000));
+    }
     return {
       cdp,
       chrome,
@@ -284,6 +349,29 @@ async function waitForDocument(cdp, timeoutMs) {
     if (readyState === 'interactive' || readyState === 'complete') return;
     await sleep(500);
   }
+}
+
+async function waitForVisibleText(cdp, timeoutMs) {
+  const start = Date.now();
+  let latest = '';
+  while (Date.now() - start < timeoutMs) {
+    latest = String(await cdp.evaluate(`document.body?.innerText || ''`).catch(() => '') || '');
+    if (latest.trim().length > 0) return latest;
+    await sleep(500);
+  }
+  return latest;
+}
+
+function normalizeReadUrl(value) {
+  const url = new URL(String(value || ''));
+  const hostname = url.hostname.toLowerCase();
+  if (!['x.com', 'www.x.com', 'twitter.com', 'www.twitter.com'].includes(hostname)) {
+    throw new Error('Read-only capture is restricted to x.com/twitter.com URLs.');
+  }
+  if (url.protocol !== 'https:') {
+    throw new Error('Read-only capture requires an HTTPS X URL.');
+  }
+  return url.toString();
 }
 
 async function hasFileInput(cdp) {
@@ -510,6 +598,8 @@ function parseArgs(args) {
     images: [],
     submit: false,
     probe: false,
+    readUrl: '',
+    textOut: '',
     json: false,
     probeOut: '',
     expectedAccount: '',
@@ -527,6 +617,10 @@ function parseArgs(args) {
       options.help = true;
     } else if (arg === '--probe') {
       options.probe = true;
+    } else if (arg === '--read-url' && args[index + 1]) {
+      options.readUrl = args[++index];
+    } else if (arg === '--text-out' && args[index + 1]) {
+      options.textOut = args[++index];
     } else if (arg === '--json') {
       options.json = true;
     } else if (arg === '--probe-out' && args[index + 1]) {
@@ -580,6 +674,8 @@ Usage:
 
 Options:
   --probe              Check Chrome/X compose readiness without typing or uploading
+  --read-url <url>     Read visible text from an X URL without typing or uploading
+  --text-out <path>    Write visible text captured by --read-url
   --json               Print probe result as JSON
   --probe-out <path>   Write browser-readiness probe state JSON
   --account <handle>   Expected X account handle for probe state
