@@ -1483,6 +1483,9 @@ test('daily execution brief surfaces browser blockers before ready publish slots
     assert.ok(brief.actionItems.some((item) => item.action.includes('prepare them only after browser readiness passes')));
     assert.match(markdown, /Browser Readiness/);
     assert.match(markdown, /Manual Publish Fallback/);
+    assert.match(markdown, /Profile Conversion Handoff/);
+    assert.match(markdown, /social:profile-package/);
+    assert.match(markdown, /final profile save click/);
     assert.match(markdown, /social:manual-publish-kit/);
     assert.match(markdown, /social:post-publish-recovery/);
     assert.match(markdown, /browser-readiness -- --day 1 --slot 1 --publishMode thread_fallback --xProfileDir '\/tmp\/x-profile'/);

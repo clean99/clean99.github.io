@@ -12,7 +12,10 @@ import {
   buildMetricsReadiness,
   mergeMetricsTemplate,
 } from './metricsCycle.mjs';
-import { buildProfileAudit } from './profile.mjs';
+import {
+  buildProfileAudit,
+  buildProfileUpdatePackage,
+} from './profile.mjs';
 
 const DEFAULT_DAILY_BRIEF_PATH = 'data/social-growth/daily-brief.md';
 
@@ -73,6 +76,9 @@ export async function buildDailyExecutionBrief({
     queue,
     generatedAt,
   });
+  const profileUpdatePackage = buildProfileUpdatePackage(profileAudit, {
+    generatedAt,
+  });
   const summary = summarizeGrowthLedger(ledger);
   const funnel = buildGrowthFunnel(ledger);
   const browserSummary = summarizeBrowserReadiness(browserReadiness);
@@ -121,6 +127,7 @@ export async function buildDailyExecutionBrief({
     engagementPlan,
     metricsReadiness,
     profileAudit,
+    profileUpdatePackage,
     browserReadiness: browserSummary,
     browserReadinessCommand,
     manualPublishFallback,
@@ -148,6 +155,7 @@ export function formatDailyExecutionBriefMarkdown(brief) {
     .filter((check) => check.status !== 'pass')
     .map((check) => `- ${check.message}`)
     .join('\n') || '- No profile fixes.';
+  const profileHandoff = formatProfileConversionHandoff(brief.profileUpdatePackage);
 
   return `# Daily X Growth Brief
 
@@ -249,6 +257,8 @@ Fixes:
 
 ${profileFixes}
 
+${profileHandoff}
+
 ## Action Order
 
 ${actions}
@@ -287,6 +297,50 @@ ${slot.commands.xPrep}
   return `## Blocked Slot Fixes
 
 ${sections}`;
+}
+
+function formatProfileConversionHandoff(profilePackage) {
+  if (!profilePackage || profilePackage.status === 'no_change_needed') return '';
+  const stopPoints = profilePackage.browser.stopBefore.map((item) => `- ${item}`).join('\n');
+  return `## Profile Conversion Handoff
+
+Generate the full local package, then prepare the profile update and pinned post in Chrome. Stop before every public account action.
+
+Display name:
+
+\`\`\`text
+${profilePackage.proposed.displayName}
+\`\`\`
+
+Bio:
+
+\`\`\`text
+${profilePackage.proposed.bio}
+\`\`\`
+
+Link:
+
+\`\`\`text
+${profilePackage.proposed.link}
+\`\`\`
+
+Pinned post draft:
+
+\`\`\`text
+${profilePackage.proposed.pinnedPost}
+\`\`\`
+
+Commands:
+
+\`\`\`bash
+npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md
+npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
+\`\`\`
+
+Stop before:
+
+${stopPoints}
+`;
 }
 
 function selectedSlot(dayReadiness, slot) {
