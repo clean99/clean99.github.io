@@ -4076,8 +4076,16 @@ test('public action checklist centralizes confirmation boundaries', async () => 
     'publish_image_thread',
     'reply',
   ]);
+  assert.deepEqual(checklist.actions.map((item) => item.actionId), [
+    'profile:edit',
+    'profile:publish-pinned-post',
+    'profile:pin-post',
+    'publish:Agent-Skills__zh__strong-thesis',
+    'reply:ai-thread',
+  ]);
   assert.ok(checklist.actions.every((item) => item.status === 'needs_action_time_confirmation'));
   assert.match(markdown, /Profile conversion actions come before publish actions/);
+  assert.match(markdown, /Action id: `publish:Agent-Skills__zh__strong-thesis`/);
   assert.match(markdown, /final public publish click/);
   assert.match(markdown, /final profile save click/);
   assert.match(markdown, /final public Reply click/);

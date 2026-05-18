@@ -100,6 +100,7 @@ function publishActions({ publishConfirmation, manualPublishKits }) {
       .filter((entry) => entry.status === 'ready_for_manual_confirmation')
       .map((entry) => ({
         type: 'publish_image_thread',
+        actionId: `publish:${entry.id}`,
         status: 'needs_action_time_confirmation',
         queueId: entry.id,
         source: entry.path,
@@ -119,6 +120,7 @@ function publishActions({ publishConfirmation, manualPublishKits }) {
       type: publishConfirmation.publishMode === 'thread_fallback'
         ? 'publish_image_thread'
         : 'publish_x_article_and_short_post',
+      actionId: `publish:${publishConfirmation.selected?.id || 'selected'}`,
       status: 'needs_action_time_confirmation',
       queueId: publishConfirmation.selected?.id || '',
       source: 'data/social-growth/publish-confirmation.md',
@@ -142,6 +144,7 @@ function profileActions(profileUpdate) {
   return [
     {
       type: 'edit_profile',
+      actionId: 'profile:edit',
       status: 'needs_action_time_confirmation',
       queueId: '',
       source: 'data/social-growth/profile-update.md',
@@ -154,6 +157,7 @@ function profileActions(profileUpdate) {
     },
     {
       type: 'publish_pinned_post',
+      actionId: 'profile:publish-pinned-post',
       status: 'needs_action_time_confirmation',
       queueId: '',
       source: 'data/social-growth/profile-update.md',
@@ -166,6 +170,7 @@ function profileActions(profileUpdate) {
     },
     {
       type: 'pin_profile_post',
+      actionId: 'profile:pin-post',
       status: 'needs_action_time_confirmation',
       queueId: '',
       source: 'data/social-growth/profile-update.md',
@@ -182,6 +187,7 @@ function profileActions(profileUpdate) {
 function replyActions(engagementPlan) {
   return (engagementPlan?.opportunities || []).map((item) => ({
     type: 'reply',
+    actionId: `reply:${item.id || item.queueId || 'candidate'}`,
     status: 'needs_action_time_confirmation',
     queueId: item.queueId || '',
     source: item.sourcePath || item.id,
@@ -200,6 +206,7 @@ function formatAction(action, index) {
   const confirm = action.confirm.map((item) => `  - ${item}`).join('\n');
   return `### ${index + 1}. ${action.type}
 
+- Action id: \`${action.actionId || action.type}\`
 - Status: ${action.status}
 ${queue}- Source: \`${action.source || 'local state'}\`
 - Stop before: ${action.stopBefore}
