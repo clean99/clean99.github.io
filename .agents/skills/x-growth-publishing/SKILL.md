@@ -30,7 +30,7 @@ For the normal daily loop, start with:
 npm run social:daily -- --limit 5 --package-limit 3 --lang zh
 ```
 
-This creates `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, and writes `data/social-growth/daily-run.md`.
+This creates `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, writes `data/social-growth/daily-run.md`, and writes `data/social-growth/weekly-plan.md` when the ledger exists.
 
 Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate.
 
@@ -41,6 +41,14 @@ npm run social:validate -- --queue data/social-growth/queue.json --format markdo
 ```
 
 Do not publish candidates that fail validation. Fix the candidate first.
+
+Then inspect the week-level execution plan:
+
+```bash
+npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json
+```
+
+Use `data/social-growth/weekly-plan.md` as the day-level schedule. It maps validated candidates to publish slots, metric capture times, and the follower pace required for the `+1000` target.
 
 For single-item control:
 
@@ -113,6 +121,10 @@ For single-item control:
 18. Generate the next optimization decision:
    ```bash
    npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
+   ```
+19. Regenerate the week-level plan after each queue or ledger update:
+   ```bash
+   npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/weekly-plan.md
    ```
 
 Use the daily command for scheduled automation. It is allowed to prepare local artifacts and reports, but it must not publish, reply, like, repost, follow, or upload media without action-time confirmation.

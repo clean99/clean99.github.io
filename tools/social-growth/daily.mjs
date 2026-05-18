@@ -9,6 +9,7 @@ import {
   writeJson,
   writePublishPackage,
 } from './queue.mjs';
+import { buildWeeklyExecutionPlan, writeWeeklyExecutionPlan } from './schedule.mjs';
 import { formatValidationMarkdown, passingQueueItemIds, validateQueue } from './validation.mjs';
 
 export async function runDailyGrowthPlan({
@@ -17,6 +18,7 @@ export async function runDailyGrowthPlan({
   queuePath = 'data/social-growth/queue.json',
   packageOutDir = 'data/social-growth/packages',
   reportPath = 'data/social-growth/daily-run.md',
+  weeklyPlanPath = 'data/social-growth/weekly-plan.md',
   ledgerPath = 'data/social-growth/ledger.json',
   metricsPath = 'data/social-growth/posts.local.json',
   queueOptions = {},
@@ -44,6 +46,14 @@ export async function runDailyGrowthPlan({
   }
 
   const ledger = await readOptionalJson(ledgerPath);
+  const weeklyPlan = ledger ? buildWeeklyExecutionPlan({
+    queue,
+    ledger,
+    now,
+  }) : null;
+  if (weeklyPlan) {
+    await writeWeeklyExecutionPlan(weeklyPlan, weeklyPlanPath);
+  }
   const metricsTemplate = createMetricsTemplateFromQueue(queue, {
     date: generatedAt.slice(0, 10),
   });
@@ -61,6 +71,8 @@ export async function runDailyGrowthPlan({
     metricsTemplate,
     packageItems,
     validation,
+    weeklyPlan,
+    weeklyPlanPath,
   });
 
   await writeText(reportPath, report);
@@ -69,6 +81,7 @@ export async function runDailyGrowthPlan({
     generatedAt,
     queuePath,
     reportPath,
+    weeklyPlanPath: weeklyPlan ? weeklyPlanPath : null,
     queuedItems: queue.items.length,
     packages,
     metricsPath,
@@ -80,6 +93,11 @@ export async function runDailyGrowthPlan({
       failed: validation.failed,
       warnings: validation.warnings,
     },
+    weeklyPlanSummary: weeklyPlan ? {
+      plannedPosts: weeklyPlan.candidates.plannedPosts,
+      missingSlots: weeklyPlan.candidates.missingSlots,
+      remainingFollowers: weeklyPlan.target.remainingFollowers,
+    } : null,
   };
 }
 
@@ -95,6 +113,8 @@ export function formatDailyRunReport({
   metricsTemplate,
   packageItems,
   validation,
+  weeklyPlan,
+  weeklyPlanPath,
 }) {
   const packageLines = packages.length
     ? packages.map((item, index) => `${index + 1}. ${item.id}: ${item.packageDir}`).join('\n')
@@ -115,6 +135,7 @@ Generated at: ${generatedAt}
 - Queue items: ${queue.items.length}
 - Publish packages directory: \`${packageOutDir}\`
 - Metrics template: \`${metricsPath}\`
+- Weekly execution plan: ${weeklyPlan ? `\`${weeklyPlanPath}\`` : 'not generated; ledger missing.'}
 - Published posts waiting for metrics: ${metricsTemplate.posts.length}
 - Package selection: article-diverse first, then fallback variants if needed.
 - Quality gate: ${validation.passed}/${validation.total} passed, ${validation.warnings} warnings.
@@ -139,6 +160,10 @@ ${formatValidationMarkdown(validation)}
 4. After the X Article or thread is public, create the short post from \`${firstPackage}/short-post.txt\`, attach the image, and link to the X Article URL.
 5. Stop before the final short-post publish click and confirm account/content.
 6. Record the public URL with \`npm run social:mark-published\`.
+
+## Weekly Execution Plan
+
+${weeklyPlan ? formatWeeklySummary(weeklyPlan) : `No weekly plan generated because no ledger was found at \`${ledgerPath}\`.`}
 
 ## Metrics Capture
 
@@ -168,6 +193,22 @@ npm run social:snapshot -- --ledger ${ledgerPath} --posts-file ${metricsPath}
 
 ${ledgerSection}
 `;
+}
+
+function formatWeeklySummary(plan) {
+  const warnings = plan.warnings.length
+    ? plan.warnings.map((warning) => `- ${warning}`).join('\n')
+    : '- No schedule warnings.';
+  return [
+    `- Target remaining followers: ${plan.target.remainingFollowers}`,
+    `- Planned publish slots: ${plan.candidates.plannedPosts}`,
+    `- Unfilled slots: ${plan.candidates.missingSlots}`,
+    `- Required daily pace: ${Math.round(plan.target.requiredDailyPace * 10) / 10}`,
+    '',
+    'Warnings:',
+    '',
+    warnings,
+  ].join('\n');
 }
 
 export function draftItems(queue) {

@@ -5,6 +5,11 @@ import { buildDistributionCandidates } from './copy.mjs';
 import { runDailyGrowthPlan } from './daily.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from './recommendations.mjs';
+import {
+  buildWeeklyExecutionPlan,
+  formatWeeklyExecutionPlanMarkdown,
+  writeWeeklyExecutionPlan,
+} from './schedule.mjs';
 import { formatValidationMarkdown, validateQueue } from './validation.mjs';
 import {
   buildPublishQueue,
@@ -108,6 +113,7 @@ if (command === 'articles') {
     queuePath: args.queue || 'data/social-growth/queue.json',
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     reportPath: args.report || 'data/social-growth/daily-run.md',
+    weeklyPlanPath: args.weeklyPlan || 'data/social-growth/weekly-plan.md',
     ledgerPath: args.ledger || 'data/social-growth/ledger.json',
     metricsPath: args.metrics || 'data/social-growth/posts.local.json',
     packageLimit: args.packageLimit || 3,
@@ -119,6 +125,25 @@ if (command === 'articles') {
     },
   });
   console.log(JSON.stringify(result, null, 2));
+} else if (command === 'week') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const plan = buildWeeklyExecutionPlan({
+    queue,
+    ledger,
+    now: args.now ? new Date(args.now) : new Date(),
+    days: args.days || 7,
+    postsPerDay: args.postsPerDay || 3,
+    timezone: args.timezone || 'Asia/Singapore',
+  });
+  if (args.out) {
+    await writeWeeklyExecutionPlan(plan, args.out);
+    console.log(`Wrote weekly execution plan to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(plan, null, 2));
+  } else {
+    console.log(formatWeeklyExecutionPlanMarkdown(plan));
+  }
 } else if (command === 'metrics-template') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const template = createMetricsTemplateFromQueue(queue, {
@@ -227,6 +252,7 @@ function printHelp() {
   npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:daily -- --limit 5 --package-limit 3
+  npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt
   npm run social:parse-x-text -- --kind profile --input data/social-growth/profile.local.txt

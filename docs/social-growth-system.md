@@ -22,6 +22,7 @@ The code can automate safe local work:
 - export a publish package with image, X Article, short post, thread fallback, and checklist files;
 - validate each candidate against the X publishing quality gate before daily packages are exported;
 - run the local daily preparation loop in one command;
+- generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
 - produce `gpt-image-2` image prompts for each candidate;
 - produce an X Article draft before the blog link;
@@ -45,7 +46,8 @@ flowchart LR
   D --> E["X post URL"]
   E --> F["Metrics snapshot"]
   F --> G["Growth report"]
-  G --> H["Next content plan"]
+  G --> H["Weekly execution plan"]
+  H --> I["Next content plan"]
 ```
 
 Core records:
@@ -54,6 +56,7 @@ Core records:
 - `DistributionCandidate`: one article, one X variant, one UTM URL, a Chinese short post, an X Article draft, and an image prompt. The short post does not include the blog URL.
 - `QualityGate`: deterministic checks for raw blog URLs, weak first-screen structure, X Article link placement, image prompt requirements, and low-value follow-up replies.
 - `PublishQueue`: local draft queue of candidates to hand to Chrome.
+- `WeeklyExecutionPlan`: seven-day posting and metrics-capture schedule tied to the follower target.
 - `MetricsSnapshot`: date, follower count, per-post interactions.
 - `GrowthReport`: follower delta, target progress, interaction totals, top posts.
 
@@ -77,6 +80,7 @@ This writes:
 - `data/social-growth/packages/<queue-id>/...`;
 - `data/social-growth/posts.local.json`;
 - `data/social-growth/daily-run.md`.
+- `data/social-growth/weekly-plan.md` when `data/social-growth/ledger.json` exists.
 
 The daily exporter prefers one strong variant per article before exporting extra variants from the same article. This avoids spending a day's slots on three near-duplicate posts.
 It exports only items that pass the local quality gate.
@@ -129,6 +133,14 @@ npm run social:validate -- --queue data/social-growth/queue.json --format markdo
 ```
 
 The validation must pass before a candidate should be published. The gate rejects the original bad pattern that produced the screenshot: a short post with a raw blog URL and no real reason to click.
+
+Generate the week-level operating plan:
+
+```bash
+npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json
+```
+
+This plan maps validated queue candidates to seven days of publish slots, keeps the pace visible, and warns when the queue does not contain enough validated candidates to sustain the 2-4 posts/day target.
 
 After a confirmed browser publish, write the public X post URL back to the queue:
 
@@ -250,27 +262,28 @@ Do not commit private analytics or account history.
 
 1. Generate a queue with `npm run social:queue -- --limit 5 --out data/social-growth/queue.json`.
 2. Run `npm run social:validate -- --queue data/social-growth/queue.json --format markdown`.
-3. Pick 2-4 strong queue items for the day, preferring distinct articles before extra variants.
-4. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
-5. Run `npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>`.
-6. Generate the image from `image-prompt.txt` with `gpt-image-2`.
-7. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
-8. Stop before publishing the X Article or thread and confirm the exact content and account.
-9. Publish only after confirmation.
-10. Use Chrome to prepare the short image-backed X post linking to the X Article.
-11. Stop before publishing the short post and confirm the exact content and account.
-12. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
-13. Stop before each public reply and confirm the exact content and account.
-14. Mark the published URL with `npm run social:mark-published`.
-15. Run `npm run social:metrics-template`.
-16. Use `npm run social:capture-metrics` when visible X text has been captured.
-17. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
-18. Run `npm run social:snapshot`.
-19. Run `npm run social:report -- --format markdown`.
-20. Run `npm run social:recommend -- --format markdown`.
-21. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+3. Run `npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json`.
+4. Pick 2-4 strong queue items for the day from `data/social-growth/weekly-plan.md`.
+5. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
+6. Run `npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>`.
+7. Generate the image from `image-prompt.txt` with `gpt-image-2`.
+8. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
+9. Stop before publishing the X Article or thread and confirm the exact content and account.
+10. Publish only after confirmation.
+11. Use Chrome to prepare the short image-backed X post linking to the X Article.
+12. Stop before publishing the short post and confirm the exact content and account.
+13. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
+14. Stop before each public reply and confirm the exact content and account.
+15. Mark the published URL with `npm run social:mark-published`.
+16. Run `npm run social:metrics-template`.
+17. Use `npm run social:capture-metrics` when visible X text has been captured.
+18. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
+19. Run `npm run social:snapshot`.
+20. Run `npm run social:report -- --format markdown`.
+21. Run `npm run social:recommend -- --format markdown`.
+22. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
-For regular operation, replace steps 1-5 with:
+For regular operation, replace steps 1-6 with:
 
 ```bash
 npm run social:daily -- --limit 5 --package-limit 3 --lang zh

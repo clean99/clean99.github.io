@@ -22,7 +22,13 @@
     {
       "id": 3,
       "prompt": "记录今天 @Clean993 的 follower 和帖子互动，生成一周涨粉 1000 的进度报告。",
-      "expected_output": "更新本地 ledger/snapshot；输出 follower delta、required pace、interaction rate 和 top posts。",
+      "expected_output": "更新本地 ledger/snapshot；输出 follower delta、required pace、interaction rate 和 top posts；必要时重新生成 weekly-plan。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "根据当前队列安排接下来一周每天发什么，目标是一周涨粉1000。",
+      "expected_output": "运行或生成 social:week；只使用通过质量门的候选；输出每日发布槽位、指标采集时间、缺口和 follower pace。",
       "files": []
     }
   ]

@@ -26,6 +26,7 @@ import {
   summarizeGrowthLedger,
 } from '../tools/social-growth/metrics.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from '../tools/social-growth/recommendations.mjs';
+import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
 import { validateQueue, validateQueueItem } from '../tools/social-growth/validation.mjs';
 import {
   buildPublishPackage,
@@ -440,6 +441,7 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
       queuePath: join(outDir, 'queue.json'),
       packageOutDir: join(outDir, 'packages'),
       reportPath: join(outDir, 'daily-run.md'),
+      weeklyPlanPath: join(outDir, 'weekly-plan.md'),
       ledgerPath: join(outDir, 'missing-ledger.json'),
       metricsPath: join(outDir, 'posts.local.json'),
       packageLimit: 2,
@@ -455,6 +457,7 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
     assert.equal(result.metricPosts, 1);
     assert.equal(result.ledgerSummary, null);
     assert.equal(result.validationSummary.status, 'pass');
+    assert.equal(result.weeklyPlanSummary, null);
 
     const queue = JSON.parse(await readFile(join(outDir, 'queue.json'), 'utf8'));
     const metricsTemplate = JSON.parse(await readFile(join(outDir, 'posts.local.json'), 'utf8'));
@@ -467,6 +470,7 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
     assert.equal(metricsTemplate.posts.length, 1);
     assert.equal(metricsTemplate.posts[0].metrics.views, '');
     assert.ok(report.includes('Daily X Growth Run'));
+    assert.ok(report.includes('Weekly execution plan: not generated; ledger missing.'));
     assert.ok(report.includes('Package selection: article-diverse first'));
     assert.ok(report.includes('X Publishing Quality Gate'));
     assert.ok(report.includes('Quality gate: 3/3 passed'));
@@ -474,6 +478,104 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
     assert.ok(report.includes('Metrics Capture'));
     assert.ok(report.includes('social:capture-metrics'));
     assert.ok(!shortPost.includes('https://clean99.github.io'));
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('weekly execution plan schedules only validated draft candidates', () => {
+  const queue = buildPublishQueue([
+    {
+      title: '第一篇',
+      excerpt: '第一篇文章解释一个可复用的工程判断框架。',
+      slug: 'First-Post',
+      lang: 'zh',
+      tags: ['AI'],
+      url: 'https://clean99.github.io/zh/2026/05/18/First-Post/',
+    },
+    {
+      title: '第二篇',
+      excerpt: '第二篇文章解释一个可复用的工程判断框架。',
+      slug: 'Second-Post',
+      lang: 'zh',
+      tags: ['Software Engineering'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Second-Post/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 2,
+  });
+  queue.items[1] = {
+    ...queue.items[1],
+    shortPost: '这篇文章不错 https://clean99.github.io/bad/',
+  };
+  const ledger = createLedger({
+    startDate: '2026-05-18',
+    baselineFollowers: 30,
+    followersIn7Days: 1000,
+  });
+
+  const plan = buildWeeklyExecutionPlan({
+    queue,
+    ledger,
+    now: '2026-05-18T00:00:00.000Z',
+    postsPerDay: 2,
+  });
+  const scheduledIds = plan.days.flatMap((day) => day.publishSlots.map((slot) => slot.item.id));
+
+  assert.equal(plan.validationSummary.failed, 1);
+  assert.ok(!scheduledIds.includes(queue.items[1].id));
+  assert.equal(plan.days.length, 7);
+  assert.equal(plan.candidates.missingSlots, 9);
+  assert.match(formatWeeklyExecutionPlanMarkdown(plan), /Weekly X Growth Execution Plan/);
+  assert.match(formatWeeklyExecutionPlanMarkdown(plan), /Need 9 more validated candidates/);
+});
+
+test('daily growth run writes a weekly execution plan when a ledger exists', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-weekly-daily-'));
+  try {
+    const ledgerPath = join(outDir, 'ledger.json');
+    const weeklyPlanPath = join(outDir, 'weekly-plan.md');
+    await writeJson(ledgerPath, createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+
+    const result = await runDailyGrowthPlan({
+      articles: [
+        {
+          title: '有用的系统',
+          excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+          slug: 'Useful-Systems',
+          lang: 'zh',
+          tags: ['AI', 'Software Engineering'],
+          url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+        },
+      ],
+      now: '2026-05-18T00:00:00.000Z',
+      queuePath: join(outDir, 'queue.json'),
+      packageOutDir: join(outDir, 'packages'),
+      reportPath: join(outDir, 'daily-run.md'),
+      weeklyPlanPath,
+      ledgerPath,
+      metricsPath: join(outDir, 'posts.local.json'),
+      packageLimit: 1,
+      queueOptions: {
+        limit: 1,
+        lang: 'zh',
+        campaign: 'test',
+      },
+    });
+    const report = await readFile(join(outDir, 'daily-run.md'), 'utf8');
+    const weeklyPlan = await readFile(weeklyPlanPath, 'utf8');
+
+    assert.equal(result.weeklyPlanPath, weeklyPlanPath);
+    assert.equal(result.weeklyPlanSummary.plannedPosts, 3);
+    assert.ok(report.includes('Weekly execution plan:'));
+    assert.ok(weeklyPlan.includes('Weekly X Growth Execution Plan'));
+    assert.ok(weeklyPlan.includes('Unfilled slots: 18'));
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

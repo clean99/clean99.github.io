@@ -24,6 +24,7 @@
     "social:report": "node tools/social-growth/cli.mjs report",
     "social:snapshot": "node tools/social-growth/cli.mjs snapshot",
     "social:validate": "node tools/social-growth/cli.mjs validate",
+    "social:week": "node tools/social-growth/cli.mjs week",
     "test": "node --test test/social-growth.test.mjs"
   },
   "hexo": {
