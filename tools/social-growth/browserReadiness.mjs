@@ -42,6 +42,7 @@ export function buildBrowserReadiness({
     mediaUpload: normalizeSignal(mediaUpload),
   };
   const publishMode = xPrep?.publishMode || 'x_article';
+  const baoyuHandoffReady = xPrep?.status === 'ready' && xPrep?.skill?.name === 'baoyu-post-to-x';
   const blockers = [];
 
   if (preflight?.status && preflight.status !== 'ready') {
@@ -56,13 +57,13 @@ export function buildBrowserReadiness({
   if (signals.chromeRunning === 'no') {
     blockers.push('Google Chrome is not running.');
   }
-  if (signals.extensionInstalled === 'no') {
+  if (signals.extensionInstalled === 'no' && !baoyuHandoffReady) {
     blockers.push('Codex Chrome Extension is not installed or enabled.');
   }
-  if (signals.nativeHost === 'no') {
+  if (signals.nativeHost === 'no' && !baoyuHandoffReady) {
     blockers.push('Codex Chrome native host manifest is missing or invalid.');
   }
-  if (signals.extensionPipe === 'closed') {
+  if (signals.extensionPipe === 'closed' && !baoyuHandoffReady) {
     blockers.push('Codex Chrome Extension native pipe is closed.');
   }
   if (signals.loginState === 'logged_out') {

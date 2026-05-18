@@ -1906,13 +1906,13 @@ test('scheduled growth loop reads browser probe file into the run status', async
     const readinessReport = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
     const persistedProbe = await readBrowserProbe(browserProbePath);
 
-    assert.equal(result.status, 'needs_chrome_extension_reconnect');
-    assert.equal(result.automation.status, 'needs_chrome_extension_reconnect');
-    assert.equal(result.automation.browserReadiness.status, 'needs_chrome_extension_reconnect');
-    assert.match(result.automation.blockers.join('\n'), /native pipe/);
+    assert.equal(result.status, 'needs_media_upload_permission');
+    assert.equal(result.automation.status, 'needs_media_upload_permission');
+    assert.equal(result.automation.browserReadiness.status, 'needs_media_upload_permission');
+    assert.doesNotMatch(result.automation.blockers.join('\n'), /native pipe/);
     assert.match(result.automation.blockers.join('\n'), /Media upload/);
-    assert.match(scheduledReport, /Status: needs_chrome_extension_reconnect/);
-    assert.match(scheduledReport, /Confirm opening a fresh Chrome window/);
+    assert.match(scheduledReport, /Status: needs_media_upload_permission/);
+    assert.doesNotMatch(scheduledReport, /Confirm opening a fresh Chrome window/);
     assert.match(readinessReport, /Extension pipe: closed/);
     assert.match(readinessReport, /Media upload is blocked/);
     assert.equal(result.paths.browserProbe, browserProbePath);
@@ -2545,7 +2545,7 @@ test('browser readiness surfaces missing bun runtime as an actionable blocker', 
   assert.match(markdown, /X publish prep blocker: Bun runtime is unavailable/);
 });
 
-test('browser readiness records Chrome pipe and media upload blockers', async () => {
+test('browser readiness ignores closed extension pipe when baoyu handoff is ready', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-browser-readiness-'));
   try {
     const queue = buildPublishQueue([
@@ -2605,15 +2605,52 @@ test('browser readiness records Chrome pipe and media upload blockers', async ()
     const writtenPath = await writeBrowserReadiness(readiness, join(outDir, 'browser-readiness.md'));
     const persisted = await readFile(writtenPath, 'utf8');
 
-    assert.equal(readiness.status, 'needs_chrome_extension_reconnect');
-    assert.ok(readiness.blockers.some((item) => item.includes('native pipe')));
+    assert.equal(readiness.status, 'needs_media_upload_permission');
+    assert.ok(!readiness.blockers.some((item) => item.includes('native pipe')));
     assert.ok(readiness.blockers.some((item) => item.includes('Media upload')));
-    assert.match(markdown, /Confirm opening a new Chrome window/);
+    assert.doesNotMatch(markdown, /Confirm opening a new Chrome window/);
     assert.match(markdown, /Media upload is blocked/);
     assert.match(persisted, /Readiness only/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('browser readiness requires extension pipe when no baoyu handoff is available', () => {
+  const readiness = buildBrowserReadiness({
+    preflight: {
+      generatedAt: '2026-05-18T00:00:00.000Z',
+      status: 'ready',
+      selected: {
+        id: 'queue-id',
+        articleSlug: 'article-slug',
+      },
+      image: {
+        outputPath: 'output/imagegen/queue-id.png',
+        ready: true,
+      },
+    },
+    xPrep: {
+      status: 'blocked',
+      publishMode: 'thread_fallback',
+      blockers: [],
+      skill: {
+        name: 'baoyu-post-to-x',
+      },
+    },
+    expectedAccount: '@Clean993',
+    observedAccount: '@Clean993',
+    chromeRunning: 'yes',
+    extensionInstalled: 'yes',
+    nativeHost: 'yes',
+    extensionPipe: 'closed',
+    articleAvailable: 'no',
+    mediaUpload: 'unknown',
+  });
+
+  assert.equal(readiness.status, 'blocked_local_prep');
+  assert.ok(readiness.blockers.some((item) => item.includes('X publish prep is not ready')));
+  assert.ok(readiness.blockers.some((item) => item.includes('native pipe')));
 });
 
 test('browser readiness asks for thread fallback when X Article editor is unavailable', async () => {
