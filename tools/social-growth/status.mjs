@@ -104,6 +104,7 @@ export function formatGrowthStatusMarkdown(status) {
   const summary = status.summary;
   const preflight = status.preflight;
   const browserReadiness = status.browserReadiness || summarizeBrowserReadiness(null);
+  const loginRecovery = loginRecoveryMarkdown(status, browserReadiness);
   const blockers = preflight?.blockers?.length
     ? preflight.blockers.map((blocker) => `- ${blocker}`).join('\n')
     : '- No preflight blockers.';
@@ -175,6 +176,8 @@ ${blockers}
 - Blockers: ${browserReadiness.blockers.length}
 
 ${browserBlockers}
+
+${loginRecovery}
 
 ## Profile Conversion
 
@@ -347,6 +350,30 @@ function summarizeBrowserReadiness(browserReadiness) {
     status: browserReadiness?.status || 'not_checked',
     blockers: [...(browserReadiness?.blockers || [])],
   };
+}
+
+function loginRecoveryMarkdown(status, browserReadiness) {
+  if (browserReadiness.status !== 'needs_x_login') return '';
+  const profileArg = status.xProfileDir ? ` --profile ${shellQuote(status.xProfileDir)}` : '';
+  const publishArgs = publishModeArgs(status);
+
+  return `## X Login Recovery
+
+Run this to open or attach the publishing Chrome profile at the X compose/login page. It only probes browser state: no text input, no media upload, no publish click.
+
+\`\`\`bash
+node tools/social-growth/x-browser-cdp.mjs --probe --json --probe-out data/social-growth/browser-probe.local.json --account '@Clean993'${profileArg}
+\`\`\`
+
+After logging in as @Clean993 in that Chrome window, rerun:
+
+\`\`\`bash
+node tools/social-growth/x-browser-cdp.mjs --probe --json --probe-out data/social-growth/browser-probe.local.json --account '@Clean993'${profileArg}
+node tools/social-growth/cli.mjs browser-readiness --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/browser-readiness.md
+node tools/social-growth/cli.mjs status --day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/status.md
+\`\`\`
+
+`;
 }
 
 function blockingBrowserStatus(browserReadiness) {

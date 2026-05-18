@@ -3539,6 +3539,9 @@ test('status CLI reads stored browser probe before reporting readiness', async (
 
     assert.equal(result.status, 0, result.stderr || result.stdout);
     assert.match(markdown, /Status: needs_x_login/);
+    assert.match(markdown, /X Login Recovery/);
+    assert.match(markdown, /x-browser-cdp\.mjs --probe --json --probe-out data\/social-growth\/browser-probe\.local\.json --account '@Clean993'/);
+    assert.match(markdown, /cli\.mjs browser-readiness --day 1 --slot 1 --publishMode thread_fallback/);
     assert.match(markdown, /The Chrome profile used for publishing is not logged into X/);
     assert.doesNotMatch(markdown, /Status: ready_for_browser_confirmation/);
   } finally {
