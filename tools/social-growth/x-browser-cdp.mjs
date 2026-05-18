@@ -23,6 +23,10 @@ const CHROME_CANDIDATES = [
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) printUsage(0);
+  if (options.probe) {
+    await probeBrowser(options);
+    return;
+  }
   if (!options.text && !options.images.length) {
     throw new Error('Provide text or at least one image.');
   }
@@ -38,26 +42,10 @@ async function preparePost({
   profileDir = defaultProfileDir(),
   chromePath = '',
 }) {
-  await mkdir(profileDir, { recursive: true });
-  const existingPort = await findExistingDebugPort(profileDir);
-  const port = existingPort || await freePort();
-  let chrome = null;
-
-  if (!existingPort) {
-    chrome = launchChrome({
-      chromePath: chromePath || findChromePath(),
-      profileDir,
-      port,
-      url: X_COMPOSE_URL,
-    });
-  }
-
-  const target = await waitForPageTarget(port, timeoutMs);
-  const cdp = await CdpClient.connect(target.webSocketDebuggerUrl);
+  const session = await connectCompose({ timeoutMs, profileDir, chromePath });
+  const { cdp, chrome } = session;
 
   try {
-    await cdp.send('Runtime.enable');
-    await cdp.send('DOM.enable');
     await waitForEditor(cdp, timeoutMs);
 
     if (text) {
@@ -83,6 +71,103 @@ async function preparePost({
   } finally {
     cdp.close();
     if (chrome) chrome.unref();
+  }
+}
+
+async function probeBrowser({
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  profileDir = defaultProfileDir(),
+  chromePath = '',
+  json = false,
+}) {
+  const session = await connectCompose({ timeoutMs, profileDir, chromePath });
+  const { cdp, chrome } = session;
+
+  try {
+    const editorReady = await waitForEditor(cdp, Math.min(timeoutMs, 15_000), { throwOnTimeout: false });
+    const fileInputReady = await hasFileInput(cdp);
+    const loginPromptVisible = await hasLoginPrompt(cdp);
+    const account = await detectAccount(cdp);
+    const currentUrl = await cdp.evaluate(`window.location.href`);
+    const blockers = [];
+
+    if (!editorReady) {
+      blockers.push(loginPromptVisible
+        ? 'X login is required before the compose editor is available.'
+        : 'X compose editor was not detected.');
+    }
+    if (editorReady && !fileInputReady) {
+      blockers.push('X image file input was not detected.');
+    }
+
+    const result = {
+      status: blockers.length ? 'blocked' : 'ready',
+      profileDir: session.profileDir,
+      currentUrl,
+      attachedToExistingChrome: Boolean(session.existingPort),
+      editorReady,
+      fileInputReady,
+      loginPromptVisible,
+      observedAccount: account,
+      publicActions: {
+        typedText: false,
+        uploadedMedia: false,
+        clickedSubmit: false,
+      },
+      blockers,
+    };
+
+    if (json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      printProbeResult(result);
+    }
+  } finally {
+    cdp.close();
+    if (chrome) chrome.unref();
+  }
+}
+
+async function connectCompose({
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  profileDir = defaultProfileDir(),
+  chromePath = '',
+}) {
+  const resolvedProfileDir = profileDir || defaultProfileDir();
+  await mkdir(resolvedProfileDir, { recursive: true });
+  const existingPort = await findExistingDebugPort(resolvedProfileDir);
+  const port = existingPort || await freePort();
+  let chrome = null;
+
+  if (!existingPort) {
+    chrome = launchChrome({
+      chromePath: chromePath || findChromePath(),
+      profileDir: resolvedProfileDir,
+      port,
+      url: X_COMPOSE_URL,
+    });
+  }
+
+  const target = await waitForPageTarget(port, timeoutMs);
+  const cdp = await CdpClient.connect(target.webSocketDebuggerUrl);
+
+  try {
+    await cdp.send('Runtime.enable');
+    await cdp.send('DOM.enable');
+    await cdp.send('Page.enable');
+    await ensureComposePage(cdp, timeoutMs);
+    return {
+      cdp,
+      chrome,
+      port,
+      existingPort,
+      profileDir: resolvedProfileDir,
+      target,
+    };
+  } catch (error) {
+    cdp.close();
+    if (chrome) chrome.unref();
+    throw error;
   }
 }
 
@@ -117,13 +202,65 @@ async function uploadImage(cdp, imagePath) {
   throw new Error('X image file input was not found.');
 }
 
-async function waitForEditor(cdp, timeoutMs) {
+async function waitForEditor(cdp, timeoutMs, { throwOnTimeout = true } = {}) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
-    if (await cdp.evaluateBoolean(`!!document.querySelector('[data-testid="tweetTextarea_0"]')`)) return;
+    if (await cdp.evaluateBoolean(`!!document.querySelector('[data-testid="tweetTextarea_0"]')`)) return true;
     await sleep(1000);
   }
+  if (!throwOnTimeout) return false;
   throw new Error('Timed out waiting for X post editor. Log into X in this Chrome profile, then rerun.');
+}
+
+async function ensureComposePage(cdp, timeoutMs) {
+  const href = await cdp.evaluate(`window.location.href`).catch(() => '');
+  if (!String(href).includes('x.com/compose/post')) {
+    await cdp.send('Page.navigate', { url: X_COMPOSE_URL });
+  }
+  await waitForDocument(cdp, Math.min(timeoutMs, 30_000));
+}
+
+async function waitForDocument(cdp, timeoutMs) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const readyState = await cdp.evaluate(`document.readyState`).catch(() => '');
+    if (readyState === 'interactive' || readyState === 'complete') return;
+    await sleep(500);
+  }
+}
+
+async function hasFileInput(cdp) {
+  return await cdp.evaluateBoolean(`
+    !!document.querySelector('input[data-testid="fileInput"], input[type="file"][accept*="image"], input[type="file"]')
+  `);
+}
+
+async function hasLoginPrompt(cdp) {
+  return await cdp.evaluateBoolean(`
+    !document.querySelector('[data-testid="tweetTextarea_0"]')
+      && !!document.querySelector('[data-testid="loginButton"], a[href="/login"], input[name="text"], input[autocomplete="username"]')
+  `);
+}
+
+async function detectAccount(cdp) {
+  const value = await cdp.evaluate(`
+    (() => {
+      const reserved = new Set([
+        'home', 'compose', 'explore', 'notifications', 'messages', 'settings',
+        'i', 'login', 'logout', 'search', 'jobs'
+      ]);
+      const accountButton = document.querySelector('[data-testid="SideNav_AccountSwitcher_Button"]');
+      const buttonText = accountButton?.innerText || '';
+      const handle = buttonText.match(/@[A-Za-z0-9_]{1,15}/)?.[0];
+      if (handle) return handle;
+      const profileHref = [...document.querySelectorAll('a[href^="/"]')]
+        .map((link) => link.getAttribute('href') || '')
+        .map((href) => href.split('?')[0].replace(/^\\//, ''))
+        .find((slug) => /^[A-Za-z0-9_]{1,15}$/.test(slug) && !reserved.has(slug));
+      return profileHref ? \`@\${profileHref}\` : '';
+    })()
+  `).catch(() => '');
+  return String(value || '').trim();
 }
 
 async function waitForImageCount(cdp, expectedCount) {
@@ -280,6 +417,8 @@ function parseArgs(args) {
     text: '',
     images: [],
     submit: false,
+    probe: false,
+    json: false,
     timeoutMs: DEFAULT_TIMEOUT_MS,
     profileDir: '',
     chromePath: '',
@@ -291,6 +430,10 @@ function parseArgs(args) {
     const arg = args[index];
     if (arg === '--help' || arg === '-h') {
       options.help = true;
+    } else if (arg === '--probe') {
+      options.probe = true;
+    } else if (arg === '--json') {
+      options.json = true;
     } else if (arg === '--image' && args[index + 1]) {
       options.images.push(args[++index]);
     } else if (arg === '--submit') {
@@ -312,6 +455,23 @@ function parseArgs(args) {
   return options;
 }
 
+function printProbeResult(result) {
+  console.log(`X Browser Probe
+
+Status: ${result.status}
+Profile: ${result.profileDir}
+Current URL: ${result.currentUrl}
+Attached to existing Chrome: ${result.attachedToExistingChrome ? 'yes' : 'no'}
+Editor ready: ${result.editorReady ? 'yes' : 'no'}
+Image file input ready: ${result.fileInputReady ? 'yes' : 'no'}
+Observed account: ${result.observedAccount || 'unknown'}
+
+Public actions: no text typed, no media uploaded, no submit clicked.
+
+Blockers:
+${result.blockers.length ? result.blockers.map((blocker) => `- ${blocker}`).join('\n') : '- None'}`);
+}
+
 function printUsage(exitCode = 0) {
   console.log(`Prepare an X post in Chrome through CDP.
 
@@ -319,6 +479,8 @@ Usage:
   node tools/social-growth/x-browser-cdp.mjs [options] [text]
 
 Options:
+  --probe              Check Chrome/X compose readiness without typing or uploading
+  --json               Print probe result as JSON
   --image <path>       Add image through file input; repeat for multiple images
   --profile <dir>      Chrome profile directory
   --chrome-path <path> Chrome executable path

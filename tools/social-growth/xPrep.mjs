@@ -84,6 +84,7 @@ export async function buildXPublishPrep(preflight, {
       profileDir,
     },
     commands: {
+      probeBrowser: `${browserRuntime.command} ${shellQuote(scripts.regularPost)} --probe --json${profileArg}`,
       prepareArticle: resolvedPublishMode === 'x_article'
         ? `${articleCommand} ${shellQuote(scripts.article)} ${shellQuote(files.xArticle)} --cover ${shellQuote(files.image)}${profileArg}`
         : '# X Article is unavailable for this account. Use the thread fallback command below.',
@@ -141,6 +142,14 @@ Status: ${prep.status}
 ## Local Blockers
 
 ${blockers}
+
+## Probe Browser Without Public Actions
+
+Run this before any publish handoff when login/editor/media-upload state is unknown. It opens or attaches Chrome, checks X compose readiness, and does not type text, upload media, or click a public button.
+
+\`\`\`bash
+${prep.commands.probeBrowser}
+\`\`\`
 
 ## Prepare X Article
 

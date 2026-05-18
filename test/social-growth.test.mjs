@@ -2373,10 +2373,14 @@ test('x publish prep bridges selected package to baoyu-post-to-x commands', asyn
     assert.match(prep.commands.prepareArticle, /x-article\.ts/);
     assert.match(prep.commands.prepareArticle, /--cover/);
     assert.match(prep.commands.prepareArticle, /--profile '\/tmp\/x-profile'/);
+    assert.match(prep.commands.probeBrowser, /x-browser-cdp\.mjs'/);
+    assert.match(prep.commands.probeBrowser, /--probe --json/);
+    assert.match(prep.commands.probeBrowser, /--profile '\/tmp\/x-profile'/);
     assert.match(prep.commands.prepareShortPost, /x-browser-cdp\.mjs/);
     assert.match(prep.commands.prepareShortPost, /--image/);
     assert.match(prep.commands.prepareShortPost, /--profile '\/tmp\/x-profile'/);
     assert.match(markdown, /X Browser Handoff/);
+    assert.match(markdown, /Probe Browser Without Public Actions/);
     assert.match(markdown, /Chrome profile: `\/tmp\/x-profile`/);
     assert.match(markdown, /Stop before the final public post click/);
     assert.match(persisted, /ARTICLE_URL='https:\/\/x\.com\/Clean993\/articles\/123'/);
@@ -2435,6 +2439,8 @@ test('x publish prep can fall back to an image-backed thread when X Article is u
     assert.equal(prep.publishMode, 'thread_fallback');
     assert.equal(prep.blockers.length, 0);
     assert.match(prep.commands.prepareArticle, /X Article is unavailable/);
+    assert.match(prep.commands.probeBrowser, /x-browser-cdp\.mjs'/);
+    assert.match(prep.commands.probeBrowser, /--probe --json/);
     assert.match(prep.commands.prepareShortPost, /x-browser-cdp\.mjs/);
     assert.match(prep.commands.prepareShortPost, /--image/);
     assert.match(prep.commands.prepareShortPost, /--profile '\/tmp\/x-profile'/);
@@ -2514,6 +2520,8 @@ test('project x browser cdp handoff exposes a non-publishing help command', () =
 
   assert.equal(result.status, 0);
   assert.match(result.stdout, /Prepare an X post in Chrome through CDP/);
+  assert.match(result.stdout, /--probe/);
+  assert.match(result.stdout, /--json/);
   assert.match(result.stdout, /stops before final publish/);
 });
 
