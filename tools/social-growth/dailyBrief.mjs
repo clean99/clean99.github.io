@@ -31,6 +31,7 @@ export async function buildDailyExecutionBrief({
   xProfileDir,
   publishMode,
   browserReadiness = null,
+  engagementLimit = 5,
   env = process.env,
 } = {}) {
   const generatedAt = toIsoString(now);
@@ -51,13 +52,13 @@ export async function buildDailyExecutionBrief({
   const engagementSearch = buildEngagementSearchPlan({
     queue,
     now,
-    limit: 8,
+    limit: engagementLimit,
   });
   const engagementPlan = buildEngagementPlan({
     queue,
     opportunityTexts,
     now,
-    limit: 5,
+    limit: engagementLimit,
   });
   const metricsTemplate = createMetricsTemplateFromQueue(queue, {
     date: generatedAt.slice(0, 10),

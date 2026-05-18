@@ -277,6 +277,7 @@ export async function runSafeAutomationCycle({
     xProfileDir,
     publishMode,
     browserReadiness,
+    engagementLimit,
     env,
   });
   await writeDailyExecutionBrief(dailyBrief, dailyBriefPath);

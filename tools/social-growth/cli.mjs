@@ -438,6 +438,7 @@ if (command === 'articles') {
     xBunCommand: args.xBunCommand,
     xProfileDir: args.xProfileDir || args.profileDir,
     publishMode: args.publishMode || args.articleMode,
+    engagementLimit: args.engagementLimit || args.limit || 5,
     env: process.env,
   });
   if (args.out) {

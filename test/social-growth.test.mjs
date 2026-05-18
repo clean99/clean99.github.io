@@ -1297,6 +1297,7 @@ test('daily execution brief combines publish, engagement, metrics, and profile a
     assert.equal(brief.status, 'ready_to_publish');
     assert.equal(brief.dayReadiness.readySlots, 1);
     assert.equal(brief.engagementSearch.status, 'ready_for_read_only_search');
+    assert.ok(brief.engagementSearch.searchCount <= 5);
     assert.equal(brief.engagementPlan.status, 'needs_opportunity_capture');
     assert.equal(brief.metricsReadiness.totalPosts, 0);
     assert.equal(brief.funnel.status, 'needs_published_posts');
@@ -1305,6 +1306,81 @@ test('daily execution brief combines publish, engagement, metrics, and profile a
     assert.match(markdown, /Conversion Funnel/);
     assert.match(markdown, /Action Order/);
     assert.match(persisted, /metrics-cycle/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('daily execution brief keeps engagement search and reply limits aligned', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-brief-engagement-limit-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+      {
+        title: 'Browser-Grade Tabs',
+        excerpt: 'Tab system needs browser-grade ownership, runtime, and isolation boundaries.',
+        slug: 'Workspace-v2-Tab-System-Browser-Grade-Tabs',
+        lang: 'zh',
+        tags: ['Frontend'],
+        url: 'https://clean99.github.io/zh/browser-grade-tabs/',
+      },
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 9,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    const imageDir = join(outDir, 'images');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+
+    const brief = await buildDailyExecutionBrief({
+      queue,
+      ledger,
+      opportunityTexts: Array.from({ length: 5 }, (_, index) => ({
+        id: `performance-thread-${index + 1}`,
+        text: [
+          `https://x.com/example/status/${index + 1}`,
+          '最近做前端性能优化，FMP、render、加载链路和指标口径全都在打架。',
+          '如果只看一次首屏，很容易漏掉 tab 切回、后台任务抢主线程这些真实路径。',
+        ].join('\n'),
+      })),
+      day: 1,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      xSkillDir: skillDir,
+      xBunCommand: 'bun',
+      publishMode: 'thread_fallback',
+      engagementLimit: 3,
+      env: {},
+    });
+    const markdown = formatDailyExecutionBriefMarkdown(brief);
+
+    assert.equal(brief.engagementSearch.searchCount, 3);
+    assert.equal(brief.engagementPlan.selectedCount, 3);
+    assert.match(markdown, /Search queries: 3/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
