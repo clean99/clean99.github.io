@@ -53,9 +53,54 @@ Current blocker: the wrapper requires `npx`, which is absent in this environment
 
 Why it is useful here: it directly targets the failure mode behind AI-sounding X copy: inflated words, fake importance, loose sentences, and filler. For Chinese X copy, use it before `humanizer-zh` so the final voice stays local and platform-native.
 
+### `social-media`
+
+- Source: `EpicenterHQ/epicenter`, path `.agents/skills/social-media`
+- Local path: `.agents/skills/social-media`
+- Use: platform-native X brevity, one idea per post, no hype language, no hashtags by default, no generic CTA, and short thread pacing.
+- Boundary: writing reference only. It must not replace the local browser confirmation boundary or queue/package format.
+
+Why it is useful here: it keeps X copy from turning into a compressed blog abstract and directly addresses the current "looks like AI" failure mode.
+
+### `writing-voice`
+
+- Source: `EpicenterHQ/epicenter`, path `.agents/skills/writing-voice`
+- Local path: `.agents/skills/writing-voice`
+- Use: remove press-release tone, stilted AI phrasing, over-structured sections, vague superlatives, and fake specificity.
+- Boundary: prose cleanup only. For final Chinese X copy, `humanizer-zh` remains the stricter pass.
+
+Why it is useful here: it names and removes the exact patterns that make technically correct X copy feel generated.
+
+### `notebook-explanation`
+
+- Source: `EpicenterHQ/epicenter`, path `.agents/skills/notebook-explanation`
+- Local path: `.agents/skills/notebook-explanation`
+- Use: technical explanation structure used by `writing-voice` for mechanisms, flows, and durable rules.
+- Boundary: explanation guidance only. It does not publish, browse, or perform account actions.
+
+Why it is useful here: it gives the writing chain a concrete mechanism-first format instead of letting posts become slogans.
+
+### `good-prose`
+
+- Source: `ahgraber/skills`, path `skills/good-prose`
+- Local path: `.agents/skills/good-prose`
+- Use: final prose audit for point-first writing, concrete verbs, AI-artifact removal, and tighter endings.
+- Boundary: prose cleanup only. It cannot publish, schedule, scrape, call APIs, or perform account actions.
+
+Why it is useful here: it catches significance inflation, negative parallelism, forced rule-of-three lists, and generic optimistic closes before `humanizer-zh`.
+
+### `x-article-editor`
+
+- Source: `sundial-org/awesome-openclaw-skills`, path `skills/x-article-editor`
+- Local path: `.agents/skills/x-article-editor`
+- Use: audit X Article title, hook, skimmability, proof, visual cadence, and close before applying a copy override.
+- Boundary: advisory only. Its final copy is not publishable until it passes `x-technical-sharing`, `humanizer-zh`, and the local quality gate.
+
+Why it is useful here: it gives X Article packaging a stronger review frame without introducing any X API or third-party publishing path.
+
 ## Installed Globally
 
-These skills are installed under `$HOME/.codex/skills/` and are available as advisory layers for this project. They are not copied into `.agents/skills/` because the global install is already active in Codex.
+These skills are installed under `$HOME/.codex/skills/` and are available as advisory layers for this project. Some of them are now also copied into `.agents/skills/` above so the project keeps the workflow after skill reload.
 
 ### `x-twitter-growth`
 
@@ -75,7 +120,7 @@ Why it is useful here: it reinforces the measurement loop: impressions/views are
 
 ### `writing-voice`
 
-- Local path: `$HOME/.codex/skills/writing-voice`
+- Local paths: `.agents/skills/writing-voice` and `$HOME/.codex/skills/writing-voice`
 - Use: remove press-release tone, stilted AI phrasing, over-structured sections, vague superlatives, and fake specificity.
 - Boundary: English-oriented voice reference. For final Chinese X copy, `humanizer-zh` remains the stricter pass.
 
@@ -83,7 +128,7 @@ Why it is useful here: it names the exact failure mode the user flagged: the pos
 
 ### `social-media`
 
-- Local path: `$HOME/.codex/skills/social-media`
+- Local paths: `.agents/skills/social-media` and `$HOME/.codex/skills/social-media`
 - Use: platform-native X brevity, one idea per post, no hype language, no hashtags by default, no generic CTA, and short thread pacing.
 - Boundary: writing reference only. It must not replace the local browser confirmation boundary or queue/package format.
 
@@ -100,7 +145,7 @@ Why it is useful here: it broadens the local system beyond one-off posts. It giv
 
 ### `x-article-editor`
 
-- Local path: `$HOME/.codex/skills/x-article-editor`
+- Local paths: `.agents/skills/x-article-editor` and `$HOME/.codex/skills/x-article-editor`
 - Use: audit X Article title, opening, skimmability, argument flow, and cover-image concept before applying a copy override.
 - Boundary: advisory only. Its final copy is not publishable until it passes `x-technical-sharing`, `humanizer-zh`, and the local quality gate.
 
@@ -182,7 +227,7 @@ Why it is useful here: this project is becoming skill-driven. A quality reviewer
 4. `social-writer` audits hook shape, thread pacing, and AI-writing patterns.
 5. `twitter-algorithm-optimizer` audits algorithmic reach hypotheses.
 6. `social-media-analyzer` helps interpret exported metrics after publication.
-7. `writing-clearly-and-concisely`, `writing-voice`, `de-ai-ify`, and `humanizer-zh` remove stiff phrasing and template residue.
+7. `writing-clearly-and-concisely`, `writing-voice`, `social-media`, `good-prose`, `de-ai-ify`, and `humanizer-zh` remove stiff phrasing, platform-mismatched copy, and template residue.
 8. `agent-browser` / `playwright` may help only with browser diagnostics after their CLIs are available.
 9. `skill-judge` is used only when changing the skill system itself.
 10. Local quality gate, image readiness, browser readiness, public-action checklist, and action-time confirmation decide whether the package is eligible.
@@ -196,5 +241,8 @@ Why it is useful here: this project is becoming skill-driven. A quality reviewer
 - `agent-browser`: installed skill contains only `SKILL.md`. It asks for restricted Bash commands (`agent-browser:*`, `npx agent-browser:*`) and points to a separate CLI install. No bundled scripts, symlinks, lifecycle hooks, or secret reads were present in the installed skill directory.
 - `playwright`: installed skill includes one wrapper script, `scripts/playwright_cli.sh`. The wrapper exits when `npx` is missing, then runs `npx --yes --package @playwright/cli playwright-cli "$@"`; no secret reads, config writes, symlinks, lifecycle hooks, or arbitrary project writes were found.
 - `writing-clearly-and-concisely`: pure Markdown/reference skill. No scripts, symlinks, hooks, lifecycle files, or public-action tools were present in the installed project directory.
+- `writing-voice`, `social-media`, and `notebook-explanation`: pure Markdown/reference project skills from `EpicenterHQ/epicenter`. No scripts, symlinks, hooks, lifecycle files, or public-action tools were present in the installed project directories.
+- `good-prose`: pure Markdown/reference project skill from `ahgraber/skills` with two local reference files. No scripts, symlinks, hooks, lifecycle files, or public-action tools were present in the installed project directory.
+- `x-article-editor`: Markdown/reference project skill from `sundial-org/awesome-openclaw-skills` with checklist/example references. No scripts, symlinks, hooks, lifecycle files, or public-action tools were present in the installed project directory.
 - `skill-judge`: global instruction-only skill with `README.md` and `SKILL.md`. No scripts, symlinks, hooks, lifecycle files, or public-action tools were present in the installed global directory.
 - `uv` is not installed, so the `skill-scanner` automated scanner could not be run. This note records the manual fallback audit.
