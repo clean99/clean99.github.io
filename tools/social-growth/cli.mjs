@@ -164,6 +164,7 @@ if (command === 'articles') {
     ledger,
     now: args.now ? new Date(args.now) : new Date(),
     limit: args.limit || 3,
+    selectedId: args.selectedId || args.id,
   });
   if (args.out) {
     await writeGrowthExperimentPlan(plan, args.out);

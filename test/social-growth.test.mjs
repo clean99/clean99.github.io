@@ -468,6 +468,7 @@ test('growth experiment plan turns the algorithm lens into measurable next exper
       ledger,
       now: '2026-05-18T00:00:00.000Z',
       limit: 2,
+      selectedId: queue.items[1].id,
     });
     const markdown = formatGrowthExperimentPlanMarkdown(plan);
     const writtenPath = await writeGrowthExperimentPlan(plan, join(outDir, 'experiment-plan.md'));
@@ -475,11 +476,15 @@ test('growth experiment plan turns the algorithm lens into measurable next exper
 
     assert.equal(plan.status, 'ready');
     assert.equal(plan.algorithmLens.stage, 'candidate_entry');
+    assert.equal(plan.selectedAligned, true);
     assert.equal(plan.experiments.length, 2);
+    assert.equal(plan.experiments[0].queueId, queue.items[1].id);
     assert.equal(plan.experiments[0].successMetric, 'published_posts');
     assert.ok(plan.experiments[0].editFocus.includes('public URL recording'));
     assert.match(plan.commands.brief, /social:x-tech-brief/);
+    assert.match(plan.commands.brief, new RegExp(queue.items[1].id));
     assert.match(markdown, /X Growth Experiment Plan/);
+    assert.match(markdown, /Selected aligned: yes/);
     assert.match(markdown, /Minimum evidence/);
     assert.match(persisted, /Local experiment planning only/);
   } finally {
@@ -1605,6 +1610,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(imageBacklog, /Images missing: 2/);
     assert.match(browserReadiness, /X Browser Readiness/);
     assert.match(experimentPlan, /X Growth Experiment Plan/);
+    assert.match(experimentPlan, new RegExp(`### exp-1: ${expectedQueue.items[0].id}`));
+    assert.match(experimentPlan, /Selected aligned: yes/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

@@ -10,10 +10,13 @@ export function buildGrowthExperimentPlan({
   ledger,
   now = new Date(),
   limit = 3,
+  selectedId,
 } = {}) {
   const recommendations = buildGrowthRecommendations(ledger);
   const lens = recommendations.algorithmLens;
-  const candidates = selectExperimentCandidates(queue, recommendations, Number(limit || 3));
+  const candidates = selectExperimentCandidates(queue, recommendations, Number(limit || 3), {
+    selectedId,
+  });
   const experiments = candidates.map((item, index) => experimentFromItem({
     item,
     index,
@@ -24,6 +27,8 @@ export function buildGrowthExperimentPlan({
   return {
     generatedAt: toIsoString(now),
     status: experiments.length ? 'ready' : 'needs_candidates',
+    selectedId: selectedId || null,
+    selectedAligned: Boolean(selectedId && candidates[0]?.id === selectedId),
     algorithmLens: lens,
     summary: recommendations.summary,
     candidates: candidates.map((item) => ({
@@ -69,6 +74,8 @@ Status: ${plan.status}
 - Content rule: ${plan.algorithmLens.contentRule}
 - Avoid: ${plan.algorithmLens.avoid}
 - Pace: ${plan.algorithmLens.pace}
+- Selected queue id: ${plan.selectedId || 'none'}
+- Selected aligned: ${plan.selectedAligned ? 'yes' : 'no'}
 
 ## Candidates
 
@@ -98,7 +105,7 @@ export async function writeGrowthExperimentPlan(plan, filePath = DEFAULT_OUT_PAT
   return filePath;
 }
 
-function selectExperimentCandidates(queue = {}, recommendations, limit) {
+function selectExperimentCandidates(queue = {}, recommendations, limit, { selectedId } = {}) {
   const draftItems = (queue.items || [])
     .filter((item) => item.status !== 'published' && !item.xPostUrl)
     .filter((item) => validateQueueItem(item).status === 'pass');
@@ -108,14 +115,25 @@ function selectExperimentCandidates(queue = {}, recommendations, limit) {
   const topArticle = recommendations.articlePerformance[0]?.key;
   const stage = recommendations.algorithmLens.stage;
 
-  return draftItems
+  const ranked = draftItems
     .map((item) => ({
       item,
       score: candidateScore(item, { topVariant, topArticle, stage }),
     }))
     .sort((a, b) => b.score - a.score || a.item.id.localeCompare(b.item.id))
-    .slice(0, limit)
     .map((entry) => entry.item);
+
+  const selected = selectedId
+    ? draftItems.find((item) => item.id === selectedId)
+    : null;
+  if (!selected) {
+    return ranked.slice(0, limit);
+  }
+
+  return [
+    selected,
+    ...ranked.filter((item) => item.id !== selected.id).slice(0, Math.max(0, limit - 1)),
+  ];
 }
 
 function candidateScore(item, { topVariant, topArticle, stage }) {

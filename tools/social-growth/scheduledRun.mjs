@@ -142,10 +142,13 @@ export async function runScheduledGrowthLoop({
     now,
     snapshot: true,
   });
+  const queue = await readJson(queuePath);
+  const ledger = await readJson(ledgerPath);
   const experimentPlan = buildGrowthExperimentPlan({
-    queue: await readJson(queuePath),
-    ledger: await readJson(ledgerPath),
+    queue,
+    ledger,
     now,
+    selectedId: automation.selected?.id,
   });
   await writeGrowthExperimentPlan(experimentPlan, experimentPlanPath);
   const result = {
