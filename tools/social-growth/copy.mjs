@@ -172,6 +172,13 @@ const ARTICLE_FRAMES = [
       coreClaim: 'Workspace Tab 性能要拆开看：首屏、热切换和后台压力各自需要指标、调度和回归门。',
       failureMode: '如果把首屏、热切换和后台压力混在一起，漂亮数字会掩盖用户看得见的卡顿。',
       readerPayoff: '把复杂工作台性能拆成可验证的路径模型',
+      strongPost: '工作台一上 Tab，FMP 很容易变成假安慰。\n\n首屏快了，不代表切回 tab 后能点；tab 保活多了，也不代表后台不会抢主线程。\n\n我把它拆成 first load / hot switch / background pressure 三条路径。配图放检查顺序，后面贴数据和取舍。',
+      proofPoints: [
+        'Scheduling route FMP 从 `14773ms` 到 `11926ms`，少了 `2847ms`。',
+        'cold tab switch p95 从 `1829.8ms` 到 `812.3ms`。',
+        'post-visible blocking 从 `1193.7ms` 到 `8.7ms`，这比只看 visible 更接近用户感受。',
+      ],
+      tradeoff: '不能靠无限保活换热切换速度；后台预热和 SDK 初始化必须服从当前前台 tab。',
       frameworkSteps: [
         '先区分 first load、hot switch 和 background pressure。',
         '为每条用户路径定义自己的可感知指标。',
@@ -193,6 +200,7 @@ const ARTICLE_FRAMES = [
       coreClaim: '没有可重复测量，AI 优化就是在讲故事。',
       failureMode: '测量口径错了，任何性能收益都不能算数。',
       readerPayoff: '判断 AI 优化到底有没有胡说',
+      strongPost: 'AI 性能优化，先别急着看模型给了多少建议。\n\n测量口径错了，任何性能收益都不能算数。\n\n我会按 baseline -> change -> verify -> ledger 拆：先固定 baseline，再让每次修改都能被同一个 harness 复验。\n\n配图放检查顺序，后面贴证据和取舍。',
       frameworkSteps: [
         '定义一个用户可感知指标。',
         '为这个指标搭一个可重复 harness。',
@@ -244,7 +252,7 @@ export function buildDistributionCandidates(article, options = {}) {
       shortPost: buildShortPost(article, variant),
       xArticle: buildXArticle(article, targetUrl),
       media: buildImageBrief(article, variant),
-      threadFallback: buildThreadFallback(article, targetUrl),
+      threadFallback: buildThreadFallback(article, targetUrl, variant),
       followUpReplies: buildFollowUpReplies(article, variant),
       posts: [buildShortPost(article, variant)],
       linkPostIndex: null,
@@ -300,17 +308,18 @@ export function sharpTake(article) {
 
 export function researchUtility(article) {
   const frame = articleFrame(article);
-  return clamp(`我把「${frame.topic}」拆成 ${frame.mechanism} 四个检查点。\n\n先看读者或用户会遇到什么失败，再看哪一步有证据。\n\n配图放检查顺序，X Article 写完整证据和取舍。`, 220);
+  return clamp(`我把「${frame.topic}」拆成 ${frame.mechanism} 这条检查顺序。\n\n先看 ${frame.failureMode}，再看哪一步有证据。\n\n配图放路径，后面贴完整证据和取舍。`, 220);
 }
 
 export function strongThesis(article) {
   const frame = articleFrame(article);
-  return clamp(`${frame.topic}，最容易被一个指标或一句经验带偏。\n\n我会先处理这件事：${frame.betterFrame}；再追 ${frame.mechanism}。场景、指标、动作、证据缺一项，结论就先放下。\n\n配图把检查点摊开，X Article 写完整复盘。`, 220);
+  if (frame.strongPost) return clamp(frame.strongPost, 230);
+  return clamp(`${frame.topic}，先别急着看一个总分。\n\n${frame.failureMode}\n\n我会按 ${frame.mechanism} 拆：先定路径和指标，再决定动作，最后用证据过 gate。\n\n配图放检查顺序，后面贴证据和取舍。`, 220);
 }
 
 export function caseStory(article) {
   const frame = articleFrame(article);
-  return clamp(`这次复盘「${frame.topic}」时，最容易误判的是：${frame.falseFrame}。\n\n我最后按 ${frame.mechanism} 把问题拆开，才知道该先处理哪条路径。\n\n配图放排查顺序，X Article 写证据和取舍。`, 220);
+  return clamp(`这次复盘「${frame.topic}」时，最容易误判的是：${frame.falseFrame}。\n\n后来按 ${frame.mechanism} 拆开，才知道要先处理哪条路径。\n\n配图放排查顺序，后面贴证据和取舍。`, 220);
 }
 
 export function usefulLesson(article) {
@@ -361,36 +370,29 @@ export function buildXArticle(article, targetUrl) {
 }
 
 export function buildChineseXArticleBody(article, targetUrl) {
-  const takeaway = articleTakeaway(article);
-  const points = extractKeyPoints(article.text, 5);
   const frame = articleFrame(article);
-  const proofPoint = verificationPoint(frame);
+  const proofPoints = frame.proofPoints?.length
+    ? frame.proofPoints
+    : [verificationPoint(frame)];
 
   return [
-    `这篇讲「${frame.topic}」里一个很具体的问题：${frame.failureMode}`,
+    `这篇复盘「${frame.topic}」里的一个坑：${frame.failureMode}`,
     '',
-    `我用 ${frame.mechanism} 这条顺序拆：先看用户或读者能感知的失败，再回到机制、动作和证据。`,
+    `我最后用 ${frame.mechanism} 拆开。先确定用户路径，再给每条路径找指标、调度策略和 gate。`,
     '',
     frame.coreClaim,
     '',
-    '## 关键结论',
-    '',
-    ...dedupePoints([
-      sanitizeArticlePoint(takeaway),
-      frame.failureMode,
-      ...points,
-    ])
-      .filter((point) => point !== frame.coreClaim)
-      .slice(0, 5)
-      .map((point) => `- ${point}`),
-    '',
-    '## 检查顺序',
+    '## 可复用框架',
     '',
     ...frame.frameworkSteps.map((step, index) => `${index + 1}. ${step}`),
     '',
-    '## 验证',
+    '## 证据',
     '',
-    proofPoint,
+    ...proofPoints.map((point) => `- ${point}`),
+    '',
+    '## 取舍',
+    '',
+    frame.tradeoff || `判断它是否成立，不看表述多完整，只看 ${frame.mechanism} 能不能在同类问题里重复跑通。`,
     '',
     `博客原文：${targetUrl}`,
   ].join('\n');
@@ -404,17 +406,17 @@ export function articleTakeaway(article) {
   return clamp(sentence(article.excerpt), 120);
 }
 
-export function buildThreadFallback(article, targetUrl) {
-  const title = clamp(article.title, 96);
+export function buildThreadFallback(article, targetUrl, variant = 'strong-thesis') {
   if (article.lang === 'zh') {
     const frame = articleFrame(article);
     return [
-      clampPost(`${title}\n\n先按 ${frame.mechanism} 看一遍：场景、指标、动作、证据哪一项缺了，结论都不稳。`),
+      buildShortPost(article, variant),
       clampPost(`检查顺序：\n\n${numberedSteps(frame.frameworkSteps, 5)}`),
       linkPost('完整过程：', targetUrl),
     ];
   }
 
+  const title = clamp(article.title, 96);
   return [
     clampPost(`${title}\n\nThe useful frame is measurement first, optimization second.`),
     clampPost('1. Pick a user-visible metric\n2. Build a harness\n3. Change one bottleneck per round\n4. Compare against the same baseline'),
@@ -486,7 +488,7 @@ export function buildImageBrief(article, variant) {
       `Core message: ${title}`,
       `Diagram text to include exactly: "${subtitle}"`,
       `Scroll-stopper headline: ${visualHook(frame, variant)}`,
-      'First-screen payload: one large Chinese headline, one concrete proof/mechanism label, and a visible reason to open the X Article; no body paragraphs.',
+      'First-screen payload: one large Chinese headline, one concrete proof/mechanism label, and a visible reason to open the follow-up thread or article; no body paragraphs.',
       'Composition: one clear loop diagram with four labeled stages, a small ledger/checklist panel, and a proof marker that supports the post claim; generous whitespace; high contrast; readable at mobile size.',
       'Style: modern engineering publication, clean vector-like bitmap illustration, precise lines, restrained color palette, no mascots, no stock-photo people.',
       `Variant emphasis: ${variantMessage}`,

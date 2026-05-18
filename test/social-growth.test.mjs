@@ -702,7 +702,7 @@ test('generates article-specific Chinese X copy instead of repeating one templat
   assert.match(strongPosts[0].shortPost, /Agent Skill/);
   assert.match(strongPosts[1].shortPost, /技术博客 SEO/);
   assert.notEqual(strongPosts[0].shortPost, strongPosts[1].shortPost);
-  assert.match(strongPosts[0].shortPost, /配图把检查点摊开，X Article 写完整复盘/);
+  assert.match(strongPosts[0].shortPost, /配图放检查顺序，后面贴证据和取舍|配图放路径，后面贴完整证据和取舍/);
   assert.doesNotMatch(strongPosts[0].shortPost, /不是.+而是|验证闭环|判断框架|图里是/u);
   assert.match(strongPosts[0].xArticle.body, /Skill 要把可复用能力写成稳定契约/);
   assert.match(strongPosts[1].xArticle.body, /技术博客做 SEO/);
@@ -727,12 +727,12 @@ test('Chinese short posts sell the image and X Article before the blog link', ()
   const item = queue.items[0];
 
   assert.doesNotMatch(item.shortPost, /https?:\/\//i);
-  assert.match(item.shortPost, /AI 性能优化，最容易被一个指标或一句经验带偏/);
+  assert.match(item.shortPost, /AI 性能优化，先别急着看模型给了多少建议/);
   assert.match(item.shortPost, /baseline -> change -> verify -> ledger/);
-  assert.match(item.shortPost, /配图把检查点摊开，X Article 写完整复盘/);
+  assert.match(item.shortPost, /配图放检查顺序，后面贴证据和取舍/);
   assert.doesNotMatch(item.shortPost, /不是.+而是|真正值钱|验证闭环|判断框架|图里是/u);
   assert.match(item.xArticle.body, /博客原文：https:\/\/clean99\.github\.io\/zh\/automated-ai-performance\//);
-  assert.match(item.xArticle.body, /## 验证/);
+  assert.match(item.xArticle.body, /## 证据/);
   assert.doesNotMatch(item.xArticle.body, /为什么值得读原文|原文围绕|短帖只能|本文从/);
   assert.doesNotMatch(item.followUpReplies.join('\n'), /你现在是不是|有没有证据|下一步能不能/);
   assert.match(item.media.prompt, /Scroll-stopper headline: AI 性能优化：先看证据/);
@@ -766,10 +766,15 @@ test('distinguishes workspace tab performance from AI performance loop copy', ()
   const workspace = queue.items.find((item) => item.articleSlug === 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure' && item.variant === 'strong-thesis');
   const aiLoop = queue.items.find((item) => item.articleSlug === 'Automated-AI-Performance-Optimization' && item.variant === 'strong-thesis');
 
-  assert.match(workspace.shortPost, /Workspace Tab 性能/);
-  assert.match(workspace.shortPost, /first load、hot switch 和 background pressure/);
+  assert.match(workspace.shortPost, /工作台一上 Tab/);
+  assert.match(workspace.shortPost, /first load \/ hot switch \/ background pressure/);
+  assert.match(workspace.shortPost, /FMP 很容易变成假安慰/);
+  assert.equal(workspace.threadFallback[0], workspace.shortPost);
+  assert.doesNotMatch(workspace.threadFallback[0], /^Workspace v2 Tab System 性能优化/u);
   assert.match(workspace.xArticle.body, /strict FMP、tab-switch probe 和 stress gate/);
+  assert.match(workspace.xArticle.body, /14773ms.*11926ms/s);
   assert.match(workspace.media.prompt, /Workspace Tab 性能/);
+  assert.doesNotMatch(workspace.media.prompt, /visible reason to open the X Article/);
   assert.match(aiLoop.shortPost, /AI 性能优化/);
   assert.notEqual(workspace.shortPost, aiLoop.shortPost);
   assert.equal(validateQueue(queue).status, 'pass');
@@ -889,7 +894,7 @@ test('copy override bridge lets a writing skill replace queue copy locally', asy
         '',
         '同一条 path 换了测量条件，后面所有收益都会变成故事。',
         '',
-        '配图放 baseline -> change -> verify -> ledger，X Article 写完整复盘。',
+        '配图放 baseline -> change -> verify -> ledger，后面贴完整复盘。',
         '',
         '#AI #软件工程',
       ].join('\n'),
@@ -2246,7 +2251,7 @@ test('x publish prep can fall back to an image-backed thread when X Article is u
     assert.match(prep.commands.prepareShortPost, /x-browser\.ts/);
     assert.match(prep.commands.prepareShortPost, /--image/);
     assert.match(prep.commands.prepareShortPost, /--profile '\/tmp\/x-profile'/);
-    assert.match(prep.commands.prepareShortPost, /Workspace v2 Tab System 性能优化/);
+    assert.match(prep.commands.prepareShortPost, /工作台一上 Tab/);
     assert.match(markdown, /Publish mode: thread_fallback/);
     assert.match(markdown, /Thread Replies After First Post/);
     assert.doesNotMatch(markdown, /ARTICLE_URL=/);
@@ -2520,7 +2525,7 @@ test('publish confirmation uses thread fallback when X Article is unavailable', 
     assert.equal(packet.status, 'ready_for_confirmation');
     assert.equal(packet.publishMode, 'thread_fallback');
     assert.doesNotMatch(packet.content.imagePost, /<x-article-url>/);
-    assert.match(packet.content.imagePost, /Workspace v2 Tab System 性能优化/);
+    assert.match(packet.content.imagePost, /工作台一上 Tab/);
     assert.match(packet.commands.recordPublished, /<x-thread-url>/);
     assert.match(markdown, /X Article Status/);
     assert.match(markdown, /Image-backed Thread First Post To Review/);
@@ -3733,11 +3738,11 @@ test('builds Chinese X Article before the blog link', () => {
 
   const xArticle = buildXArticle(article, 'https://clean99.github.io/zh/post/');
 
-  assert.match(xArticle.body, /## 关键结论/);
-  assert.match(xArticle.body, /## 验证/);
+  assert.match(xArticle.body, /## 可复用框架/);
+  assert.match(xArticle.body, /## 证据/);
   assert.ok(!xArticle.body.startsWith('# 全自动 AI 性能优化'));
   assert.doesNotMatch(xArticle.body, /为什么值得读原文|原文围绕|短帖只能|本文从/);
-  assert.ok(xArticle.body.indexOf('## 关键结论') < xArticle.body.indexOf('博客原文：'));
+  assert.ok(xArticle.body.indexOf('## 可复用框架') < xArticle.body.indexOf('博客原文：'));
   assert.ok(xArticle.body.endsWith('https://clean99.github.io/zh/post/'));
 });
 

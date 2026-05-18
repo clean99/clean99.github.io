@@ -23,6 +23,8 @@ const FORBIDDEN_SHORT_POST_PATTERNS = [
   /验证闭环/u,
   /图里是/u,
   /图里放/u,
+  /一个指标或一句经验带偏/u,
+  /X Article 写完整复盘/iu,
   /长文放在\s*X Article/iu,
   /^原文[:：]/u,
   /^博客[:：]/u,
@@ -74,6 +76,7 @@ const CHINESE_VISUAL_HANDOFF_PATTERNS = [
   /流程图/u,
   /配图/u,
   /X Article/i,
+  /后面贴/u,
   /完整(复盘|证据|过程)/u,
 ];
 const VARIANT_PATTERNS = {
@@ -155,7 +158,7 @@ export function formatValidationMarkdown(validation) {
     '- Short post sells the idea without raw blog URLs.',
     '- First screen contains a Chinese claim plus a concrete mechanism.',
     '- Short post avoids AI-smelling meta commentary and generic article praise.',
-    '- Chinese short post sells the generated image or X Article before any blog link.',
+    '- Chinese short post sells the generated image, follow-up thread, or X Article before any blog link.',
     '- Queue does not reuse the same short post across different articles.',
     '- X Article carries the blog link at the end.',
     '- X Article does not contain heading-glued or table extraction fragments.',
