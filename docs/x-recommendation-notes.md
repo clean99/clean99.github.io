@@ -74,6 +74,17 @@ The local system should behave like a small experimental recommender-facing publ
 
 This is why the implementation has a quality gate before browser work. The gate is not copy taste theater; it prevents actions that would create ranking debt.
 
+The executable version of this mapping lives in `tools/social-growth/recommendations.mjs` as the `Algorithm Lens` section of `npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown`.
+
+| Local funnel status | Algorithm-facing stage | Metric to move | Decision |
+| --- | --- | --- | --- |
+| `needs_published_posts` | candidate entry | published posts | Ship one confirmed X Article + image post before polishing later slots. |
+| `needs_view_data` | measurement hydration | views | Capture visible analytics before judging copy quality. |
+| `needs_interaction` | multi-action prediction | interaction / view | Improve first line, mechanism, and image promise instead of increasing volume. |
+| `needs_profile_clicks` | profile handoff | profile click / interaction | Make the post and X Article create a reason to inspect the account. |
+| `needs_follow_conversion` | follow conversion | follow / profile click | Fix profile promise and pinned post before scaling impressions. |
+| `converting` | winner scaling | follow / view | Reuse the winning mechanism while preserving author diversity and avoiding duplicate templates. |
+
 ### 1. Win Candidate Entry Before Optimizing Ranking
 
 A post cannot rank if it never enters candidate pools. For this blog, candidate entry comes from:

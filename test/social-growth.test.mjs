@@ -378,6 +378,39 @@ test('builds a growth funnel from views to follows', () => {
   assert.match(markdown, /Follow \/ profile click/);
 });
 
+test('growth funnel treats follows as conversion even when profile clicks are unavailable', () => {
+  const ledger = {
+    target: {
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    },
+    snapshots: [
+      {
+        date: '2026-05-18',
+        followers: 32,
+        posts: [
+          {
+            id: 'follow-without-profile-clicks',
+            articleSlug: 'A',
+            variant: 'strong-thesis',
+            metrics: {
+              views: 1000,
+              likes: 20,
+              follows: 2,
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  const funnel = buildGrowthFunnel(ledger);
+
+  assert.equal(funnel.status, 'converting');
+  assert.equal(funnel.posts[0].bottleneck, 'converting');
+});
+
 test('parses visible X profile and post metrics text', () => {
   assert.deepEqual(parseXProfileMetrics('Clean993\n30 Following\n1.2K Followers'), {
     followers: 1200,
@@ -894,6 +927,9 @@ test('x technical sharing brief packages source article and copy override templa
     assert.match(markdown, /Opening options/);
     assert.match(markdown, /Growth Feedback/);
     assert.match(markdown, /Follower delta: 16 \/ 1000/);
+    assert.match(markdown, /Algorithm lens/);
+    assert.match(markdown, /Stage: winner_scaling/);
+    assert.match(markdown, /Metric to move: follow_per_view/);
     assert.match(markdown, /strong-thesis: score/);
     assert.match(markdown, /Automated-AI-Performance-Optimization: score/);
     assert.match(markdown, /profile clicks 12/);
@@ -2882,6 +2918,10 @@ test('builds growth recommendations from variant performance', () => {
   const result = buildGrowthRecommendations(ledger);
 
   assert.equal(result.variantPerformance[0].key, 'strong-thesis');
+  assert.equal(result.algorithmLens.stage, 'winner_scaling');
+  assert.equal(result.algorithmLens.metricToMove, 'follow_per_view');
   assert.ok(result.recommendations.some((item) => item.action.includes('strong-thesis')));
   assert.match(formatRecommendationsMarkdown(ledger), /Variant Performance/);
+  assert.match(formatRecommendationsMarkdown(ledger), /Algorithm Lens/);
+  assert.match(formatRecommendationsMarkdown(ledger), /Stage: winner_scaling/);
 });

@@ -370,6 +370,7 @@ After every snapshot:
 
 - run `npm run social:funnel -- --ledger data/social-growth/ledger.json --format markdown`;
 - run `npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown`;
+  - read the `Algorithm Lens` section first; it maps the current funnel to candidate entry, measurement hydration, multi-action prediction, profile handoff, follow conversion, or winner scaling;
 - run `npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md` after profile text is captured;
 - double down on topics that create follows, replies, reposts, bookmarks, or profile clicks;
 - kill templates that only get impressions or likes without follower lift;

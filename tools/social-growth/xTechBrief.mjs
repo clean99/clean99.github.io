@@ -298,6 +298,7 @@ function buildGrowthFeedback(ledger, selected) {
     summary: feedback.summary,
     variantPerformance: feedback.variantPerformance.slice(0, 5),
     articlePerformance: feedback.articlePerformance.slice(0, 5),
+    algorithmLens: feedback.algorithmLens,
     selectedVariant: findPerformance(feedback.variantPerformance, selected.variant),
     selectedArticle: findPerformance(feedback.articlePerformance, selected.articleSlug),
     recommendations: feedback.recommendations.slice(0, 5),
@@ -328,6 +329,7 @@ function formatGrowthFeedbackMarkdown(feedback) {
   const selectedArticle = feedback.selectedArticle
     ? formatPerformanceLine(feedback.selectedArticle)
     : '- Selected article/topic has no measured history yet.';
+  const algorithmLens = formatAlgorithmLens(feedback.algorithmLens);
 
   return `Target pace:
 
@@ -342,6 +344,10 @@ Selected history:
 
 ${selectedVariant}
 ${selectedArticle}
+
+Algorithm lens:
+
+${algorithmLens}
 
 Variant performance:
 
@@ -365,6 +371,24 @@ function formatRecommendationLines(recommendations) {
     return ['- No recommendations yet. Publish, capture metrics, then rerun this brief.'];
   }
   return recommendations.map((item) => `- ${item.priority}: ${item.action} Reason: ${item.reason}`);
+}
+
+function formatAlgorithmLens(lens) {
+  if (!lens) return '- Missing algorithm lens.';
+  const actions = (lens.nextActions || [])
+    .slice(0, 3)
+    .map((item) => `  - ${item.priority}: ${item.action} Reason: ${item.reason}`)
+    .join('\n');
+
+  return [
+    `- Stage: ${lens.stage}`,
+    `- Metric to move: ${lens.metricToMove}`,
+    `- Content rule: ${lens.contentRule}`,
+    `- Avoid: ${lens.avoid}`,
+    `- Pace: ${lens.pace}`,
+    '- Actions:',
+    actions || '  - No algorithm actions.',
+  ].join('\n');
 }
 
 function findPerformance(items, key) {

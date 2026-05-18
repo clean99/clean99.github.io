@@ -50,6 +50,7 @@ The code can automate safe local work:
 - append follower and interaction snapshots;
 - calculate follower and interaction progress from snapshots;
 - diagnose the follower funnel from views to interactions, profile clicks, and follows;
+- map the funnel into an algorithm-facing recommendation lens: candidate entry, measurement hydration, multi-action prediction, profile handoff, follow conversion, or winner scaling;
 - generate reports.
 
 The code must not silently perform public social actions. Posting, replying, liking, reposting, following, or changing account state in Chrome is a public action from the user's account. The browser operator must stop at the action point and get confirmation before the final click.
@@ -405,6 +406,8 @@ Generate optimization recommendations:
 ```bash
 npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
 ```
+
+The recommendation report begins with an `Algorithm Lens` section. It maps the current local funnel state to the public X recommendation concepts documented in `docs/x-recommendation-notes.md`: candidate sourcing, multi-action prediction, author diversity, and negative-feedback filters. This is not a clone of the X algorithm; it is a decision layer for what metric to move next and what behavior to avoid.
 
 The recommendation notes behind these rules live in:
 

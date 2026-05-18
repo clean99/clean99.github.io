@@ -101,18 +101,18 @@ function analyzePostFunnel(post) {
 function postBottleneck({ metrics, interactions }) {
   if (!metrics.views) return 'needs_view_data';
   if (!interactions) return 'hook_or_image_not_earning_interactions';
+  if (metrics.follows) return 'converting';
   if (!metrics.profileClicks) return 'no_profile_click_handoff';
-  if (!metrics.follows) return 'profile_clicks_not_converting';
-  return 'converting';
+  return 'profile_clicks_not_converting';
 }
 
 function funnelStatus({ posts, totals }) {
   if (!posts.length) return 'needs_published_posts';
   if (!totals.views) return 'needs_view_data';
   if (!totals.interactions) return 'needs_interaction';
+  if (totals.follows) return 'converting';
   if (!totals.profileClicks) return 'needs_profile_clicks';
-  if (!totals.follows) return 'needs_follow_conversion';
-  return 'converting';
+  return 'needs_follow_conversion';
 }
 
 function bottleneckFor(status) {
