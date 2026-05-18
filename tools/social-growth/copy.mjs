@@ -343,18 +343,20 @@ export function buildChineseXArticleBody(article, targetUrl) {
   const takeaway = articleTakeaway(article);
   const points = extractKeyPoints(article.text, 5);
   const frame = articleFrame(article);
+  const proofPoint = verificationPoint(frame);
 
   return [
-    `这篇文章讨论的不是“${frame.falseFrame}”，而是一个更实际的问题：${frame.betterFrame}。`,
+    `很多「${frame.topic}」的讨论会卡在“${frame.falseFrame}”。`,
     '',
-    `我的核心判断：${frame.coreClaim}`,
+    `真正要解决的是：${frame.betterFrame}。`,
+    '',
+    frame.coreClaim,
     '',
     '## 关键结论',
     '',
     ...dedupePoints([
       sanitizeArticlePoint(takeaway),
       frame.failureMode,
-      `读者应该带走的是：${frame.readerPayoff}。`,
       ...points,
     ])
       .filter((point) => point !== frame.coreClaim)
@@ -365,9 +367,9 @@ export function buildChineseXArticleBody(article, targetUrl) {
     '',
     ...frame.frameworkSteps.map((step, index) => `${index + 1}. ${step}`),
     '',
-    '## 为什么值得读原文',
+    '## 验证',
     '',
-    `原文围绕《${article.title}》展开，有完整背景、判断过程和可复用步骤。短帖只能给出框架，原文适合用来核对细节、边界和实际例子。`,
+    proofPoint,
     '',
     `博客原文：${targetUrl}`,
   ].join('\n');
@@ -416,7 +418,7 @@ export function buildFollowUpReplies(article, variant) {
 
   return [
     clampPost(variantReply),
-    clampPost(`如果你要把这个方法搬到自己的项目，先问三个问题：\n\n1. 你现在是不是还在${frame.falseFrame}？\n2. ${frame.betterFrame} 有没有证据？\n3. 下一步能不能按 ${frame.mechanism} 跑？`),
+    clampPost(`落地时先看一个失败信号：如果流程仍然停在“${frame.falseFrame}”，后面再多动作也只是堆复杂度。先把 ${frame.mechanism} 这条链路跑通。`),
   ];
 }
 
@@ -493,6 +495,7 @@ export function extractKeyPoints(text, limit = 5) {
     .filter((item) => !/^\d+(\.\d+)?s\s*\|/.test(item))
     .filter((item) => !/^\|/.test(item))
     .filter((item) => !/^TL;DR/i.test(item))
+    .filter((item) => !isMetaArticlePoint(item))
     .filter((item) => !isHeadingGluedPoint(item));
 
   return normalized.slice(0, limit);
@@ -507,6 +510,11 @@ export function sanitizeArticlePoint(point) {
 
 export function isHeadingGluedPoint(point) {
   return /^(真正的问题|先修 Harness，再谈优化|Goal-Driven Loop 怎么跑|成功落地时改了什么|模式[一二三四五六七八九十]|结论|为什么值得读原文)\s+\S/u
+    .test(String(point || '').trim());
+}
+
+export function isMetaArticlePoint(point) {
+  return /^(本文|本篇|原文|背景\s+Agentic|读者应该|为什么值得读原文)/u
     .test(String(point || '').trim());
 }
 
@@ -535,6 +543,10 @@ function visualHook(frame, variant) {
   if (variant === 'research-utility') return `${frame.topic}：把方法画出来`;
   if (variant === 'case-story') return `${frame.topic}：从误判到根因`;
   return `${frame.topic}：不是建议，是验证闭环`;
+}
+
+function verificationPoint(frame) {
+  return `判断它是否成立，不看表述多完整，只看 ${frame.mechanism} 能不能在同类问题里重复跑通；如果缺少可检查结果，这个框架还不能算工程资产。`;
 }
 
 export function sentence(text) {

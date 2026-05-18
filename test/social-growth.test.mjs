@@ -654,12 +654,16 @@ test('Chinese short posts sell the image and X Article before the blog link', ()
   assert.match(item.shortPost, /真正值钱的不是让模型多给几条优化建议/);
   assert.match(item.shortPost, /图里是判断框架，长文放在 X Article/);
   assert.match(item.xArticle.body, /博客原文：https:\/\/clean99\.github\.io\/zh\/automated-ai-performance\//);
+  assert.match(item.xArticle.body, /## 验证/);
+  assert.doesNotMatch(item.xArticle.body, /为什么值得读原文|原文围绕|短帖只能|本文从/);
+  assert.doesNotMatch(item.followUpReplies.join('\n'), /你现在是不是|有没有证据|下一步能不能/);
   assert.match(item.media.prompt, /Scroll-stopper headline: AI 性能优化：不是建议，是验证闭环/);
   assert.equal(validateQueueItem(item).status, 'pass');
 });
 
 test('filters heading-glued fragments from Chinese X Article extraction', () => {
   const points = extractKeyPoints([
+    '本文从第一性原理出发，拆解性能优化的自动化闭环。',
     '真正的问题 目标看起来很简单：优化 Workspace FMP。',
     '实际目标更严格： | 指标 | 目标 | | --- | ---: | | 子应用 FMP P90 | 2。',
     '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
@@ -672,6 +676,7 @@ test('filters heading-glued fragments from Chinese X Article extraction', () => 
     lang: 'zh',
     tags: ['AI', 'Software Engineering', 'Web Performance'],
     text: [
+      '本文从第一性原理出发，拆解性能优化的自动化闭环。',
       '真正的问题 目标看起来很简单：优化 Workspace FMP。',
       '实际目标更严格： | 指标 | 目标 | | --- | ---: | | 子应用 FMP P90 | 2。',
       '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
@@ -685,6 +690,7 @@ test('filters heading-glued fragments from Chinese X Article extraction', () => 
     '测量契约修复后，loop 才开始优化真实瓶颈',
   ]);
   assert.doesNotMatch(xArticle.body, /真正的问题 目标/);
+  assert.doesNotMatch(xArticle.body, /本文从第一性原理/);
   assert.doesNotMatch(xArticle.body, /\| 指标 \|/);
   assert.match(xArticle.body, /没有可重复测量/);
 });
@@ -1435,11 +1441,11 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const metricsReport = await readFile(join(outDir, 'metrics-cycle.md'), 'utf8');
     const funnelReport = await readFile(join(outDir, 'funnel.md'), 'utf8');
 
-    assert.equal(result.status, 'needs_copy_review');
-    assert.equal(result.automation.status, 'needs_copy_review');
+    assert.equal(result.status, 'ready_for_browser_confirmation');
+    assert.equal(result.automation.status, 'ready_for_browser_confirmation');
     assert.equal(result.metrics.status, 'needs_published_posts');
     assert.equal(result.automation.profileConversion.status, 'pass');
-    assert.equal(result.automation.publishConfirmation.status, 'needs_copy_review');
+    assert.equal(result.automation.publishConfirmation.status, 'ready_for_confirmation');
     assert.equal(result.automation.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.selected.id, expectedQueue.items[0].id);
@@ -1448,7 +1454,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Engagement search/);
     assert.match(scheduledReport, /Engagement plan/);
     assert.match(scheduledReport, /Publish confirmation/);
-    assert.match(scheduledReport, /Content review: needs_copy_review/);
+    assert.match(scheduledReport, /Content review: pass/);
     assert.match(scheduledReport, /Profile Conversion/);
     assert.match(scheduledReport, /Funnel report/);
     assert.match(scheduledReport, /safe for recurring execution/);
@@ -1959,6 +1965,28 @@ test('publish confirmation packet requires copy review for article-summary frami
     createdAt: '2026-05-18T00:00:00.000Z',
     limit: 1,
   });
+  queue.items[0] = {
+    ...queue.items[0],
+    xArticle: {
+      ...queue.items[0].xArticle,
+      body: [
+        '本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践。',
+        '',
+        '## 关键结论',
+        '',
+        '- Skill 的价值不是多一段提示词。',
+        '',
+        '## 为什么值得读原文',
+        '',
+        '原文围绕《Agent Skills 探索实录》展开，有完整背景、判断过程和可复用步骤。短帖只能给出框架，原文适合用来核对细节、边界和实际例子。',
+        '',
+        `博客原文：${queue.items[0].targetUrl}`,
+      ].join('\n'),
+    },
+    followUpReplies: [
+      '如果你要把这个方法搬到自己的项目，先问三个问题：你现在是不是还在把一堆提示词塞进上下文？有没有证据？下一步能不能按 context -> contract -> execution -> eval 跑？',
+    ],
+  };
   const preflight = {
     generatedAt: '2026-05-18T00:00:00.000Z',
     blockers: [],
@@ -2995,7 +3023,9 @@ test('builds Chinese X Article before the blog link', () => {
   const xArticle = buildXArticle(article, 'https://clean99.github.io/zh/post/');
 
   assert.match(xArticle.body, /## 关键结论/);
+  assert.match(xArticle.body, /## 验证/);
   assert.ok(!xArticle.body.startsWith('# 全自动 AI 性能优化'));
+  assert.doesNotMatch(xArticle.body, /为什么值得读原文|原文围绕|短帖只能|本文从/);
   assert.ok(xArticle.body.indexOf('## 关键结论') < xArticle.body.indexOf('博客原文：'));
   assert.ok(xArticle.body.endsWith('https://clean99.github.io/zh/post/'));
 });
