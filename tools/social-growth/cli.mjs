@@ -444,6 +444,43 @@ if (command === 'articles') {
   const metrics = await readOptionalJson(args.metrics || 'data/social-growth/posts.local.json');
   const profileText = await readOptionalText(args.profileText || 'data/social-growth/profile.local.txt');
   const opportunityTexts = await readEngagementOpportunityTexts(args.opportunities || 'data/social-growth/engagement-opportunities');
+  const publishMode = args.publishMode || args.articleMode;
+  const preflight = await buildPublishPreflight({
+    queue,
+    ledger,
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    ensurePackage: args.ensurePackage !== 'false',
+    preferReadyImage: args.preferReadyImage !== 'false',
+  });
+  const prep = await buildXPublishPrep(preflight, {
+    skillDir: args.skillDir || args.xSkillDir,
+    bunCommand: args.bunCommand || args.xBunCommand,
+    articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
+    publishMode,
+    profileDir: args.xProfileDir || args.profileDir,
+    profileDirectory: args.xProfileDirectory || args.profileDirectory,
+  });
+  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
+  const storedProbe = await readBrowserProbe(probePath);
+  const inputProbe = browserProbeFromArgs(args);
+  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
+  if (hasBrowserProbeValues(inputProbe)) effectiveProbe.generatedAt = preflight.generatedAt;
+  if (args.writeProbe !== 'false' && hasBrowserProbeValues(effectiveProbe)) {
+    await writeBrowserProbe(effectiveProbe, probePath);
+  }
+  const browserReadiness = buildBrowserReadiness({
+    preflight,
+    xPrep: prep,
+    ...effectiveProbe,
+    profileDir: args.xProfileDir || args.profileDir,
+    profileDirectory: args.xProfileDirectory || args.profileDirectory,
+    generatedAt: preflight.generatedAt,
+  });
   const brief = await buildDailyExecutionBrief({
     queue,
     ledger,
@@ -459,7 +496,8 @@ if (command === 'articles') {
     xBunCommand: args.xBunCommand,
     xProfileDir: args.xProfileDir || args.profileDir,
     xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
-    publishMode: args.publishMode || args.articleMode,
+    publishMode,
+    browserReadiness,
     engagementLimit: args.engagementLimit || args.limit || 5,
     env: process.env,
   });

@@ -1468,12 +1468,93 @@ test('daily execution brief surfaces browser blockers before ready publish slots
     assert.match(brief.browserReadinessCommand, /--publishMode thread_fallback/);
     assert.match(brief.browserReadinessCommand, /--xProfileDir '\/tmp\/x-profile'/);
     assert.equal(brief.dayReadiness.readySlots, 1);
+    assert.equal(brief.manualPublishFallback.available, true);
     assert.ok(brief.actionItems.some((item) => item.action.includes('Fix browser readiness')));
+    assert.ok(brief.actionItems.some((item) => item.action.includes('manual publish kit')));
     assert.ok(brief.actionItems.some((item) => item.action.includes('prepare them only after browser readiness passes')));
     assert.match(markdown, /Browser Readiness/);
+    assert.match(markdown, /Manual Publish Fallback/);
+    assert.match(markdown, /social:manual-publish-kit/);
+    assert.match(markdown, /social:post-publish-recovery/);
     assert.match(markdown, /browser-readiness -- --day 1 --slot 1 --publishMode thread_fallback --xProfileDir '\/tmp\/x-profile'/);
     assert.match(markdown, /Extension native pipe is closed|native pipe is closed/);
     assert.doesNotMatch(markdown, /P0: Prepare 1 ready/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('daily brief CLI reads stored browser probe before action order', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-brief-cli-probe-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    const queuePath = join(outDir, 'queue.json');
+    const ledgerPath = join(outDir, 'ledger.json');
+    const probePath = join(outDir, 'browser-probe.local.json');
+    const profilePath = join(outDir, 'profile.txt');
+    const briefPath = join(outDir, 'daily-brief.md');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(imageDir, `${queue.items[0].id}.png`), 'fake image');
+    await writeJson(queuePath, queue);
+    await writeJson(ledgerPath, createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+    await writeFile(probePath, `${JSON.stringify({
+      expectedAccount: '@Clean993',
+      chromeRunning: 'yes',
+      loginState: 'logged_out',
+      articleAvailable: 'no',
+      mediaUpload: 'unknown',
+    }, null, 2)}\n`);
+    await writeFile(profilePath, [
+      'Clean99 | AI 工程化与前端性能',
+      '@Clean993',
+      '写 AI 工程化、前端性能、React 和测试。把真实工程问题压成可复用框架。',
+      'https://clean99.github.io',
+      'Pinned',
+      '30 Followers',
+    ].join('\n'));
+
+    const result = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'daily-brief',
+      '--queue', queuePath,
+      '--ledger', ledgerPath,
+      '--browser-probe', probePath,
+      '--profile-text', profilePath,
+      '--image-dir', imageDir,
+      '--package-out', join(outDir, 'packages'),
+      '--publishMode', 'thread_fallback',
+      '--out', briefPath,
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+    const markdown = await readFile(briefPath, 'utf8');
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.match(markdown, /Status: needs_x_login/);
+    assert.match(markdown, /The Chrome profile used for publishing is not logged into X/);
+    assert.match(markdown, /Manual Publish Fallback/);
+    assert.match(markdown, /social:manual-publish-kit/);
+    assert.match(markdown, /social:post-publish-recovery/);
+    assert.doesNotMatch(markdown, /Status: ready_to_publish/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -3657,11 +3738,16 @@ test('growth status surfaces blocking browser readiness before publish prep', as
     const markdown = formatGrowthStatusMarkdown(status);
 
     assert.equal(status.status, 'needs_chrome_extension_reconnect');
+    assert.equal(status.manualPublishFallback.available, true);
     assert.ok(status.nextActions.some((item) => item.action.includes('Fix browser readiness')));
+    assert.ok(status.nextActions.some((item) => item.action.includes('manual publish kit')));
     assert.ok(!status.nextActions.some((item) => item.priority === 'P0' && item.action.includes('thread first post')));
     assert.ok(!status.nextActions.some((item) => item.priority === 'P0' && item.action.includes('Publish one confirmed')));
     assert.ok(status.nextActions.some((item) => item.priority === 'P1' && item.reason.includes('After the current blocker is cleared')));
     assert.match(markdown, /Browser Readiness/);
+    assert.match(markdown, /Manual Publish Fallback/);
+    assert.match(markdown, /manual-publish-kit/);
+    assert.match(markdown, /post-publish-recovery/);
     assert.match(markdown, /Chrome extension native pipe is closed/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
@@ -3735,7 +3821,10 @@ test('status CLI reads stored browser probe before reporting readiness', async (
     assert.equal(result.status, 0, result.stderr || result.stdout);
     assert.match(markdown, /Status: needs_x_login/);
     assert.match(markdown, /X Login Recovery/);
+    assert.match(markdown, /Manual Publish Fallback/);
     assert.match(markdown, /cli\.mjs login-recovery --day 1 --slot 1 --publishMode thread_fallback/);
+    assert.match(markdown, /cli\.mjs manual-publish-kit --day 1 --slot 1 --publishMode thread_fallback/);
+    assert.match(markdown, /cli\.mjs post-publish-recovery --queue data\/social-growth\/queue\.json/);
     assert.match(markdown, /x-browser-cdp\.mjs --probe --json --probe-out data\/social-growth\/browser-probe\.local\.json --account '@Clean993'/);
     assert.match(markdown, /cli\.mjs browser-readiness --day 1 --slot 1 --publishMode thread_fallback/);
     assert.match(markdown, /The Chrome profile used for publishing is not logged into X/);

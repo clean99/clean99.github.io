@@ -75,6 +75,12 @@ export async function buildDailyExecutionBrief({
   });
   const summary = summarizeGrowthLedger(ledger);
   const funnel = buildGrowthFunnel(ledger);
+  const browserSummary = summarizeBrowserReadiness(browserReadiness);
+  const manualPublishFallback = buildManualPublishFallback({
+    dayReadiness,
+    browserReadiness: browserSummary,
+    slot,
+  });
   const actionItems = buildActionItems({
     dayReadiness,
     engagementSearch,
@@ -82,7 +88,8 @@ export async function buildDailyExecutionBrief({
     metricsReadiness,
     profileAudit,
     funnel,
-    browserReadiness,
+    browserReadiness: browserSummary,
+    manualPublishFallback,
     day,
   });
   const browserReadinessCommand = buildBrowserReadinessCommand({
@@ -113,8 +120,9 @@ export async function buildDailyExecutionBrief({
     engagementPlan,
     metricsReadiness,
     profileAudit,
-    browserReadiness: summarizeBrowserReadiness(browserReadiness),
+    browserReadiness: browserSummary,
     browserReadinessCommand,
+    manualPublishFallback,
     actionItems,
     boundary: 'Local brief only. Publishing, media upload, reply, like, repost, follow, profile edit, and pin actions still require action-time confirmation in Chrome.',
   };
@@ -130,6 +138,7 @@ export function formatDailyExecutionBriefMarkdown(brief) {
   const slots = brief.dayReadiness.slots.length
     ? brief.dayReadiness.slots.map(formatSlot).join('\n')
     : '- No publish slots for this day.';
+  const manualPublishFallback = formatManualPublishFallback(brief.manualPublishFallback);
   const actions = brief.actionItems.length
     ? brief.actionItems.map((item) => `- ${item.priority}: ${item.action}\n  Reason: ${item.reason}`).join('\n')
     : '- No actions.';
@@ -176,6 +185,7 @@ Command:
 ${brief.browserReadinessCommand || buildBrowserReadinessCommand({ day: brief.day, slot: 1 })}
 \`\`\`
 
+${manualPublishFallback}
 ## Engagement
 
 - Search status: ${brief.engagementSearch.status}
@@ -279,6 +289,70 @@ function buildBrowserReadinessCommand({
   return args.join(' ');
 }
 
+function buildManualPublishFallback({
+  dayReadiness,
+  browserReadiness,
+  slot,
+} = {}) {
+  const browserBlocked = blockingBrowserIssues(browserReadiness).length > 0;
+  const selected = selectedReadySlot(dayReadiness, slot);
+  const base = {
+    available: false,
+    selected: selected || null,
+    slotLabel: selected ? `day ${dayReadiness.day} slot ${selected.slot}` : '',
+    kitPath: 'data/social-growth/manual-publish-kit.md',
+    kitCommand: '',
+    recoveryCommand: '',
+    reason: '',
+  };
+  if (!browserBlocked || !selected) return base;
+
+  return {
+    ...base,
+    available: true,
+    kitCommand: manualPublishKitCommand(dayReadiness.day, selected),
+    recoveryCommand: postPublishRecoveryCommand(selected),
+    reason: `${selected.id} is locally ready with an image; the blocker is the CDP publishing browser state, not the content package.`,
+  };
+}
+
+function selectedReadySlot(dayReadiness, slot) {
+  const slotNumber = Number(slot || 1);
+  const readySlots = dayReadiness.slots.filter((item) => item.preflightStatus === 'ready' && item.xPrepStatus === 'ready');
+  return readySlots.find((item) => item.slot === slotNumber)
+    || readySlots[0]
+    || null;
+}
+
+function manualPublishKitCommand(day, slot) {
+  return `npm run social:manual-publish-kit -- --day ${Number(day)} --slot ${slot.slot}${publishModeArg(slot.publishMode)} --id ${shellQuote(slot.id)} --out data/social-growth/manual-publish-kit.md`;
+}
+
+function postPublishRecoveryCommand(slot) {
+  if (slot.publishMode === 'thread_fallback') {
+    return `npm run social:post-publish-recovery -- --queue data/social-growth/queue.json --id ${shellQuote(slot.id)} --url '<x-thread-url>' --reply-out data/social-growth/thread-reply-handoff.md`;
+  }
+  return `npm run social:post-publish-recovery -- --queue data/social-growth/queue.json --id ${shellQuote(slot.id)} --url '<x-post-url>' --article-url '<x-article-url>' --reply-out data/social-growth/thread-reply-handoff.md`;
+}
+
+function formatManualPublishFallback(fallback) {
+  if (!fallback?.available) return '';
+  return `## Manual Publish Fallback
+
+Use this if a normal Chrome profile is already logged into \`@Clean993\` while the CDP publishing profile is blocked. This is a local kit only; every publish, media upload, reply, like, repost, follow, profile edit, and pin still requires action-time confirmation in Chrome.
+
+\`\`\`bash
+${fallback.kitCommand}
+${fallback.recoveryCommand}
+\`\`\`
+
+`;
+}
+
+function publishModeArg(publishMode) {
+  return publishMode === 'thread_fallback' ? ' --publishMode thread_fallback' : '';
+}
+
 function shellQuote(value) {
   return `'${String(value).replace(/'/g, "'\\''")}'`;
 }
@@ -291,6 +365,7 @@ function buildActionItems({
   profileAudit,
   funnel,
   browserReadiness,
+  manualPublishFallback,
   day,
 }) {
   const actions = [];
@@ -311,6 +386,13 @@ function buildActionItems({
       action: `Fix browser readiness before preparing public X editors: ${browserReadiness.status}.`,
       reason: browserBlockers.join(' '),
     });
+    if (manualPublishFallback?.available) {
+      actions.push({
+        priority: 'P0',
+        action: `Generate the manual publish kit for ${manualPublishFallback.slotLabel}, publish from a logged-in normal Chrome profile with confirmation, then run post-publish-recovery.`,
+        reason: manualPublishFallback.reason,
+      });
+    }
   }
   if (readySlots.length && !browserBlockers.length) {
     actions.push({

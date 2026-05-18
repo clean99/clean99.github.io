@@ -58,6 +58,15 @@ export async function buildGrowthStatus({
     preflight,
     browserReadiness: browserSummary,
   });
+  const manualPublishFallback = buildManualPublishFallback({
+    preflight,
+    browserReadiness: browserSummary,
+    publishMode: resolvedPublishMode,
+    day,
+    slot,
+    xProfileDir,
+    xProfileDirectory,
+  });
 
   return {
     generatedAt,
@@ -88,6 +97,7 @@ export async function buildGrowthStatus({
     publishMode: resolvedPublishMode,
     xProfileDir,
     xProfileDirectory,
+    manualPublishFallback,
     nextActions: nextActions({
       validation,
       weeklyPlan,
@@ -98,6 +108,7 @@ export async function buildGrowthStatus({
       publishMode: resolvedPublishMode,
       day,
       slot,
+      manualPublishFallback,
     }),
   };
 }
@@ -107,6 +118,7 @@ export function formatGrowthStatusMarkdown(status) {
   const preflight = status.preflight;
   const browserReadiness = status.browserReadiness || summarizeBrowserReadiness(null);
   const loginRecovery = loginRecoveryMarkdown(status, browserReadiness);
+  const manualPublishFallback = manualPublishFallbackMarkdown(status);
   const blockers = preflight?.blockers?.length
     ? preflight.blockers.map((blocker) => `- ${blocker}`).join('\n')
     : '- No preflight blockers.';
@@ -180,6 +192,7 @@ ${blockers}
 ${browserBlockers}
 
 ${loginRecovery}
+${manualPublishFallback}
 
 ## Profile Conversion
 
@@ -219,6 +232,8 @@ ${cliCommand('validate', '--queue data/social-growth/queue.json --format markdow
 ${cliCommand('preflight', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot} --out data/social-growth/publish-preflight.md`)}
 ${cliCommand('image-brief', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}`)}
 ${cliCommand('x-prep', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)} --out data/social-growth/x-publish-prep.md`)}
+${manualPublishKitCommand(status, preflight)}
+${postPublishRecoveryCommand(status, preflight)}
 ${cliCommand('profile-audit', '--profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md')}
 ${cliCommand('profile-package', '--profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md')}
 ${recordCommand(status, preflight)}
@@ -271,6 +286,7 @@ function nextActions({
   publishMode,
   day,
   slot,
+  manualPublishFallback,
 }) {
   const actions = [];
   const browserBlocked = Boolean(blockingBrowserStatus(browserReadiness));
@@ -284,6 +300,13 @@ function nextActions({
       action: `Fix browser readiness before preparing public X editors: ${browserReadiness.status}.`,
       reason: browserReadiness.blockers.join(' ') || 'Browser readiness is blocking the selected publish slot.',
     });
+    if (manualPublishFallback?.available) {
+      actions.push({
+        priority: 'P0',
+        action: 'Generate the manual publish kit and use a logged-in normal Chrome profile for confirmed publishing, then run post-publish-recovery.',
+        reason: manualPublishFallback.reason,
+      });
+    }
   } else {
     actions.push({
       priority: 'P0',
@@ -347,6 +370,49 @@ function deferActionsWhenBlocked(actions, blocked) {
   });
 }
 
+function buildManualPublishFallback({
+  preflight,
+  browserReadiness,
+  publishMode,
+  day,
+  slot,
+  xProfileDir,
+  xProfileDirectory,
+} = {}) {
+  const browserBlocked = Boolean(blockingBrowserStatus(browserReadiness));
+  const localPackageReady = preflight?.status === 'ready'
+    && Boolean(preflight?.selected?.id)
+    && preflight?.image?.ready === true;
+  const commandStatus = {
+    selectedSlot: {
+      day: Number(day || 1),
+      slot: Number(slot || 1),
+    },
+    publishMode,
+    xProfileDir,
+    xProfileDirectory,
+  };
+  const base = {
+    available: false,
+    selectedSlot: commandStatus.selectedSlot,
+    queueId: preflight?.selected?.id || '',
+    publishMode,
+    kitPath: 'data/social-growth/manual-publish-kit.md',
+    kitCommand: '',
+    recoveryCommand: '',
+    reason: '',
+  };
+  if (!browserBlocked || !localPackageReady) return base;
+
+  return {
+    ...base,
+    available: true,
+    kitCommand: manualPublishKitCommand(commandStatus, preflight),
+    recoveryCommand: postPublishRecoveryCommand(commandStatus, preflight),
+    reason: 'Selected package and image are ready; the blocker is the CDP publishing browser state, so a logged-in normal Chrome profile can still move the growth loop after explicit confirmation.',
+  };
+}
+
 function summarizeBrowserReadiness(browserReadiness) {
   return {
     status: browserReadiness?.status || 'not_checked',
@@ -376,6 +442,23 @@ ${xBrowserCommand(`--probe --json --probe-out data/social-growth/browser-probe.l
 ${cliCommand('browser-readiness', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/browser-readiness.md`)}
 ${cliCommand('status', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/status.md`)}
 \`\`\`
+
+`;
+}
+
+function manualPublishFallbackMarkdown(status) {
+  const fallback = status.manualPublishFallback;
+  if (!fallback?.available) return '';
+  return `## Manual Publish Fallback
+
+Use this when the CDP publishing profile is still blocked but a normal Chrome profile is already logged into \`@Clean993\`. This creates a local copy/paste kit only; it is not permission to publish, upload media, reply, like, repost, follow, edit profile, or pin content.
+
+\`\`\`bash
+${fallback.kitCommand}
+${fallback.recoveryCommand}
+\`\`\`
+
+After confirmed publication, paste the public X status URL into the recovery command. The recovery command marks the queue item published, refreshes local metrics files, and writes the thread reply handoff.
 
 `;
 }
@@ -454,6 +537,19 @@ function recordCommand(status, preflight) {
     return cliCommand('mark-published', `--queue data/social-growth/queue.json --id ${id} --url '<x-thread-url>' --reply-out data/social-growth/thread-reply-handoff.md`);
   }
   return cliCommand('mark-published', `--queue data/social-growth/queue.json --id ${id} --url '<x-post-url>' --article-url '<x-article-url>'`);
+}
+
+function manualPublishKitCommand(status, preflight) {
+  const idArg = preflight?.selected?.id ? ` --id ${shellQuote(preflight.selected.id)}` : '';
+  return cliCommand('manual-publish-kit', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishModeArgs(status)}${idArg} --out data/social-growth/manual-publish-kit.md`);
+}
+
+function postPublishRecoveryCommand(status, preflight) {
+  const id = shellQuote(preflight?.selected?.id || '<queue-id>');
+  if (status.publishMode === 'thread_fallback') {
+    return cliCommand('post-publish-recovery', `--queue data/social-growth/queue.json --id ${id} --url '<x-thread-url>' --reply-out data/social-growth/thread-reply-handoff.md`);
+  }
+  return cliCommand('post-publish-recovery', `--queue data/social-growth/queue.json --id ${id} --url '<x-post-url>' --article-url '<x-article-url>' --reply-out data/social-growth/thread-reply-handoff.md`);
 }
 
 function cliCommand(command, args = '') {
