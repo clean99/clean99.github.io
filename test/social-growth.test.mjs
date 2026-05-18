@@ -3491,6 +3491,59 @@ test('browser readiness accepts an X compose draft that matches the selected fir
   assert.deepEqual(readiness.blockers, []);
 });
 
+test('browser readiness can use logged-in normal Chrome when CDP profile is logged out', () => {
+  const readiness = buildBrowserReadiness({
+    preflight: {
+      generatedAt: '2026-05-18T00:00:00.000Z',
+      status: 'ready',
+      selected: {
+        id: 'Agent-Skills__zh__strong-thesis',
+        articleSlug: 'Agent-Skills',
+      },
+      image: {
+        outputPath: 'output/imagegen/Agent-Skills__zh__strong-thesis.png',
+        ready: true,
+      },
+    },
+    xPrep: {
+      status: 'ready',
+      publishMode: 'thread_fallback',
+      selected: {
+        id: 'Agent-Skills__zh__strong-thesis',
+        articleSlug: 'Agent-Skills',
+      },
+      files: {
+        image: 'output/imagegen/Agent-Skills__zh__strong-thesis.png',
+      },
+      skill: {
+        browserHandoff: 'cdp',
+      },
+    },
+    expectedAccount: '@Clean993',
+    chromeRunning: 'yes',
+    extensionInstalled: 'yes',
+    nativeHost: 'yes',
+    extensionPipe: 'yes',
+    loginState: 'logged_out',
+    articleAvailable: 'no',
+    mediaUpload: 'yes',
+    currentUrl: 'https://x.com/i/flow/login?redirect_after_login=%2Fcompose%2Fpost',
+    userBrowserAccount: '@Clean993',
+    userBrowserLoginState: 'logged_in',
+    userBrowserCurrentUrl: 'https://x.com/home',
+    userBrowserTitle: 'Home / X',
+  });
+  const markdown = formatBrowserReadinessMarkdown(readiness);
+
+  assert.equal(readiness.status, 'ready_via_user_chrome_confirmation');
+  assert.deepEqual(readiness.blockers, []);
+  assert.equal(readiness.userBrowserSession.usable, true);
+  assert.ok(readiness.warnings.some((item) => item.includes('CDP publishing profile is logged out')));
+  assert.ok(readiness.nextActions.some((item) => item.action.includes('manual publish kit')));
+  assert.match(markdown, /Normal Chrome Session/);
+  assert.match(markdown, /Usable for confirmation flow: true/);
+});
+
 test('compose draft resolution maps an existing draft to a queue item', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-compose-resolution-'));
   try {
@@ -4910,6 +4963,68 @@ test('growth status surfaces blocking browser readiness before publish prep', as
     assert.match(markdown, /manual-publish-kit/);
     assert.match(markdown, /post-publish-recovery/);
     assert.match(markdown, /Chrome extension native pipe is closed/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('growth status prefers manual kit when normal Chrome is already logged in', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-status-user-chrome-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(imageDir, `${queue.items[0].id}.png`), 'fake image');
+
+    const status = await buildGrowthStatus({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      publishMode: 'thread_fallback',
+      browserReadiness: {
+        status: 'ready_via_user_chrome_confirmation',
+        currentUrl: 'https://x.com/i/flow/login?redirect_after_login=%2Fcompose%2Fpost',
+        blockers: [],
+        warnings: [
+          'The CDP publishing profile is logged out, but normal Chrome is logged into the expected X account.',
+        ],
+        userBrowserSession: {
+          account: '@Clean993',
+          loginState: 'yes',
+          currentUrl: 'https://x.com/home',
+          title: 'Home / X',
+          usable: true,
+        },
+      },
+      env: {},
+    });
+    const markdown = formatGrowthStatusMarkdown(status);
+
+    assert.equal(status.status, 'ready_via_user_chrome_confirmation');
+    assert.equal(status.manualPublishFallback.available, true);
+    assert.ok(status.nextActions.some((item) => item.action.includes('manual publish kit')));
+    assert.ok(!status.nextActions.some((item) => item.action.includes('Fix browser readiness')));
+    assert.match(markdown, /Manual Publish Fallback/);
+    assert.match(markdown, /Normal Chrome is logged into @Clean993/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

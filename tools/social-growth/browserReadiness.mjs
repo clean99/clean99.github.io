@@ -16,6 +16,10 @@ const PROBE_FIELDS = [
   'mediaUpload',
   'profileDirectory',
   'currentUrl',
+  'userBrowserAccount',
+  'userBrowserLoginState',
+  'userBrowserCurrentUrl',
+  'userBrowserTitle',
   'composeDraftText',
   'generatedAt',
 ];
@@ -36,6 +40,10 @@ export function buildBrowserReadiness({
   profileDir = xPrep?.skill?.profileDir || '',
   profileDirectory = xPrep?.skill?.profileDirectory || '',
   currentUrl = '',
+  userBrowserAccount = '',
+  userBrowserLoginState = UNKNOWN,
+  userBrowserCurrentUrl = '',
+  userBrowserTitle = '',
   generatedAt = preflight?.generatedAt || new Date().toISOString(),
 } = {}) {
   const signals = {
@@ -52,11 +60,19 @@ export function buildBrowserReadiness({
     composeDraftText,
     expectedTexts: selectedComposeDraftTexts({ preflight, xPrep, publishMode }),
   });
+  const userBrowserSession = buildUserBrowserSession({
+    expectedAccount,
+    userBrowserAccount,
+    userBrowserLoginState,
+    userBrowserCurrentUrl,
+    userBrowserTitle,
+  });
   const cdpHandoffReady = xPrep?.status === 'ready' && (
     xPrep?.skill?.browserHandoff === 'cdp'
     || xPrep?.skill?.name === 'baoyu-post-to-x'
   );
   const blockers = [];
+  const warnings = [];
 
   if (preflight?.status && preflight.status !== 'ready') {
     blockers.push('Local publish preflight is not ready.');
@@ -79,11 +95,15 @@ export function buildBrowserReadiness({
   if (signals.extensionPipe === 'closed' && !cdpHandoffReady) {
     blockers.push('Codex Chrome Extension native pipe is closed.');
   }
-  if (signals.loginState === 'logged_out') {
+  if (signals.loginState === 'logged_out' && !userBrowserSession.usable) {
     blockers.push('The Chrome profile used for publishing is not logged into X.');
+  } else if (signals.loginState === 'logged_out' && userBrowserSession.usable) {
+    warnings.push('The CDP publishing profile is logged out, but normal Chrome is logged into the expected X account.');
   }
-  if (observedAccount && !sameAccount(observedAccount, expectedAccount)) {
+  if (observedAccount && !sameAccount(observedAccount, expectedAccount) && !userBrowserSession.usable) {
     blockers.push(`Chrome is logged into ${observedAccount}, not ${expectedAccount}.`);
+  } else if (observedAccount && !sameAccount(observedAccount, expectedAccount) && userBrowserSession.usable) {
+    warnings.push(`The CDP publishing profile appears to be ${observedAccount}, but normal Chrome is logged into ${expectedAccount}.`);
   }
   if (composeDraft.status === 'different') {
     blockers.push('X compose already contains a different draft; save, publish after confirmation, or discard it before writing the selected package.');
@@ -97,13 +117,14 @@ export function buildBrowserReadiness({
 
   return {
     generatedAt: toIsoString(generatedAt),
-    status: readinessStatus({ blockers, signals, observedAccount, publishMode }),
+    status: readinessStatus({ blockers, signals, observedAccount, publishMode, userBrowserSession }),
     expectedAccount,
     observedAccount,
     publishMode,
     profileDir,
     profileDirectory,
     currentUrl: String(currentUrl || '').trim(),
+    userBrowserSession,
     selected: {
       id: preflight?.selected?.id || xPrep?.selected?.id || '',
       articleSlug: preflight?.selected?.articleSlug || xPrep?.selected?.articleSlug || '',
@@ -117,7 +138,8 @@ export function buildBrowserReadiness({
     signals,
     composeDraft,
     blockers,
-    nextActions: nextActions({ blockers, signals, publishMode, profileDir, profileDirectory }),
+    warnings,
+    nextActions: nextActions({ blockers, signals, publishMode, profileDir, profileDirectory, userBrowserSession }),
     boundary: 'Readiness only. Do not publish, upload media, reply, like, repost, follow, edit profile, pin content, or click final X buttons without action-time confirmation.',
   };
 }
@@ -129,6 +151,10 @@ export function formatBrowserReadinessMarkdown(readiness) {
   const actions = readiness.nextActions.length
     ? readiness.nextActions.map((item) => `- ${item.priority}: ${item.action}\n  Reason: ${item.reason}`).join('\n')
     : '- No next actions.';
+  const warnings = readiness.warnings?.length
+    ? readiness.warnings.map((warning) => `- ${warning}`).join('\n')
+    : '- No browser readiness warnings.';
+  const userSession = readiness.userBrowserSession || {};
 
   return `# X Browser Readiness
 
@@ -150,6 +176,14 @@ Status: ${readiness.status}
 - Chrome profile dir: ${readiness.profileDir ? `\`${readiness.profileDir}\`` : 'default baoyu shared profile'}
 - Chrome profile directory: ${readiness.profileDirectory || 'default'}
 - Current URL: ${readiness.currentUrl || 'unknown'}
+
+## Normal Chrome Session
+
+- Account: ${userSession.account || 'unknown'}
+- Login state: ${userSession.loginState || 'unknown'}
+- Usable for confirmation flow: ${Boolean(userSession.usable)}
+- Current URL: ${userSession.currentUrl || 'unknown'}
+- Title: ${userSession.title || 'unknown'}
 
 ## Local Prep
 
@@ -175,6 +209,10 @@ Status: ${readiness.status}
 ## Blockers
 
 ${blockers}
+
+## Warnings
+
+${warnings}
 
 ## Next Actions
 
@@ -227,8 +265,11 @@ export function hasBrowserProbeValues(probe = {}) {
   return PROBE_FIELDS.some((field) => field !== 'generatedAt' && probeFieldHasValue(normalized, field));
 }
 
-function readinessStatus({ blockers, signals, observedAccount, publishMode }) {
+function readinessStatus({ blockers, signals, observedAccount, publishMode, userBrowserSession }) {
   if (!blockers.length) {
+    if (userBrowserSession?.usable && signals.loginState === 'logged_out') {
+      return 'ready_via_user_chrome_confirmation';
+    }
     const unknowns = Object.values(signals).filter((value) => value === UNKNOWN).length;
     if (!observedAccount || unknowns) return 'needs_browser_probe';
     return 'ready_for_browser_confirmation';
@@ -244,9 +285,17 @@ function readinessStatus({ blockers, signals, observedAccount, publishMode }) {
   return 'blocked_browser_readiness';
 }
 
-function nextActions({ blockers, signals, publishMode, profileDir }) {
+function nextActions({ blockers, signals, publishMode, profileDir, userBrowserSession }) {
   const actions = [];
   if (!blockers.length) {
+    if (userBrowserSession?.usable) {
+      actions.push({
+        priority: 'P0',
+        action: 'Use the logged-in normal Chrome session with the manual publish kit, stopping before media upload and final publish confirmation.',
+        reason: 'The CDP publishing profile is not the active X session, but normal Chrome is already logged into the expected account.',
+      });
+      return actions;
+    }
     actions.push({
       priority: 'P0',
       action: 'Open the prepared Chrome handoff and stop before media upload and final publish confirmation.',
@@ -337,8 +386,30 @@ function normalizeBrowserProbe(probe = {}) {
   }
   if (hasValue(probe.profileDirectory)) normalized.profileDirectory = String(probe.profileDirectory).trim();
   if (hasValue(probe.currentUrl)) normalized.currentUrl = String(probe.currentUrl).trim();
+  if (hasValue(probe.userBrowserAccount)) normalized.userBrowserAccount = String(probe.userBrowserAccount).trim();
+  if (hasValue(probe.userBrowserLoginState)) normalized.userBrowserLoginState = normalizeSignal(probe.userBrowserLoginState);
+  if (hasValue(probe.userBrowserCurrentUrl)) normalized.userBrowserCurrentUrl = String(probe.userBrowserCurrentUrl).trim();
+  if (hasValue(probe.userBrowserTitle)) normalized.userBrowserTitle = String(probe.userBrowserTitle).trim();
   if (hasValue(probe.generatedAt)) normalized.generatedAt = toIsoString(probe.generatedAt);
   return normalized;
+}
+
+function buildUserBrowserSession({
+  expectedAccount,
+  userBrowserAccount,
+  userBrowserLoginState,
+  userBrowserCurrentUrl,
+  userBrowserTitle,
+} = {}) {
+  const account = String(userBrowserAccount || '').trim();
+  const loginState = normalizeSignal(userBrowserLoginState);
+  return {
+    account,
+    loginState,
+    currentUrl: String(userBrowserCurrentUrl || '').trim(),
+    title: String(userBrowserTitle || '').trim(),
+    usable: loginState === 'yes' && Boolean(account) && sameAccount(account, expectedAccount),
+  };
 }
 
 function probeFieldHasValue(probe, field) {

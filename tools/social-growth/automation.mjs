@@ -264,6 +264,10 @@ export async function runSafeAutomationCycle({
     profileDir: xProfileDir,
     profileDirectory: effectiveProfileDirectory,
     currentUrl: effectiveBrowserProbe.currentUrl,
+    userBrowserAccount: effectiveBrowserProbe.userBrowserAccount,
+    userBrowserLoginState: effectiveBrowserProbe.userBrowserLoginState,
+    userBrowserCurrentUrl: effectiveBrowserProbe.userBrowserCurrentUrl,
+    userBrowserTitle: effectiveBrowserProbe.userBrowserTitle,
     generatedAt,
   });
   await writeBrowserReadiness(browserReadiness, browserReadinessPath);

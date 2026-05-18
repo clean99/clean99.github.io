@@ -189,6 +189,9 @@ ${blockers}
 - Status: ${browserReadiness.status}
 - Blockers: ${browserReadiness.blockers.length}
 - Current URL: ${browserReadiness.currentUrl || 'unknown'}
+- Normal Chrome account: ${browserReadiness.userBrowserSession?.account || 'unknown'}
+- Normal Chrome usable: ${Boolean(browserReadiness.userBrowserSession?.usable)}
+- Normal Chrome URL: ${browserReadiness.userBrowserSession?.currentUrl || 'unknown'}
 
 ${browserBlockers}
 
@@ -276,6 +279,7 @@ function statusName({
   if (!weeklyPlan) return 'blocked_no_ledger';
   if (preflight.status === 'blocked') return 'blocked_preflight';
   if (blockingBrowserStatus(browserReadiness)) return browserReadiness.status;
+  if (browserReadiness?.status === 'ready_via_user_chrome_confirmation') return 'ready_via_user_chrome_confirmation';
   return 'ready_for_browser_confirmation';
 }
 
@@ -316,10 +320,14 @@ function nextActions({
   } else {
     actions.push({
       priority: 'P0',
-      action: publishMode === 'thread_fallback'
-        ? 'Prepare the image-backed thread first post in Chrome, stopping before media upload and final publish confirmation.'
-        : 'Prepare the X Article and image-backed short post in Chrome, stopping before every public action for confirmation.',
-      reason: 'Preflight has no blockers.',
+      action: browserReadiness.status === 'ready_via_user_chrome_confirmation'
+        ? 'Use the manual publish kit in the logged-in normal Chrome session, stopping before media upload and final publish confirmation.'
+        : (publishMode === 'thread_fallback'
+            ? 'Prepare the image-backed thread first post in Chrome, stopping before media upload and final publish confirmation.'
+            : 'Prepare the X Article and image-backed short post in Chrome, stopping before every public action for confirmation.'),
+      reason: browserReadiness.status === 'ready_via_user_chrome_confirmation'
+        ? 'Normal Chrome is logged into @Clean993 while the CDP publishing profile is not.'
+        : 'Preflight has no blockers.',
     });
   }
 
@@ -386,6 +394,7 @@ function buildManualPublishFallback({
   xProfileDirectory,
 } = {}) {
   const browserBlocked = Boolean(blockingBrowserStatus(browserReadiness));
+  const userChromeReady = browserReadiness?.status === 'ready_via_user_chrome_confirmation';
   const localPackageReady = preflight?.status === 'ready'
     && Boolean(preflight?.selected?.id)
     && preflight?.image?.ready === true;
@@ -412,7 +421,7 @@ function buildManualPublishFallback({
     recoveryCommand: '',
     reason: '',
   };
-  if (!browserBlocked || !localPackageReady) return base;
+  if ((!browserBlocked && !userChromeReady) || !localPackageReady) return base;
   if (browserReadiness.blockers.some((item) => item.includes('different draft'))) return base;
 
   return {
@@ -420,7 +429,9 @@ function buildManualPublishFallback({
     available: true,
     kitCommand: manualPublishKitCommand(commandStatus, preflight),
     recoveryCommand: postPublishRecoveryCommand(commandStatus, preflight),
-    reason: 'Selected package and image are ready; the blocker is the CDP publishing browser state, so a logged-in normal Chrome profile can still move the growth loop after explicit confirmation.',
+    reason: userChromeReady
+      ? 'Selected package and image are ready; normal Chrome is logged into @Clean993, so manual confirmation can move the growth loop without using the logged-out CDP profile.'
+      : 'Selected package and image are ready; the blocker is the CDP publishing browser state, so a logged-in normal Chrome profile can still move the growth loop after explicit confirmation.',
   };
 }
 
@@ -429,6 +440,8 @@ function summarizeBrowserReadiness(browserReadiness) {
     status: browserReadiness?.status || 'not_checked',
     currentUrl: browserReadiness?.currentUrl || '',
     blockers: [...(browserReadiness?.blockers || [])],
+    warnings: [...(browserReadiness?.warnings || [])],
+    userBrowserSession: browserReadiness?.userBrowserSession || null,
   };
 }
 
@@ -491,6 +504,7 @@ function blockingBrowserStatus(browserReadiness) {
   if (!browserReadiness?.blockers?.length) return '';
   if (browserReadiness.status === 'needs_browser_probe') return '';
   if (browserReadiness.status === 'ready_for_browser_confirmation') return '';
+  if (browserReadiness.status === 'ready_via_user_chrome_confirmation') return '';
   return browserReadiness.status;
 }
 

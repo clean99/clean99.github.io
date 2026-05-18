@@ -1405,6 +1405,10 @@ function browserProbeFromArgs(options = {}) {
   if (options.xProfileDirectory !== undefined) probe.profileDirectory = options.xProfileDirectory;
   if (options.profileDirectory !== undefined) probe.profileDirectory = options.profileDirectory;
   if (options.currentUrl !== undefined) probe.currentUrl = options.currentUrl;
+  if (options.userBrowserAccount !== undefined) probe.userBrowserAccount = options.userBrowserAccount;
+  if (options.userBrowserLoginState !== undefined) probe.userBrowserLoginState = options.userBrowserLoginState;
+  if (options.userBrowserCurrentUrl !== undefined) probe.userBrowserCurrentUrl = options.userBrowserCurrentUrl;
+  if (options.userBrowserTitle !== undefined) probe.userBrowserTitle = options.userBrowserTitle;
   return probe;
 }
 
