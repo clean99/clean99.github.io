@@ -9,8 +9,10 @@ import {
 import { readJson } from './queue.mjs';
 import {
   buildProfileAudit,
+  buildProfileUpdatePackage,
   readOptionalText,
   writeProfileAudit,
+  writeProfileUpdatePackage,
 } from './profile.mjs';
 import {
   buildGrowthStatus,
@@ -31,6 +33,7 @@ const DEFAULT_STATUS_PATH = 'data/social-growth/status.md';
 const DEFAULT_PREFLIGHT_PATH = 'data/social-growth/publish-preflight.md';
 const DEFAULT_PROFILE_TEXT_PATH = 'data/social-growth/profile.local.txt';
 const DEFAULT_PROFILE_AUDIT_PATH = 'data/social-growth/profile-audit.md';
+const DEFAULT_PROFILE_UPDATE_PATH = 'data/social-growth/profile-update.md';
 const DEFAULT_AUTOMATION_REPORT_PATH = 'data/social-growth/automation-run.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
@@ -50,6 +53,7 @@ export async function runSafeAutomationCycle({
   preflightPath = DEFAULT_PREFLIGHT_PATH,
   profileTextPath = DEFAULT_PROFILE_TEXT_PATH,
   profileAuditPath = DEFAULT_PROFILE_AUDIT_PATH,
+  profileUpdatePath = DEFAULT_PROFILE_UPDATE_PATH,
   automationReportPath = DEFAULT_AUTOMATION_REPORT_PATH,
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
   imageDir = DEFAULT_IMAGE_DIR,
@@ -91,6 +95,8 @@ export async function runSafeAutomationCycle({
     generatedAt,
   });
   await writeProfileAudit(profileAudit, profileAuditPath);
+  const profileUpdate = buildProfileUpdatePackage(profileAudit, { generatedAt });
+  await writeProfileUpdatePackage(profileUpdate, profileUpdatePath);
 
   const preflight = await buildPublishPreflight({
     queue,
@@ -146,6 +152,7 @@ export async function runSafeAutomationCycle({
       status: statusPath,
       preflight: preflightPath,
       profileAudit: profileAuditPath,
+      profileUpdate: profileUpdatePath,
       imageBrief: imageBriefOutPath,
       automationReport: automationReportPath,
     },
@@ -181,6 +188,7 @@ Status: ${result.status}
 - Status: \`${result.paths.status}\`
 - Preflight: \`${result.paths.preflight}\`
 - Profile audit: \`${result.paths.profileAudit}\`
+- Profile update package: \`${result.paths.profileUpdate}\`
 - Image brief: \`${result.paths.imageBrief || 'not generated'}\`
 
 ## Local Blockers

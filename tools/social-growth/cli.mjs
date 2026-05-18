@@ -13,9 +13,12 @@ import {
 } from './preflight.mjs';
 import {
   buildProfileAudit,
+  buildProfileUpdatePackage,
   formatProfileAuditMarkdown,
+  formatProfileUpdatePackageMarkdown,
   readOptionalText,
   writeProfileAudit,
+  writeProfileUpdatePackage,
 } from './profile.mjs';
 import {
   buildImageBrief,
@@ -97,6 +100,25 @@ if (command === 'articles') {
     console.log(JSON.stringify(audit, null, 2));
   } else {
     console.log(formatProfileAuditMarkdown(audit));
+  }
+} else if (command === 'profile-package') {
+  const queue = args.queue === 'false' ? null : await readJson(args.queue || 'data/social-growth/queue.json');
+  const profileText = await readOptionalText(args.profileText || 'data/social-growth/profile.local.txt');
+  const audit = await buildProfileAudit({
+    profileText,
+    queue,
+    generatedAt: args.now ? new Date(args.now) : new Date(),
+  });
+  const profilePackage = buildProfileUpdatePackage(audit, {
+    generatedAt: audit.generatedAt,
+  });
+  if (args.out) {
+    await writeProfileUpdatePackage(profilePackage, args.out);
+    console.log(`Wrote X profile update package to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(profilePackage, null, 2));
+  } else {
+    console.log(formatProfileUpdatePackageMarkdown(profilePackage));
   }
 } else if (command === 'validate') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
@@ -183,6 +205,7 @@ if (command === 'articles') {
     preflightPath: args.preflightOut || 'data/social-growth/publish-preflight.md',
     profileTextPath: args.profileText || 'data/social-growth/profile.local.txt',
     profileAuditPath: args.profileAuditOut || 'data/social-growth/profile-audit.md',
+    profileUpdatePath: args.profileUpdateOut || 'data/social-growth/profile-update.md',
     automationReportPath: args.out || 'data/social-growth/automation-run.md',
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
     imageDir: args.imageDir || 'output/imagegen',
@@ -430,6 +453,7 @@ function printHelp() {
   npm run social:report -- --ledger data/social-growth/example-ledger.json --format markdown
   npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
   npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
+  npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md
   npm run social:validate -- --queue data/social-growth/queue.json --format markdown
 `);
 }

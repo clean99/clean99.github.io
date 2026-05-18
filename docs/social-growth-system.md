@@ -103,6 +103,7 @@ This performs only local work:
 
 - refreshes the Chinese queue, daily report, weekly plan, packages, and metrics template;
 - writes `data/social-growth/profile-audit.md` from copied visible profile text;
+- writes `data/social-growth/profile-update.md` as a Chrome handoff for display name, bio, link, and pinned post;
 - writes `data/social-growth/publish-preflight.md`;
 - writes or refreshes the selected `data/social-growth/image-briefs/*.md`;
 - writes `data/social-growth/status.md`;
@@ -225,6 +226,14 @@ npm run social:profile-audit -- --profile-text data/social-growth/profile.local.
 
 This is local guidance only. It checks whether the visible profile text has a clear technical promise, a blog link, a pinned post, and a readable follower count. Editing the profile, link, or pinned post is a public account change and still requires action-time confirmation in Chrome.
 
+Export the exact profile update handoff:
+
+```bash
+npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md
+```
+
+This writes the current profile values, proposed display name, bio, link, pinned post draft, Chrome steps, and stop-before points. It is a preparation artifact only; saving the profile, publishing the pinned post, and pinning it still require action-time confirmation.
+
 Initialize a one-week follower ledger:
 
 ```bash
@@ -297,6 +306,7 @@ Use `data/social-growth/example-ledger.json` as the shape. Real local data shoul
 - `data/social-growth/*.local.json`
 - `data/social-growth/*.local.txt`
 - `data/social-growth/profile-audit.md`
+- `data/social-growth/profile-update.md`
 - `data/social-growth/queue.json`
 - `data/social-growth/post-texts/`
 - `data/social-growth/snapshots/`
@@ -351,14 +361,15 @@ Do not commit private analytics or account history.
 15. Stop before publishing the short post and confirm the exact content and account.
 16. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
 17. Stop before each public reply and confirm the exact content and account.
-18. Mark the published URL with `npm run social:mark-published`.
-19. Run `npm run social:metrics-template`.
-20. Use `npm run social:capture-metrics` when visible X text has been captured.
-21. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
-22. Run `npm run social:snapshot`.
-23. Run `npm run social:report -- --format markdown`.
-24. Run `npm run social:recommend -- --format markdown`.
-25. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+18. If `profile-update.md` is still needed, prepare the profile edit and pinned-post flow in Chrome, stopping before every save/publish/pin action.
+19. Mark the published URL with `npm run social:mark-published`.
+20. Run `npm run social:metrics-template`.
+21. Use `npm run social:capture-metrics` when visible X text has been captured.
+22. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
+23. Run `npm run social:snapshot`.
+24. Run `npm run social:report -- --format markdown`.
+25. Run `npm run social:recommend -- --format markdown`.
+26. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 For regular operation, replace steps 1-6 with:
 

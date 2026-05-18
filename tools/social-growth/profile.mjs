@@ -3,6 +3,7 @@ import { dirname } from 'node:path';
 import { parseXProfileMetrics } from './capture.mjs';
 
 const DEFAULT_PROFILE_AUDIT_PATH = 'data/social-growth/profile-audit.md';
+const DEFAULT_PROFILE_UPDATE_PATH = 'data/social-growth/profile-update.md';
 const POSITIONING_KEYWORDS = [
   'AI',
   'Agent',
@@ -129,6 +130,127 @@ ${audit.boundary.map((item) => `- ${item}`).join('\n')}
 export async function writeProfileAudit(audit, filePath = DEFAULT_PROFILE_AUDIT_PATH) {
   await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, `${formatProfileAuditMarkdown(audit).trimEnd()}\n`);
+  return filePath;
+}
+
+export function buildProfileUpdatePackage(audit, {
+  generatedAt = audit?.generatedAt || new Date(),
+} = {}) {
+  if (!audit) {
+    throw new Error('profile audit is required');
+  }
+  const failedChecks = audit.checks.filter((check) => check.status !== 'pass');
+
+  return {
+    generatedAt: toIsoString(generatedAt),
+    status: audit.status === 'pass' ? 'no_change_needed' : 'needs_browser_confirmation',
+    current: {
+      displayName: audit.profile.displayName || '',
+      bio: audit.profile.bio || '',
+      link: audit.profile.link || '',
+      pinned: audit.profile.pinned,
+      followers: audit.profile.followers,
+    },
+    proposed: {
+      displayName: audit.suggestions.displayName,
+      bio: audit.suggestions.bio,
+      link: audit.suggestions.link,
+      pinnedPost: audit.suggestions.pinnedPost,
+    },
+    failedChecks,
+    browser: {
+      stopBefore: [
+        'final profile save click',
+        'final pinned-post publish click',
+        'final pin-to-profile confirmation click',
+      ],
+      steps: [
+        'Open the Clean993 X profile.',
+        'Open Edit profile and fill display name, bio, and link from the proposed copy.',
+        'Stop before saving profile changes and request action-time confirmation.',
+        'Create a new post from the pinned-post draft.',
+        'Stop before publishing the post and request action-time confirmation.',
+        'After the post is public, pin it to the profile.',
+        'Stop before the final pin confirmation and request action-time confirmation.',
+        'Recapture visible profile text and rerun social:profile-audit.',
+      ],
+    },
+    boundary: [
+      'This package is a local handoff only.',
+      'Profile edits and pinned-post changes are public account actions and require action-time confirmation in Chrome.',
+    ],
+  };
+}
+
+export function formatProfileUpdatePackageMarkdown(profilePackage) {
+  const failedChecks = profilePackage.failedChecks.length
+    ? profilePackage.failedChecks.map((check) => `- ${check.message}`).join('\n')
+    : '- No failed profile checks.';
+  const stopPoints = profilePackage.browser.stopBefore.map((item) => `- ${item}`).join('\n');
+  const steps = profilePackage.browser.steps.map((item, index) => `${index + 1}. ${item}`).join('\n');
+
+  return `# X Profile Update Package
+
+Generated at: ${profilePackage.generatedAt}
+Status: ${profilePackage.status}
+
+## Failed Checks
+
+${failedChecks}
+
+## Current Profile
+
+- Display name: ${profilePackage.current.displayName || 'unknown'}
+- Bio: ${profilePackage.current.bio || 'missing'}
+- Link: ${profilePackage.current.link || 'missing'}
+- Pinned post detected: ${profilePackage.current.pinned}
+- Followers: ${profilePackage.current.followers || 'unknown'}
+
+## Proposed Profile Copy
+
+Display name:
+
+\`\`\`text
+${profilePackage.proposed.displayName}
+\`\`\`
+
+Bio:
+
+\`\`\`text
+${profilePackage.proposed.bio}
+\`\`\`
+
+Link:
+
+\`\`\`text
+${profilePackage.proposed.link}
+\`\`\`
+
+Pinned post draft:
+
+\`\`\`text
+${profilePackage.proposed.pinnedPost}
+\`\`\`
+
+## Chrome Handoff
+
+Steps:
+
+${steps}
+
+Stop before:
+
+${stopPoints}
+
+## Boundary
+
+${profilePackage.boundary.map((item) => `- ${item}`).join('\n')}
+`;
+}
+
+export async function writeProfileUpdatePackage(profilePackage, filePath = DEFAULT_PROFILE_UPDATE_PATH) {
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${formatProfileUpdatePackageMarkdown(profilePackage).trimEnd()}\n`);
   return filePath;
 }
 

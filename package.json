@@ -23,6 +23,7 @@
     "social:plan": "node tools/social-growth/cli.mjs plan",
     "social:preflight": "node tools/social-growth/cli.mjs preflight",
     "social:profile-audit": "node tools/social-growth/cli.mjs profile-audit",
+    "social:profile-package": "node tools/social-growth/cli.mjs profile-package",
     "social:queue": "node tools/social-growth/cli.mjs queue",
     "social:recommend": "node tools/social-growth/cli.mjs recommend",
     "social:register-image": "node tools/social-growth/cli.mjs register-image",

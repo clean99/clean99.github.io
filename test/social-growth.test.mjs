@@ -36,6 +36,8 @@ import {
 import { buildPublishPreflight, formatPublishPreflightMarkdown, registerPublishImage } from '../tools/social-growth/preflight.mjs';
 import {
   buildProfileAudit,
+  buildProfileUpdatePackage,
+  formatProfileUpdatePackageMarkdown,
   formatProfileAuditMarkdown,
   parseProfileText,
   writeProfileAudit,
@@ -650,6 +652,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       preflightPath: join(outDir, 'publish-preflight.md'),
       profileTextPath: join(outDir, 'profile.local.txt'),
       profileAuditPath: join(outDir, 'profile-audit.md'),
+      profileUpdatePath: join(outDir, 'profile-update.md'),
       automationReportPath: join(outDir, 'automation-run.md'),
       imageBriefDir: join(outDir, 'image-briefs'),
       imageDir: join(outDir, 'images'),
@@ -666,15 +669,18 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const status = await readFile(join(outDir, 'status.md'), 'utf8');
     const preflight = await readFile(join(outDir, 'publish-preflight.md'), 'utf8');
     const profileAudit = await readFile(join(outDir, 'profile-audit.md'), 'utf8');
+    const profileUpdate = await readFile(join(outDir, 'profile-update.md'), 'utf8');
 
     assert.equal(result.status, 'blocked_preflight');
     assert.match(result.blockers.join('\n'), /Image file is missing/);
     assert.match(result.blockers.join('\n'), /pin a post/);
     assert.ok(result.paths.imageBrief.endsWith('.md'));
     assert.match(report, /No public X action was performed/);
+    assert.match(report, /Profile update package/);
     assert.match(status, /Profile Conversion/);
     assert.match(preflight, /Status: blocked/);
     assert.match(profileAudit, /Status: needs_work/);
+    assert.match(profileUpdate, /final profile save click/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -986,6 +992,42 @@ test('profile audit turns visible profile text into conversion checks', async ()
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('profile update package prepares browser-confirmed profile changes', async () => {
+  const audit = await buildProfileAudit({
+    profileText: [
+      'clean',
+      '@Clean993',
+      'Software Engineer at Tiktok',
+      'Singaporeclean99.github.io',
+      '30 Followers',
+    ].join('\n'),
+    queue: buildPublishQueue([
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    }),
+    generatedAt: '2026-05-18T00:00:00.000Z',
+  });
+  const profilePackage = buildProfileUpdatePackage(audit);
+  const markdown = formatProfileUpdatePackageMarkdown(profilePackage);
+
+  assert.equal(profilePackage.status, 'needs_browser_confirmation');
+  assert.equal(profilePackage.current.displayName, 'clean');
+  assert.match(profilePackage.proposed.bio, /AI 工程化/);
+  assert.match(markdown, /final profile save click/);
+  assert.match(markdown, /Pinned post draft/);
+  assert.match(markdown, /action-time confirmation/);
 });
 
 test('profile parser ignores X navigation chrome around the profile card', () => {
