@@ -52,6 +52,7 @@ import {
   writeProfileAudit,
 } from '../tools/social-growth/profile.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
+import { runScheduledGrowthLoop } from '../tools/social-growth/scheduledRun.mjs';
 import { buildGrowthStatus, formatGrowthStatusMarkdown, writeGrowthStatus } from '../tools/social-growth/status.mjs';
 import { runXGrowthDryRun } from '../tools/social-growth/flowDryRun.mjs';
 import { buildXPublishPrep, formatXPublishPrepMarkdown, writeXPublishPrep } from '../tools/social-growth/xPrep.mjs';
@@ -831,6 +832,93 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(profileAudit, /Status: needs_work/);
     assert.match(profileUpdate, /final profile save click/);
     assert.match(xPrep, /baoyu-post-to-x Bridge/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('scheduled growth loop combines safe prep and read-only metrics cycle', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-scheduled-'));
+  try {
+    const articles = [
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ];
+    const expectedQueue = buildPublishQueue(articles, {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    const imageDir = join(outDir, 'images');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-article.ts'), '// test script');
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await writeFile(join(imageDir, `${expectedQueue.items[0].id}.png`), 'fake image');
+    await writeJson(join(outDir, 'ledger.json'), createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+    await writeFile(join(outDir, 'profile.local.txt'), [
+      'Clean99 | AI 工程化与前端性能',
+      '@Clean993',
+      '写 AI 工程化、前端性能、React 和测试。把真实工程问题压成可复用框架。',
+      'https://clean99.github.io',
+      'Pinned',
+      '30 Followers',
+    ].join('\n'));
+
+    const result = await runScheduledGrowthLoop({
+      articles,
+      now: '2026-05-18T00:00:00.000Z',
+      queuePath: join(outDir, 'queue.json'),
+      packageOutDir: join(outDir, 'packages'),
+      dailyReportPath: join(outDir, 'daily-run.md'),
+      weeklyPlanPath: join(outDir, 'weekly-plan.md'),
+      ledgerPath: join(outDir, 'ledger.json'),
+      metricsPath: join(outDir, 'posts.local.json'),
+      statusPath: join(outDir, 'status.md'),
+      preflightPath: join(outDir, 'publish-preflight.md'),
+      profileTextPath: join(outDir, 'profile.local.txt'),
+      postTextDir: join(outDir, 'post-texts'),
+      profileAuditPath: join(outDir, 'profile-audit.md'),
+      profileUpdatePath: join(outDir, 'profile-update.md'),
+      automationReportPath: join(outDir, 'automation-run.md'),
+      metricsCyclePath: join(outDir, 'metrics-cycle.md'),
+      growthReportPath: join(outDir, 'growth-report.md'),
+      recommendationsPath: join(outDir, 'recommendations.md'),
+      scheduledReportPath: join(outDir, 'scheduled-run.md'),
+      imageBriefDir: join(outDir, 'image-briefs'),
+      imageDir,
+      xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
+      xSkillDir: skillDir,
+      xBunCommand: 'bun',
+      queueOptions: {
+        limit: 1,
+        lang: 'zh',
+        campaign: 'test',
+      },
+      packageLimit: 1,
+      env: {},
+    });
+    const scheduledReport = await readFile(join(outDir, 'scheduled-run.md'), 'utf8');
+    const metricsReport = await readFile(join(outDir, 'metrics-cycle.md'), 'utf8');
+
+    assert.equal(result.status, 'needs_candidates');
+    assert.equal(result.automation.status, 'needs_candidates');
+    assert.equal(result.metrics.status, 'needs_published_posts');
+    assert.equal(result.selected.id, expectedQueue.items[0].id);
+    assert.match(scheduledReport, /Scheduled X Growth Run/);
+    assert.match(scheduledReport, /safe for recurring execution/);
+    assert.match(metricsReport, /No browser publish/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

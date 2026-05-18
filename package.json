@@ -33,6 +33,7 @@
     "social:recommend": "node tools/social-growth/cli.mjs recommend",
     "social:register-image": "node tools/social-growth/cli.mjs register-image",
     "social:report": "node tools/social-growth/cli.mjs report",
+    "social:scheduled-run": "node tools/social-growth/cli.mjs scheduled-run",
     "social:snapshot": "node tools/social-growth/cli.mjs snapshot",
     "social:status": "node tools/social-growth/cli.mjs status",
     "social:validate": "node tools/social-growth/cli.mjs validate",

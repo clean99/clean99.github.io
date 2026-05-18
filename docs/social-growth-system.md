@@ -37,6 +37,7 @@ The code can automate safe local work:
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
 - run one post-publish metrics cycle that merges published posts, parses copied visible X text, updates the ledger when follower count is present, and writes the next recommendations;
+- run one scheduled-safe loop that combines local publish preparation and read-only metrics parsing without browser actions;
 - audit the X profile's follower-conversion signals from copied visible profile text;
 - produce image 2 / `gpt-image-2` image prompts for each candidate;
 - produce an X Article draft before the blog link;
@@ -121,6 +122,14 @@ This performs only local work:
 
 It is the preferred recurring entry point. It still does not publish, upload media, reply, like, repost, follow, or edit the X profile. If the output says the image file is missing, generate it with built-in `imagegen` or register an existing PNG first, then rerun preflight before opening Chrome.
 
+Run the scheduled-safe loop:
+
+```bash
+npm run social:scheduled-run -- --day 1 --slot 1
+```
+
+This combines `social:automation` and `social:metrics-cycle` into one recurring-safe local pass. It refreshes queue/packages/status/preflight/profile/image/X prep artifacts, parses copied visible X text when available, writes reports, and never opens Chrome or performs public X actions.
+
 Run the full local dry-run when content is not ready for real publishing:
 
 ```bash
@@ -144,6 +153,14 @@ This writes an ignored JSON template under `data/social-growth/copy-overrides/`.
 - `image.prompt`
 - `threadFallback`
 - `followUpReplies`
+
+For technical sharing content, use the project skill:
+
+```text
+.agents/skills/x-technical-sharing/SKILL.md
+```
+
+It adapts the generic `technical-sharing-doc` causality chain into X-native output: short-post first screen, X Article, image prompt, fallback thread, and follow-up replies.
 
 Apply the optimized copy back to the local queue:
 

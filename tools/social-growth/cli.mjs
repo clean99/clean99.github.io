@@ -44,6 +44,7 @@ import {
   formatWeeklyExecutionPlanMarkdown,
   writeWeeklyExecutionPlan,
 } from './schedule.mjs';
+import { runScheduledGrowthLoop } from './scheduledRun.mjs';
 import {
   buildGrowthStatus,
   formatGrowthStatusMarkdown,
@@ -245,6 +246,52 @@ if (command === 'articles') {
     status: result.status,
     selected: result.selected,
     blockers: result.blockers,
+    paths: result.paths,
+  }, null, 2));
+} else if (command === 'scheduled-run') {
+  const articles = await loadArticles();
+  const result = await runScheduledGrowthLoop({
+    articles,
+    now: args.now ? new Date(args.now) : new Date(),
+    day: args.day || 1,
+    slot: args.slot || 1,
+    queuePath: args.queue || 'data/social-growth/queue.json',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    dailyReportPath: args.report || 'data/social-growth/daily-run.md',
+    weeklyPlanPath: args.weeklyPlan || 'data/social-growth/weekly-plan.md',
+    ledgerPath: args.ledger || 'data/social-growth/ledger.json',
+    metricsPath: args.metrics || 'data/social-growth/posts.local.json',
+    statusPath: args.statusOut || 'data/social-growth/status.md',
+    preflightPath: args.preflightOut || 'data/social-growth/publish-preflight.md',
+    profileTextPath: args.profileText || 'data/social-growth/profile.local.txt',
+    postTextDir: args.postTextDir || 'data/social-growth/post-texts',
+    profileAuditPath: args.profileAuditOut || 'data/social-growth/profile-audit.md',
+    profileUpdatePath: args.profileUpdateOut || 'data/social-growth/profile-update.md',
+    automationReportPath: args.automationOut || 'data/social-growth/automation-run.md',
+    metricsCyclePath: args.metricsCycleOut || 'data/social-growth/metrics-cycle.md',
+    growthReportPath: args.growthReport || 'data/social-growth/growth-report.md',
+    recommendationsPath: args.recommendations || 'data/social-growth/recommendations.md',
+    scheduledReportPath: args.out || 'data/social-growth/scheduled-run.md',
+    imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
+    imageDir: args.imageDir || 'output/imagegen',
+    xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
+    xSkillDir: args.xSkillDir,
+    xBunCommand: args.xBunCommand,
+    packageLimit: args.packageLimit || 3,
+    weeklyDays: args.days || 7,
+    weeklyPostsPerDay: args.postsPerDay || 3,
+    queueOptions: {
+      limit: args.limit || 5,
+      lang: args.lang || DEFAULT_LANG,
+      campaign: args.campaign,
+    },
+  });
+  console.log(JSON.stringify({
+    generatedAt: result.generatedAt,
+    status: result.status,
+    selected: result.selected,
+    automation: result.automation,
+    metrics: result.metrics,
     paths: result.paths,
   }, null, 2));
 } else if (command === 'day-readiness') {
@@ -611,6 +658,7 @@ function printHelp() {
   npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:daily -- --limit 5 --package-limit 3
   npm run social:automation -- --day 1 --slot 1
+  npm run social:scheduled-run -- --day 1 --slot 1
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
   npm run social:copy-template -- --day 1 --slot 1
   npm run social:apply-copy -- --input data/social-growth/copy-overrides/<queue-id>.json

@@ -24,6 +24,7 @@ Before writing copy, read `references/chinese-x-style.md` when the user asks to 
 
 ## Reusable Skills
 
+- Use `x-technical-sharing` as the writing layer when turning technical sharing docs, design notes, performance write-ups, or blog posts into X-native Chinese copy. It preserves the `technical-sharing-doc` causality chain but outputs short post, X Article, image prompt, fallback thread, and follow-up replies for the copy override bridge.
 - Use the built-in `imagegen` skill as the primary image path. It uses image 2 / `gpt-image-2` and does not require `OPENAI_API_KEY`. After generation, copy or register the selected PNG into the expected `output/imagegen/<queue-id>.png` path.
 - Use `baoyu-post-to-x` as the preferred Chrome/CDP helper for preparing X Articles, regular image posts, quote posts, or media posts when a scripted browser handoff is useful. Its scripts fill content in Chrome and leave the final public publish click to the user, which matches this skill's confirmation boundary.
 - Use `baoyu-danger-x-to-markdown` only for consented research or competitor/content archiving. It uses a reverse-engineered X API and must not become the default publishing or metrics path.
@@ -63,6 +64,7 @@ npm run social:copy-template -- --day 1 --slot 1
 ```
 
 Give the generated JSON file under `data/social-growth/copy-overrides/` to the writing skill. It should replace only `shortPost`, `xArticle`, `image`, `threadFallback`, and `followUpReplies`.
+For technical sharing content, use the project skill at `.agents/skills/x-technical-sharing/SKILL.md` to rewrite those fields. It adapts `technical-sharing-doc` into X-native Chinese copy: first-screen claim, X Article causality chain, image prompt, and substantive replies.
 After the JSON is optimized, apply it locally:
 
 ```bash
@@ -246,6 +248,14 @@ For single-item control:
    ```
 
 Use the daily command for scheduled automation. It is allowed to prepare local artifacts and reports, but it must not publish, reply, like, repost, follow, or upload media without action-time confirmation.
+
+For recurring safe jobs, prefer:
+
+```bash
+npm run social:scheduled-run -- --day 1 --slot 1
+```
+
+This combines safe local publishing preparation with read-only metrics-cycle parsing and writes `data/social-growth/scheduled-run.md`.
 
 ## Copy Rules
 
