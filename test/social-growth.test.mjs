@@ -3027,6 +3027,9 @@ test('compose draft resolution maps an existing draft to a queue item', async ()
       createdAt: '2026-05-18T00:00:00.000Z',
       limit: 2,
     });
+    const imageDir = join(outDir, 'images');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(imageDir, 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure__zh__strong-thesis.png'), 'fake image');
     const draftText = [
       'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
       '',
@@ -3081,6 +3084,7 @@ test('compose draft resolution maps an existing draft to a queue item', async ()
       day: 2,
       slot: 1,
       publishMode: 'thread_fallback',
+      imageDir,
       generatedAt: '2026-05-18T00:00:00.000Z',
     });
     const markdown = formatComposeDraftResolutionMarkdown(resolution);
@@ -3089,9 +3093,19 @@ test('compose draft resolution maps an existing draft to a queue item', async ()
 
     assert.equal(resolution.status, 'needs_resolution');
     assert.ok(resolution.match.item.id.startsWith('Workspace-v2-Tab-System-Performance'));
+    assert.equal(resolution.match.image.ready, false);
+    assert.ok(resolution.match.image.alternateReadyPath.endsWith('__zh__strong-thesis.png'));
+    assert.equal(resolution.match.draftMatchesFirstPost, false);
     assert.match(resolution.commands.afterPublishingExistingDraft, /post-publish-recovery/);
+    assert.match(resolution.commands.imageBriefForExistingDraft, /image-brief --id/);
     assert.match(markdown, /Likely Queue Match/);
     assert.match(markdown, /Workspace-v2-Tab-System-Performance/);
+    assert.match(markdown, /Existing Draft Publishability/);
+    assert.match(markdown, /Image ready for matched item: no/);
+    assert.match(markdown, /Image ready: no/);
+    assert.match(markdown, /Alternate ready same-article image/);
+    assert.match(markdown, /Publishing it as-is would violate the image-first package strategy/);
+    assert.match(markdown, /do not treat this existing draft as a healthy growth slot/);
     assert.match(persisted, /X Compose Draft Resolution/);
     assert.match(persisted, /Do not overwrite it with the selected package/);
   } finally {

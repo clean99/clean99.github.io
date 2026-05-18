@@ -951,6 +951,7 @@ if (command === 'articles') {
     day: args.day || 1,
     slot: args.slot || 1,
     publishMode,
+    imageDir: args.imageDir || 'output/imagegen',
     generatedAt: preflight.generatedAt,
   });
   if (args.out) {

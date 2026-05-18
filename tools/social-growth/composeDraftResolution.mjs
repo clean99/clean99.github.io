@@ -1,7 +1,9 @@
+import { existsSync, readdirSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 
 const DEFAULT_OUT_PATH = 'data/social-growth/compose-draft-resolution.md';
+const DEFAULT_IMAGE_DIR = 'output/imagegen';
 
 export function buildComposeDraftResolution({
   queue,
@@ -11,10 +13,12 @@ export function buildComposeDraftResolution({
   day = 1,
   slot = 1,
   publishMode = browserReadiness?.publishMode || 'thread_fallback',
+  imageDir = DEFAULT_IMAGE_DIR,
   generatedAt = new Date().toISOString(),
 } = {}) {
   const text = String(draftText || '').trim();
-  const matches = matchQueueItems(queue?.items || [], text);
+  const items = queue?.items || [];
+  const matches = matchQueueItems(items, text, { imageDir });
   const bestMatch = matches[0] || null;
   const selectedId = browserReadiness?.selected?.id || '';
   const status = text ? 'needs_resolution' : 'no_compose_draft';
@@ -41,6 +45,9 @@ export function buildComposeDraftResolution({
       afterPublishingExistingDraft: bestMatch
         ? postPublishRecoveryCommand(bestMatch.item.id, publishMode)
         : '',
+      imageBriefForExistingDraft: bestMatch
+        ? imageBriefCommand(bestMatch.item.id)
+        : '',
       status: statusCommand({ day, slot, publishMode }),
     },
     boundary: 'This is a local resolution runbook only. Do not publish, discard drafts, upload media, reply, like, repost, follow, edit profile, pin content, or click final X buttons without action-time confirmation in Chrome.',
@@ -52,10 +59,15 @@ export function formatComposeDraftResolutionMarkdown(resolution) {
   const matchLines = match
     ? [
       `- Queue id: ${match.item.id}`,
+      `- Queue status: ${match.item.status || 'unknown'}`,
       `- Article slug: ${match.item.articleSlug || 'unknown'}`,
       `- Variant: ${match.item.variant || 'unknown'}`,
       `- Confidence: ${match.confidence}`,
       `- Reason: ${match.reasons.join('; ')}`,
+      `- Current draft matches quality-gated first post: ${yesNo(match.draftMatchesFirstPost)}`,
+      `- Image ready for matched item: ${yesNo(match.image.ready)}`,
+      `- Expected image: \`${match.image.path}\``,
+      `- Alternate ready image for same article: ${match.image.alternateReadyPath ? `\`${match.image.alternateReadyPath}\`` : 'none'}`,
     ].join('\n')
     : '- No queue item confidently matched the current compose draft.';
   const recovery = resolution.commands.afterPublishingExistingDraft
@@ -94,6 +106,10 @@ ${matchLines}
 2. If this existing draft should not be published, discard it in Chrome only after confirming that losing the draft is acceptable. Then rerun browser readiness.
 3. If you are unsure, leave the compose tab untouched. The selected package must stay blocked until the existing draft is resolved.
 
+## Existing Draft Publishability
+
+${formatPublishability(match, resolution)}
+
 ${recovery}
 
 After discarding or otherwise clearing the draft, refresh readiness:
@@ -115,18 +131,57 @@ export async function writeComposeDraftResolution(resolution, filePath = DEFAULT
   return filePath;
 }
 
-function matchQueueItems(items, draftText) {
+function formatPublishability(match, resolution) {
+  if (!resolution.draft.text) return '- No compose draft is captured.';
+  if (!match) {
+    return [
+      '- Do not publish this draft as part of the measured queue yet.',
+      '- It does not map cleanly to a queue item, so metrics would be hard to attribute.',
+    ].join('\n');
+  }
+
+  const lines = [];
+  lines.push(`- Queue item status: ${match.item.status || 'unknown'}.`);
+  lines.push(`- Draft matches queue first post: ${yesNo(match.draftMatchesFirstPost)}.`);
+  lines.push(`- Image ready: ${yesNo(match.image.ready)}.`);
+  lines.push(`- Expected image: \`${match.image.path}\`.`);
+  if (match.image.alternateReadyPath) {
+    lines.push(`- Alternate ready same-article image: \`${match.image.alternateReadyPath}\`.`);
+  }
+  if (!match.draftMatchesFirstPost) {
+    lines.push('- The compose draft does not match the quality-gated short post/thread first post for the matched queue item.');
+  }
+  if (!match.image.ready) {
+    lines.push('- The matched queue item does not have its expected image ready. Publishing it as-is would violate the image-first package strategy.');
+    lines.push(`- Generate or register the matched image before using this draft as a measured growth post:`);
+    lines.push('');
+    lines.push('```bash');
+    lines.push(resolution.commands.imageBriefForExistingDraft);
+    lines.push('```');
+  }
+  if (match.image.alternateReadyPath) {
+    lines.push('- The alternate image can help recover the article, but using it for this variant should be treated as an intentional override.');
+  }
+  if (match.draftMatchesFirstPost && match.image.ready) {
+    lines.push('- The draft maps to a queue item and the expected image is ready. It can be reviewed as the current publish candidate after action-time confirmation.');
+  } else {
+    lines.push('- Recommendation: do not treat this existing draft as a healthy growth slot until the copy and image package are resolved.');
+  }
+  return lines.join('\n');
+}
+
+function matchQueueItems(items, draftText, { imageDir = DEFAULT_IMAGE_DIR } = {}) {
   const draft = normalize(draftText);
   if (!draft) return [];
 
   return items
-    .map((item) => scoreQueueItem(item, draft))
+    .map((item) => scoreQueueItem(item, draft, { items, imageDir }))
     .filter((match) => match.confidence > 0)
     .sort((left, right) => right.confidence - left.confidence || left.item.id.localeCompare(right.item.id))
     .slice(0, 5);
 }
 
-function scoreQueueItem(item, draft) {
+function scoreQueueItem(item, draft, { items, imageDir }) {
   let confidence = 0;
   const reasons = [];
   const candidates = [
@@ -166,13 +221,68 @@ function scoreQueueItem(item, draft) {
     item,
     confidence: Math.min(100, confidence),
     reasons: reasons.length ? reasons : ['weak textual overlap'],
+    draftMatchesFirstPost: draftMatchesAny(draft, [item.shortPost, item.threadFallback?.[0]]),
+    image: resolveQueueImage({
+      item,
+      items,
+      imageDir,
+    }),
   };
+}
+
+function draftMatchesAny(draft, candidates) {
+  return candidates.some((candidate) => {
+    const normalized = normalize(candidate);
+    return normalized && (draft === normalized || draft.startsWith(`${normalized} `));
+  });
+}
+
+function resolveQueueImage({ item, items, imageDir }) {
+  const path = resolveImagePath(imageDir, item.id);
+  const sameArticleIds = items
+    .filter((candidate) => candidate.articleSlug === item.articleSlug)
+    .map((candidate) => candidate.id);
+  const alternateReadyPath = sameArticleIds
+    .filter((id) => id !== item.id)
+    .map((id) => resolveImagePath(imageDir, id))
+    .find((candidate) => candidate.ready)?.path || '';
+
+  return {
+    path: path.path,
+    ready: path.ready,
+    alternateReadyPath,
+  };
+}
+
+function resolveImagePath(imageDir, id) {
+  const canonical = join(imageDir, `${safePathSegment(id)}.png`);
+  if (existsSync(canonical)) return { path: canonical, ready: true };
+  const legacy = findLegacyImagePath(imageDir, id);
+  if (legacy) return { path: legacy, ready: true };
+  return { path: canonical, ready: false };
+}
+
+function findLegacyImagePath(imageDir, id) {
+  try {
+    const prefix = `${safePathSegment(id)}__`;
+    const file = readdirSync(imageDir)
+      .filter((name) => name.startsWith(prefix) && name.endsWith('.png'))
+      .sort()[0];
+    return file ? join(imageDir, file) : '';
+  } catch (error) {
+    if (error.code === 'ENOENT') return '';
+    throw error;
+  }
 }
 
 function postPublishRecoveryCommand(id, publishMode) {
   const urlArg = publishMode === 'thread_fallback' ? "'<x-thread-url>'" : "'<x-post-url>'";
   const articleArg = publishMode === 'thread_fallback' ? '' : " --article-url '<x-article-url>'";
   return `${nodeCommand()} tools/social-growth/cli.mjs post-publish-recovery --queue data/social-growth/queue.json --id ${shellQuote(id)} --url ${urlArg}${articleArg} --reply-out data/social-growth/thread-reply-handoff.md`;
+}
+
+function imageBriefCommand(id) {
+  return `${nodeCommand()} tools/social-growth/cli.mjs image-brief --id ${shellQuote(id)}`;
 }
 
 function browserReadinessCommand({ day, slot, publishMode }) {
@@ -191,6 +301,10 @@ function slugPhrase(value) {
   return String(value || '')
     .replace(/__.*$/, '')
     .replace(/[-_/]+/g, ' ');
+}
+
+function safePathSegment(value) {
+  return String(value).replace(/[^A-Za-z0-9._=-]+/g, '-');
 }
 
 function normalize(value) {
@@ -213,6 +327,10 @@ function nodeCommand() {
 
 function shellQuote(value) {
   return `'${String(value).replace(/'/g, "'\\''")}'`;
+}
+
+function yesNo(value) {
+  return value ? 'yes' : 'no';
 }
 
 function toIsoString(value) {
