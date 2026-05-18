@@ -2283,6 +2283,117 @@ test('scheduled growth loop reads browser probe file into the run status', async
   }
 });
 
+test('scheduled growth loop prioritizes filled manual publish URLs before browser work', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-scheduled-filled-url-'));
+  try {
+    const articles = [
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+    ];
+    const expectedQueue = buildPublishQueue(articles, {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    const imageDir = join(outDir, 'images');
+    const manualKitDir = join(outDir, 'manual-publish-kits');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await mkdir(imageDir, { recursive: true });
+    await mkdir(manualKitDir, { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await writeFile(join(imageDir, `${expectedQueue.items[0].id}.png`), 'fake image');
+    await writeJson(join(outDir, 'ledger.json'), createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+    await writeFile(join(outDir, 'profile.local.txt'), [
+      'Clean99 | AI 工程化与前端性能',
+      '@Clean993',
+      '写 AI 工程化、前端性能、React 和测试。把真实工程问题压成可复用框架。',
+      'https://clean99.github.io',
+      'Pinned',
+      '30 Followers',
+    ].join('\n'));
+    await writeJson(join(manualKitDir, 'day1-published-urls.json'), {
+      version: 1,
+      status: 'ready_for_recovery',
+      items: [{
+        slot: 1,
+        id: expectedQueue.items[0].id,
+        url: 'https://x.com/Clean993/status/1234567890',
+        articleUrl: '',
+        publishedAt: '2026-05-19T01:02:03.000Z',
+      }],
+    });
+
+    const result = await runScheduledGrowthLoop({
+      articles,
+      now: '2026-05-18T00:00:00.000Z',
+      queuePath: join(outDir, 'queue.json'),
+      packageOutDir: join(outDir, 'packages'),
+      dailyReportPath: join(outDir, 'daily-run.md'),
+      dailyBriefPath: join(outDir, 'daily-brief.md'),
+      weeklyPlanPath: join(outDir, 'weekly-plan.md'),
+      ledgerPath: join(outDir, 'ledger.json'),
+      metricsPath: join(outDir, 'posts.local.json'),
+      statusPath: join(outDir, 'status.md'),
+      preflightPath: join(outDir, 'publish-preflight.md'),
+      profileTextPath: join(outDir, 'profile.local.txt'),
+      postTextDir: join(outDir, 'post-texts'),
+      profileAuditPath: join(outDir, 'profile-audit.md'),
+      profileUpdatePath: join(outDir, 'profile-update.md'),
+      automationReportPath: join(outDir, 'automation-run.md'),
+      metricsCyclePath: join(outDir, 'metrics-cycle.md'),
+      growthReportPath: join(outDir, 'growth-report.md'),
+      recommendationsPath: join(outDir, 'recommendations.md'),
+      funnelPath: join(outDir, 'funnel.md'),
+      experimentPlanPath: join(outDir, 'experiment-plan.md'),
+      scheduledReportPath: join(outDir, 'scheduled-run.md'),
+      imageBriefDir: join(outDir, 'image-briefs'),
+      imageBacklogPath: join(outDir, 'image-backlog.md'),
+      imageDir,
+      xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
+      publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
+      browserReadinessPath: join(outDir, 'browser-readiness.md'),
+      browserProbePath: join(outDir, 'browser-probe.local.json'),
+      engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
+      engagementPlanPath: join(outDir, 'engagement-plan.md'),
+      engagementSearchPath: join(outDir, 'engagement-search.md'),
+      manualPublishKitDir: manualKitDir,
+      xSkillDir: skillDir,
+      xBunCommand: 'bun',
+      publishMode: 'thread_fallback',
+      queueOptions: {
+        limit: 1,
+        lang: 'zh',
+        campaign: 'test',
+      },
+      packageLimit: 1,
+      env: {},
+    });
+    const scheduledReport = await readFile(join(outDir, 'scheduled-run.md'), 'utf8');
+    const urlTemplate = JSON.parse(await readFile(join(manualKitDir, 'day1-published-urls.json'), 'utf8'));
+
+    assert.equal(result.status, 'needs_post_publish_recovery');
+    assert.equal(result.automation.manualPublishUrls.filled, 1);
+    assert.equal(result.automation.manualPublishUrls.pending, 0);
+    assert.equal(urlTemplate.items[0].url, 'https://x.com/Clean993/status/1234567890');
+    assert.match(scheduledReport, /Manual publish URLs filled: 1\/1/);
+    assert.match(scheduledReport, /Current local action: run `npm run social:post-publish-recovery-batch/);
+    assert.match(scheduledReport, /## Next Action\n\nRun the local batch recovery command/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('full flow dry run simulates publication and metrics without touching real state', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-flow-dry-run-'));
   try {

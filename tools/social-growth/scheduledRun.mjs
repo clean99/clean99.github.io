@@ -160,6 +160,7 @@ export async function runScheduledGrowthLoop({
   });
   const queue = await readJson(queuePath);
   const ledger = await readJson(ledgerPath);
+  const manualPublishUrls = await summarizeManualPublishUrls(automation.paths.manualPublishUrlTemplate);
   const experimentPlan = buildGrowthExperimentPlan({
     queue,
     ledger,
@@ -169,7 +170,7 @@ export async function runScheduledGrowthLoop({
   await writeGrowthExperimentPlan(experimentPlan, experimentPlanPath);
   const result = {
     generatedAt,
-    status: scheduledStatus(automation.status, metrics.status),
+    status: scheduledStatus(automation.status, metrics.status, manualPublishUrls),
     selected: automation.selected,
     automation: {
       status: automation.status,
@@ -182,6 +183,7 @@ export async function runScheduledGrowthLoop({
       launchWindow: automation.launchWindow,
       engagement: automation.engagement,
       manualPublishKits: automation.manualPublishKits,
+      manualPublishUrls,
       experimentPlan: {
         status: experimentPlan.status,
         experiments: experimentPlan.experiments.length,
@@ -264,6 +266,7 @@ Status: ${result.status}
 - Engagement status: ${result.automation.engagement?.status || 'unknown'}
 - Ready reply candidates: ${result.automation.engagement?.readyCandidates ?? 'unknown'}
 - Manual publish kits ready: ${result.automation.manualPublishKits?.readyKits ?? 'unknown'}/${result.automation.manualPublishKits?.totalSlots ?? 'unknown'}
+- Manual publish URLs filled: ${result.automation.manualPublishUrls?.filled ?? 'unknown'}/${result.automation.manualPublishUrls?.total ?? 'unknown'}
 
 Blockers:
 
@@ -329,7 +332,10 @@ export async function writeScheduledRunReport(result, filePath) {
   return filePath;
 }
 
-function scheduledStatus(automationStatus, metricsStatus) {
+function scheduledStatus(automationStatus, metricsStatus, manualPublishUrls = null) {
+  if (manualPublishUrls?.filled > 0 && metricsStatus === 'needs_published_posts') {
+    return 'needs_post_publish_recovery';
+  }
   if (automationStatus === 'ready_for_browser_confirmation') {
     return 'ready_for_browser_confirmation';
   }
@@ -357,6 +363,9 @@ function scheduledStatus(automationStatus, metricsStatus) {
 }
 
 function nextAction(result) {
+  if (result.automation.manualPublishUrls?.filled > 0 && result.metrics.status === 'needs_published_posts') {
+    return `Run the local batch recovery command before doing more browser work: ${result.automation.manualPublishUrls.recoveryCommand}`;
+  }
   if (result.automation.browserReadiness?.status === 'needs_chrome_extension_reconnect') {
     return 'Confirm opening a fresh Chrome window for the selected profile, then rerun browser readiness before preparing the thread.';
   }
@@ -391,11 +400,14 @@ function humanGate(result) {
   const lines = [
     `- Publish confirmation packet: ${result.automation.publishConfirmation?.status || 'unknown'}`,
     `- Manual publish kits ready: ${result.automation.manualPublishKits?.readyKits ?? 'unknown'}/${result.automation.manualPublishKits?.totalSlots ?? 'unknown'}`,
+    `- Manual publish URLs filled: ${result.automation.manualPublishUrls?.filled ?? 'unknown'}/${result.automation.manualPublishUrls?.total ?? 'unknown'}`,
     `- Metrics state: ${result.metrics.status}`,
     '- Public-action boundary: every publish, media upload, reply, like, repost, follow, profile edit, and pin still requires action-time confirmation in Chrome.',
   ];
 
-  if (result.automation.browserReadiness?.status === 'needs_x_login') {
+  if (result.automation.manualPublishUrls?.filled > 0 && result.metrics.status === 'needs_published_posts') {
+    lines.push(`- Current local action: run \`${result.automation.manualPublishUrls.recoveryCommand}\` before more browser work.`);
+  } else if (result.automation.browserReadiness?.status === 'needs_x_login') {
     lines.push(`- Current human action: log into @Clean993 through \`${result.paths.loginHandoff || 'data/social-growth/login-handoff.md'}\`, then rerun the safe scheduled check.`);
   } else if (result.automation.browserReadiness?.status === 'needs_media_upload_permission') {
     lines.push(`- Current human action: fix media upload readiness in \`${result.paths.browserReadiness}\` before preparing the first image-backed post.`);
@@ -412,6 +424,49 @@ function humanGate(result) {
   }
 
   return lines.join('\n');
+}
+
+async function summarizeManualPublishUrls(filePath) {
+  const fallback = {
+    status: 'missing',
+    path: filePath || '',
+    total: 0,
+    filled: 0,
+    pending: 0,
+    filledItems: [],
+    recoveryCommand: '',
+  };
+  if (!filePath) return fallback;
+
+  let template;
+  try {
+    template = await readJson(filePath);
+  } catch (error) {
+    if (error?.code === 'ENOENT') return fallback;
+    throw error;
+  }
+
+  const items = template.items || [];
+  const filledItems = items.filter((item) => item.url);
+  return {
+    status: template.status || (filledItems.length ? 'ready_for_recovery' : 'ready_for_url_capture'),
+    path: filePath,
+    total: items.length,
+    filled: filledItems.length,
+    pending: items.length - filledItems.length,
+    filledItems: filledItems.map((item) => ({
+      slot: item.slot,
+      id: item.id,
+      url: item.url,
+    })),
+    recoveryCommand: `npm run social:post-publish-recovery-batch -- --input ${shellQuote(filePath)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies --launch-window-dir data/social-growth/launch-windows`,
+  };
+}
+
+function shellQuote(value) {
+  const text = String(value);
+  if (/^[A-Za-z0-9_./:=+-]+$/.test(text)) return text;
+  return `'${text.replace(/'/g, "'\\''")}'`;
 }
 
 function toIsoString(value) {
