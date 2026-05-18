@@ -58,6 +58,13 @@ npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-pr
 ```
 
 Preflight checks the selected package, quality gate result, expected image file, `OPENAI_API_KEY`, and browser stop points. Do not open Chrome for publishing until the preflight blockers are understood.
+If the image was generated outside the local CLI, register it with:
+
+```bash
+npm run social:register-image -- --day 1 --slot 1 --source /absolute/path/to/generated.png
+```
+
+After an image is registered, `OPENAI_API_KEY` is not required for preflight readiness.
 
 For single-item control:
 
@@ -98,45 +105,49 @@ For single-item control:
        --out output/imagegen/<slug>.png
      ```
    - If `OPENAI_API_KEY` is missing, stop and ask the user for the key or use built-in image generation as a preview path.
-7. Re-run preflight and require the image blocker to be gone.
-8. In Chrome, prepare the X Article first. If X Article publishing is unavailable for the account, fall back to a thread using `thread-fallback.md`:
+7. If the image was generated outside the local CLI, register it:
+   ```bash
+   npm run social:register-image -- --id <queue-id> --source /absolute/path/to/generated.png
+   ```
+8. Re-run preflight and require the image blocker to be gone.
+9. In Chrome, prepare the X Article first. If X Article publishing is unavailable for the account, fall back to a thread using `thread-fallback.md`:
    - title: `xArticle.title`;
    - body: `xArticle.body`;
    - attach the generated image when the UI supports it.
-9. Stop before the final Article publish click and ask for confirmation.
-10. After the X Article or thread is public, create the short X post:
+10. Stop before the final Article publish click and ask for confirmation.
+11. After the X Article or thread is public, create the short X post:
    - attach the generated image;
    - use `short-post.txt`;
    - include the X Article URL, not the blog URL.
-11. Stop before the final post click and ask for confirmation.
-12. After the short post is public, prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
-13. Stop before each public reply click and ask for confirmation.
-14. Record the published URL:
+12. Stop before the final post click and ask for confirmation.
+13. After the short post is public, prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
+14. Stop before each public reply click and ask for confirmation.
+15. Record the published URL:
    ```bash
    npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>
    ```
-15. Prepare the metrics template:
+16. Prepare the metrics template:
    ```bash
    npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
    ```
-16. Capture read-only visible X text into the metrics template when available:
+17. Capture read-only visible X text into the metrics template when available:
    ```bash
    npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
    ```
-17. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
-18. Record metrics twice per day:
+18. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
+19. Record metrics twice per day:
    ```bash
    npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
    ```
-19. Review progress:
+20. Review progress:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
-20. Generate the next optimization decision:
+21. Generate the next optimization decision:
    ```bash
    npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
    ```
-21. Regenerate the week-level plan after each queue or ledger update:
+22. Regenerate the week-level plan after each queue or ledger update:
    ```bash
    npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/weekly-plan.md
    ```

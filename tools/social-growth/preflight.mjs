@@ -1,4 +1,4 @@
-import { access, mkdir, writeFile } from 'node:fs/promises';
+import { access, copyFile, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { buildWeeklyExecutionPlan, packageDirForItem } from './schedule.mjs';
 import {
@@ -50,7 +50,7 @@ export async function buildPublishPreflight({
   if (!imageReady) {
     blockers.push(`Image file is missing: ${imagePath}`);
   }
-  if (!hasOpenAiKey) {
+  if (!imageReady && !hasOpenAiKey) {
     blockers.push('OPENAI_API_KEY is missing, so the local gpt-image-2 CLI cannot generate the image.');
   }
 
@@ -77,6 +77,7 @@ export async function buildPublishPreflight({
       outputPath: imagePath,
       ready: imageReady,
       hasOpenAiKey,
+      keyRequired: !imageReady,
       command: imageCommand({
         promptFile: join(packageDir, 'image-prompt.txt'),
         outputPath: imagePath,
@@ -125,6 +126,7 @@ ${blockers}
 - Output path: \`${preflight.image.outputPath}\`
 - Image ready: ${preflight.image.ready}
 - OPENAI_API_KEY present: ${preflight.image.hasOpenAiKey}
+- OPENAI_API_KEY required now: ${preflight.image.keyRequired}
 
 \`\`\`bash
 ${preflight.image.command}
@@ -142,6 +144,35 @@ After confirmed publication, record URLs:
 ${preflight.browser.recordCommand}
 \`\`\`
 `;
+}
+
+export async function registerPublishImage({
+  queue,
+  ledger,
+  sourceImage,
+  id,
+  day = 1,
+  slot = 1,
+  now = new Date(),
+  imageDir = DEFAULT_IMAGE_DIR,
+} = {}) {
+  if (!sourceImage) {
+    throw new Error('sourceImage is required');
+  }
+  const plan = buildWeeklyExecutionPlan({ queue, ledger, now });
+  const selected = id
+    ? findQueueItem(queue, id)
+    : selectSlotItem(plan, { day, slot });
+  const outputPath = join(imageDir, `${safePathSegment(selected.id)}.png`);
+
+  await mkdir(dirname(outputPath), { recursive: true });
+  await copyFile(sourceImage, outputPath);
+
+  return {
+    id: selected.id,
+    sourceImage,
+    outputPath,
+  };
 }
 
 export async function writePublishPreflight(preflight, filePath) {

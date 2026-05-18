@@ -22,6 +22,7 @@
     "social:preflight": "node tools/social-growth/cli.mjs preflight",
     "social:queue": "node tools/social-growth/cli.mjs queue",
     "social:recommend": "node tools/social-growth/cli.mjs recommend",
+    "social:register-image": "node tools/social-growth/cli.mjs register-image",
     "social:report": "node tools/social-growth/cli.mjs report",
     "social:snapshot": "node tools/social-growth/cli.mjs snapshot",
     "social:validate": "node tools/social-growth/cli.mjs validate",

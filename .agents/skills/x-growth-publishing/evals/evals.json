@@ -40,7 +40,13 @@
     {
       "id": 7,
       "prompt": "准备发布 Day 1 Slot 1，但先检查图片和浏览器动作边界。",
-      "expected_output": "运行 social:preflight；输出选中的 package、gpt-image-2 生成命令、图片是否存在、OPENAI_API_KEY 状态、以及公开发布/上传/回复前必须停止确认。",
+      "expected_output": "运行 social:preflight；输出选中的 package、gpt-image-2 生成命令、图片是否存在、OPENAI_API_KEY 状态、register-image 路径、以及公开发布/上传/回复前必须停止确认。",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "我已经用别的方式生成好图了，把它接到 Day 1 Slot 1 的发布包里。",
+      "expected_output": "运行 social:register-image 或给出等价命令；复制到 preflight 期望路径；重跑 social:preflight，图片存在时不能再因为缺 OPENAI_API_KEY 阻塞。",
       "files": []
     }
   ]

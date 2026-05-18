@@ -26,7 +26,7 @@ import {
   summarizeGrowthLedger,
 } from '../tools/social-growth/metrics.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from '../tools/social-growth/recommendations.mjs';
-import { buildPublishPreflight, formatPublishPreflightMarkdown } from '../tools/social-growth/preflight.mjs';
+import { buildPublishPreflight, formatPublishPreflightMarkdown, registerPublishImage } from '../tools/social-growth/preflight.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
 import { validateQueue, validateQueueItem } from '../tools/social-growth/validation.mjs';
 import {
@@ -711,6 +711,7 @@ test('publish preflight reports missing image and confirmation boundary', async 
     assert.ok(preflight.blockers.some((blocker) => blocker.includes('Image file is missing')));
     assert.ok(preflight.browser.stopBefore.includes('final X Article publish click'));
     assert.match(markdown, /OPENAI_API_KEY present: false/);
+    assert.match(markdown, /OPENAI_API_KEY required now: true/);
     assert.doesNotMatch(preflight.image.command, /\n\+/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
@@ -760,6 +761,63 @@ test('publish preflight is ready when image and key exist', async () => {
     assert.equal(preflight.image.ready, true);
     assert.equal(preflight.image.hasOpenAiKey, true);
     assert.match(preflight.browser.recordCommand, /social:mark-published/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('publish preflight is ready without key when a generated image is registered', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-preflight-register-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录 — AI Agent 时代的函数式蓝图',
+        excerpt: '本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const sourceImage = join(outDir, 'generated.png');
+    await writeFile(sourceImage, 'fake image');
+
+    const registered = await registerPublishImage({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      sourceImage,
+      day: 1,
+      slot: 1,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir: join(outDir, 'images'),
+    });
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      id: queue.items[0].id,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir: join(outDir, 'images'),
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+
+    assert.equal(registered.outputPath, preflight.image.outputPath);
+    assert.equal(preflight.status, 'ready');
+    assert.equal(preflight.image.ready, true);
+    assert.equal(preflight.image.hasOpenAiKey, false);
+    assert.equal(preflight.image.keyRequired, false);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

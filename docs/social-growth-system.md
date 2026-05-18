@@ -153,6 +153,14 @@ npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-pr
 
 The preflight writes the selected queue id, package path, expected image path, `gpt-image-2` generation command, and browser stop points. It is allowed to create the local package, but it must not publish, upload, reply, like, repost, follow, or edit.
 
+If the image was generated outside the local CLI, register it into the expected path:
+
+```bash
+npm run social:register-image -- --day 1 --slot 1 --source /absolute/path/to/generated.png
+```
+
+After registering an image, run preflight again. `OPENAI_API_KEY` is required only when the image is still missing.
+
 After a confirmed browser publish, write the public X post URL back to the queue:
 
 ```bash
@@ -279,22 +287,23 @@ Do not commit private analytics or account history.
 6. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
 7. Run `npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>`.
 8. Generate the image from `image-prompt.txt` with `gpt-image-2`.
-9. Re-run preflight and require `Status: ready`.
-10. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
-11. Stop before publishing the X Article or thread and confirm the exact content and account.
-12. Publish only after confirmation.
-13. Use Chrome to prepare the short image-backed X post linking to the X Article.
-14. Stop before publishing the short post and confirm the exact content and account.
-15. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
-16. Stop before each public reply and confirm the exact content and account.
-17. Mark the published URL with `npm run social:mark-published`.
-18. Run `npm run social:metrics-template`.
-19. Use `npm run social:capture-metrics` when visible X text has been captured.
-20. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
-21. Run `npm run social:snapshot`.
-22. Run `npm run social:report -- --format markdown`.
-23. Run `npm run social:recommend -- --format markdown`.
-24. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+9. If the image was generated elsewhere, run `npm run social:register-image -- --day 1 --slot 1 --source /absolute/path/to/generated.png`.
+10. Re-run preflight and require `Status: ready`.
+11. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
+12. Stop before publishing the X Article or thread and confirm the exact content and account.
+13. Publish only after confirmation.
+14. Use Chrome to prepare the short image-backed X post linking to the X Article.
+15. Stop before publishing the short post and confirm the exact content and account.
+16. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
+17. Stop before each public reply and confirm the exact content and account.
+18. Mark the published URL with `npm run social:mark-published`.
+19. Run `npm run social:metrics-template`.
+20. Use `npm run social:capture-metrics` when visible X text has been captured.
+21. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
+22. Run `npm run social:snapshot`.
+23. Run `npm run social:report -- --format markdown`.
+24. Run `npm run social:recommend -- --format markdown`.
+25. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 For regular operation, replace steps 1-6 with:
 
