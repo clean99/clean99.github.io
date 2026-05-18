@@ -291,6 +291,10 @@ ${confirmationIssues}
 - Blockers: ${result.automation.browserReadiness?.blockers?.length ?? 'unknown'}
 - Report: \`${result.paths.browserReadiness}\`
 
+## Human Gate
+
+${humanGate(result)}
+
 ## Metrics
 
 - Status: ${result.metrics.status}
@@ -381,6 +385,33 @@ function nextAction(result) {
     return 'Read the recommendations and update the next publish package before the next browser-confirmed post.';
   }
   return 'Read the status dashboard and fix the highest-priority local blocker.';
+}
+
+function humanGate(result) {
+  const lines = [
+    `- Publish confirmation packet: ${result.automation.publishConfirmation?.status || 'unknown'}`,
+    `- Manual publish kits ready: ${result.automation.manualPublishKits?.readyKits ?? 'unknown'}/${result.automation.manualPublishKits?.totalSlots ?? 'unknown'}`,
+    `- Metrics state: ${result.metrics.status}`,
+    '- Public-action boundary: every publish, media upload, reply, like, repost, follow, profile edit, and pin still requires action-time confirmation in Chrome.',
+  ];
+
+  if (result.automation.browserReadiness?.status === 'needs_x_login') {
+    lines.push(`- Current human action: log into @Clean993 through \`${result.paths.loginHandoff || 'data/social-growth/login-handoff.md'}\`, then rerun the safe scheduled check.`);
+  } else if (result.automation.browserReadiness?.status === 'needs_media_upload_permission') {
+    lines.push(`- Current human action: fix media upload readiness in \`${result.paths.browserReadiness}\` before preparing the first image-backed post.`);
+  } else if (result.automation.status === 'ready_for_browser_confirmation') {
+    lines.push(`- Current human action: review \`${result.paths.publishConfirmation}\` and stop before the first public Chrome action.`);
+  } else if (result.metrics.status === 'needs_published_posts') {
+    lines.push('- Current human action: publish only after confirmation, then record the public X URL so metrics can start.');
+  } else if (result.metrics.status === 'needs_post_metrics_capture') {
+    lines.push('- Current human action: capture visible post metrics text for published URLs, then rerun the safe scheduled check.');
+  } else if (result.metrics.status === 'snapshotted') {
+    lines.push(`- Current human action: read \`${result.paths.recommendations}\` before selecting the next package.`);
+  } else {
+    lines.push('- Current human action: follow the next action below.');
+  }
+
+  return lines.join('\n');
 }
 
 function toIsoString(value) {

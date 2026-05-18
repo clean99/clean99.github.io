@@ -2129,6 +2129,10 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Publish confirmation/);
     assert.match(scheduledReport, /Launch window/);
     assert.match(scheduledReport, /Browser readiness/);
+    assert.match(scheduledReport, /Human Gate/);
+    assert.match(scheduledReport, /Publish confirmation packet: ready_for_confirmation/);
+    assert.match(scheduledReport, /Public-action boundary: every publish, media upload, reply, like, repost, follow, profile edit, and pin still requires action-time confirmation in Chrome/);
+    assert.match(scheduledReport, /Current human action: review/);
     assert.match(scheduledReport, /Content review: pass/);
     assert.match(scheduledReport, /Profile Conversion/);
     assert.match(scheduledReport, /Funnel report/);
@@ -2259,6 +2263,8 @@ test('scheduled growth loop reads browser probe file into the run status', async
     assert.doesNotMatch(result.automation.blockers.join('\n'), /native pipe/);
     assert.match(result.automation.blockers.join('\n'), /Media upload/);
     assert.match(scheduledReport, /Status: needs_media_upload_permission/);
+    assert.match(scheduledReport, /Human Gate/);
+    assert.match(scheduledReport, /Current human action: fix media upload readiness/);
     assert.doesNotMatch(scheduledReport, /Confirm opening a fresh Chrome window/);
     assert.match(readinessReport, /Extension pipe: closed/);
     assert.match(readinessReport, /Media upload is blocked/);
