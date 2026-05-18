@@ -44,6 +44,7 @@ import {
 } from '../tools/social-growth/profile.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
 import { buildGrowthStatus, formatGrowthStatusMarkdown, writeGrowthStatus } from '../tools/social-growth/status.mjs';
+import { buildXPublishPrep, formatXPublishPrepMarkdown, writeXPublishPrep } from '../tools/social-growth/xPrep.mjs';
 import { validateQueue, validateQueueItem } from '../tools/social-growth/validation.mjs';
 import {
   buildPublishPackage,
@@ -612,6 +613,10 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       baselineFollowers: 30,
       followersIn7Days: 1000,
     }));
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-article.ts'), '// test script');
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
     await writeFile(join(outDir, 'profile.local.txt'), [
       'clean',
       '@Clean993',
@@ -656,6 +661,9 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       automationReportPath: join(outDir, 'automation-run.md'),
       imageBriefDir: join(outDir, 'image-briefs'),
       imageDir: join(outDir, 'images'),
+      xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
+      xSkillDir: skillDir,
+      xBunCommand: 'bun',
       packageLimit: 2,
       queueOptions: {
         limit: 2,
@@ -670,17 +678,21 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const preflight = await readFile(join(outDir, 'publish-preflight.md'), 'utf8');
     const profileAudit = await readFile(join(outDir, 'profile-audit.md'), 'utf8');
     const profileUpdate = await readFile(join(outDir, 'profile-update.md'), 'utf8');
+    const xPrep = await readFile(join(outDir, 'x-publish-prep.md'), 'utf8');
 
     assert.equal(result.status, 'blocked_preflight');
     assert.match(result.blockers.join('\n'), /Image file is missing/);
     assert.match(result.blockers.join('\n'), /pin a post/);
     assert.ok(result.paths.imageBrief.endsWith('.md'));
+    assert.equal(result.paths.xPublishPrep, join(outDir, 'x-publish-prep.md'));
     assert.match(report, /No public X action was performed/);
+    assert.match(report, /X publish prep/);
     assert.match(report, /Profile update package/);
     assert.match(status, /Profile Conversion/);
     assert.match(preflight, /Status: blocked/);
     assert.match(profileAudit, /Status: needs_work/);
     assert.match(profileUpdate, /final profile save click/);
+    assert.match(xPrep, /baoyu-post-to-x Bridge/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -939,6 +951,68 @@ test('image brief exports prompt, visual checks, and register command', async ()
     assert.match(markdown, /--source '\/tmp\/generated.png'/);
     assert.match(markdown, /Do not open Chrome for publishing until preflight is ready/);
     assert.match(persisted, /Short Post First Screen/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('x publish prep bridges selected package to baoyu-post-to-x commands', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-x-prep-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '这篇文章讨论的是让每一轮修改都能被同一个 harness 复验。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    const imagePath = join(imageDir, `${queue.items[0].id}.png`);
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-article.ts'), '// test script');
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(imagePath, 'fake image');
+
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      id: queue.items[0].id,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+    const prep = await buildXPublishPrep(preflight, {
+      skillDir,
+      bunCommand: 'bun',
+      articleUrlPlaceholder: 'https://x.com/Clean993/articles/123',
+    });
+    const markdown = formatXPublishPrepMarkdown(prep);
+    const writtenPath = await writeXPublishPrep(prep, join(outDir, 'x-publish-prep.md'));
+    const persisted = await readFile(writtenPath, 'utf8');
+
+    assert.equal(prep.status, 'ready');
+    assert.equal(prep.blockers.length, 0);
+    assert.match(prep.commands.prepareArticle, /x-article\.ts/);
+    assert.match(prep.commands.prepareArticle, /--cover/);
+    assert.match(prep.commands.prepareShortPost, /x-browser\.ts/);
+    assert.match(prep.commands.prepareShortPost, /--image/);
+    assert.match(markdown, /baoyu-post-to-x Bridge/);
+    assert.match(markdown, /Stop before the final public post click/);
+    assert.match(persisted, /ARTICLE_URL='https:\/\/x\.com\/Clean993\/articles\/123'/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

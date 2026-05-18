@@ -38,6 +38,7 @@ npm run social:automation -- --day 1 --slot 1
 
 This safe automation cycle creates or refreshes `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, writes `data/social-growth/daily-run.md`, writes `data/social-growth/weekly-plan.md` when the ledger exists, writes `data/social-growth/status.md`, writes `data/social-growth/publish-preflight.md`, writes `data/social-growth/profile-audit.md`, and writes `data/social-growth/automation-run.md`.
 It also writes `data/social-growth/profile-update.md` when profile conversion needs a browser handoff for display name, bio, link, or pinned post.
+It writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` commands that can prefill Chrome for the X Article and image-backed short post while preserving the final confirmation boundary.
 
 Automation is still local-only: it must not publish, upload media, reply, like, repost, follow, or edit the X profile. Daily package selection is article-diverse first: prefer one strong variant per article, then fall back to extra variants only when there are not enough distinct draft articles. Daily packages are exported only for items that pass the local quality gate. When the ledger exists, the daily command inside automation expands the queue enough to cover the default 7-day, 3-posts/day cadence, capped by available Chinese articles.
 
@@ -94,6 +95,14 @@ npm run social:register-image -- --day 1 --slot 1 --source /absolute/path/to/gen
 
 `OPENAI_API_KEY` is never required for the preferred built-in `imagegen` path. It is only needed when the user explicitly requests the local CLI fallback.
 
+Prepare the Chrome publishing handoff with the existing `baoyu-post-to-x` skill:
+
+```bash
+npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md
+```
+
+This command does not publish. It emits commands for the `x-article.ts` and `x-browser.ts` scripts and keeps the stop-before-final-click boundary explicit.
+
 For single-item control:
 
 1. Read the target blog post from `source/_posts/`.
@@ -143,54 +152,58 @@ For single-item control:
    npm run social:register-image -- --id <queue-id> --source /absolute/path/to/generated.png
    ```
 9. Re-run preflight and require the image blocker to be gone.
-10. In Chrome, prepare the X Article first. If X Article publishing is unavailable for the account, fall back to a thread using `thread-fallback.md`:
+10. Generate the `baoyu-post-to-x` handoff:
+   ```bash
+   npm run social:x-prep -- --id <queue-id> --out data/social-growth/x-publish-prep.md
+   ```
+11. In Chrome, prepare the X Article first. If X Article publishing is unavailable for the account, fall back to a thread using `thread-fallback.md`:
    - title: `xArticle.title`;
    - body: `xArticle.body`;
    - attach the generated image when the UI supports it.
-11. Stop before the final Article publish click and ask for confirmation.
-12. After the X Article or thread is public, create the short X post:
+12. Stop before the final Article publish click and ask for confirmation.
+13. After the X Article or thread is public, create the short X post:
    - attach the generated image;
    - use `short-post.txt`;
    - include the X Article URL, not the blog URL.
-13. Stop before the final post click and ask for confirmation.
-14. After the short post is public, prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
-15. Stop before each public reply click and ask for confirmation.
-16. Record the published URL:
+14. Stop before the final post click and ask for confirmation.
+15. After the short post is public, prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
+16. Stop before each public reply click and ask for confirmation.
+17. Record the published URL:
    ```bash
    npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>
    ```
-17. Prepare the metrics template:
+18. Prepare the metrics template:
    ```bash
    npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
    ```
-18. Capture read-only visible X text into the metrics template when available:
+19. Capture read-only visible X text into the metrics template when available:
    ```bash
    npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
    ```
-19. Audit profile conversion from copied visible profile text:
+20. Audit profile conversion from copied visible profile text:
    ```bash
    npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
    ```
    Treat profile edits, link edits, and pinned-post changes as public account actions requiring action-time confirmation.
-20. Prepare the profile update handoff when the audit says `needs_work`:
+21. Prepare the profile update handoff when the audit says `needs_work`:
    ```bash
    npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md
    ```
    Use the package only to prepare Chrome fields. Stop before profile save, pinned-post publish, and pin confirmation.
-21. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
-22. Record metrics twice per day:
+22. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
+23. Record metrics twice per day:
    ```bash
    npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
    ```
-23. Review progress:
+24. Review progress:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
-24. Generate the next optimization decision:
+25. Generate the next optimization decision:
    ```bash
    npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
    ```
-25. Regenerate the week-level plan after each queue or ledger update:
+26. Regenerate the week-level plan after each queue or ledger update:
    ```bash
    npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/weekly-plan.md
    ```

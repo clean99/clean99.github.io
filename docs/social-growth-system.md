@@ -112,6 +112,7 @@ This performs only local work:
 - writes `data/social-growth/profile-update.md` as a Chrome handoff for display name, bio, link, and pinned post;
 - writes `data/social-growth/publish-preflight.md`;
 - writes or refreshes the selected `data/social-growth/image-briefs/*.md`;
+- writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` Chrome prefill commands;
 - writes `data/social-growth/status.md`;
 - writes `data/social-growth/automation-run.md`.
 
@@ -205,6 +206,14 @@ npm run social:register-image -- --day 1 --slot 1 --source /absolute/path/to/gen
 ```
 
 After registering an image, run preflight again. `OPENAI_API_KEY` is not required for the preferred built-in `imagegen` path; it is only needed when the user explicitly requests the local CLI fallback.
+
+Prepare the Chrome publishing handoff with `baoyu-post-to-x`:
+
+```bash
+npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md
+```
+
+This writes commands for preparing the X Article and the follow-up image post in Chrome. It does not publish; final public clicks still require confirmation.
 
 After a confirmed browser publish, write the public X post URL back to the queue:
 
@@ -360,14 +369,15 @@ Do not commit private analytics or account history.
 8. Generate the image from `image-prompt.txt` with built-in `imagegen`, then register the final selected PNG into the expected path.
 9. If the image was generated elsewhere, run `npm run social:register-image -- --day 1 --slot 1 --source /absolute/path/to/generated.png`.
 10. Re-run preflight and require `Status: ready`.
-11. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
-12. Stop before publishing the X Article or thread and confirm the exact content and account.
-13. Publish only after confirmation.
-14. Use Chrome to prepare the short image-backed X post linking to the X Article.
-15. Stop before publishing the short post and confirm the exact content and account.
-16. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
-17. Stop before each public reply and confirm the exact content and account.
-18. If `profile-update.md` is still needed, prepare the profile edit and pinned-post flow in Chrome, stopping before every save/publish/pin action.
+11. Run `npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md`.
+12. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
+13. Stop before publishing the X Article or thread and confirm the exact content and account.
+14. Publish only after confirmation.
+15. Use Chrome to prepare the short image-backed X post linking to the X Article.
+16. Stop before publishing the short post and confirm the exact content and account.
+17. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
+18. Stop before each public reply and confirm the exact content and account.
+19. If `profile-update.md` is still needed, prepare the profile edit and pinned-post flow in Chrome, stopping before every save/publish/pin action.
 19. Mark the published URL with `npm run social:mark-published`.
 20. Run `npm run social:metrics-template`.
 21. Use `npm run social:capture-metrics` when visible X text has been captured.

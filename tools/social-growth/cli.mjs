@@ -36,6 +36,11 @@ import {
   formatGrowthStatusMarkdown,
   writeGrowthStatus,
 } from './status.mjs';
+import {
+  buildXPublishPrep,
+  formatXPublishPrepMarkdown,
+  writeXPublishPrep,
+} from './xPrep.mjs';
 import { formatValidationMarkdown, validateQueue } from './validation.mjs';
 import {
   buildPublishQueue,
@@ -209,6 +214,9 @@ if (command === 'articles') {
     automationReportPath: args.out || 'data/social-growth/automation-run.md',
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
     imageDir: args.imageDir || 'output/imagegen',
+    xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
+    xSkillDir: args.xSkillDir,
+    xBunCommand: args.xBunCommand,
     packageLimit: args.packageLimit || 3,
     weeklyDays: args.days || 7,
     weeklyPostsPerDay: args.postsPerDay || 3,
@@ -316,6 +324,33 @@ if (command === 'articles') {
     imageReady: brief.image.ready,
     blockers: brief.blockers,
   }, null, 2));
+} else if (command === 'x-prep') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const preflight = await buildPublishPreflight({
+    queue,
+    ledger,
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    ensurePackage: args.ensurePackage !== 'false',
+  });
+  const prep = await buildXPublishPrep(preflight, {
+    skillDir: args.skillDir,
+    bunCommand: args.bunCommand || 'npx -y bun',
+    articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
+  });
+  if (args.out) {
+    await writeXPublishPrep(prep, args.out);
+    console.log(`Wrote X publish prep to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(prep, null, 2));
+  } else {
+    console.log(formatXPublishPrepMarkdown(prep));
+  }
 } else if (command === 'register-image') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -443,6 +478,7 @@ function printHelp() {
   npm run social:status -- --day 1 --slot 1 --out data/social-growth/status.md
   npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md
   npm run social:image-brief -- --day 1 --slot 1
+  npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md
   npm run social:register-image -- --day 1 --slot 1 --source /path/to/generated.png
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt

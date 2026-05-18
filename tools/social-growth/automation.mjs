@@ -22,6 +22,10 @@ import {
   buildPublishPreflight,
   writePublishPreflight,
 } from './preflight.mjs';
+import {
+  buildXPublishPrep,
+  writeXPublishPrep,
+} from './xPrep.mjs';
 
 const DEFAULT_QUEUE_PATH = 'data/social-growth/queue.json';
 const DEFAULT_PACKAGE_DIR = 'data/social-growth/packages';
@@ -37,6 +41,7 @@ const DEFAULT_PROFILE_UPDATE_PATH = 'data/social-growth/profile-update.md';
 const DEFAULT_AUTOMATION_REPORT_PATH = 'data/social-growth/automation-run.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
+const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
 
 export async function runSafeAutomationCycle({
   articles,
@@ -57,6 +62,9 @@ export async function runSafeAutomationCycle({
   automationReportPath = DEFAULT_AUTOMATION_REPORT_PATH,
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
   imageDir = DEFAULT_IMAGE_DIR,
+  xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
+  xSkillDir,
+  xBunCommand,
   packageLimit = 3,
   weeklyDays = 7,
   weeklyPostsPerDay = 3,
@@ -118,6 +126,11 @@ export async function runSafeAutomationCycle({
     imageBriefOutPath = imageBriefPath(imageBrief, imageBriefDir);
     await writeImageBrief(imageBrief, imageBriefOutPath);
   }
+  const xPublishPrep = await buildXPublishPrep(preflight, {
+    skillDir: xSkillDir,
+    bunCommand: xBunCommand,
+  });
+  await writeXPublishPrep(xPublishPrep, xPublishPrepPath);
 
   const status = await buildGrowthStatus({
     queue,
@@ -138,12 +151,13 @@ export async function runSafeAutomationCycle({
     status: status.status,
     daily,
     selected: preflight.selected,
-    blockers: [
+    blockers: dedupe([
       ...preflight.blockers,
+      ...xPublishPrep.blockers,
       ...profileAudit.checks
         .filter((check) => check.status !== 'pass')
         .map((check) => check.message),
-    ],
+    ]),
     paths: {
       queue: queuePath,
       dailyReport: dailyReportPath,
@@ -154,6 +168,7 @@ export async function runSafeAutomationCycle({
       profileAudit: profileAuditPath,
       profileUpdate: profileUpdatePath,
       imageBrief: imageBriefOutPath,
+      xPublishPrep: xPublishPrepPath,
       automationReport: automationReportPath,
     },
     boundary: 'No public X action was performed. Chrome publishing, media upload, profile edits, replies, likes, reposts, follows, and final publish clicks still require action-time confirmation.',
@@ -190,6 +205,7 @@ Status: ${result.status}
 - Profile audit: \`${result.paths.profileAudit}\`
 - Profile update package: \`${result.paths.profileUpdate}\`
 - Image brief: \`${result.paths.imageBrief || 'not generated'}\`
+- X publish prep: \`${result.paths.xPublishPrep}\`
 
 ## Local Blockers
 
@@ -210,4 +226,8 @@ export async function writeAutomationReport(result, filePath) {
 function toIsoString(value) {
   if (value instanceof Date) return value.toISOString();
   return new Date(value).toISOString();
+}
+
+function dedupe(items) {
+  return [...new Set(items)];
 }
