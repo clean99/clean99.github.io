@@ -7,6 +7,20 @@ const DEFAULT_ENGAGEMENT_SEARCH_PATH = 'data/social-growth/engagement-search.md'
 const DEFAULT_CAPTURE_TEMPLATE_PATH = `${DEFAULT_OPPORTUNITY_DIR}/_capture-template.md`;
 const REPLY_MAX_CHARS = 260;
 const DEFAULT_SEARCH_LIMIT = 8;
+const CREATOR_SEED_ACCOUNTS = [
+  {
+    handle: 'lxfater',
+    displayName: '铁锤人',
+    focus: 'AI 工程化、Agent 工具、技术工作流',
+    reason: 'Use as a technical-utility reference: concrete discovery, artifact, workflow, or measurable result first.',
+  },
+  {
+    handle: 'lidangzzz',
+    displayName: '立党',
+    focus: '强判断、市场地图、技术圈议题判断',
+    reason: 'Use as a structure reference only: blunt claim, concrete case, observable criteria. Do not copy persona or abuse.',
+  },
+];
 const LOW_VALUE_PATTERNS = [
   /求关注/u,
   /关注我/u,
@@ -122,6 +136,7 @@ export function buildEngagementSearchPlan({
   now = new Date(),
   limit = DEFAULT_SEARCH_LIMIT,
   daysBack = 7,
+  seedAccounts = CREATOR_SEED_ACCOUNTS,
 } = {}) {
   const generatedAt = toIsoString(now);
   const items = (queue?.items || []).filter((item) => item.status !== 'published');
@@ -131,6 +146,7 @@ export function buildEngagementSearchPlan({
   const searches = topicScores
     .flatMap((topic) => buildSearchesForTopic(topic, since))
     .slice(0, Number(limit || DEFAULT_SEARCH_LIMIT));
+  const creatorSeeds = buildCreatorSeedTargets(seedAccounts, since);
 
   return {
     version: 1,
@@ -140,6 +156,8 @@ export function buildEngagementSearchPlan({
     queueCandidates: items.length,
     searchCount: searches.length,
     searches,
+    creatorSeedCount: creatorSeeds.length,
+    creatorSeeds,
     captureDirectory: DEFAULT_OPPORTUNITY_DIR,
     boundary: 'Read-only discovery only. Opening a search URL is allowed; replying, liking, reposting, following, quoting, or posting still requires action-time confirmation.',
   };
@@ -170,6 +188,7 @@ export function buildEngagementCaptureTemplate(plan, {
     status: targets.length ? 'ready_for_capture' : 'needs_search_plan',
     targetCount: targets.length,
     targets,
+    creatorSeeds: plan?.creatorSeeds || [],
     boundary: 'Capture template only. Copy visible thread text for local planning; do not reply, like, repost, quote, follow, DM, edit profile, pin, or post without action-time confirmation in Chrome.',
   };
 }
@@ -184,6 +203,9 @@ export function formatEngagementCaptureTemplateMarkdown(template) {
   const targets = template.targets.length
     ? template.targets.map(formatCaptureTarget).join('\n\n')
     : '- No capture targets. Generate an engagement search plan first.';
+  const creatorSeeds = template.creatorSeeds?.length
+    ? template.creatorSeeds.map(formatCreatorCaptureTarget).join('\n\n')
+    : '- No seed account targets.';
 
   return `# X Engagement Capture Template
 
@@ -197,6 +219,12 @@ Use this file while doing read-only X search. For every useful thread, create on
 ## Capture Targets
 
 ${targets}
+
+## Seed Account Targets
+
+These are not accounts to imitate. Use them to find Chinese technical conversations where a reply can add mechanism, proof, or a concrete checklist.
+
+${creatorSeeds}
 
 ## Keep / Skip Gate
 
@@ -224,6 +252,9 @@ export function formatEngagementSearchPlanMarkdown(plan) {
   const searches = plan.searches.length
     ? plan.searches.map(formatSearchItem).join('\n\n')
     : '- No search queries. Generate or restore the Chinese queue first.';
+  const creatorSeeds = plan.creatorSeeds?.length
+    ? plan.creatorSeeds.map(formatCreatorSeed).join('\n\n')
+    : '- No seed accounts configured.';
 
   return `# X Engagement Search Plan
 
@@ -234,6 +265,7 @@ Status: ${plan.status}
 
 - Draft queue candidates: ${plan.queueCandidates}
 - Search queries: ${plan.searchCount}
+- Seed accounts: ${plan.creatorSeedCount ?? 0}
 - Since: ${plan.since}
 
 Use these searches to find relevant Chinese technical threads before building the reply plan.
@@ -241,6 +273,12 @@ Use these searches to find relevant Chinese technical threads before building th
 ## Queries
 
 ${searches}
+
+## Creator Seed Accounts
+
+These read-only targets borrow structure, not voice. Capture only concrete technical threads where Clean993 can add a mechanism, caveat, or checklist.
+
+${creatorSeeds}
 
 ## Capture
 
@@ -277,6 +315,35 @@ Suggested file shape:
 \`\`\`text
 URL: <public x status url>
 Author: <handle or display name if visible>
+Why relevant: <mechanism / proof caveat / checklist / correction>
+
+<paste copied visible thread text here>
+\`\`\``;
+}
+
+function formatCreatorSeed(item, index) {
+  return `### ${index + 1}. ${item.displayName} (@${item.handle})
+
+- Focus: ${item.focus}
+- Profile/replies: ${item.profileUrl}
+- Recent search: ${item.searchUrl}
+- Capture target: \`${item.captureHint}\`
+- Use: ${item.reason}`;
+}
+
+function formatCreatorCaptureTarget(item, index) {
+  return `### ${index + 1}. ${item.displayName} (@${item.handle})
+
+- Open read-only profile/replies: ${item.profileUrl}
+- Open read-only recent search: ${item.searchUrl}
+- Save one useful copied thread text to: \`${item.captureHint}\`
+- Use: ${item.reason}
+
+Suggested file shape:
+
+\`\`\`text
+URL: <public x status url>
+Author: @${item.handle}
 Why relevant: <mechanism / proof caveat / checklist / correction>
 
 <paste copied visible thread text here>
@@ -572,6 +639,25 @@ function buildSearchesForTopic(topic, since) {
       captureHint: `${DEFAULT_OPPORTUNITY_DIR}/${topicSlug(topic.label)}-${index + 1}.txt`,
     };
   });
+}
+
+function buildCreatorSeedTargets(seedAccounts, since) {
+  return (seedAccounts || [])
+    .filter((account) => account?.handle)
+    .map((account) => {
+      const handle = String(account.handle).replace(/^@/, '');
+      const query = `from:${handle} since:${since} -filter:replies`;
+      return {
+        handle,
+        displayName: account.displayName || `@${handle}`,
+        focus: account.focus || 'Chinese technical conversations',
+        reason: account.reason || 'Use as a read-only seed account for relevant conversations.',
+        profileUrl: `https://x.com/${handle}/with_replies`,
+        query,
+        searchUrl: xSearchUrl(query),
+        captureHint: `${DEFAULT_OPPORTUNITY_DIR}/creator-${handle}.txt`,
+      };
+    });
 }
 
 function searchKeywordPairs(keywords) {

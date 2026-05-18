@@ -1253,7 +1253,10 @@ test('engagement capture template writes ignored local intake instructions', asy
 
     assert.equal(template.status, 'ready_for_capture');
     assert.equal(template.targetCount, 2);
+    assert.equal(template.creatorSeeds.length, 2);
     assert.match(markdown, /Keep \/ Skip Gate/);
+    assert.match(markdown, /Seed Account Targets/);
+    assert.match(markdown, /creator-lxfater\.txt/);
     assert.match(markdown, /Save useful copied thread text to/);
     assert.match(markdown, /do not reply, like, repost/);
     assert.match(persisted, /X Engagement Capture Template/);
@@ -1330,11 +1333,16 @@ test('engagement search plan creates read-only X searches from queue topics', as
     assert.equal(plan.status, 'ready_for_read_only_search');
     assert.equal(plan.since, '2026-05-15');
     assert.ok(plan.searches.length <= 4);
+    assert.equal(plan.creatorSeedCount, 2);
+    assert.ok(plan.creatorSeeds.some((item) => item.handle === 'lxfater'));
+    assert.ok(plan.creatorSeeds.every((item) => item.searchUrl.startsWith('https://x.com/search?')));
     assert.ok(plan.searches.some((item) => item.topic === 'AI 工程化'));
     assert.ok(plan.searches.every((item) => item.url.startsWith('https://x.com/search?')));
     assert.ok(plan.searches.every((item) => item.query.includes('lang:zh')));
     assert.ok(plan.searches.every((item) => item.captureHint.includes('engagement-opportunities')));
     assert.match(markdown, /Read-only discovery/);
+    assert.match(markdown, /Creator Seed Accounts/);
+    assert.match(markdown, /铁锤人/);
     assert.match(persisted, /X Engagement Search Plan/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
