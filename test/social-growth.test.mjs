@@ -125,6 +125,11 @@ import {
   formatLoginHandoffMarkdown,
   writeLoginHandoff,
 } from '../tools/social-growth/loginHandoff.mjs';
+import {
+  buildLaunchWindowPlan,
+  formatLaunchWindowPlanMarkdown,
+  writeLaunchWindowPlan,
+} from '../tools/social-growth/launchWindow.mjs';
 import { buildXPublishPrep, formatXPublishPrepMarkdown, writeXPublishPrep } from '../tools/social-growth/xPrep.mjs';
 import {
   buildXTechnicalSharingBrief,
@@ -1891,6 +1896,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       imageDir: join(outDir, 'images'),
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
       publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
+      launchWindowPath: join(outDir, 'launch-window.md'),
       browserReadinessPath: join(outDir, 'browser-readiness.md'),
       browserProbePath: join(outDir, 'browser-probe.local.json'),
       profileDiagnosticsPath: join(outDir, 'x-profile-diagnostics.md'),
@@ -1918,6 +1924,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const profileUpdate = await readFile(join(outDir, 'profile-update.md'), 'utf8');
     const xPrep = await readFile(join(outDir, 'x-publish-prep.md'), 'utf8');
     const confirmation = await readFile(join(outDir, 'publish-confirmation.md'), 'utf8');
+    const launchWindow = await readFile(join(outDir, 'launch-window.md'), 'utf8');
     const browserReadiness = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
     const profileDiagnostics = await readFile(join(outDir, 'x-profile-diagnostics.md'), 'utf8');
     const loginHandoff = await readFile(join(outDir, 'login-handoff.md'), 'utf8');
@@ -1939,6 +1946,8 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.equal(result.paths.dailyBrief, join(outDir, 'daily-brief.md'));
     assert.equal(result.paths.xPublishPrep, join(outDir, 'x-publish-prep.md'));
     assert.equal(result.paths.publishConfirmation, join(outDir, 'publish-confirmation.md'));
+    assert.equal(result.paths.launchWindow, join(outDir, 'launch-window.md'));
+    assert.equal(result.launchWindow.status, 'needs_public_url');
     assert.equal(result.paths.browserReadiness, join(outDir, 'browser-readiness.md'));
     assert.equal(result.paths.profileDiagnostics, join(outDir, 'x-profile-diagnostics.md'));
     assert.equal(result.paths.loginHandoff, join(outDir, 'login-handoff.md'));
@@ -1959,6 +1968,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(report, /Daily brief/);
     assert.match(dailyBrief, /Daily X Growth Brief/);
     assert.match(report, /X publish prep/);
+    assert.match(report, /Launch window/);
     assert.match(report, /Browser readiness/);
     assert.match(report, /X profile diagnostics/);
     assert.match(report, /X login handoff/);
@@ -1979,6 +1989,8 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(profileUpdate, /final profile save click/);
     assert.match(xPrep, /X Browser Handoff/);
     assert.match(confirmation, /X Publish Confirmation Packet/);
+    assert.match(launchWindow, /X Launch Window Plan/);
+    assert.match(launchWindow, /Required Before Tracking/);
     assert.match(confirmation, /X Article To Review/);
     assert.match(confirmation, /Image-backed Short Post To Review/);
     assert.match(browserReadiness, /X Browser Readiness/);
@@ -2065,6 +2077,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       imageDir,
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
       publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
+      launchWindowPath: join(outDir, 'launch-window.md'),
       browserReadinessPath: join(outDir, 'browser-readiness.md'),
       browserProbePath: join(outDir, 'browser-probe.local.json'),
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
@@ -2084,6 +2097,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const metricsReport = await readFile(join(outDir, 'metrics-cycle.md'), 'utf8');
     const funnelReport = await readFile(join(outDir, 'funnel.md'), 'utf8');
     const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
+    const launchWindow = await readFile(join(outDir, 'launch-window.md'), 'utf8');
     const browserReadiness = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
     const engagementCaptureTemplate = await readFile(join(outDir, 'engagement-opportunities/_capture-template.md'), 'utf8');
     const experimentPlan = await readFile(join(outDir, 'experiment-plan.md'), 'utf8');
@@ -2094,6 +2108,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.metrics.status, 'needs_published_posts');
     assert.equal(result.automation.profileConversion.status, 'pass');
     assert.equal(result.automation.publishConfirmation.status, 'ready_for_confirmation');
+    assert.equal(result.automation.launchWindow.status, 'needs_public_url');
     assert.equal(result.automation.browserReadiness.status, 'needs_browser_probe');
     assert.equal(result.automation.experimentPlan.status, 'ready');
     assert.equal(result.automation.engagement.searchStatus, 'ready_for_read_only_search');
@@ -2111,6 +2126,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Engagement plan/);
     assert.match(scheduledReport, /Manual publish kits ready: 1\/3/);
     assert.match(scheduledReport, /Publish confirmation/);
+    assert.match(scheduledReport, /Launch window/);
     assert.match(scheduledReport, /Browser readiness/);
     assert.match(scheduledReport, /Content review: pass/);
     assert.match(scheduledReport, /Profile Conversion/);
@@ -2120,6 +2136,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(metricsReport, /No browser publish/);
     assert.match(funnelReport, /X Growth Funnel/);
     assert.match(imageBacklog, /Images missing: 2/);
+    assert.match(launchWindow, /X Launch Window Plan/);
+    assert.match(launchWindow, /browser-metrics-capture/);
     assert.match(browserReadiness, /X Browser Readiness/);
     assert.match(engagementCaptureTemplate, /X Engagement Capture Template/);
     assert.match(engagementCaptureTemplate, /do not reply, like, repost/);
@@ -3869,6 +3887,83 @@ test('thread reply handoff materializes reply intent URLs from a published threa
   assert.match(markdown, /X Thread Reply Handoff/);
   assert.match(markdown, /Status id: 1234567890123456789/);
   assert.match(markdown, /stop before the final public Reply click/);
+});
+
+test('launch window plan creates early metrics and reply checkpoints', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-launch-window-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const publishedQueue = markQueueItemPublished(queue, {
+      id: queue.items[0].id,
+      xPostUrl: 'https://x.com/Clean993/status/1234567890123456789',
+      publishedAt: '2026-05-18T01:00:00.000Z',
+    });
+
+    const plan = buildLaunchWindowPlan({
+      queue: publishedQueue,
+      id: queue.items[0].id,
+      generatedAt: '2026-05-18T01:05:00.000Z',
+      xProfileDirectory: 'Profile 1',
+    });
+    const markdown = formatLaunchWindowPlanMarkdown(plan);
+    const outPath = await writeLaunchWindowPlan(plan, join(outDir, 'launch-window.md'));
+    const persisted = await readFile(outPath, 'utf8');
+
+    assert.equal(plan.status, 'ready_for_early_tracking');
+    assert.equal(plan.checkpoints.length, 4);
+    assert.equal(plan.checkpoints[0].dueAt, '2026-05-18T01:15:00.000Z');
+    assert.match(markdown, /X Launch Window Plan/);
+    assert.match(markdown, /\+15m/);
+    assert.match(markdown, /browser-metrics-capture/);
+    assert.match(markdown, /thread-reply-handoff/);
+    assert.match(markdown, /public Reply click/);
+    assert.match(persisted, /ready_for_early_tracking/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('launch window plan blocks optimization until a public URL is recorded', () => {
+  const queue = buildPublishQueue([
+    {
+      title: 'Vibe Coding VS Spec Driven Coding',
+      excerpt: '没有 spec，模型会把未确认的假设写进代码里。',
+      slug: 'Vibe-Coding-VS-Spec-Driven-Coding',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering'],
+      url: 'https://clean99.github.io/zh/vibe-vs-spec/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  const plan = buildLaunchWindowPlan({
+    queue,
+    id: queue.items[0].id,
+    generatedAt: '2026-05-18T01:05:00.000Z',
+  });
+  const markdown = formatLaunchWindowPlanMarkdown(plan);
+
+  assert.equal(plan.status, 'needs_public_url');
+  assert.equal(plan.checkpoints[0].dueAt, '');
+  assert.match(markdown, /Required Before Tracking/);
+  assert.match(markdown, /post-publish-recovery/);
+  assert.match(markdown, /<x-thread-url>/);
+  assert.match(markdown, /first run post-publish recovery/);
 });
 
 test('publish confirmation packet requires copy review for article-summary framing', async () => {

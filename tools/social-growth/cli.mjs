@@ -149,6 +149,11 @@ import {
   formatXProfileDiagnosticsMarkdown,
   writeXProfileDiagnostics,
 } from './xProfileDiagnostics.mjs';
+import {
+  buildLaunchWindowPlan,
+  formatLaunchWindowPlanMarkdown,
+  writeLaunchWindowPlan,
+} from './launchWindow.mjs';
 
 const command = process.argv[2] || 'help';
 const args = parseArgs(process.argv.slice(3));
@@ -337,6 +342,7 @@ if (command === 'articles') {
     imageDir: args.imageDir || 'output/imagegen',
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
     publishConfirmationPath: args.confirmationOut || 'data/social-growth/publish-confirmation.md',
+    launchWindowPath: args.launchWindowOut || 'data/social-growth/launch-window.md',
     browserReadinessPath: args.browserReadinessOut || 'data/social-growth/browser-readiness.md',
     browserProbePath: args.browserProbe || args.browserProbeOut || 'data/social-growth/browser-probe.local.json',
     profileDiagnosticsPath: args.profileDiagnosticsOut || 'data/social-growth/x-profile-diagnostics.md',
@@ -408,6 +414,7 @@ if (command === 'articles') {
     imageDir: args.imageDir || 'output/imagegen',
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
     publishConfirmationPath: args.confirmationOut || 'data/social-growth/publish-confirmation.md',
+    launchWindowPath: args.launchWindowOut || 'data/social-growth/launch-window.md',
     browserReadinessPath: args.browserReadinessOut || 'data/social-growth/browser-readiness.md',
     browserProbePath: args.browserProbe || args.browserProbeOut || 'data/social-growth/browser-probe.local.json',
     profileDiagnosticsPath: args.profileDiagnosticsOut || 'data/social-growth/x-profile-diagnostics.md',
@@ -882,6 +889,47 @@ if (command === 'articles') {
 } else if (command === 'post-publish-recovery-batch') {
   const result = await runPostPublishRecoveryBatch(args);
   console.log(JSON.stringify(result, null, 2));
+} else if (command === 'launch-window') {
+  const queuePath = args.queue || 'data/social-growth/queue.json';
+  const queue = await readJson(queuePath);
+  const selected = await selectRecoveryQueueItem({
+    queue,
+    ledgerPath: args.ledger || 'data/social-growth/ledger.json',
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now,
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+  });
+  const plan = buildLaunchWindowPlan({
+    queue,
+    id: selected.id,
+    xPostUrl: args.url || args.xPostUrl,
+    publishedAt: args.publishedAt,
+    generatedAt: args.now ? new Date(args.now) : new Date(),
+    queuePath,
+    ledgerPath: args.ledger || 'data/social-growth/ledger.json',
+    metricsPath: args.metrics || 'data/social-growth/posts.local.json',
+    profileTextPath: args.profileText || 'data/social-growth/profile.local.txt',
+    postTextDir: args.postTextDir || 'data/social-growth/post-texts',
+    replyOutPath: args.replyOut || 'data/social-growth/thread-reply-handoff.md',
+    cycleOutPath: args.cycleOut || 'data/social-growth/metrics-cycle.md',
+    growthReportPath: args.growthReportOut || 'data/social-growth/growth-report.md',
+    recommendationsPath: args.recommendationsOut || 'data/social-growth/recommendations.md',
+    funnelPath: args.funnelOut || 'data/social-growth/funnel.md',
+    account: args.account || '@Clean993',
+    xProfileDir: args.xProfileDir || args.profileDir,
+    xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
+  });
+  if (args.out) {
+    await writeLaunchWindowPlan(plan, args.out);
+    console.log(`Wrote X launch window plan to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(plan, null, 2));
+  } else {
+    console.log(formatLaunchWindowPlanMarkdown(plan));
+  }
 } else if (command === 'x-prep') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -2012,6 +2060,7 @@ function printHelp() {
   npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out data/social-growth/thread-reply-handoff.md --id <queue-id> --url <x-post-url>
   npm run social:post-publish-recovery -- --day today --slot 1 --url <x-post-url>
   npm run social:post-publish-recovery-batch -- --input data/social-growth/manual-publish-kits/day1-published-urls.json
+  npm run social:launch-window -- --day today --slot 1 --out data/social-growth/launch-window.md
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt
   npm run social:browser-metrics-capture -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --metrics data/social-growth/posts.local.json

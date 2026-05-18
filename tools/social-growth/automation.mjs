@@ -64,6 +64,10 @@ import {
   writePublishConfirmation,
 } from './publishConfirmation.mjs';
 import {
+  buildLaunchWindowPlan,
+  writeLaunchWindowPlan,
+} from './launchWindow.mjs';
+import {
   buildManualPublishKit,
   buildManualPublishKitIndex,
   buildManualPublishUrlTemplate,
@@ -94,6 +98,7 @@ const DEFAULT_IMAGE_BACKLOG_PATH = 'data/social-growth/image-backlog.md';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
 const DEFAULT_PUBLISH_CONFIRMATION_PATH = 'data/social-growth/publish-confirmation.md';
+const DEFAULT_LAUNCH_WINDOW_PATH = 'data/social-growth/launch-window.md';
 const DEFAULT_BROWSER_READINESS_PATH = 'data/social-growth/browser-readiness.md';
 const DEFAULT_BROWSER_PROBE_PATH = 'data/social-growth/browser-probe.local.json';
 const DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
@@ -124,6 +129,7 @@ export async function runSafeAutomationCycle({
   imageDir = DEFAULT_IMAGE_DIR,
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
   publishConfirmationPath = DEFAULT_PUBLISH_CONFIRMATION_PATH,
+  launchWindowPath = DEFAULT_LAUNCH_WINDOW_PATH,
   browserReadinessPath = DEFAULT_BROWSER_READINESS_PATH,
   browserProbePath = DEFAULT_BROWSER_PROBE_PATH,
   profileDiagnosticsPath = '',
@@ -281,6 +287,21 @@ export async function runSafeAutomationCycle({
     generatedAt,
   });
   await writePublishConfirmation(publishConfirmation, publishConfirmationPath);
+  const launchWindow = launchWindowPath && preflight.selected?.id
+    ? buildLaunchWindowPlan({
+      queue,
+      id: preflight.selected.id,
+      generatedAt,
+      queuePath,
+      ledgerPath,
+      metricsPath,
+      profileTextPath,
+      postTextDir,
+      xProfileDir,
+      xProfileDirectory: effectiveProfileDirectory,
+    })
+    : null;
+  if (launchWindow) await writeLaunchWindowPlan(launchWindow, launchWindowPath);
 
   const engagementOpportunities = await readEngagementOpportunityTexts(engagementOpportunityDir);
   const engagementSearch = buildEngagementSearchPlan({
@@ -385,6 +406,7 @@ export async function runSafeAutomationCycle({
     },
     profileDiagnostics: summarizeProfileDiagnostics(profileDiagnostics),
     loginHandoff: summarizeLoginHandoff(loginHandoff),
+    launchWindow: summarizeLaunchWindow(launchWindow),
     paths: {
       queue: queuePath,
       dailyReport: dailyReportPath,
@@ -399,6 +421,7 @@ export async function runSafeAutomationCycle({
       imageBacklog: imageBacklogPath,
       xPublishPrep: xPublishPrepPath,
       publishConfirmation: publishConfirmationPath,
+      launchWindow: launchWindowPath || null,
       browserReadiness: browserReadinessPath,
       browserProbe: browserProbePath,
       profileDiagnostics: profileDiagnosticsPath || null,
@@ -482,6 +505,7 @@ Status: ${result.status}
 - Image backlog: \`${result.paths.imageBacklog || 'not generated'}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
 - Publish confirmation: \`${result.paths.publishConfirmation}\`
+- Launch window: \`${result.paths.launchWindow || 'not generated'}\`
 - Browser readiness: \`${result.paths.browserReadiness}\`
 - Browser probe state: \`${result.paths.browserProbe}\`
 - X profile diagnostics: \`${result.paths.profileDiagnostics || 'not generated'}\`
@@ -517,6 +541,12 @@ ${profileIssues}
 - Recommendations: ${result.profileDiagnostics?.recommendations ?? 'unknown'}
 - Login handoff: ${result.loginHandoff?.status || 'unknown'}
 - Login handoff alternates: ${result.loginHandoff?.alternateProfiles ?? 'unknown'}
+
+## Launch Window
+
+- Status: ${result.launchWindow?.status || 'unknown'}
+- Checkpoints: ${result.launchWindow?.checkpoints ?? 'unknown'}
+- Report: \`${result.paths.launchWindow || 'not generated'}\`
 
 ## Publish Confirmation
 
@@ -625,6 +655,19 @@ function summarizeLoginHandoff(handoff) {
   return {
     status: handoff.status,
     alternateProfiles: handoff.alternateProfiles.length,
+  };
+}
+
+function summarizeLaunchWindow(plan) {
+  if (!plan) {
+    return {
+      status: 'not_generated',
+      checkpoints: 0,
+    };
+  }
+  return {
+    status: plan.status,
+    checkpoints: plan.checkpoints.length,
   };
 }
 

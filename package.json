@@ -34,6 +34,7 @@
     "social:ingest-imagegen": "node tools/social-growth/cli.mjs ingest-imagegen",
     "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",
     "social:login-recovery": "node tools/social-growth/cli.mjs login-recovery",
+    "social:launch-window": "node tools/social-growth/cli.mjs launch-window",
     "social:manual-publish-kit": "node tools/social-growth/cli.mjs manual-publish-kit",
     "social:manual-publish-kits": "node tools/social-growth/cli.mjs manual-publish-kits",
     "social:mark-published": "node tools/social-growth/cli.mjs mark-published",

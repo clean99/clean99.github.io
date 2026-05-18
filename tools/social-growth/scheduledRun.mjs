@@ -33,6 +33,7 @@ const DEFAULT_IMAGE_BACKLOG_PATH = 'data/social-growth/image-backlog.md';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
 const DEFAULT_PUBLISH_CONFIRMATION_PATH = 'data/social-growth/publish-confirmation.md';
+const DEFAULT_LAUNCH_WINDOW_PATH = 'data/social-growth/launch-window.md';
 const DEFAULT_BROWSER_READINESS_PATH = 'data/social-growth/browser-readiness.md';
 const DEFAULT_BROWSER_PROBE_PATH = 'data/social-growth/browser-probe.local.json';
 const DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
@@ -69,6 +70,7 @@ export async function runScheduledGrowthLoop({
   imageDir = DEFAULT_IMAGE_DIR,
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
   publishConfirmationPath = DEFAULT_PUBLISH_CONFIRMATION_PATH,
+  launchWindowPath = DEFAULT_LAUNCH_WINDOW_PATH,
   browserReadinessPath = DEFAULT_BROWSER_READINESS_PATH,
   browserProbePath = DEFAULT_BROWSER_PROBE_PATH,
   profileDiagnosticsPath = '',
@@ -118,6 +120,7 @@ export async function runScheduledGrowthLoop({
     imageDir,
     xPublishPrepPath,
     publishConfirmationPath,
+    launchWindowPath,
     browserReadinessPath,
     browserProbePath,
     profileDiagnosticsPath,
@@ -176,6 +179,7 @@ export async function runScheduledGrowthLoop({
       browserReadiness: automation.browserReadiness,
       profileDiagnostics: automation.profileDiagnostics,
       loginHandoff: automation.loginHandoff,
+      launchWindow: automation.launchWindow,
       engagement: automation.engagement,
       manualPublishKits: automation.manualPublishKits,
       experimentPlan: {
@@ -242,6 +246,7 @@ Status: ${result.status}
 - Image backlog: \`${result.paths.imageBacklog || 'not generated'}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
 - Publish confirmation: \`${result.paths.publishConfirmation}\`
+- Launch window: \`${result.paths.launchWindow || 'not generated'}\`
 - Browser readiness: \`${result.paths.browserReadiness}\`
 - Browser probe state: \`${result.paths.browserProbe}\`
 - X profile diagnostics: \`${result.paths.profileDiagnostics || 'not generated'}\`
@@ -252,6 +257,7 @@ Status: ${result.status}
 - Manual publish kits: \`${result.paths.manualPublishKitIndex}\`
 - Profile diagnostics recommendations: ${result.automation.profileDiagnostics?.recommendations ?? 'unknown'}
 - Login handoff status: ${result.automation.loginHandoff?.status || 'unknown'}
+- Launch window status: ${result.automation.launchWindow?.status || 'unknown'}
 - Engagement search status: ${result.automation.engagement?.searchStatus || 'unknown'}
 - Engagement capture template status: ${result.automation.engagement?.captureTemplateStatus || 'unknown'}
 - Engagement capture targets: ${result.automation.engagement?.captureTargets ?? 'unknown'}
