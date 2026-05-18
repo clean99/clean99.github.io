@@ -4,6 +4,7 @@ import { basename, dirname, extname, join } from 'node:path';
 const DEFAULT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
 const DEFAULT_ENGAGEMENT_PLAN_PATH = 'data/social-growth/engagement-plan.md';
 const DEFAULT_ENGAGEMENT_SEARCH_PATH = 'data/social-growth/engagement-search.md';
+const DEFAULT_CAPTURE_TEMPLATE_PATH = `${DEFAULT_OPPORTUNITY_DIR}/_capture-template.md`;
 const REPLY_MAX_CHARS = 260;
 const DEFAULT_SEARCH_LIMIT = 8;
 const LOW_VALUE_PATTERNS = [
@@ -65,6 +66,7 @@ export async function readEngagementOpportunityTexts(dir = DEFAULT_OPPORTUNITY_D
   const files = entries
     .filter((entry) => entry.isFile())
     .map((entry) => entry.name)
+    .filter((file) => !file.startsWith('_'))
     .filter((file) => ['.txt', '.md'].includes(extname(file).toLowerCase()))
     .sort();
 
@@ -149,6 +151,75 @@ export async function writeEngagementSearchPlan(plan, filePath = DEFAULT_ENGAGEM
   return filePath;
 }
 
+export function buildEngagementCaptureTemplate(plan, {
+  maxTargets = 5,
+} = {}) {
+  const targets = (plan?.searches || [])
+    .slice(0, Math.max(1, Number(maxTargets || 5)))
+    .map((item) => ({
+      topic: item.topic,
+      query: item.query,
+      url: item.url,
+      captureHint: item.captureHint,
+      queueIds: item.queueIds || [],
+    }));
+
+  return {
+    version: 1,
+    generatedAt: plan?.generatedAt || new Date().toISOString(),
+    status: targets.length ? 'ready_for_capture' : 'needs_search_plan',
+    targetCount: targets.length,
+    targets,
+    boundary: 'Capture template only. Copy visible thread text for local planning; do not reply, like, repost, quote, follow, DM, edit profile, pin, or post without action-time confirmation in Chrome.',
+  };
+}
+
+export async function writeEngagementCaptureTemplate(template, filePath = DEFAULT_CAPTURE_TEMPLATE_PATH) {
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${formatEngagementCaptureTemplateMarkdown(template).trimEnd()}\n`);
+  return filePath;
+}
+
+export function formatEngagementCaptureTemplateMarkdown(template) {
+  const targets = template.targets.length
+    ? template.targets.map(formatCaptureTarget).join('\n\n')
+    : '- No capture targets. Generate an engagement search plan first.';
+
+  return `# X Engagement Capture Template
+
+Generated at: ${template.generatedAt}
+Status: ${template.status}
+
+## Purpose
+
+Use this file while doing read-only X search. For every useful thread, create one copied-text file at the listed capture target. Files starting with \`_\` are ignored by the engagement planner so this template is never treated as a reply opportunity.
+
+## Capture Targets
+
+${targets}
+
+## Keep / Skip Gate
+
+Keep only threads where a reply can add at least one of:
+
+- a mechanism the thread missed;
+- a proof caveat or measurement caveat;
+- a checklist that helps readers act;
+- a concrete correction to a technical claim.
+
+Skip:
+
+- outrage, drama, giveaways, job posts, fundraising, and generic hot takes;
+- threads where our reply would only say "agree";
+- threads that require private information, credentials, or internal details;
+- threads unrelated to the current queue topics.
+
+## Boundary
+
+${template.boundary}
+`;
+}
+
 export function formatEngagementSearchPlanMarkdown(plan) {
   const searches = plan.searches.length
     ? plan.searches.map(formatSearchItem).join('\n\n')
@@ -191,6 +262,25 @@ Capture only threads where a reply can add a mechanism, proof caveat, checklist,
 
 ${plan.boundary}
 `;
+}
+
+function formatCaptureTarget(item, index) {
+  return `### ${index + 1}. ${item.topic}
+
+- Search query: \`${item.query}\`
+- Open read-only: ${item.url}
+- Save useful copied thread text to: \`${item.captureHint}\`
+- Queue anchors: ${item.queueIds.join(', ') || 'none'}
+
+Suggested file shape:
+
+\`\`\`text
+URL: <public x status url>
+Author: <handle or display name if visible>
+Why relevant: <mechanism / proof caveat / checklist / correction>
+
+<paste copied visible thread text here>
+\`\`\``;
 }
 
 export function formatEngagementPlanMarkdown(plan) {

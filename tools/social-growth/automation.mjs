@@ -23,9 +23,11 @@ import {
   writeImageBacklog,
 } from './imageBacklog.mjs';
 import {
+  buildEngagementCaptureTemplate,
   buildEngagementPlan,
   buildEngagementSearchPlan,
   readEngagementOpportunityTexts,
+  writeEngagementCaptureTemplate,
   writeEngagementPlan,
   writeEngagementSearchPlan,
 } from './engagement.mjs';
@@ -117,6 +119,7 @@ export async function runSafeAutomationCycle({
   browserReadinessPath = DEFAULT_BROWSER_READINESS_PATH,
   browserProbePath = DEFAULT_BROWSER_PROBE_PATH,
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
+  engagementCaptureTemplatePath = join(engagementOpportunityDir, '_capture-template.md'),
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
   engagementSearchPath = DEFAULT_ENGAGEMENT_SEARCH_PATH,
   manualPublishKitDir,
@@ -253,6 +256,10 @@ export async function runSafeAutomationCycle({
     limit: engagementLimit,
   });
   await writeEngagementSearchPlan(engagementSearch, engagementSearchPath);
+  const engagementCaptureTemplate = buildEngagementCaptureTemplate(engagementSearch, {
+    maxTargets: engagementLimit,
+  });
+  await writeEngagementCaptureTemplate(engagementCaptureTemplate, engagementCaptureTemplatePath);
   const engagementPlan = buildEngagementPlan({
     queue,
     opportunityTexts: engagementOpportunities,
@@ -358,6 +365,7 @@ export async function runSafeAutomationCycle({
       browserReadiness: browserReadinessPath,
       browserProbe: browserProbePath,
       engagementSearch: engagementSearchPath,
+      engagementCaptureTemplate: engagementCaptureTemplatePath,
       engagementPlan: engagementPlanPath,
       manualPublishKitIndex: manualPublishKits.indexPath,
       manualPublishUrlTemplate: manualPublishKits.urlTemplatePath,
@@ -366,6 +374,8 @@ export async function runSafeAutomationCycle({
     engagement: {
       status: engagementPlan.status,
       searchStatus: engagementSearch.status,
+      captureTemplateStatus: engagementCaptureTemplate.status,
+      captureTargets: engagementCaptureTemplate.targetCount,
       searchQueries: engagementSearch.searchCount,
       readyCandidates: engagementPlan.selectedCount,
       capturedOpportunities: engagementPlan.opportunityCount,
@@ -436,6 +446,7 @@ Status: ${result.status}
 - Browser readiness: \`${result.paths.browserReadiness}\`
 - Browser probe state: \`${result.paths.browserProbe}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
+- Engagement capture template: \`${result.paths.engagementCaptureTemplate}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
 - Manual publish kits: \`${result.paths.manualPublishKitIndex}\`
 - Manual publish URL template: \`${result.paths.manualPublishUrlTemplate}\`
@@ -444,6 +455,8 @@ Status: ${result.status}
 
 - Status: ${result.engagement.status}
 - Search status: ${result.engagement.searchStatus}
+- Capture template: ${result.engagement.captureTemplateStatus}
+- Capture targets: ${result.engagement.captureTargets}
 - Search queries: ${result.engagement.searchQueries}
 - Captured opportunities: ${result.engagement.capturedOpportunities}
 - Ready reply candidates: ${result.engagement.readyCandidates}

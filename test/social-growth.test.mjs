@@ -42,10 +42,13 @@ import {
 import { buildDayReadiness, formatDayReadinessMarkdown, writeDayReadiness } from '../tools/social-growth/dayReadiness.mjs';
 import {
   buildEngagementPlan,
+  buildEngagementCaptureTemplate,
   buildEngagementSearchPlan,
+  formatEngagementCaptureTemplateMarkdown,
   formatEngagementPlanMarkdown,
   formatEngagementSearchPlanMarkdown,
   readEngagementOpportunityTexts,
+  writeEngagementCaptureTemplate,
   writeEngagementPlan,
   writeEngagementSearchPlan,
 } from '../tools/social-growth/engagement.mjs';
@@ -1155,6 +1158,11 @@ test('engagement plan creates selective reply candidates from captured technical
       '最近用 AI Agent 做前端性能优化，最大的问题不是模型不会写代码，而是每次优化后 baseline 口径都不一样。',
       '如果没有 harness，所谓收益很难复现。',
     ].join('\n'));
+    await writeFile(join(opportunityDir, '_capture-template.md'), [
+      '# X Engagement Capture Template',
+      'This file should be ignored by the planner.',
+      'AI Agent baseline harness',
+    ].join('\n'));
     await writeFile(join(opportunityDir, 'giveaway.txt'), [
       '转发抽奖',
       '关注我领取福利。',
@@ -1184,6 +1192,8 @@ test('engagement plan creates selective reply candidates from captured technical
     await writeEngagementPlan(plan, outPath);
     const persisted = await readFile(outPath, 'utf8');
 
+    assert.equal(opportunityTexts.length, 2);
+    assert.ok(!opportunityTexts.some((item) => item.id === '_capture-template'));
     assert.equal(plan.status, 'ready_for_browser_confirmation');
     assert.equal(plan.selectedCount, 1);
     assert.ok(queue.items.some((item) => item.id === plan.opportunities[0].queueId));
@@ -1194,6 +1204,47 @@ test('engagement plan creates selective reply candidates from captured technical
     assert.ok(plan.skipped.some((item) => item.status === 'skipped_low_value'));
     assert.match(markdown, /final public Reply click/);
     assert.match(persisted, /X Engagement Plan/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('engagement capture template writes ignored local intake instructions', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-engagement-capture-template-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const searchPlan = buildEngagementSearchPlan({
+      queue,
+      now: '2026-05-18T00:00:00.000Z',
+      limit: 2,
+    });
+    const template = buildEngagementCaptureTemplate(searchPlan, { maxTargets: 2 });
+    const markdown = formatEngagementCaptureTemplateMarkdown(template);
+    const outPath = join(outDir, 'engagement-opportunities', '_capture-template.md');
+    await writeEngagementCaptureTemplate(template, outPath);
+    const persisted = await readFile(outPath, 'utf8');
+    const opportunities = await readEngagementOpportunityTexts(join(outDir, 'engagement-opportunities'));
+
+    assert.equal(template.status, 'ready_for_capture');
+    assert.equal(template.targetCount, 2);
+    assert.match(markdown, /Keep \/ Skip Gate/);
+    assert.match(markdown, /Save useful copied thread text to/);
+    assert.match(markdown, /do not reply, like, repost/);
+    assert.match(persisted, /X Engagement Capture Template/);
+    assert.deepEqual(opportunities, []);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -1826,6 +1877,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const browserReadiness = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
     const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
     const engagementSearch = await readFile(join(outDir, 'engagement-search.md'), 'utf8');
+    const engagementCaptureTemplate = await readFile(join(outDir, 'engagement-opportunities/_capture-template.md'), 'utf8');
     const engagementPlan = await readFile(join(outDir, 'engagement-plan.md'), 'utf8');
     const manualPublishKits = await readFile(join(outDir, 'manual-publish-kits/day1-ready-slots.md'), 'utf8');
 
@@ -1843,9 +1895,12 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.equal(result.paths.publishConfirmation, join(outDir, 'publish-confirmation.md'));
     assert.equal(result.paths.browserReadiness, join(outDir, 'browser-readiness.md'));
     assert.equal(result.paths.engagementSearch, join(outDir, 'engagement-search.md'));
+    assert.equal(result.paths.engagementCaptureTemplate, join(outDir, 'engagement-opportunities/_capture-template.md'));
     assert.equal(result.paths.engagementPlan, join(outDir, 'engagement-plan.md'));
     assert.equal(result.paths.manualPublishKitIndex, join(outDir, 'manual-publish-kits/day1-ready-slots.md'));
     assert.equal(result.engagement.searchStatus, 'ready_for_read_only_search');
+    assert.equal(result.engagement.captureTemplateStatus, 'ready_for_capture');
+    assert.equal(result.engagement.captureTargets, result.engagement.searchQueries);
     assert.equal(result.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.manualPublishKits.status, 'no_ready_slots');
     assert.equal(result.manualPublishKits.readyKits, 0);
@@ -1861,6 +1916,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(dailyBrief, /social:image-brief/);
     assert.match(dailyBrief, /social:register-image/);
     assert.match(report, /Engagement plan/);
+    assert.match(report, /Engagement capture template/);
     assert.match(report, /Manual publish kits/);
     assert.match(report, /Profile update package/);
     assert.match(report, /Profile Conversion/);
@@ -1875,6 +1931,8 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(browserReadiness, /X Browser Readiness/);
     assert.match(browserReadiness, /blocked_local_prep/);
     assert.match(engagementSearch, /X Engagement Search Plan/);
+    assert.match(engagementCaptureTemplate, /X Engagement Capture Template/);
+    assert.match(engagementCaptureTemplate, /Keep \/ Skip Gate/);
     assert.match(engagementPlan, /needs_opportunity_capture/);
     assert.match(manualPublishKits, /Manual X Publish Kits/);
     assert.match(manualPublishKits, /No ready manual publish kits/);
@@ -1970,6 +2028,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const funnelReport = await readFile(join(outDir, 'funnel.md'), 'utf8');
     const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
     const browserReadiness = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
+    const engagementCaptureTemplate = await readFile(join(outDir, 'engagement-opportunities/_capture-template.md'), 'utf8');
     const experimentPlan = await readFile(join(outDir, 'experiment-plan.md'), 'utf8');
     const manualPublishKits = await readFile(join(outDir, 'manual-publish-kits/day1-ready-slots.md'), 'utf8');
 
@@ -1981,6 +2040,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.automation.browserReadiness.status, 'needs_browser_probe');
     assert.equal(result.automation.experimentPlan.status, 'ready');
     assert.equal(result.automation.engagement.searchStatus, 'ready_for_read_only_search');
+    assert.equal(result.automation.engagement.captureTemplateStatus, 'ready_for_capture');
+    assert.equal(result.automation.engagement.captureTargets, result.automation.engagement.searchQueries);
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.automation.manualPublishKits.status, 'ready_for_manual_confirmation');
     assert.equal(result.automation.manualPublishKits.readyKits, 1);
@@ -1989,6 +2050,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Daily brief/);
     assert.match(scheduledReport, /Image backlog/);
     assert.match(scheduledReport, /Engagement search/);
+    assert.match(scheduledReport, /Engagement capture template/);
     assert.match(scheduledReport, /Engagement plan/);
     assert.match(scheduledReport, /Manual publish kits ready: 1\/3/);
     assert.match(scheduledReport, /Publish confirmation/);
@@ -2002,6 +2064,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(funnelReport, /X Growth Funnel/);
     assert.match(imageBacklog, /Images missing: 2/);
     assert.match(browserReadiness, /X Browser Readiness/);
+    assert.match(engagementCaptureTemplate, /X Engagement Capture Template/);
+    assert.match(engagementCaptureTemplate, /do not reply, like, repost/);
     assert.match(manualPublishKits, /Manual X Publish Kits/);
     assert.match(manualPublishKits, /Ready slots: 1\/3/);
     assert.match(manualPublishKits, /post-publish-recovery/);

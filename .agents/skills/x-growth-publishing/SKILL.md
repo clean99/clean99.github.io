@@ -453,6 +453,7 @@ npm run social:engagement-search -- --out data/social-growth/engagement-search.m
 Open only the read-only search URLs from that file to find candidate threads. Then save copied visible X thread text into `data/social-growth/engagement-opportunities/*.txt` and run:
 
 ```bash
+npm run social:engagement-capture-template -- --out data/social-growth/engagement-opportunities/_capture-template.md
 npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md
 ```
 

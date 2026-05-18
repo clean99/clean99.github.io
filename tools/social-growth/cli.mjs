@@ -39,10 +39,13 @@ import {
 } from './dayReadiness.mjs';
 import {
   buildEngagementPlan,
+  buildEngagementCaptureTemplate,
   buildEngagementSearchPlan,
+  formatEngagementCaptureTemplateMarkdown,
   formatEngagementPlanMarkdown,
   formatEngagementSearchPlanMarkdown,
   readEngagementOpportunityTexts,
+  writeEngagementCaptureTemplate,
   writeEngagementPlan,
   writeEngagementSearchPlan,
 } from './engagement.mjs';
@@ -560,6 +563,25 @@ if (command === 'articles') {
     console.log(JSON.stringify(plan, null, 2));
   } else {
     console.log(formatEngagementSearchPlanMarkdown(plan));
+  }
+} else if (command === 'engagement-capture-template') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const searchPlan = buildEngagementSearchPlan({
+    queue,
+    now: args.now ? new Date(args.now) : new Date(),
+    limit: args.limit || 8,
+    daysBack: args.daysBack || 7,
+  });
+  const template = buildEngagementCaptureTemplate(searchPlan, {
+    maxTargets: args.maxTargets || args.limit || 5,
+  });
+  if (args.out) {
+    await writeEngagementCaptureTemplate(template, args.out);
+    console.log(`Wrote X engagement capture template to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(template, null, 2));
+  } else {
+    console.log(formatEngagementCaptureTemplateMarkdown(template));
   }
 } else if (command === 'copy-template') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');

@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 import { runSafeAutomationCycle } from './automation.mjs';
 import { runPostPublishMetricsCycle } from './metricsCycle.mjs';
 import { readJson } from './queue.mjs';
@@ -72,6 +72,7 @@ export async function runScheduledGrowthLoop({
   browserReadinessPath = DEFAULT_BROWSER_READINESS_PATH,
   browserProbePath = DEFAULT_BROWSER_PROBE_PATH,
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
+  engagementCaptureTemplatePath = join(engagementOpportunityDir, '_capture-template.md'),
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
   engagementSearchPath = DEFAULT_ENGAGEMENT_SEARCH_PATH,
   engagementLimit = 5,
@@ -116,6 +117,7 @@ export async function runScheduledGrowthLoop({
     browserReadinessPath,
     browserProbePath,
     engagementOpportunityDir,
+    engagementCaptureTemplatePath,
     engagementPlanPath,
     engagementSearchPath,
     engagementLimit,
@@ -233,9 +235,12 @@ Status: ${result.status}
 - Browser readiness: \`${result.paths.browserReadiness}\`
 - Browser probe state: \`${result.paths.browserProbe}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
+- Engagement capture template: \`${result.paths.engagementCaptureTemplate}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
 - Manual publish kits: \`${result.paths.manualPublishKitIndex}\`
 - Engagement search status: ${result.automation.engagement?.searchStatus || 'unknown'}
+- Engagement capture template status: ${result.automation.engagement?.captureTemplateStatus || 'unknown'}
+- Engagement capture targets: ${result.automation.engagement?.captureTargets ?? 'unknown'}
 - Engagement status: ${result.automation.engagement?.status || 'unknown'}
 - Ready reply candidates: ${result.automation.engagement?.readyCandidates ?? 'unknown'}
 - Manual publish kits ready: ${result.automation.manualPublishKits?.readyKits ?? 'unknown'}/${result.automation.manualPublishKits?.totalSlots ?? 'unknown'}
