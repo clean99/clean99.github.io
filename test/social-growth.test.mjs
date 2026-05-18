@@ -4230,6 +4230,7 @@ test('growth status surfaces blocking browser readiness before publish prep', as
     assert.equal(status.manualPublishFallback.available, true);
     assert.ok(status.nextActions.some((item) => item.action.includes('Fix browser readiness')));
     assert.ok(status.nextActions.some((item) => item.action.includes('manual publish kit')));
+    assert.ok(status.nextActions.some((item) => item.action.includes('post-publish-recovery-batch')));
     assert.ok(!status.nextActions.some((item) => item.priority === 'P0' && item.action.includes('thread first post')));
     assert.ok(!status.nextActions.some((item) => item.priority === 'P0' && item.action.includes('Publish one confirmed')));
     assert.ok(status.nextActions.some((item) => item.priority === 'P1' && item.reason.includes('After the current blocker is cleared')));

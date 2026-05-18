@@ -308,7 +308,7 @@ function nextActions({
     if (manualPublishFallback?.available) {
       actions.push({
         priority: 'P0',
-        action: 'Generate the manual publish kit and use a logged-in normal Chrome profile for confirmed publishing, then run post-publish-recovery.',
+        action: 'Generate manual publish kit(s), publish from a logged-in normal Chrome profile with confirmation, then fill the batch URL template and run post-publish-recovery-batch.',
         reason: manualPublishFallback.reason,
       });
     }
