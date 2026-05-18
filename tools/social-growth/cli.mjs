@@ -55,6 +55,7 @@ import { summarizeGrowthLedger } from './metrics.mjs';
 import {
   buildPublishPreflight,
   formatPublishPreflightMarkdown,
+  ingestLatestGeneratedImage,
   registerPublishImage,
   writePublishPreflight,
 } from './preflight.mjs';
@@ -1082,6 +1083,22 @@ if (command === 'articles') {
     slot: args.slot || 1,
     now: args.now ? new Date(args.now) : new Date(),
     imageDir: args.imageDir || 'output/imagegen',
+  });
+  console.log(JSON.stringify(result, null, 2));
+} else if (command === 'ingest-imagegen') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const result = await ingestLatestGeneratedImage({
+    queue,
+    ledger,
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    sourceDir: args.sourceDir,
+    codexHome: args.codexHome,
+    since: args.since,
   });
   console.log(JSON.stringify(result, null, 2));
 } else if (command === 'metrics-template') {

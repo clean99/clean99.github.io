@@ -71,6 +71,7 @@ export async function buildImageBacklog({
         commands: {
           imageBrief: `npm run social:image-brief -- --id ${preflight.selected.id}`,
           register: `npm run social:register-image -- --id ${preflight.selected.id} --source ${shellQuote(sourcePlaceholder)}`,
+          ingestLatest: `npm run social:ingest-imagegen -- --id ${preflight.selected.id}`,
           preflight: `npm run social:preflight -- --id ${preflight.selected.id} --out data/social-growth/publish-preflight.md`,
         },
       });
@@ -161,6 +162,7 @@ Commands:
 \`\`\`bash
 ${entry.commands.imageBrief}
 ${entry.commands.register}
+${entry.commands.ingestLatest}
 ${entry.commands.preflight}
 \`\`\``;
 }

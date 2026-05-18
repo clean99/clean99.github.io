@@ -30,6 +30,7 @@
     "social:handoff": "node tools/social-growth/cli.mjs handoff",
     "social:image-backlog": "node tools/social-growth/cli.mjs image-backlog",
     "social:image-brief": "node tools/social-growth/cli.mjs image-brief",
+    "social:ingest-imagegen": "node tools/social-growth/cli.mjs ingest-imagegen",
     "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",
     "social:login-recovery": "node tools/social-growth/cli.mjs login-recovery",
     "social:manual-publish-kit": "node tools/social-growth/cli.mjs manual-publish-kit",

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, utimes, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -87,7 +87,12 @@ import {
   formatImageBacklogMarkdown,
   writeImageBacklog,
 } from '../tools/social-growth/imageBacklog.mjs';
-import { buildPublishPreflight, formatPublishPreflightMarkdown, registerPublishImage } from '../tools/social-growth/preflight.mjs';
+import {
+  buildPublishPreflight,
+  formatPublishPreflightMarkdown,
+  ingestLatestGeneratedImage,
+  registerPublishImage,
+} from '../tools/social-growth/preflight.mjs';
 import {
   buildThreadReplyHandoff,
   buildPublishConfirmation,
@@ -4798,6 +4803,69 @@ test('publish preflight is ready without key when a generated image is registere
     assert.equal(preflight.image.hasOpenAiKey, false);
     assert.equal(preflight.image.keyRequired, false);
     assert.equal(preflight.image.cliFallbackKeyRequired, false);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('ingests the newest Codex-generated PNG into the expected image path', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-imagegen-ingest-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '技术博客 SEO 检查表',
+        excerpt: '只补标签不改信息结构，搜索引擎仍然不知道该把页面分发给谁。',
+        slug: 'Tech-Blog-SEO-Checklist',
+        lang: 'zh',
+        tags: ['SEO', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/seo-checklist/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const generatedDir = join(outDir, 'generated_images');
+    const nestedDir = join(generatedDir, 'run-1');
+    await mkdir(nestedDir, { recursive: true });
+    const oldImage = join(generatedDir, 'old.png');
+    const newestImage = join(nestedDir, 'newest.png');
+    await writeFile(oldImage, 'old image');
+    await writeFile(newestImage, 'new image');
+    await utimes(oldImage, new Date('2026-05-18T00:00:00.000Z'), new Date('2026-05-18T00:00:00.000Z'));
+    await utimes(newestImage, new Date('2026-05-18T01:00:00.000Z'), new Date('2026-05-18T01:00:00.000Z'));
+
+    const ingested = await ingestLatestGeneratedImage({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      sourceDir: generatedDir,
+      id: queue.items[0].id,
+      imageDir: join(outDir, 'images'),
+      now: '2026-05-18T00:00:00.000Z',
+    });
+
+    assert.equal(ingested.sourceImage, newestImage);
+    assert.equal(ingested.candidateCount, 2);
+    assert.equal(await readFile(ingested.outputPath, 'utf8'), 'new image');
+    await assert.rejects(
+      () => ingestLatestGeneratedImage({
+        queue,
+        ledger: createLedger({
+          startDate: '2026-05-18',
+          baselineFollowers: 30,
+          followersIn7Days: 1000,
+        }),
+        sourceDir: generatedDir,
+        id: queue.items[0].id,
+        imageDir: join(outDir, 'images-2'),
+        since: '2026-05-18T02:00:00.000Z',
+      }),
+      /No generated PNG found/,
+    );
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

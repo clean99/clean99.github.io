@@ -1,5 +1,6 @@
-import { access, copyFile, mkdir, readdir, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { access, copyFile, mkdir, readdir, stat, writeFile } from 'node:fs/promises';
+import { homedir } from 'node:os';
+import { dirname, extname, join } from 'node:path';
 import { buildWeeklyExecutionPlan, packageDirForItem } from './schedule.mjs';
 import {
   findQueueItem,
@@ -190,6 +191,46 @@ export async function registerPublishImage({
   };
 }
 
+export async function ingestLatestGeneratedImage({
+  queue,
+  ledger,
+  id,
+  day = 1,
+  slot = 1,
+  now = new Date(),
+  imageDir = DEFAULT_IMAGE_DIR,
+  sourceDir,
+  codexHome = process.env.CODEX_HOME || join(homedir(), '.codex'),
+  since,
+} = {}) {
+  const plan = buildWeeklyExecutionPlan({ queue, ledger, now });
+  const selected = id
+    ? findQueueItem(queue, id)
+    : await selectSlotItem(plan, { day, slot, imageDir, preferReadyImage: false });
+  const sourceDirs = sourceDir ? [sourceDir] : defaultGeneratedImageDirs(codexHome);
+  const candidates = await latestGeneratedImageCandidates(sourceDirs, { since });
+  const sourceImage = candidates[0]?.path;
+  if (!sourceImage) {
+    throw new Error(`No generated PNG found under: ${sourceDirs.join(', ')}`);
+  }
+
+  const registered = await registerPublishImage({
+    queue,
+    ledger,
+    sourceImage,
+    id: selected.id,
+    now,
+    imageDir,
+  });
+
+  return {
+    ...registered,
+    sourceDir: candidates[0].root,
+    candidateCount: candidates.length,
+    sourceMtime: candidates[0].mtime.toISOString(),
+  };
+}
+
 export async function writePublishPreflight(preflight, filePath) {
   await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, `${formatPublishPreflightMarkdown(preflight).trimEnd()}\n`);
@@ -245,6 +286,48 @@ async function findLegacyImagePath(imageDir, id) {
     if (error.code === 'ENOENT') return null;
     throw error;
   }
+}
+
+async function latestGeneratedImageCandidates(sourceDirs, { since } = {}) {
+  const threshold = since ? new Date(since).getTime() : 0;
+  if (Number.isNaN(threshold)) {
+    throw new Error(`Invalid --since datetime: ${since}`);
+  }
+  const candidates = [];
+  for (const sourceDir of sourceDirs) {
+    const root = sourceDir;
+    const files = await collectImageFiles(sourceDir, { root, depth: 0 }).catch((error) => {
+      if (error.code === 'ENOENT') return [];
+      throw error;
+    });
+    for (const file of files) {
+      if (file.mtime.getTime() >= threshold) candidates.push(file);
+    }
+  }
+  return candidates.sort((left, right) => right.mtime.getTime() - left.mtime.getTime());
+}
+
+async function collectImageFiles(dir, { root, depth }) {
+  if (depth > 4) return [];
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...await collectImageFiles(fullPath, { root, depth: depth + 1 }));
+    } else if (entry.isFile() && extname(entry.name).toLowerCase() === '.png') {
+      const info = await stat(fullPath);
+      files.push({ path: fullPath, root, mtime: info.mtime });
+    }
+  }
+  return files;
+}
+
+function defaultGeneratedImageDirs(codexHome) {
+  return [
+    join(codexHome, 'generated_images'),
+    join(codexHome, 'generated-images'),
+  ];
 }
 
 function canonicalImagePath(imageDir, id) {
