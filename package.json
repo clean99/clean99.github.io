@@ -21,6 +21,7 @@
     "social:image-brief": "node tools/social-growth/cli.mjs image-brief",
     "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",
     "social:mark-published": "node tools/social-growth/cli.mjs mark-published",
+    "social:metrics-cycle": "node tools/social-growth/cli.mjs metrics-cycle",
     "social:metrics-template": "node tools/social-growth/cli.mjs metrics-template",
     "social:package": "node tools/social-growth/cli.mjs package",
     "social:parse-x-text": "node tools/social-growth/cli.mjs parse-x-text",

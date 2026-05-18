@@ -71,6 +71,7 @@ import {
   publishedPostsFromQueue,
   updateLedgerSnapshot,
 } from './ledger.mjs';
+import { runPostPublishMetricsCycle } from './metricsCycle.mjs';
 
 const command = process.argv[2] || 'help';
 const args = parseArgs(process.argv.slice(3));
@@ -493,6 +494,31 @@ if (command === 'articles') {
     postTextDir: args.postTextDir,
   });
   console.log(JSON.stringify(result, null, 2));
+} else if (command === 'metrics-cycle') {
+  const result = await runPostPublishMetricsCycle({
+    queuePath: args.queue || 'data/social-growth/queue.json',
+    ledgerPath: args.ledger || 'data/social-growth/ledger.json',
+    metricsPath: args.metrics || 'data/social-growth/posts.local.json',
+    profileTextPath: args.profileText || 'data/social-growth/profile.local.txt',
+    postTextDir: args.postTextDir || 'data/social-growth/post-texts',
+    cycleReportPath: args.out || 'data/social-growth/metrics-cycle.md',
+    growthReportPath: args.growthReport || 'data/social-growth/growth-report.md',
+    recommendationsPath: args.recommendations || 'data/social-growth/recommendations.md',
+    now: args.now ? new Date(args.now) : new Date(),
+    snapshot: args.snapshot !== 'false',
+  });
+  console.log(JSON.stringify({
+    generatedAt: result.generatedAt,
+    status: result.status,
+    followers: result.followers,
+    publishedPosts: result.publishedPosts,
+    capturedPostTexts: result.capturedPostTexts,
+    outputs: {
+      cycleReport: result.cycleReportPath,
+      growthReport: result.growthReportPath,
+      recommendations: result.recommendationsPath,
+    },
+  }, null, 2));
 } else if (command === 'parse-x-text') {
   const text = await readText(requiredArg(args, 'input'));
   const parsed = args.kind === 'post' ? parseXPostMetrics(text) : parseXProfileMetrics(text);
@@ -597,6 +623,7 @@ function printHelp() {
   npm run social:register-image -- --day 1 --slot 1 --source /path/to/generated.png
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt
+  npm run social:metrics-cycle -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
   npm run social:parse-x-text -- --kind profile --input data/social-growth/profile.local.txt
   npm run social:init-ledger -- --followers 1234 --out data/social-growth/ledger.json
   npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json

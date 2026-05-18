@@ -34,6 +34,7 @@ import {
   postScore,
   summarizeGrowthLedger,
 } from '../tools/social-growth/metrics.mjs';
+import { runPostPublishMetricsCycle } from '../tools/social-growth/metricsCycle.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from '../tools/social-growth/recommendations.mjs';
 import {
   buildImageBrief,
@@ -1879,6 +1880,197 @@ test('metrics template includes only published posts and snapshot can read it', 
     assert.equal(explicitUndefined.snapshots[1].followers, 35);
     assert.equal(updated.snapshots[1].posts[0].metrics.views, 1200);
     assert.equal(summarizeGrowthLedger(updated).followerDelta, 5);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('post-publish metrics cycle captures text, snapshots ledger, and writes reports', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-metrics-cycle-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '有用的系统',
+        excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+        slug: 'Useful-Systems',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const publishedQueue = markQueueItemPublished(queue, {
+      id: queue.items[0].id,
+      xPostUrl: 'https://x.com/Clean993/status/1',
+      xArticleUrl: 'https://x.com/Clean993/articles/1',
+      publishedAt: '2026-05-18T01:00:00.000Z',
+    });
+    const queuePath = join(outDir, 'queue.json');
+    const ledgerPath = join(outDir, 'ledger.json');
+    const metricsPath = join(outDir, 'posts.local.json');
+    const profileTextPath = join(outDir, 'profile.local.txt');
+    const postTextDir = join(outDir, 'post-texts');
+    await writeJson(queuePath, publishedQueue);
+    await writeJson(ledgerPath, createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+    await mkdir(postTextDir);
+    await writeFile(profileTextPath, 'Clean993\n31 Followers\n');
+    await writeFile(join(postTextDir, `${queue.items[0].id}.txt`), [
+      'Views',
+      '1.2K',
+      'Likes',
+      '12',
+      'Replies',
+      '3',
+      'Reposts',
+      '2',
+      'Bookmarks',
+      '5',
+      'Profile clicks',
+      '9',
+      'New follows',
+      '1',
+    ].join('\n'));
+
+    const result = await runPostPublishMetricsCycle({
+      queuePath,
+      ledgerPath,
+      metricsPath,
+      profileTextPath,
+      postTextDir,
+      cycleReportPath: join(outDir, 'metrics-cycle.md'),
+      growthReportPath: join(outDir, 'growth-report.md'),
+      recommendationsPath: join(outDir, 'recommendations.md'),
+      now: '2026-05-19T00:00:00.000Z',
+    });
+    const metrics = JSON.parse(await readFile(metricsPath, 'utf8'));
+    const ledger = JSON.parse(await readFile(ledgerPath, 'utf8'));
+    const cycleReport = await readFile(join(outDir, 'metrics-cycle.md'), 'utf8');
+    const growthReport = await readFile(join(outDir, 'growth-report.md'), 'utf8');
+    const recommendations = await readFile(join(outDir, 'recommendations.md'), 'utf8');
+
+    assert.equal(result.status, 'snapshotted');
+    assert.equal(result.followers, '31');
+    assert.equal(result.readiness.postsWithViews, 1);
+    assert.equal(metrics.posts[0].metrics.views, '1200');
+    assert.equal(metrics.posts[0].metrics.follows, '1');
+    assert.equal(ledger.snapshots.length, 2);
+    assert.equal(ledger.snapshots[1].followers, 31);
+    assert.equal(ledger.snapshots[1].posts[0].metrics.views, 1200);
+    assert.match(cycleReport, /Post-Publish Metrics Cycle/);
+    assert.match(cycleReport, /Read-only metrics parsing only/);
+    assert.match(growthReport, /Follower delta: 1/);
+    assert.match(recommendations, /Growth Recommendations/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('post-publish metrics cycle does not snapshot when follower count is missing', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-metrics-cycle-missing-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '有用的系统',
+        excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+        slug: 'Useful-Systems',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const publishedQueue = markQueueItemPublished(queue, {
+      id: queue.items[0].id,
+      xPostUrl: 'https://x.com/Clean993/status/1',
+      publishedAt: '2026-05-18T01:00:00.000Z',
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+    const queuePath = join(outDir, 'queue.json');
+    const ledgerPath = join(outDir, 'ledger.json');
+    await writeJson(queuePath, publishedQueue);
+    await writeJson(ledgerPath, ledger);
+
+    const result = await runPostPublishMetricsCycle({
+      queuePath,
+      ledgerPath,
+      metricsPath: join(outDir, 'posts.local.json'),
+      profileTextPath: join(outDir, 'missing-profile.txt'),
+      postTextDir: join(outDir, 'missing-post-texts'),
+      cycleReportPath: join(outDir, 'metrics-cycle.md'),
+      growthReportPath: join(outDir, 'growth-report.md'),
+      recommendationsPath: join(outDir, 'recommendations.md'),
+      now: '2026-05-19T00:00:00.000Z',
+    });
+    const persistedLedger = JSON.parse(await readFile(ledgerPath, 'utf8'));
+
+    assert.equal(result.status, 'needs_profile_capture');
+    assert.equal(result.readiness.followersReady, false);
+    assert.deepEqual(persistedLedger, ledger);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('post-publish metrics cycle does not snapshot before any published post exists', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-metrics-cycle-empty-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '有用的系统',
+        excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+        slug: 'Useful-Systems',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+    const queuePath = join(outDir, 'queue.json');
+    const ledgerPath = join(outDir, 'ledger.json');
+    const profileTextPath = join(outDir, 'profile.local.txt');
+    await writeJson(queuePath, queue);
+    await writeJson(ledgerPath, ledger);
+    await writeFile(profileTextPath, 'Clean993\n31 Followers\n');
+
+    const result = await runPostPublishMetricsCycle({
+      queuePath,
+      ledgerPath,
+      metricsPath: join(outDir, 'posts.local.json'),
+      profileTextPath,
+      postTextDir: join(outDir, 'post-texts'),
+      cycleReportPath: join(outDir, 'metrics-cycle.md'),
+      growthReportPath: join(outDir, 'growth-report.md'),
+      recommendationsPath: join(outDir, 'recommendations.md'),
+      now: '2026-05-19T00:00:00.000Z',
+    });
+    const persistedLedger = JSON.parse(await readFile(ledgerPath, 'utf8'));
+
+    assert.equal(result.status, 'needs_published_posts');
+    assert.equal(result.followers, '31');
+    assert.equal(result.publishedPosts, 0);
+    assert.deepEqual(persistedLedger, ledger);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

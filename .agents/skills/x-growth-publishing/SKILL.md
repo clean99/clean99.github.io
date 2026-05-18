@@ -223,19 +223,24 @@ For single-item control:
    ```
    Use the package only to prepare Chrome fields. Stop before profile save, pinned-post publish, and pin confirmation.
 22. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
-23. Record metrics twice per day:
+23. Prefer the consolidated post-publish metrics cycle when copied visible profile/post text is available:
+   ```bash
+   npm run social:metrics-cycle -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
+   ```
+   This parses read-only local text, writes `metrics-cycle.md`, writes a growth report and recommendations, and appends a ledger snapshot only when follower count is present.
+24. Record metrics twice per day if you are not using `social:metrics-cycle`:
    ```bash
    npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
    ```
-24. Review progress:
+25. Review progress:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
-25. Generate the next optimization decision:
+26. Generate the next optimization decision:
    ```bash
    npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
    ```
-26. Regenerate the week-level plan after each queue or ledger update:
+27. Regenerate the week-level plan after each queue or ledger update:
    ```bash
    npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/weekly-plan.md
    ```
