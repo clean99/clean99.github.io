@@ -34,6 +34,7 @@ import {
 } from '../tools/social-growth/imageBrief.mjs';
 import { buildPublishPreflight, formatPublishPreflightMarkdown, registerPublishImage } from '../tools/social-growth/preflight.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
+import { buildGrowthStatus, formatGrowthStatusMarkdown, writeGrowthStatus } from '../tools/social-growth/status.mjs';
 import { validateQueue, validateQueueItem } from '../tools/social-growth/validation.mjs';
 import {
   buildPublishPackage,
@@ -800,6 +801,147 @@ test('image brief exports prompt, visual checks, and register command', async ()
     assert.match(markdown, /--source '\/tmp\/generated.png'/);
     assert.match(markdown, /Do not open Chrome for publishing until preflight is ready/);
     assert.match(persisted, /Short Post First Screen/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('growth status summarizes blocker, pace, and next commands', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-status-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '这篇文章讨论的是让每一轮修改都能被同一个 harness 复验。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+
+    const status = await buildGrowthStatus({
+      queue,
+      ledger,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir: join(outDir, 'images'),
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+    const markdown = formatGrowthStatusMarkdown(status);
+    const writtenPath = await writeGrowthStatus(status, join(outDir, 'status.md'));
+    const persisted = await readFile(writtenPath, 'utf8');
+
+    assert.equal(status.status, 'blocked_preflight');
+    assert.equal(status.validation.status, 'pass');
+    assert.equal(status.weeklyPlan.missingSlots, 18);
+    assert.equal(status.preflight.status, 'blocked');
+    assert.ok(status.nextActions.some((item) => item.action.includes('Generate the gpt-image-2 image')));
+    assert.match(markdown, /Follower delta: 0/);
+    assert.match(markdown, /social:image-brief/);
+    assert.match(persisted, /Public X actions still require action-time confirmation/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('growth status is ready for browser confirmation when the selected image exists', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-status-ready-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Agent Skills 探索实录',
+        excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+        slug: 'Agent-Skills',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/agent-skills/',
+      },
+      {
+        title: '从第一性原理理解 SEO',
+        excerpt: '理解搜索引擎如何读取、归类和信任页面。',
+        slug: 'SEO-Overhaul',
+        lang: 'zh',
+        tags: ['Software Engineering'],
+        url: 'https://clean99.github.io/zh/seo/',
+      },
+      {
+        title: 'Vibe Coding VS Spec-Driven Coding',
+        excerpt: '复杂改动需要先固定意图、边界和验收标准。',
+        slug: 'Spec-Driven-Coding',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/spec/',
+      },
+      {
+        title: 'Building Fault Tolerant React App With Error Boundary',
+        excerpt: '把崩溃隔离、错误上报和恢复路径都设计进去。',
+        slug: 'Error-Boundary',
+        lang: 'zh',
+        tags: ['React', 'Frontend'],
+        url: 'https://clean99.github.io/zh/error-boundary/',
+      },
+      {
+        title: 'React Performance Optimization',
+        excerpt: '先定位 render、网络和交互成本真正落在哪一层。',
+        slug: 'React-Performance',
+        lang: 'zh',
+        tags: ['React', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/react-performance/',
+      },
+      {
+        title: 'React Server Component Internals',
+        excerpt: '理解 server/client 边界如何改变数据流和打包模型。',
+        slug: 'React-Server-Component',
+        lang: 'zh',
+        tags: ['React', 'Frontend'],
+        url: 'https://clean99.github.io/zh/rsc/',
+      },
+      {
+        title: '前端测试用例设计',
+        excerpt: '用行为用例保护重构空间。',
+        slug: 'Frontend-Testing',
+        lang: 'zh',
+        tags: ['testing'],
+        url: 'https://clean99.github.io/zh/testing/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 7,
+    });
+    const imageDir = join(outDir, 'images');
+    const imagePath = join(imageDir, `${queue.items[0].id}.png`);
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(imagePath, 'fake image');
+
+    const status = await buildGrowthStatus({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+
+    assert.equal(status.status, 'ready_for_browser_confirmation');
+    assert.equal(status.weeklyPlan.missingSlots, 0);
+    assert.equal(status.preflight.status, 'ready');
+    assert.equal(status.preflight.image.ready, true);
+    assert.ok(status.nextActions.some((item) => item.action.includes('Prepare the X Article')));
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

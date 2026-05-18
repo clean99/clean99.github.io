@@ -23,6 +23,7 @@ The code can automate safe local work:
 - validate each candidate against the X publishing quality gate before daily packages are exported;
 - run a publish preflight that checks image readiness and the public-action confirmation boundary;
 - export an image brief with the exact `gpt-image-2` prompt, visual review checklist, expected output path, and register command;
+- write a single growth status dashboard that combines follower pace, queue coverage, publish preflight, blockers, and next commands;
 - run the local daily preparation loop in one command;
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
@@ -154,6 +155,14 @@ npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-pr
 ```
 
 The preflight writes the selected queue id, package path, expected image path, `gpt-image-2` generation command, and browser stop points. It is allowed to create the local package, but it must not publish, upload, reply, like, repost, follow, or edit.
+
+Write the consolidated local status dashboard:
+
+```bash
+npm run social:status -- --day 1 --slot 1 --out data/social-growth/status.md
+```
+
+This status file is the first place to look during automation runs. It combines the follower target, queue quality gate, weekly slot coverage, selected publish preflight, image readiness, blockers, and the next commands. It is ignored by git because it reflects local account state and transient publish blockers.
 
 Export the image generation and review handoff for the same slot:
 

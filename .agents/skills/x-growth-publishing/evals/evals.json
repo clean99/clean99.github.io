@@ -54,6 +54,12 @@
       "prompt": "没有 OPENAI_API_KEY，但我要先把 Day 1 Slot 1 的 gpt-image-2 生图需求固定下来，后面能接回发布流。",
       "expected_output": "运行 social:image-brief；输出或写入 image brief，包含短帖首屏、X Article 标题、gpt-image-2 prompt、视觉审查清单、expected image path、register-image 命令和 preflight rerun 命令；不进入公开发布。",
       "files": []
+    },
+    {
+      "id": 10,
+      "prompt": "今天自动化跑完后告诉我整个 X 增长系统卡在哪里、下一步该做什么。",
+      "expected_output": "运行 social:status 或生成等价状态面板；汇总 follower pace、quality gate、weekly coverage、publish preflight、image readiness、blockers 和 next commands；不进入公开发布。",
+      "files": []
     }
   ]
 }

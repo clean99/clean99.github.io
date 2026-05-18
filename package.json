@@ -26,6 +26,7 @@
     "social:register-image": "node tools/social-growth/cli.mjs register-image",
     "social:report": "node tools/social-growth/cli.mjs report",
     "social:snapshot": "node tools/social-growth/cli.mjs snapshot",
+    "social:status": "node tools/social-growth/cli.mjs status",
     "social:validate": "node tools/social-growth/cli.mjs validate",
     "social:week": "node tools/social-growth/cli.mjs week",
     "test": "node --test test/social-growth.test.mjs"

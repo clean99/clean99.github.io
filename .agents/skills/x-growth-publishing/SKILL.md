@@ -51,6 +51,14 @@ npm run social:week -- --queue data/social-growth/queue.json --ledger data/socia
 Use `data/social-growth/weekly-plan.md` as the day-level schedule. It maps validated candidates to publish slots, metric capture times, and the follower pace required for the `+1000` target.
 Before browser work, the healthy default state is `21/21 passed` and `Unfilled slots: 0`. If the quality gate fails, fix copy generation or reduce scope before posting.
 
+For one consolidated status view, write:
+
+```bash
+npm run social:status -- --day 1 --slot 1 --out data/social-growth/status.md
+```
+
+Use `data/social-growth/status.md` to see follower pace, queue coverage, selected preflight, image readiness, blockers, and the next commands in one place.
+
 Run publish preflight for the selected slot:
 
 ```bash

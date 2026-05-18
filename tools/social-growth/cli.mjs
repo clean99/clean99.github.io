@@ -21,6 +21,11 @@ import {
   formatWeeklyExecutionPlanMarkdown,
   writeWeeklyExecutionPlan,
 } from './schedule.mjs';
+import {
+  buildGrowthStatus,
+  formatGrowthStatusMarkdown,
+  writeGrowthStatus,
+} from './status.mjs';
 import { formatValidationMarkdown, validateQueue } from './validation.mjs';
 import {
   buildPublishQueue,
@@ -179,6 +184,27 @@ if (command === 'articles') {
   } else {
     console.log(formatPublishPreflightMarkdown(preflight));
   }
+} else if (command === 'status') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const status = await buildGrowthStatus({
+    queue,
+    ledger,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    ensurePackage: args.ensurePackage === 'true',
+  });
+  if (args.out) {
+    await writeGrowthStatus(status, args.out);
+    console.log(`Wrote X growth status to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(status, null, 2));
+  } else {
+    console.log(formatGrowthStatusMarkdown(status));
+  }
 } else if (command === 'image-brief') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -329,6 +355,7 @@ function printHelp() {
   npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:daily -- --limit 5 --package-limit 3
   npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json
+  npm run social:status -- --day 1 --slot 1 --out data/social-growth/status.md
   npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md
   npm run social:image-brief -- --day 1 --slot 1
   npm run social:register-image -- --day 1 --slot 1 --source /path/to/generated.png
