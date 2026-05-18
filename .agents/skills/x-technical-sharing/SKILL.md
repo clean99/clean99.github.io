@@ -140,7 +140,7 @@ Good short post:
 - No raw blog URL.
 - One mechanism within the first two lines.
 - Mention the image or X Article naturally.
-- At most two hashtags.
+- No hashtags by default. Only add one when the user explicitly asks for a hashtag experiment.
 - No engagement bait: no `点赞`, `转发`, `评论区`, `怎么看`, or generic questions.
 - Do not mimic abusive creator voices. Borrow structure only.
 
@@ -186,6 +186,7 @@ Remove AI-smelling filler:
 - generic questions such as `你怎么看`.
 
 If the project-level `x-writing` community skill is available, use its `references/anti-patterns.md` as a cleanup checklist for rhythm, inflated vocabulary, formal transitions, and reframing cliches. Do not inherit its English-only examples blindly; Chinese technical specificity and this skill's output contract win.
+If the project-level `writing-clearly-and-concisely` skill is available, use it before `humanizer-zh`: cut needless words, force concrete language, put claims in positive form, and remove puffed-up AI vocabulary. Do not let it flatten a sharp Chinese technical voice into generic documentation prose.
 If the project-level `humanizer-zh` skill is available, run it after drafting and before `social:apply-copy`. It should remove Chinese AI-writing residue such as negative reframing, generic transitions, inflated slogans, and perfectly balanced template sentences.
 If the project-level `marketing-psychology` skill is available, use it before finalizing the first line and image headline. Keep only the psychological frame that is tied to the technical mechanism: a wrong belief, visible loss, status payoff, or decision pressure. Do not add generic persuasion language.
 If the community `copy-editing` skill is available, use it as a focused critique pass, not a rewrite engine. Preserve the technical mechanism and edit for clarity, specificity, proof, and reader action.

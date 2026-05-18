@@ -44,6 +44,15 @@ Why it is useful here: it gives a standard fallback workflow for real-browser sn
 
 Current blocker: the wrapper requires `npx`, which is absent in this environment.
 
+### `writing-clearly-and-concisely`
+
+- Source: `softaworks/agent-toolkit`, path `skills/writing-clearly-and-concisely`
+- Local paths: `.agents/skills/writing-clearly-and-concisely` and `$HOME/.codex/skills/writing-clearly-and-concisely`
+- Use: a ruthless clarity pass for short posts, X Articles, image headlines, profile copy, and skill text.
+- Boundary: prose cleanup only. It cannot publish, schedule, scrape, call APIs, or perform account actions.
+
+Why it is useful here: it directly targets the failure mode behind AI-sounding X copy: inflated words, fake importance, loose sentences, and filler. For Chinese X copy, use it before `humanizer-zh` so the final voice stays local and platform-native.
+
 ## Installed Globally
 
 These skills are installed under `$HOME/.codex/skills/` and are available as advisory layers for this project. They are not copied into `.agents/skills/` because the global install is already active in Codex.
@@ -149,6 +158,15 @@ Why it is useful here: it broadens the local system beyond one-off posts. It giv
 - Use: relationship-loop and non-spam engagement strategy.
 - Boundary: translate recommendations into small manual engagement targets and local metrics; no mass replies, DMs, follows, or account actions.
 
+### `skill-judge`
+
+- Source: `softaworks/agent-toolkit`, path `skills/skill-judge`
+- Local path: `$HOME/.codex/skills/skill-judge`
+- Use: review `SKILL.md` quality when expanding or refactoring this workflow.
+- Boundary: design review only. It does not install skills, publish content, or change public X state.
+
+Why it is useful here: this project is becoming skill-driven. A quality reviewer helps keep new skills compact, specific, and aligned with the actual X growth workflow instead of accumulating generic instructions.
+
 ## Rejected for This System
 
 - Twitter/X API automation skills: conflicts with the explicit no-X-API constraint.
@@ -164,9 +182,10 @@ Why it is useful here: it broadens the local system beyond one-off posts. It giv
 4. `social-writer` audits hook shape, thread pacing, and AI-writing patterns.
 5. `twitter-algorithm-optimizer` audits algorithmic reach hypotheses.
 6. `social-media-analyzer` helps interpret exported metrics after publication.
-7. `writing-voice`, `de-ai-ify`, and `humanizer-zh` remove stiff phrasing and template residue.
+7. `writing-clearly-and-concisely`, `writing-voice`, `de-ai-ify`, and `humanizer-zh` remove stiff phrasing and template residue.
 8. `agent-browser` / `playwright` may help only with browser diagnostics after their CLIs are available.
-9. Local quality gate, image readiness, browser readiness, public-action checklist, and action-time confirmation decide whether the package is eligible.
+9. `skill-judge` is used only when changing the skill system itself.
+10. Local quality gate, image readiness, browser readiness, public-action checklist, and action-time confirmation decide whether the package is eligible.
 
 ## Security Audit Notes
 
@@ -176,4 +195,6 @@ Why it is useful here: it broadens the local system beyond one-off posts. It giv
 - `marketing-social`: instruction/reference-only skill. Its references mention external scraping/scheduling tools as generic strategy ideas; those are not allowed for this project unless separately approved and still cannot bypass the browser confirmation boundary.
 - `agent-browser`: installed skill contains only `SKILL.md`. It asks for restricted Bash commands (`agent-browser:*`, `npx agent-browser:*`) and points to a separate CLI install. No bundled scripts, symlinks, lifecycle hooks, or secret reads were present in the installed skill directory.
 - `playwright`: installed skill includes one wrapper script, `scripts/playwright_cli.sh`. The wrapper exits when `npx` is missing, then runs `npx --yes --package @playwright/cli playwright-cli "$@"`; no secret reads, config writes, symlinks, lifecycle hooks, or arbitrary project writes were found.
+- `writing-clearly-and-concisely`: pure Markdown/reference skill. No scripts, symlinks, hooks, lifecycle files, or public-action tools were present in the installed project directory.
+- `skill-judge`: global instruction-only skill with `README.md` and `SKILL.md`. No scripts, symlinks, hooks, lifecycle files, or public-action tools were present in the installed global directory.
 - `uv` is not installed, so the `skill-scanner` automated scanner could not be run. This note records the manual fallback audit.
