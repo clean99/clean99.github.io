@@ -190,6 +190,42 @@ export function buildManualPublishUrlTemplate({
   };
 }
 
+export function fillManualPublishUrlTemplate(template, {
+  slot,
+  id,
+  url,
+  articleUrl,
+  publishedAt,
+  now = new Date(),
+} = {}) {
+  const targetUrl = String(url || '').trim();
+  if (!targetUrl) throw new Error('url is required');
+  if (!id && !slot) throw new Error('id or slot is required');
+  const targetSlot = slot === undefined || slot === null || slot === '' ? null : Number(slot);
+  let matched = false;
+  const items = (template.items || []).map((item) => {
+    const idMatches = id ? item.id === id : true;
+    const slotMatches = targetSlot === null ? true : Number(item.slot) === targetSlot;
+    if (!idMatches || !slotMatches) return item;
+    matched = true;
+    return {
+      ...item,
+      url: targetUrl,
+      articleUrl: articleUrl === undefined ? (item.articleUrl || '') : String(articleUrl || '').trim(),
+      publishedAt: publishedAt || item.publishedAt || toIsoString(now),
+    };
+  });
+  if (!matched) {
+    const selector = id ? `id ${id}` : `slot ${targetSlot}`;
+    throw new Error(`No manual publish URL item matched ${selector}`);
+  }
+  return {
+    ...template,
+    status: items.some((item) => item.url) ? 'ready_for_recovery' : template.status,
+    items,
+  };
+}
+
 export function buildManualPublishKitIndex({
   generatedAt = new Date().toISOString(),
   day = 1,
@@ -223,7 +259,7 @@ export function buildManualPublishKitIndex({
 
 export function formatManualPublishKitIndexMarkdown(index) {
   const kits = index.kits.length
-    ? index.kits.map(formatManualKitEntry).join('\n\n')
+    ? index.kits.map((entry) => formatManualKitEntry(entry, index.batchRecovery.urlTemplatePath)).join('\n\n')
     : '- No ready manual publish kits were generated.';
   const batchRecovery = formatBatchRecovery(index);
 
@@ -261,7 +297,7 @@ export async function writeManualPublishKitIndex(index, filePath) {
   return filePath;
 }
 
-function formatManualKitEntry(entry) {
+function formatManualKitEntry(entry, urlTemplatePath) {
   return `### Slot ${entry.slot}: ${entry.id}
 
 - Time: ${entry.time || 'unknown'}
@@ -273,6 +309,12 @@ After confirmed publication:
 
 \`\`\`bash
 ${entry.recoveryCommand}
+\`\`\`
+
+Or fill the batch URL template:
+
+\`\`\`bash
+npm run social:manual-publish-url -- --input ${shellQuote(urlTemplatePath)} --id ${shellQuote(entry.id)} --url <x-thread-url>
 \`\`\``;
 }
 
@@ -303,4 +345,9 @@ function safePathSegment(value) {
 function numberOrDefault(value, fallback) {
   if (value === undefined || value === null || value === '') return Number(fallback || 0);
   return Number(value);
+}
+
+function toIsoString(value) {
+  if (value instanceof Date) return value.toISOString();
+  return new Date(value).toISOString();
 }

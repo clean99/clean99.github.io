@@ -37,6 +37,7 @@
     "social:launch-window": "node tools/social-growth/cli.mjs launch-window",
     "social:manual-publish-kit": "node tools/social-growth/cli.mjs manual-publish-kit",
     "social:manual-publish-kits": "node tools/social-growth/cli.mjs manual-publish-kits",
+    "social:manual-publish-url": "node tools/social-growth/cli.mjs manual-publish-url",
     "social:mark-published": "node tools/social-growth/cli.mjs mark-published",
     "social:metrics-cycle": "node tools/social-growth/cli.mjs metrics-cycle",
     "social:metrics-template": "node tools/social-growth/cli.mjs metrics-template",

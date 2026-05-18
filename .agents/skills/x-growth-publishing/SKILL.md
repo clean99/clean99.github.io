@@ -235,7 +235,13 @@ For multiple ready manual slots, prefer the batch kit index:
 npm run social:manual-publish-kits -- --day today --publishMode thread_fallback --out data/social-growth/manual-publish-kits/day<N>-ready-slots.md
 ```
 
-After each confirmed manual publication, paste the public X status URL into `data/social-growth/manual-publish-kits/day<N>-published-urls.json`. Leave unpublished slots blank, then run:
+After each confirmed manual publication, fill the public X status URL with the local helper so the slot, kit path, recovery command, and metrics text path stay aligned:
+
+```bash
+npm run social:manual-publish-url -- --input data/social-growth/manual-publish-kits/day<N>-published-urls.json --id <queue-id> --url <x-thread-url>
+```
+
+Leave unpublished slots blank, then run:
 
 ```bash
 npm run social:post-publish-recovery-batch -- --input data/social-growth/manual-publish-kits/day<N>-published-urls.json --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies --launch-window-dir data/social-growth/launch-windows
@@ -373,7 +379,11 @@ For single-item control:
    npm run social:post-publish-recovery -- --day today --slot 1 --url <x-post-url>
    ```
    This validates the public X status URL, marks the selected queue item as published, refreshes the metrics template, writes the reply handoff, and runs the read-only metrics cycle from local copied text by default. It does not open Chrome unless `--skip-browser false` is explicitly passed.
-   For multiple manually confirmed posts from the same day, fill the batch URL template and run:
+   For multiple manually confirmed posts from the same day, fill the batch URL template with the local helper and run:
+   ```bash
+   npm run social:manual-publish-url -- --input data/social-growth/manual-publish-kits/day<N>-published-urls.json --id <queue-id> --url <x-thread-url>
+   ```
+   Then recover the filled URLs:
    ```bash
    npm run social:post-publish-recovery-batch -- --input data/social-growth/manual-publish-kits/day<N>-published-urls.json
    ```

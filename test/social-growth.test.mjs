@@ -106,6 +106,7 @@ import {
 import {
   buildManualPublishKit,
   buildManualPublishUrlTemplate,
+  fillManualPublishUrlTemplate,
   formatManualPublishKitMarkdown,
 } from '../tools/social-growth/manualPublishKit.mjs';
 import {
@@ -3811,6 +3812,7 @@ test('manual publish kits CLI writes all ready fallback kits and an index', asyn
     assert.match(indexMarkdown, /launch-window-dir data\/social-growth\/launch-windows/);
     assert.match(indexMarkdown, /urlHint/);
     assert.match(indexMarkdown, /postTextPath/);
+    assert.match(indexMarkdown, /manual-publish-url/);
     assert.equal(urlTemplate.status, 'ready_for_url_capture');
     assert.equal(urlTemplate.items.length, 2);
     assert.equal(urlTemplate.items[0].id, plannedSlots[0].item.id);
@@ -3882,6 +3884,73 @@ test('manual publish URL template maps ready kits to fillable published URL reco
     },
   ]);
   assert.match(template.boundary, /performs no public X actions/);
+});
+
+test('manual publish URL helper fills one confirmed X status URL locally', () => {
+  const template = buildManualPublishUrlTemplate({
+    generatedAt: '2026-05-19T00:00:00.000Z',
+    day: 2,
+    date: '2026-05-19',
+    kits: [
+      { slot: 1, id: 'Agent-Skills__zh__strong-thesis' },
+      { slot: 2, id: 'Spec-Driven-Coding__zh__case-story' },
+    ],
+  });
+
+  const updated = fillManualPublishUrlTemplate(template, {
+    id: 'Spec-Driven-Coding__zh__case-story',
+    url: 'https://x.com/Clean993/status/1234567890',
+    now: '2026-05-19T03:04:05.000Z',
+  });
+
+  assert.equal(updated.status, 'ready_for_recovery');
+  assert.equal(updated.items[0].url, '');
+  assert.equal(updated.items[1].url, 'https://x.com/Clean993/status/1234567890');
+  assert.equal(updated.items[1].publishedAt, '2026-05-19T03:04:05.000Z');
+  assert.throws(() => fillManualPublishUrlTemplate(template, {
+    id: 'Missing__zh__strong-thesis',
+    url: 'https://x.com/Clean993/status/1234567890',
+  }), /No manual publish URL item matched/);
+});
+
+test('manual publish URL CLI normalizes a confirmed URL without public actions', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-manual-url-'));
+  try {
+    const inputPath = join(outDir, 'published-urls.json');
+    const template = buildManualPublishUrlTemplate({
+      generatedAt: '2026-05-19T00:00:00.000Z',
+      day: 2,
+      date: '2026-05-19',
+      kits: [
+        { slot: 1, id: 'Agent-Skills__zh__strong-thesis' },
+      ],
+    });
+    await writeJson(inputPath, template);
+
+    const result = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'manual-publish-url',
+      '--input', inputPath,
+      '--id', 'Agent-Skills__zh__strong-thesis',
+      '--url', 'https://twitter.com/Clean993/status/1234567890?s=20',
+      '--now', '2026-05-19T03:04:05.000Z',
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+    const output = JSON.parse(result.stdout);
+    const updated = JSON.parse(await readFile(inputPath, 'utf8'));
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.equal(output.status, 'ready_for_recovery');
+    assert.equal(output.publicActions.typedText, false);
+    assert.equal(output.publicActions.uploadedMedia, false);
+    assert.equal(output.publicActions.clickedSubmit, false);
+    assert.equal(updated.items[0].url, 'https://x.com/Clean993/status/1234567890');
+    assert.equal(updated.items[0].publishedAt, '2026-05-19T03:04:05.000Z');
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
 });
 
 test('thread reply handoff materializes reply intent URLs from a published thread URL', () => {

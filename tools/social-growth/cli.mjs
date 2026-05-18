@@ -111,6 +111,7 @@ import {
   buildManualPublishKitIndex,
   buildManualPublishUrlTemplate,
   buildManualPublishKit,
+  fillManualPublishUrlTemplate,
   formatManualPublishKitMarkdown,
   manualPublishKitIndexPath,
   manualPublishKitPath,
@@ -1156,6 +1157,32 @@ if (command === 'articles') {
   } else {
     console.log(`Wrote ${entries.length} manual X publish kit(s), URL template, and index to ${indexPath}`);
   }
+} else if (command === 'manual-publish-url') {
+  const inputPath = requiredArg(args, 'input');
+  const template = await readJson(inputPath);
+  const normalizedUrl = normalizeXStatusUrl(requiredArg(args, 'url'));
+  const updated = fillManualPublishUrlTemplate(template, {
+    slot: args.slot,
+    id: args.id,
+    url: normalizedUrl,
+    articleUrl: args.articleUrl,
+    publishedAt: args.publishedAt,
+    now: args.now ? new Date(args.now) : new Date(),
+  });
+  const outPath = args.out || inputPath;
+  await writeJson(outPath, updated);
+  const filled = updated.items.filter((item) => item.url);
+  console.log(JSON.stringify({
+    status: updated.status,
+    path: outPath,
+    filled: filled.length,
+    item: filled.find((item) => item.url === normalizedUrl) || null,
+    publicActions: {
+      typedText: false,
+      uploadedMedia: false,
+      clickedSubmit: false,
+    },
+  }, null, 2));
 } else if (command === 'register-image') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -2169,6 +2196,7 @@ function printHelp() {
   npm run social:confirmation -- --day today --slot 1 --out data/social-growth/publish-confirmation.md
   npm run social:manual-publish-kit -- --day today --slot 1 --out data/social-growth/manual-publish-kit.md
   npm run social:manual-publish-kits -- --day today --out-dir data/social-growth/manual-publish-kits
+  npm run social:manual-publish-url -- --input data/social-growth/manual-publish-kits/day1-published-urls.json --id <queue-id> --url <x-thread-url>
   npm run social:register-image -- --day today --slot 1 --source /path/to/generated.png
   npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out data/social-growth/thread-reply-handoff.md --id <queue-id> --url <x-post-url>
   npm run social:post-publish-recovery -- --day today --slot 1 --url <x-post-url>
