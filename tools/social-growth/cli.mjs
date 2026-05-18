@@ -8,6 +8,7 @@ import {
   markQueueItemPublished,
   prepareBrowserHandoff,
   readJson,
+  writePublishPackage,
   writeJson,
 } from './queue.mjs';
 import {
@@ -48,16 +49,16 @@ if (command === 'articles') {
     .filter((article) => !lang || article.lang === lang)
     .slice(0, limit)
     .flatMap((article) =>
-    buildDistributionCandidates(article, { campaign: args.campaign }).map((candidate) => ({
-      articleSlug: candidate.articleSlug,
-      lang: candidate.lang,
-      variant: candidate.variant,
-      targetUrl: candidate.targetUrl,
-      posts: candidate.posts,
-      nextAction: 'queue_for_browser_publish',
-      requiresBrowserConfirmation: candidate.requiresBrowserConfirmation,
-    })),
-  );
+      buildDistributionCandidates(article, { campaign: args.campaign }).map((candidate) => ({
+        articleSlug: candidate.articleSlug,
+        lang: candidate.lang,
+        variant: candidate.variant,
+        targetUrl: candidate.targetUrl,
+        posts: candidate.posts,
+        nextAction: 'queue_for_browser_publish',
+        requiresBrowserConfirmation: candidate.requiresBrowserConfirmation,
+      })),
+    );
   console.log(JSON.stringify(plan, null, 2));
 } else if (command === 'queue') {
   const articles = await loadArticles();
@@ -72,6 +73,13 @@ if (command === 'articles') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const item = findQueueItem(queue, args.id || queue.items[0]?.id);
   console.log(JSON.stringify(prepareBrowserHandoff(item), null, 2));
+} else if (command === 'package') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const item = findQueueItem(queue, args.id || queue.items[0]?.id);
+  const written = await writePublishPackage(item, {
+    outDir: args.out || 'data/social-growth/packages',
+  });
+  console.log(JSON.stringify(written, null, 2));
 } else if (command === 'mark-published') {
   const queuePath = args.queue || 'data/social-growth/queue.json';
   const queue = await readJson(queuePath);
@@ -156,6 +164,7 @@ function printHelp() {
   npm run social:plan -- --limit 3
   npm run social:queue -- --limit 3 --out data/social-growth/queue.json
   npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>
+  npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:init-ledger -- --followers 1234 --out data/social-growth/ledger.json
   npm run social:snapshot -- --ledger data/social-growth/ledger.json --date 2026-05-19 --followers 1300 --posts-file data/social-growth/posts.local.json
   npm run social:report -- --ledger data/social-growth/example-ledger.json

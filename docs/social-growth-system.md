@@ -19,6 +19,7 @@ The code can automate safe local work:
 - draft X posts and threads;
 - create and persist a browser publishing queue;
 - prepare exact handoff text for Chrome;
+- export a publish package with image, X Article, short post, thread fallback, and checklist files;
 - produce `gpt-image-2` image prompts for each candidate;
 - produce an X Article draft before the blog link;
 - mark published X URLs back into the queue;
@@ -82,6 +83,21 @@ Prepare the exact text a browser executor should fill:
 ```bash
 npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>
 ```
+
+Export the complete publishing package:
+
+```bash
+npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
+```
+
+The package is written under `data/social-growth/packages/<queue-id>/` and contains:
+
+- `image-prompt.txt`;
+- `x-article.md`;
+- `short-post.txt`;
+- `thread-fallback.md`;
+- `browser-handoff.json`;
+- `publish-checklist.md`.
 
 After a confirmed browser publish, write the public X post URL back to the queue:
 
@@ -178,17 +194,18 @@ Do not commit private analytics or account history.
 1. Generate a queue with `npm run social:queue -- --limit 5 --out data/social-growth/queue.json`.
 2. Pick 2-4 strong queue items for the day.
 3. Run `npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>`.
-4. Generate the image from `image.prompt` with `gpt-image-2`.
-5. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
-6. Stop before publishing the X Article or thread and confirm the exact content and account.
-7. Publish only after confirmation.
-8. Use Chrome to prepare the short image-backed X post linking to the X Article.
-9. Stop before publishing the short post and confirm the exact content and account.
-10. Mark the published URL with `npm run social:mark-published`.
-11. Record follower count and post interactions twice per day.
-12. Run `npm run social:snapshot`.
-13. Run `npm run social:report -- --format markdown`.
-14. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+4. Run `npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>`.
+5. Generate the image from `image-prompt.txt` with `gpt-image-2`.
+6. Use Chrome to prepare the X Article first. If X Article is unavailable for the account, fall back to a thread.
+7. Stop before publishing the X Article or thread and confirm the exact content and account.
+8. Publish only after confirmation.
+9. Use Chrome to prepare the short image-backed X post linking to the X Article.
+10. Stop before publishing the short post and confirm the exact content and account.
+11. Mark the published URL with `npm run social:mark-published`.
+12. Record follower count and post interactions twice per day.
+13. Run `npm run social:snapshot`.
+14. Run `npm run social:report -- --format markdown`.
+15. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 ## Chrome Integration Plan
 

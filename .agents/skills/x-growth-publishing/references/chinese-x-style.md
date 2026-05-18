@@ -88,6 +88,7 @@ Use when there is a concrete project result:
 - Audience: Chinese technical readers who care about AI, frontend, testing, performance, and engineering judgment.
 - Positioning: practical engineer, not guru; measured systems, not empty AI hype.
 - First-line job: make a Chinese reader feel "这个和我遇到的问题有关".
+- Strong openings need a concrete mechanism within the next two lines; pure attitude is cheap.
 - Image job: explain structure faster than text.
 - X Article job: satisfy the click inside X before sending the reader to the blog.
 - Blog link job: archive and full detail, placed at the end of the X Article.
@@ -101,4 +102,3 @@ Use when there is a concrete project result:
 - "AI will change everything" without a mechanism;
 - more than two hashtags;
 - mass replies or low-quality engagement bait.
-

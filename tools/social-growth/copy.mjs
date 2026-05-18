@@ -87,15 +87,15 @@ export function sharpTake(article) {
 }
 
 export function researchUtility(article) {
-  return clamp('我把这篇工程文章拆成了一张图。\n\n问题不是“让 AI 写代码”，而是让 AI 每一步都有证据。\n\n核心流程：baseline -> 修改 -> 验证 -> ledger', 220);
+  return clamp('我把 AI 性能优化拆成了一张可复用流程图。\n\n真正有价值的不是 prompt，而是让 Agent 每一轮都留下：baseline、修改、验证、失败记录。\n\n图里是完整结构。', 220);
 }
 
 export function strongThesis(article) {
-  return clamp('很多人把 AI 编程想错了。\n\n真正的分界线不是模型多聪明，而是你有没有 measurement 和 ledger。\n\n没有可重复验证，AI 优化就是在讲故事。', 220);
+  return clamp('AI 写优化建议很便宜。\n\n贵的是证明它没胡说。\n\n我把这个问题做成了一套 Agent 跑得动的闭环：baseline -> change -> verify -> ledger。\n\n没有 ledger，所谓优化只是故事。', 220);
 }
 
 export function caseStory(article) {
-  return clamp('我一开始以为这是性能优化问题。\n\n后来发现，真正的问题是：测量契约先坏了。\n\n这篇写的是怎么把 AI Agent 从“提建议”变成“跑闭环”。', 220);
+  return clamp('我以为这篇是性能优化复盘。\n\n写完发现真正的问题更狠：AI 不是不能改代码，是我们经常没有证据判断它改得对不对。\n\n所以我把 measurement 和 ledger 做成了第一等公民。', 220);
 }
 
 export function usefulLesson(article) {
@@ -149,8 +149,6 @@ export function buildChineseXArticleBody(article, targetUrl) {
   const points = extractKeyPoints(article.text, 5);
 
   return [
-    `# ${article.title}`,
-    '',
     '这篇文章不是想证明“AI 很聪明”，而是讨论一个更现实的问题：怎样让 AI Agent 做出来的优化可以被验证，而不是只停留在建议层面。',
     '',
     '我的核心判断：没有可重复 measurement，AI 优化就是在讲故事。',
@@ -209,8 +207,6 @@ export function buildThreadFallback(article, targetUrl) {
 export function buildEnglishXArticleBody(article, targetUrl) {
   const points = extractKeyPoints(article.text, 5);
   return [
-    `# ${article.title}`,
-    '',
     article.excerpt,
     '',
     'Useful frame:',

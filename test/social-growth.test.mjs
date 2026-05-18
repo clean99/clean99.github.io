@@ -1,10 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { articleFromMarkdown, addUtm, parseFrontmatter } from '../tools/social-growth/articles.mjs';
 import { buildDistributionCandidates, buildXArticle, selectHashtags } from '../tools/social-growth/copy.mjs';
 import { appendSnapshot, createLedger, formatMarkdownReport } from '../tools/social-growth/ledger.mjs';
 import { parseCompactNumber, postScore, summarizeGrowthLedger } from '../tools/social-growth/metrics.mjs';
-import { buildPublishQueue, composePublishPosts, markQueueItemPublished } from '../tools/social-growth/queue.mjs';
+import {
+  buildPublishPackage,
+  buildPublishQueue,
+  composePublishPosts,
+  markQueueItemPublished,
+  writePublishPackage,
+} from '../tools/social-growth/queue.mjs';
 
 test('parses Hexo frontmatter and builds canonical URLs', () => {
   const source = `---
@@ -180,6 +189,42 @@ test('builds publish queue and composes handoff posts without losing the URL', (
   assert.equal(updated.items[0].xPostUrl, 'https://x.com/Clean993/status/1');
 });
 
+test('exports a browser publish package with image, article, and checklist artifacts', async () => {
+  const queue = buildPublishQueue([
+    {
+      title: '有用的系统',
+      excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+      slug: 'Useful-Systems',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+  const item = queue.items[0];
+  const publishPackage = buildPublishPackage(item);
+
+  assert.ok(publishPackage.files['image-prompt.txt'].includes('Model: gpt-image-2'));
+  assert.ok(publishPackage.files['x-article.md'].includes('博客原文：'));
+  assert.ok(!publishPackage.files['short-post.txt'].includes('https://clean99.github.io'));
+  assert.ok(publishPackage.files['publish-checklist.md'].includes('Stop before the final'));
+
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-package-'));
+  try {
+    const written = await writePublishPackage(item, { outDir });
+    assert.equal(written.files.length, 6);
+    const prompt = await readFile(join(written.packageDir, 'image-prompt.txt'), 'utf8');
+    const checklist = await readFile(join(written.packageDir, 'publish-checklist.md'), 'utf8');
+    assert.ok(prompt.includes('1536x1024'));
+    assert.ok(checklist.includes(item.id));
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('maps existing tags to Chinese audience hashtags', () => {
   assert.equal(selectHashtags(['AI', 'Software Engineering', 'Web Performance'], 'zh'), '#AI #软件工程');
   assert.equal(selectHashtags(['Software Engineering'], 'en'), '#SoftwareEngineering');
@@ -196,6 +241,7 @@ test('builds Chinese X Article before the blog link', () => {
   const xArticle = buildXArticle(article, 'https://clean99.github.io/zh/post/');
 
   assert.match(xArticle.body, /## 关键结论/);
+  assert.ok(!xArticle.body.startsWith('# 全自动 AI 性能优化'));
   assert.ok(xArticle.body.indexOf('## 关键结论') < xArticle.body.indexOf('博客原文：'));
   assert.ok(xArticle.body.endsWith('https://clean99.github.io/zh/post/'));
 });

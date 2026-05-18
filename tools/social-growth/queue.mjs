@@ -1,4 +1,5 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { buildDistributionCandidates } from './copy.mjs';
 
 export function buildPublishQueue(articles, options = {}) {
@@ -77,6 +78,90 @@ export function prepareBrowserHandoff(item) {
   };
 }
 
+export function buildPublishPackage(item) {
+  const handoff = prepareBrowserHandoff(item);
+  return {
+    id: item.id,
+    files: {
+      'image-prompt.txt': formatImagePrompt(handoff.image),
+      'x-article.md': formatXArticle(handoff.xArticle),
+      'thread-fallback.md': formatThreadFallback(handoff.threadFallback),
+      'short-post.txt': handoff.shortPost,
+      'browser-handoff.json': JSON.stringify(handoff, null, 2),
+      'publish-checklist.md': formatPublishChecklist(item),
+    },
+  };
+}
+
+export async function writePublishPackage(item, { outDir = 'data/social-growth/packages' } = {}) {
+  const safeId = safePathSegment(item.id);
+  const packageDir = join(outDir, safeId);
+  const publishPackage = buildPublishPackage(item);
+
+  await mkdir(packageDir, { recursive: true });
+  await Promise.all(Object.entries(publishPackage.files).map(([fileName, content]) => (
+    writeFile(join(packageDir, fileName), trailingNewline(content))
+  )));
+
+  return {
+    id: item.id,
+    packageDir,
+    files: Object.keys(publishPackage.files).map((fileName) => join(packageDir, fileName)),
+  };
+}
+
+export function formatImagePrompt(image = {}) {
+  return [
+    `Model: ${image.model || 'gpt-image-2'}`,
+    `Size: ${image.size || '1536x1024'}`,
+    `Quality: ${image.quality || 'medium'}`,
+    `Alt: ${image.alt || ''}`,
+    '',
+    image.prompt || '',
+  ].join('\n').trim();
+}
+
+export function formatXArticle(xArticle = {}) {
+  return [
+    `Title: ${xArticle.title || ''}`,
+    '',
+    'Body:',
+    '',
+    xArticle.body || '',
+  ].join('\n').trim();
+}
+
+export function formatThreadFallback(posts = []) {
+  return posts
+    .map((post, index) => [`## Post ${index + 1}`, '', post].join('\n'))
+    .join('\n\n')
+    .trim();
+}
+
+export function formatPublishChecklist(item) {
+  return [
+    `# Publish Package: ${item.id}`,
+    '',
+    `- Variant: ${item.variant}`,
+    `- Article slug: ${item.articleSlug}`,
+    `- Target blog URL: ${item.targetUrl}`,
+    '',
+    '## Order',
+    '',
+    '1. Generate the image from `image-prompt.txt` with `gpt-image-2`.',
+    '2. Create the X Article from `x-article.md`.',
+    '3. Stop before the final X Article publish click and confirm the account/content.',
+    '4. Publish the X Article only after confirmation.',
+    '5. Create the short X post from `short-post.txt`, attach the image, and link to the X Article URL.',
+    '6. Stop before the final short-post publish click and confirm the account/content.',
+    '7. Record the public URL with `social:mark-published`.',
+    '',
+    '## Boundary',
+    '',
+    'Public posting, image upload, replies, likes, reposts, follows, and edits require action-time confirmation.',
+  ].join('\n');
+}
+
 export function markQueueItemPublished(queue, { id, xPostUrl, publishedAt = new Date().toISOString() }) {
   return {
     ...queue,
@@ -105,5 +190,14 @@ export async function readJson(filePath) {
 }
 
 export async function writeJson(filePath, value) {
+  await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, `${JSON.stringify(value, null, 2)}\n`);
+}
+
+function safePathSegment(value) {
+  return String(value).replace(/[^A-Za-z0-9._=-]+/g, '-');
+}
+
+function trailingNewline(value) {
+  return `${String(value).trimEnd()}\n`;
 }

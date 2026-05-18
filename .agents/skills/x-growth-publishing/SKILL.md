@@ -33,7 +33,18 @@ Before writing copy, read `references/chinese-x-style.md` when the user asks to 
    ```bash
    npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>
    ```
-4. Generate a `gpt-image-2` image from the queue item's `image.prompt`.
+4. Export the publish package:
+   ```bash
+   npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
+   ```
+   Use the generated files as the source of truth:
+   - `image-prompt.txt`;
+   - `x-article.md`;
+   - `short-post.txt`;
+   - `thread-fallback.md`;
+   - `browser-handoff.json`;
+   - `publish-checklist.md`.
+5. Generate a `gpt-image-2` image from `image-prompt.txt`.
    - Preferred CLI when the user explicitly asks for image model control:
      ```bash
      python "$HOME/.codex/skills/.system/imagegen/scripts/image_gen.py" generate \
@@ -44,25 +55,25 @@ Before writing copy, read `references/chinese-x-style.md` when the user asks to 
        --out output/imagegen/<slug>.png
      ```
    - If `OPENAI_API_KEY` is missing, stop and ask the user for the key or use built-in image generation as a preview path.
-5. In Chrome, prepare the X Article first. If X Article publishing is unavailable for the account, fall back to a thread using `xArticle.body` split into readable posts:
+6. In Chrome, prepare the X Article first. If X Article publishing is unavailable for the account, fall back to a thread using `thread-fallback.md`:
    - title: `xArticle.title`;
    - body: `xArticle.body`;
    - attach the generated image when the UI supports it.
-6. Stop before the final Article publish click and ask for confirmation.
-7. After the X Article or thread is public, create the short X post:
+7. Stop before the final Article publish click and ask for confirmation.
+8. After the X Article or thread is public, create the short X post:
    - attach the generated image;
-   - use `shortPost`;
+   - use `short-post.txt`;
    - include the X Article URL, not the blog URL.
-8. Stop before the final post click and ask for confirmation.
-9. Record the published URL:
+9. Stop before the final post click and ask for confirmation.
+10. Record the published URL:
    ```bash
    npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url>
    ```
-10. Record metrics twice per day:
+11. Record metrics twice per day:
    ```bash
    npm run social:snapshot -- --ledger data/social-growth/ledger.json --date YYYY-MM-DD --followers <count> --posts-file data/social-growth/posts.local.json
    ```
-11. Review progress:
+12. Review progress:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
@@ -74,6 +85,7 @@ Short post:
 - one clear Chinese claim;
 - no raw blog URL;
 - one concrete reader payoff;
+- concrete mechanism within the first two lines;
 - 1-2 Chinese-readable hashtags;
 - image attached;
 - link to the X Article after it exists.
