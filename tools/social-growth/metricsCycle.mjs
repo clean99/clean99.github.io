@@ -95,6 +95,26 @@ export async function runPostPublishMetricsCycle({
   return result;
 }
 
+export async function refreshMetricsTemplateFromQueue({
+  queue,
+  metricsPath = DEFAULT_METRICS_PATH,
+  date,
+  followers = '',
+} = {}) {
+  const template = createMetricsTemplateFromQueue(queue, {
+    date,
+    followers,
+  });
+  const existingMetrics = await readOptionalJson(metricsPath);
+  const mergedMetrics = mergeMetricsTemplate(existingMetrics, template);
+  await writeJson(metricsPath, mergedMetrics);
+
+  return {
+    metricsPath,
+    publishedPosts: mergedMetrics.posts.length,
+  };
+}
+
 export function mergeMetricsTemplate(existingMetrics, nextTemplate) {
   if (!existingMetrics) return nextTemplate;
 

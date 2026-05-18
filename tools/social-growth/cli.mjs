@@ -115,7 +115,10 @@ import {
   publishedPostsFromQueue,
   updateLedgerSnapshot,
 } from './ledger.mjs';
-import { runPostPublishMetricsCycle } from './metricsCycle.mjs';
+import {
+  refreshMetricsTemplateFromQueue,
+  runPostPublishMetricsCycle,
+} from './metricsCycle.mjs';
 
 const command = process.argv[2] || 'help';
 const args = parseArgs(process.argv.slice(3));
@@ -879,6 +882,7 @@ if (command === 'articles') {
   console.log(JSON.stringify(parsed, null, 2));
 } else if (command === 'mark-published') {
   const queuePath = args.queue || 'data/social-growth/queue.json';
+  const metricsPath = args.metrics === 'false' ? null : (args.metrics || 'data/social-growth/posts.local.json');
   const queue = await readJson(queuePath);
   const updated = markQueueItemPublished(queue, {
     id: requiredArg(args, 'id'),
@@ -888,6 +892,14 @@ if (command === 'articles') {
   });
   await writeJson(queuePath, updated);
   console.log(`Marked ${args.id} as published in ${queuePath}`);
+  if (metricsPath) {
+    const metrics = await refreshMetricsTemplateFromQueue({
+      queue: updated,
+      metricsPath,
+      date: args.metricsDate || args.date,
+    });
+    console.log(`Refreshed metrics template for ${metrics.publishedPosts} published posts in ${metrics.metricsPath}`);
+  }
 } else if (command === 'init-ledger') {
   const ledger = createLedger({
     startDate: args.start,
@@ -1004,6 +1016,7 @@ function printHelp() {
   npm run social:x-prep -- --day 1 --slot 1 --out data/social-growth/x-publish-prep.md
   npm run social:confirmation -- --day 1 --slot 1 --out data/social-growth/publish-confirmation.md
   npm run social:register-image -- --day 1 --slot 1 --source /path/to/generated.png
+  npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --id <queue-id> --url <x-post-url>
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt
   npm run social:metrics-cycle -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts

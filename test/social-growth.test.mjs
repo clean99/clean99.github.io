@@ -65,7 +65,10 @@ import {
   postScore,
   summarizeGrowthLedger,
 } from '../tools/social-growth/metrics.mjs';
-import { runPostPublishMetricsCycle } from '../tools/social-growth/metricsCycle.mjs';
+import {
+  refreshMetricsTemplateFromQueue,
+  runPostPublishMetricsCycle,
+} from '../tools/social-growth/metricsCycle.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from '../tools/social-growth/recommendations.mjs';
 import {
   buildImageBrief,
@@ -3716,6 +3719,74 @@ test('metrics template includes only published posts and snapshot can read it', 
     assert.equal(explicitUndefined.snapshots[1].followers, 35);
     assert.equal(updated.snapshots[1].posts[0].metrics.views, 1200);
     assert.equal(summarizeGrowthLedger(updated).followerDelta, 5);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('mark-published CLI refreshes metrics template without losing captured fields', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-mark-published-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '有用的系统',
+        excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+        slug: 'Useful-Systems',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const publishedQueue = markQueueItemPublished(queue, {
+      id: queue.items[1].id,
+      xPostUrl: 'https://x.com/Clean993/status/2',
+      publishedAt: '2026-05-18T01:00:00.000Z',
+    });
+    const metricsPath = join(outDir, 'posts.local.json');
+    await writeJson(join(outDir, 'queue.json'), publishedQueue);
+    await refreshMetricsTemplateFromQueue({
+      queue: publishedQueue,
+      metricsPath,
+      date: '2026-05-18',
+    });
+    const existingMetrics = JSON.parse(await readFile(metricsPath, 'utf8'));
+    existingMetrics.posts[0].metrics.views = '1200';
+    await writeJson(metricsPath, existingMetrics);
+
+    const result = spawnSync(process.execPath, [
+      join(process.cwd(), 'tools/social-growth/cli.mjs'),
+      'mark-published',
+      '--queue',
+      join(outDir, 'queue.json'),
+      '--metrics',
+      metricsPath,
+      '--metrics-date',
+      '2026-05-19',
+      '--id',
+      queue.items[0].id,
+      '--url',
+      'https://x.com/Clean993/status/1',
+      '--published-at',
+      '2026-05-19T01:00:00.000Z',
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /Refreshed metrics template for 2 published posts/);
+    const updatedQueue = JSON.parse(await readFile(join(outDir, 'queue.json'), 'utf8'));
+    const updatedMetrics = JSON.parse(await readFile(metricsPath, 'utf8'));
+
+    assert.equal(updatedQueue.items[0].status, 'published');
+    assert.equal(updatedMetrics.date, '2026-05-18');
+    assert.equal(updatedMetrics.posts.length, 2);
+    assert.equal(updatedMetrics.posts.find((post) => post.id === queue.items[1].id).metrics.views, '1200');
+    assert.equal(updatedMetrics.posts.find((post) => post.id === queue.items[0].id).url, 'https://x.com/Clean993/status/1');
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
