@@ -3809,10 +3809,16 @@ test('manual publish kits CLI writes all ready fallback kits and an index', asyn
     assert.match(indexMarkdown, /Batch Recovery/);
     assert.match(indexMarkdown, /post-publish-recovery-batch/);
     assert.match(indexMarkdown, /launch-window-dir data\/social-growth\/launch-windows/);
+    assert.match(indexMarkdown, /urlHint/);
+    assert.match(indexMarkdown, /postTextPath/);
     assert.equal(urlTemplate.status, 'ready_for_url_capture');
     assert.equal(urlTemplate.items.length, 2);
     assert.equal(urlTemplate.items[0].id, plannedSlots[0].item.id);
+    assert.equal(urlTemplate.items[0].kit, firstKitPath);
+    assert.equal(urlTemplate.items[0].urlHint, 'https://x.com/Clean993/status/<status-id>');
     assert.equal(urlTemplate.items[0].url, '');
+    assert.match(urlTemplate.items[0].recoveryCommand, /post-publish-recovery/);
+    assert.match(urlTemplate.items[0].postTextPath, new RegExp(`${plannedSlots[0].item.id}\\.txt$`));
     assert.ok(indexMarkdown.includes(firstKitPath));
     assert.ok(indexMarkdown.includes(secondKitPath));
     assert.match(indexMarkdown, /post-publish-recovery/);
@@ -3832,8 +3838,18 @@ test('manual publish URL template maps ready kits to fillable published URL reco
     day: 2,
     date: '2026-05-19',
     kits: [
-      { slot: 1, id: 'Agent-Skills__zh__strong-thesis' },
-      { slot: 2, id: 'Spec-Driven-Coding__zh__case-story' },
+      {
+        slot: 1,
+        id: 'Agent-Skills__zh__strong-thesis',
+        path: 'data/social-growth/manual-publish-kits/day2-slot1-Agent-Skills.md',
+        recoveryCommand: 'npm run social:post-publish-recovery -- --id Agent-Skills__zh__strong-thesis --url <x-thread-url>',
+      },
+      {
+        slot: 2,
+        id: 'Spec-Driven-Coding__zh__case-story',
+        path: 'data/social-growth/manual-publish-kits/day2-slot2-Spec-Driven-Coding.md',
+        recoveryCommand: 'npm run social:post-publish-recovery -- --id Spec-Driven-Coding__zh__case-story --url <x-thread-url>',
+      },
     ],
   });
 
@@ -3843,16 +3859,26 @@ test('manual publish URL template maps ready kits to fillable published URL reco
     {
       slot: 1,
       id: 'Agent-Skills__zh__strong-thesis',
+      kit: 'data/social-growth/manual-publish-kits/day2-slot1-Agent-Skills.md',
+      urlHint: 'https://x.com/Clean993/status/<status-id>',
       url: '',
       articleUrl: '',
       publishedAt: '',
+      recoveryCommand: 'npm run social:post-publish-recovery -- --id Agent-Skills__zh__strong-thesis --url <x-thread-url>',
+      postTextPath: 'data/social-growth/post-texts/Agent-Skills__zh__strong-thesis.txt',
+      note: 'Fill url only after the final public publish click has been confirmed in Chrome.',
     },
     {
       slot: 2,
       id: 'Spec-Driven-Coding__zh__case-story',
+      kit: 'data/social-growth/manual-publish-kits/day2-slot2-Spec-Driven-Coding.md',
+      urlHint: 'https://x.com/Clean993/status/<status-id>',
       url: '',
       articleUrl: '',
       publishedAt: '',
+      recoveryCommand: 'npm run social:post-publish-recovery -- --id Spec-Driven-Coding__zh__case-story --url <x-thread-url>',
+      postTextPath: 'data/social-growth/post-texts/Spec-Driven-Coding__zh__case-story.txt',
+      note: 'Fill url only after the final public publish click has been confirmed in Chrome.',
     },
   ]);
   assert.match(template.boundary, /performs no public X actions/);

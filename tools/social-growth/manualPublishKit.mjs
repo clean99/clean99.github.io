@@ -177,9 +177,14 @@ export function buildManualPublishUrlTemplate({
     items: kits.map((entry) => ({
       slot: Number(entry.slot || 1),
       id: entry.id,
+      kit: entry.path || '',
+      urlHint: 'https://x.com/Clean993/status/<status-id>',
       url: '',
       articleUrl: '',
       publishedAt: '',
+      recoveryCommand: entry.recoveryCommand || '',
+      postTextPath: `data/social-growth/post-texts/${entry.id}.txt`,
+      note: 'Fill url only after the final public publish click has been confirmed in Chrome.',
     })),
     boundary: 'Fill only after manual Chrome publication has been confirmed. This file is for local queue/metrics recovery and performs no public X actions.',
   };
@@ -277,7 +282,8 @@ function formatBatchRecovery(index) {
   }
   return `1. After confirmed publication, fill \`url\` for each published item in \`${index.batchRecovery.urlTemplatePath}\`.
 2. Leave unpublished items blank.
-3. Run the batch recovery command:
+3. Use the \`kit\`, \`urlHint\`, \`recoveryCommand\`, and \`postTextPath\` fields in that JSON to avoid mixing slots.
+4. Run the batch recovery command:
 
 \`\`\`bash
 ${index.batchRecovery.command}
