@@ -65,6 +65,12 @@ npm run social:copy-template -- --day 1 --slot 1
 
 Give the generated JSON file under `data/social-growth/copy-overrides/` to the writing skill. It should replace only `shortPost`, `xArticle`, `image`, `threadFallback`, and `followUpReplies`.
 For technical sharing content, use the project skill at `.agents/skills/x-technical-sharing/SKILL.md` to rewrite those fields. It adapts `technical-sharing-doc` into X-native Chinese copy: first-screen claim, X Article causality chain, image prompt, and substantive replies.
+Prefer this handoff command because it writes both the JSON template and a source-aware writing brief:
+
+```bash
+npm run social:x-tech-brief -- --day 1 --slot 1
+```
+
 After the JSON is optimized, apply it locally:
 
 ```bash

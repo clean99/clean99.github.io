@@ -38,6 +38,7 @@
     "social:status": "node tools/social-growth/cli.mjs status",
     "social:validate": "node tools/social-growth/cli.mjs validate",
     "social:week": "node tools/social-growth/cli.mjs week",
+    "social:x-tech-brief": "node tools/social-growth/cli.mjs x-tech-brief",
     "social:x-prep": "node tools/social-growth/cli.mjs x-prep",
     "test": "node --test test/social-growth.test.mjs"
   },

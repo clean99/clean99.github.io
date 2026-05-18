@@ -38,6 +38,10 @@ Read the source material before writing:
 - code diff, commit, or spec if relevant;
 - metrics, screenshots, logs, or test evidence when available;
 - existing queue item from `social:copy-template`.
+- preferably the generated brief from:
+  ```bash
+  npm run social:x-tech-brief -- --day 1 --slot 1
+  ```
 
 Do not infer a mechanism from the title alone. If evidence is missing, write a more modest claim.
 

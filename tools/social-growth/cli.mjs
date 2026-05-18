@@ -55,6 +55,10 @@ import {
   formatXPublishPrepMarkdown,
   writeXPublishPrep,
 } from './xPrep.mjs';
+import {
+  buildXTechnicalSharingBrief,
+  writeXTechnicalSharingBrief,
+} from './xTechBrief.mjs';
 import { formatValidationMarkdown, validateQueue } from './validation.mjs';
 import {
   buildPublishQueue,
@@ -335,6 +339,30 @@ if (command === 'articles') {
     id: item.id,
     outPath,
     nextCommand: `npm run social:apply-copy -- --input ${outPath}`,
+  }, null, 2));
+} else if (command === 'x-tech-brief') {
+  const articles = await loadArticles();
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const brief = await buildXTechnicalSharingBrief({
+    articles,
+    queue,
+    ledger,
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    briefPath: args.out,
+    templatePath: args.templateOut,
+    skillPath: args.skillPath || '.agents/skills/x-technical-sharing/SKILL.md',
+  });
+  const written = await writeXTechnicalSharingBrief(brief);
+  console.log(JSON.stringify({
+    id: brief.selected.id,
+    article: brief.article?.absolutePath || null,
+    briefPath: written.briefPath,
+    templatePath: written.templatePath,
+    nextCommand: `npm run social:apply-copy -- --input ${written.templatePath}`,
   }, null, 2));
 } else if (command === 'apply-copy') {
   const queuePath = args.queue || 'data/social-growth/queue.json';
@@ -661,6 +689,7 @@ function printHelp() {
   npm run social:scheduled-run -- --day 1 --slot 1
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
   npm run social:copy-template -- --day 1 --slot 1
+  npm run social:x-tech-brief -- --day 1 --slot 1
   npm run social:apply-copy -- --input data/social-growth/copy-overrides/<queue-id>.json
   npm run social:flow-dry-run -- --day 1 --slot 1 --out data/social-growth/dry-run/flow-dry-run.md
   npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json

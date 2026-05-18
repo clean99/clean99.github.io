@@ -33,6 +33,7 @@ The code can automate safe local work:
 - run the local daily preparation loop in one command;
 - run a safe Codex automation cycle that refreshes local artifacts, status, preflight, image brief, and profile audit without public X actions;
 - export and apply a JSON copy override so a separate writing skill can replace generated short-post, X Article, image prompt, fallback thread, and replies before preflight;
+- write an X technical sharing brief that packages the source article, current queue item, causality chain, and copy override template for the `x-technical-sharing` skill;
 - run a full dry-run cycle that simulates publication, metrics capture, ledger update, reporting, and recommendations in ignored local copies;
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
@@ -161,6 +162,14 @@ For technical sharing content, use the project skill:
 ```
 
 It adapts the generic `technical-sharing-doc` causality chain into X-native output: short-post first screen, X Article, image prompt, fallback thread, and follow-up replies.
+
+Generate the complete writing brief for that skill:
+
+```bash
+npm run social:x-tech-brief -- --day 1 --slot 1
+```
+
+This writes `data/social-growth/x-tech-briefs/<queue-id>.md` and a matching copy override JSON under `data/social-growth/copy-overrides/`. The brief includes the source article, current generated copy, extracted source points, the problem/cause/mechanism chain, and the exact fields the writing skill should replace.
 
 Apply the optimized copy back to the local queue:
 
