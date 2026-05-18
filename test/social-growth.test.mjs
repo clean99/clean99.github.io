@@ -1606,6 +1606,7 @@ test('daily brief CLI reads stored browser probe before action order', async () 
       loginState: 'logged_out',
       articleAvailable: 'no',
       mediaUpload: 'unknown',
+      profileDirectory: 'Profile 1',
     }, null, 2)}\n`);
     await writeFile(profilePath, [
       'Clean99 | AI 工程化与前端性能',
@@ -1636,6 +1637,7 @@ test('daily brief CLI reads stored browser probe before action order', async () 
     assert.match(markdown, /Status: needs_x_login/);
     assert.match(markdown, /The Chrome profile used for publishing is not logged into X/);
     assert.match(markdown, /social:login-recovery/);
+    assert.match(markdown, /--xProfileDirectory 'Profile 1'/);
     assert.match(markdown, /Manual Publish Fallback/);
     assert.match(markdown, /social:manual-publish-kit/);
     assert.match(markdown, /social:post-publish-recovery/);
@@ -2052,6 +2054,7 @@ test('scheduled growth loop reads browser probe file into the run status', async
       extensionPipe: 'closed',
       articleAvailable: 'no',
       mediaUpload: 'blocked',
+      profileDirectory: 'Profile 1',
       generatedAt: '2026-05-18T00:00:00.000Z',
     }, browserProbePath);
 
@@ -2101,6 +2104,7 @@ test('scheduled growth loop reads browser probe file into the run status', async
     });
     const scheduledReport = await readFile(join(outDir, 'scheduled-run.md'), 'utf8');
     const readinessReport = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
+    const xPrepReport = await readFile(join(outDir, 'x-publish-prep.md'), 'utf8');
     const persistedProbe = await readBrowserProbe(browserProbePath);
 
     assert.equal(result.status, 'needs_media_upload_permission');
@@ -2112,9 +2116,12 @@ test('scheduled growth loop reads browser probe file into the run status', async
     assert.doesNotMatch(scheduledReport, /Confirm opening a fresh Chrome window/);
     assert.match(readinessReport, /Extension pipe: closed/);
     assert.match(readinessReport, /Media upload is blocked/);
+    assert.match(readinessReport, /Chrome profile directory: Profile 1/);
+    assert.match(xPrepReport, /--profile-directory 'Profile 1'/);
     assert.equal(result.paths.browserProbe, browserProbePath);
     assert.equal(persistedProbe.extensionPipe, 'closed');
     assert.equal(persistedProbe.mediaUpload, 'blocked');
+    assert.equal(persistedProbe.profileDirectory, 'Profile 1');
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -4291,6 +4298,7 @@ test('status CLI reads stored browser probe before reporting readiness', async (
       loginState: 'logged_out',
       articleAvailable: 'no',
       mediaUpload: 'unknown',
+      profileDirectory: 'Profile 1',
     }, null, 2)}\n`);
     await writeFile(profilePath, [
       'Clean99 | AI 工程化与前端性能',
@@ -4322,13 +4330,13 @@ test('status CLI reads stored browser probe before reporting readiness', async (
     assert.match(markdown, /Status: needs_x_login/);
     assert.match(markdown, /X Login Recovery/);
     assert.match(markdown, /Manual Publish Fallback/);
-    assert.match(markdown, /cli\.mjs login-recovery --day 1 --slot 1 --publishMode thread_fallback/);
+    assert.match(markdown, /cli\.mjs login-recovery --day 1 --slot 1 --publishMode thread_fallback --xProfileDirectory 'Profile 1'/);
     assert.match(markdown, /cli\.mjs manual-publish-kits --day 1 --publishMode thread_fallback/);
     assert.match(markdown, /manual-publish-kits\/day1-ready-slots\.md/);
     assert.match(markdown, /cli\.mjs manual-publish-kit --day 1 --slot 1 --publishMode thread_fallback/);
     assert.match(markdown, /cli\.mjs post-publish-recovery --queue data\/social-growth\/queue\.json/);
-    assert.match(markdown, /x-browser-cdp\.mjs --probe --json --probe-out data\/social-growth\/browser-probe\.local\.json --account '@Clean993'/);
-    assert.match(markdown, /cli\.mjs browser-readiness --day 1 --slot 1 --publishMode thread_fallback/);
+    assert.match(markdown, /x-browser-cdp\.mjs --probe --json --probe-out data\/social-growth\/browser-probe\.local\.json --account '@Clean993' --profile-directory 'Profile 1'/);
+    assert.match(markdown, /cli\.mjs browser-readiness --day 1 --slot 1 --publishMode thread_fallback --xProfileDirectory 'Profile 1'/);
     assert.match(markdown, /The Chrome profile used for publishing is not logged into X/);
     assert.doesNotMatch(markdown, /Status: ready_for_browser_confirmation/);
   } finally {

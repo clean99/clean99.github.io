@@ -400,6 +400,8 @@ function loginRecoveryCommand(brief) {
   ];
   const publishMode = brief.browserReadiness?.publishMode || selectedSlot(brief.dayReadiness, brief.selectedSlot)?.publishMode;
   if (publishMode === 'thread_fallback') args.push('--publishMode thread_fallback');
+  if (brief.browserReadiness?.profileDir) args.push(`--xProfileDir ${shellQuote(brief.browserReadiness.profileDir)}`);
+  if (brief.browserReadiness?.profileDirectory) args.push(`--xProfileDirectory ${shellQuote(brief.browserReadiness.profileDirectory)}`);
   return args.join(' ');
 }
 
@@ -697,6 +699,9 @@ function briefStatus({
 function summarizeBrowserReadiness(browserReadiness) {
   return {
     status: browserReadiness?.status || 'not_checked',
+    publishMode: browserReadiness?.publishMode || '',
+    profileDir: browserReadiness?.profileDir || '',
+    profileDirectory: browserReadiness?.profileDirectory || '',
     blockers: [...(browserReadiness?.blockers || [])],
   };
 }

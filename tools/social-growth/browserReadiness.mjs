@@ -331,6 +331,7 @@ function normalizeBrowserProbe(probe = {}) {
   if (Object.prototype.hasOwnProperty.call(probe, 'composeDraftText')) {
     normalized.composeDraftText = String(probe.composeDraftText === true ? '' : (probe.composeDraftText ?? '')).trim();
   }
+  if (hasValue(probe.profileDirectory)) normalized.profileDirectory = String(probe.profileDirectory).trim();
   if (hasValue(probe.generatedAt)) normalized.generatedAt = toIsoString(probe.generatedAt);
   return normalized;
 }

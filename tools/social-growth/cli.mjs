@@ -465,6 +465,8 @@ if (command === 'articles') {
   const inputProbe = browserProbeFromArgs(args);
   const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
   const publishMode = args.publishMode || args.articleMode || inferPublishModeFromProbe(effectiveProbe);
+  const profileDir = args.xProfileDir || args.profileDir;
+  const profileDirectory = args.xProfileDirectory || args.profileDirectory || effectiveProbe.profileDirectory;
   const preflight = await buildPublishPreflight({
     queue,
     ledger,
@@ -482,8 +484,8 @@ if (command === 'articles') {
     bunCommand: args.bunCommand || args.xBunCommand,
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
     publishMode,
-    profileDir: args.xProfileDir || args.profileDir,
-    profileDirectory: args.xProfileDirectory || args.profileDirectory,
+    profileDir,
+    profileDirectory,
   });
   if (hasBrowserProbeValues(inputProbe)) effectiveProbe.generatedAt = preflight.generatedAt;
   if (args.writeProbe !== 'false' && hasBrowserProbeValues(effectiveProbe)) {
@@ -493,8 +495,8 @@ if (command === 'articles') {
     preflight,
     xPrep: prep,
     ...effectiveProbe,
-    profileDir: args.xProfileDir || args.profileDir,
-    profileDirectory: args.xProfileDirectory || args.profileDirectory,
+    profileDir,
+    profileDirectory,
     generatedAt: preflight.generatedAt,
   });
   const brief = await buildDailyExecutionBrief({
@@ -510,8 +512,8 @@ if (command === 'articles') {
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
-    xProfileDir: args.xProfileDir || args.profileDir,
-    xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
+    xProfileDir: profileDir,
+    xProfileDirectory: profileDirectory,
     publishMode,
     browserReadiness,
     engagementLimit: args.engagementLimit || args.limit || 5,
@@ -704,7 +706,13 @@ if (command === 'articles') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
   const profileText = await readOptionalText(args.profileText || 'data/social-growth/profile.local.txt');
+  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
+  const storedProbe = await readBrowserProbe(probePath);
+  const inputProbe = browserProbeFromArgs(args);
+  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
   const publishMode = args.publishMode || args.articleMode;
+  const profileDir = args.xProfileDir || args.profileDir;
+  const profileDirectory = args.xProfileDirectory || args.profileDirectory || effectiveProbe.profileDirectory;
   const preflight = await buildPublishPreflight({
     queue,
     ledger,
@@ -722,13 +730,9 @@ if (command === 'articles') {
     bunCommand: args.bunCommand,
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
     publishMode,
-    profileDir: args.xProfileDir || args.profileDir,
-    profileDirectory: args.xProfileDirectory || args.profileDirectory,
+    profileDir,
+    profileDirectory,
   });
-  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
-  const storedProbe = await readBrowserProbe(probePath);
-  const inputProbe = browserProbeFromArgs(args);
-  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
   if (hasBrowserProbeValues(inputProbe)) effectiveProbe.generatedAt = preflight.generatedAt;
   if (args.writeProbe !== 'false' && hasBrowserProbeValues(effectiveProbe)) {
     await writeBrowserProbe(effectiveProbe, probePath);
@@ -737,8 +741,8 @@ if (command === 'articles') {
     preflight,
     xPrep: prep,
     ...effectiveProbe,
-    profileDir: args.xProfileDir || args.profileDir,
-    profileDirectory: args.xProfileDirectory || args.profileDirectory,
+    profileDir,
+    profileDirectory,
     generatedAt: preflight.generatedAt,
   });
   const status = await buildGrowthStatus({
@@ -751,8 +755,8 @@ if (command === 'articles') {
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     profileText,
     publishMode,
-    xProfileDir: args.xProfileDir || args.profileDir,
-    xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
+    xProfileDir: profileDir,
+    xProfileDirectory: profileDirectory,
     browserReadiness,
     ensurePackage: args.ensurePackage === 'true',
     preferReadyImage: args.preferReadyImage === 'true',
@@ -890,18 +894,20 @@ if (command === 'articles') {
     ensurePackage: args.ensurePackage !== 'false',
     preferReadyImage: args.preferReadyImage !== 'false',
   });
+  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
+  const storedProbe = await readBrowserProbe(probePath);
+  const inputProbe = browserProbeFromArgs(args);
+  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
+  const profileDir = args.xProfileDir || args.profileDir;
+  const profileDirectory = args.xProfileDirectory || args.profileDirectory || effectiveProbe.profileDirectory;
   const prep = await buildXPublishPrep(preflight, {
     skillDir: args.skillDir,
     bunCommand: args.bunCommand,
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
     publishMode: args.publishMode || args.articleMode,
-    profileDir: args.xProfileDir || args.profileDir,
-    profileDirectory: args.xProfileDirectory || args.profileDirectory,
+    profileDir,
+    profileDirectory,
   });
-  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
-  const storedProbe = await readBrowserProbe(probePath);
-  const inputProbe = browserProbeFromArgs(args);
-  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
   if (hasBrowserProbeValues(inputProbe)) effectiveProbe.generatedAt = preflight.generatedAt;
   if (args.writeProbe !== 'false' && hasBrowserProbeValues(effectiveProbe)) {
     await writeBrowserProbe(effectiveProbe, probePath);
@@ -910,8 +916,8 @@ if (command === 'articles') {
     preflight,
     xPrep: prep,
     ...effectiveProbe,
-    profileDir: args.xProfileDir || args.profileDir,
-    profileDirectory: args.xProfileDirectory || args.profileDirectory,
+    profileDir,
+    profileDirectory,
     generatedAt: preflight.generatedAt,
   });
   if (args.out) {

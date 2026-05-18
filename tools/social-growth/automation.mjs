@@ -204,17 +204,19 @@ export async function runSafeAutomationCycle({
   });
   await writeImageBacklog(imageBacklog, imageBacklogPath);
 
+  const storedBrowserProbe = await readBrowserProbe(browserProbePath);
+  const effectiveBrowserProbe = mergeBrowserProbe(storedBrowserProbe, browserProbe);
+  if (hasBrowserProbeValues(browserProbe)) effectiveBrowserProbe.generatedAt = generatedAt;
+  const effectiveProfileDirectory = xProfileDirectory || effectiveBrowserProbe.profileDirectory;
+
   const xPublishPrep = await buildXPublishPrep(preflight, {
     skillDir: xSkillDir,
     bunCommand: xBunCommand,
     profileDir: xProfileDir,
-    profileDirectory: xProfileDirectory,
+    profileDirectory: effectiveProfileDirectory,
     publishMode,
   });
   await writeXPublishPrep(xPublishPrep, xPublishPrepPath);
-  const storedBrowserProbe = await readBrowserProbe(browserProbePath);
-  const effectiveBrowserProbe = mergeBrowserProbe(storedBrowserProbe, browserProbe);
-  if (hasBrowserProbeValues(browserProbe)) effectiveBrowserProbe.generatedAt = generatedAt;
   if (hasBrowserProbeValues(browserProbe) || hasBrowserProbeValues(storedBrowserProbe)) {
     await writeBrowserProbe(effectiveBrowserProbe, browserProbePath);
   }
@@ -231,7 +233,7 @@ export async function runSafeAutomationCycle({
     articleAvailable: effectiveBrowserProbe.articleAvailable,
     mediaUpload: effectiveBrowserProbe.mediaUpload,
     profileDir: xProfileDir,
-    profileDirectory: xProfileDirectory || effectiveBrowserProbe.profileDirectory,
+    profileDirectory: effectiveProfileDirectory,
     generatedAt,
   });
   await writeBrowserReadiness(browserReadiness, browserReadinessPath);

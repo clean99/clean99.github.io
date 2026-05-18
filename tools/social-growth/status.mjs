@@ -435,22 +435,22 @@ function loginRecoveryMarkdown(status, browserReadiness) {
   const profileArg = status.xProfileDir ? ` --profile ${shellQuote(status.xProfileDir)}` : '';
   const profileDirectoryArg = status.xProfileDirectory ? ` --profile-directory ${shellQuote(status.xProfileDirectory)}` : '';
   const publishArgs = publishModeArgs(status);
-  const recoveryArgs = `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs}`;
+  const browserArgs = `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs}`;
 
   return `## X Login Recovery
 
 Run this to open or attach the publishing Chrome profile at the X compose/login page and refresh local readiness files. It only probes browser state: no text input, no media upload, no publish click.
 
 \`\`\`bash
-${cliCommand('login-recovery', recoveryArgs)}
+${cliCommand('login-recovery', browserArgs)}
 \`\`\`
 
 After logging in as @Clean993 in that Chrome window, rerun the same command. If you need the lower-level steps:
 
 \`\`\`bash
 ${xBrowserCommand(`--probe --json --probe-out data/social-growth/browser-probe.local.json --account '@Clean993'${profileArg}${profileDirectoryArg}`)}
-${cliCommand('browser-readiness', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/browser-readiness.md`)}
-${cliCommand('status', `--day ${status.selectedSlot.day} --slot ${status.selectedSlot.slot}${publishArgs} --out data/social-growth/status.md`)}
+${cliCommand('browser-readiness', `${browserArgs} --out data/social-growth/browser-readiness.md`)}
+${cliCommand('status', `${browserArgs} --out data/social-growth/status.md`)}
 \`\`\`
 
 `;
