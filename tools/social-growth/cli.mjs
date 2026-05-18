@@ -112,6 +112,7 @@ import {
   buildManualPublishUrlTemplate,
   buildManualPublishKit,
   fillManualPublishUrlTemplate,
+  mergeManualPublishUrlTemplate,
   formatManualPublishKitMarkdown,
   manualPublishKitIndexPath,
   manualPublishKitPath,
@@ -1137,12 +1138,16 @@ if (command === 'articles') {
     }),
   });
   const urlTemplatePath = index.batchRecovery.urlTemplatePath;
-  const urlTemplate = buildManualPublishUrlTemplate({
+  const nextUrlTemplate = buildManualPublishUrlTemplate({
     generatedAt: dayReadiness.generatedAt,
     day: dayReadiness.day,
     date: dayReadiness.date,
     kits: entries,
   });
+  const urlTemplate = mergeManualPublishUrlTemplate(
+    await readExistingJson(urlTemplatePath),
+    nextUrlTemplate,
+  );
   await writeManualPublishUrlTemplate(urlTemplate, urlTemplatePath);
   const indexPath = args.out || manualPublishKitIndexPath({
     day: dayReadiness.day,
@@ -2225,6 +2230,15 @@ function requiredArg(options, key) {
     throw new Error(`Missing required argument: --${key}`);
   }
   return options[key];
+}
+
+async function readExistingJson(filePath) {
+  try {
+    return await readJson(filePath);
+  } catch (error) {
+    if (error?.code === 'ENOENT') return null;
+    throw error;
+  }
 }
 
 async function buildComposeDraftResolutionFromCli(options) {

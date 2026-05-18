@@ -241,6 +241,8 @@ After each confirmed manual publication, fill the public X status URL with the l
 npm run social:manual-publish-url -- --input data/social-growth/manual-publish-kits/day<N>-published-urls.json --id <queue-id> --url <x-thread-url>
 ```
 
+The helper is local-only and normalizes the X status URL. Later `manual-publish-kits` or `scheduled-run` executions preserve filled URLs instead of resetting the template.
+
 Leave unpublished slots blank, then run:
 
 ```bash

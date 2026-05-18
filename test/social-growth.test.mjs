@@ -107,6 +107,7 @@ import {
   buildManualPublishKit,
   buildManualPublishUrlTemplate,
   fillManualPublishUrlTemplate,
+  mergeManualPublishUrlTemplate,
   formatManualPublishKitMarkdown,
 } from '../tools/social-growth/manualPublishKit.mjs';
 import {
@@ -3771,12 +3772,23 @@ test('manual publish kits CLI writes all ready fallback kits and an index', asyn
     const queuePath = join(outDir, 'queue.json');
     const ledgerPath = join(outDir, 'ledger.json');
     await mkdir(imageDir, { recursive: true });
+    await mkdir(kitDir, { recursive: true });
     await mkdir(join(skillDir, 'scripts'), { recursive: true });
     await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
     await writeFile(join(imageDir, `${plannedSlots[0].item.id}.png`), 'fake image');
     await writeFile(join(imageDir, `${plannedSlots[1].item.id}.png`), 'fake image');
     await writeJson(queuePath, queue);
     await writeJson(ledgerPath, ledger);
+    await writeJson(join(kitDir, 'day1-published-urls.json'), {
+      version: 1,
+      items: [{
+        slot: 1,
+        id: plannedSlots[0].item.id,
+        url: 'https://x.com/Clean993/status/1234567890',
+        articleUrl: '',
+        publishedAt: '2026-05-19T01:02:03.000Z',
+      }],
+    });
 
     const result = spawnSync(process.execPath, [
       'tools/social-growth/cli.mjs',
@@ -3813,12 +3825,13 @@ test('manual publish kits CLI writes all ready fallback kits and an index', asyn
     assert.match(indexMarkdown, /urlHint/);
     assert.match(indexMarkdown, /postTextPath/);
     assert.match(indexMarkdown, /manual-publish-url/);
-    assert.equal(urlTemplate.status, 'ready_for_url_capture');
+    assert.equal(urlTemplate.status, 'ready_for_recovery');
     assert.equal(urlTemplate.items.length, 2);
     assert.equal(urlTemplate.items[0].id, plannedSlots[0].item.id);
     assert.equal(urlTemplate.items[0].kit, firstKitPath);
     assert.equal(urlTemplate.items[0].urlHint, 'https://x.com/Clean993/status/<status-id>');
-    assert.equal(urlTemplate.items[0].url, '');
+    assert.equal(urlTemplate.items[0].url, 'https://x.com/Clean993/status/1234567890');
+    assert.equal(urlTemplate.items[0].publishedAt, '2026-05-19T01:02:03.000Z');
     assert.match(urlTemplate.items[0].recoveryCommand, /post-publish-recovery/);
     assert.match(urlTemplate.items[0].postTextPath, new RegExp(`${plannedSlots[0].item.id}\\.txt$`));
     assert.ok(indexMarkdown.includes(firstKitPath));
@@ -3911,6 +3924,39 @@ test('manual publish URL helper fills one confirmed X status URL locally', () =>
     id: 'Missing__zh__strong-thesis',
     url: 'https://x.com/Clean993/status/1234567890',
   }), /No manual publish URL item matched/);
+});
+
+test('manual publish URL merge preserves confirmed URLs across regeneration', () => {
+  const existing = buildManualPublishUrlTemplate({
+    generatedAt: '2026-05-19T00:00:00.000Z',
+    day: 2,
+    kits: [
+      { slot: 1, id: 'Agent-Skills__zh__strong-thesis' },
+      { slot: 2, id: 'Spec-Driven-Coding__zh__case-story' },
+    ],
+  });
+  const filled = fillManualPublishUrlTemplate(existing, {
+    slot: 1,
+    url: 'https://x.com/Clean993/status/1234567890',
+    now: '2026-05-19T03:04:05.000Z',
+  });
+  const regenerated = buildManualPublishUrlTemplate({
+    generatedAt: '2026-05-19T04:00:00.000Z',
+    day: 2,
+    kits: [
+      { slot: 1, id: 'Agent-Skills__zh__strong-thesis', path: 'new-kit.md' },
+      { slot: 2, id: 'Spec-Driven-Coding__zh__case-story', path: 'second-kit.md' },
+    ],
+  });
+
+  const merged = mergeManualPublishUrlTemplate(filled, regenerated);
+
+  assert.equal(merged.status, 'ready_for_recovery');
+  assert.equal(merged.generatedAt, '2026-05-19T04:00:00.000Z');
+  assert.equal(merged.items[0].kit, 'new-kit.md');
+  assert.equal(merged.items[0].url, 'https://x.com/Clean993/status/1234567890');
+  assert.equal(merged.items[0].publishedAt, '2026-05-19T03:04:05.000Z');
+  assert.equal(merged.items[1].url, '');
 });
 
 test('manual publish URL CLI normalizes a confirmed URL without public actions', async () => {

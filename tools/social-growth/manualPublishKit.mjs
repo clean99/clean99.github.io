@@ -226,6 +226,27 @@ export function fillManualPublishUrlTemplate(template, {
   };
 }
 
+export function mergeManualPublishUrlTemplate(existingTemplate, nextTemplate) {
+  if (!existingTemplate?.items?.length) return nextTemplate;
+  const existingById = new Map(existingTemplate.items.map((item) => [item.id, item]));
+  const existingBySlot = new Map(existingTemplate.items.map((item) => [Number(item.slot), item]));
+  const items = (nextTemplate.items || []).map((item) => {
+    const existing = existingById.get(item.id) || existingBySlot.get(Number(item.slot));
+    if (!existing?.url) return item;
+    return {
+      ...item,
+      url: existing.url,
+      articleUrl: existing.articleUrl || item.articleUrl || '',
+      publishedAt: existing.publishedAt || item.publishedAt || '',
+    };
+  });
+  return {
+    ...nextTemplate,
+    status: items.some((item) => item.url) ? 'ready_for_recovery' : nextTemplate.status,
+    items,
+  };
+}
+
 export function buildManualPublishKitIndex({
   generatedAt = new Date().toISOString(),
   day = 1,

@@ -71,6 +71,7 @@ import {
   buildManualPublishKit,
   buildManualPublishKitIndex,
   buildManualPublishUrlTemplate,
+  mergeManualPublishUrlTemplate,
   manualPublishKitIndexPath,
   manualPublishKitPath,
   manualPublishUrlTemplatePath,
@@ -775,12 +776,16 @@ async function writeReadyManualPublishKits({
     }),
   });
   const resolvedUrlTemplatePath = index.batchRecovery.urlTemplatePath;
-  const urlTemplate = buildManualPublishUrlTemplate({
+  const nextUrlTemplate = buildManualPublishUrlTemplate({
     generatedAt: dayReadiness?.generatedAt || toIsoString(now),
     day: dayReadiness?.day || 1,
     date: dayReadiness?.date || '',
     kits: entries,
   });
+  const urlTemplate = mergeManualPublishUrlTemplate(
+    await readExistingJson(resolvedUrlTemplatePath),
+    nextUrlTemplate,
+  );
   await writeManualPublishUrlTemplate(urlTemplate, resolvedUrlTemplatePath);
   const resolvedIndexPath = indexPath || manualPublishKitIndexPath({
     day: index.day,
@@ -794,4 +799,13 @@ async function writeReadyManualPublishKits({
     urlTemplatePath: resolvedUrlTemplatePath,
     entries,
   };
+}
+
+async function readExistingJson(filePath) {
+  try {
+    return await readJson(filePath);
+  } catch (error) {
+    if (error?.code === 'ENOENT') return null;
+    throw error;
+  }
 }
