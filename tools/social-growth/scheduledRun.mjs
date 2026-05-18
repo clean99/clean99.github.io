@@ -74,6 +74,7 @@ export async function runScheduledGrowthLoop({
   profileDiagnosticsPath = '',
   profileDiagnosticsIncludeSystemChrome = false,
   profileDiagnosticsExtraDirs = [],
+  loginHandoffPath = '',
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
   engagementCaptureTemplatePath = join(engagementOpportunityDir, '_capture-template.md'),
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
@@ -122,6 +123,7 @@ export async function runScheduledGrowthLoop({
     profileDiagnosticsPath,
     profileDiagnosticsIncludeSystemChrome,
     profileDiagnosticsExtraDirs,
+    loginHandoffPath,
     engagementOpportunityDir,
     engagementCaptureTemplatePath,
     engagementPlanPath,
@@ -173,6 +175,7 @@ export async function runScheduledGrowthLoop({
       publishConfirmation: automation.publishConfirmation,
       browserReadiness: automation.browserReadiness,
       profileDiagnostics: automation.profileDiagnostics,
+      loginHandoff: automation.loginHandoff,
       engagement: automation.engagement,
       manualPublishKits: automation.manualPublishKits,
       experimentPlan: {
@@ -242,11 +245,13 @@ Status: ${result.status}
 - Browser readiness: \`${result.paths.browserReadiness}\`
 - Browser probe state: \`${result.paths.browserProbe}\`
 - X profile diagnostics: \`${result.paths.profileDiagnostics || 'not generated'}\`
+- X login handoff: \`${result.paths.loginHandoff || 'not generated'}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement capture template: \`${result.paths.engagementCaptureTemplate}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
 - Manual publish kits: \`${result.paths.manualPublishKitIndex}\`
 - Profile diagnostics recommendations: ${result.automation.profileDiagnostics?.recommendations ?? 'unknown'}
+- Login handoff status: ${result.automation.loginHandoff?.status || 'unknown'}
 - Engagement search status: ${result.automation.engagement?.searchStatus || 'unknown'}
 - Engagement capture template status: ${result.automation.engagement?.captureTemplateStatus || 'unknown'}
 - Engagement capture targets: ${result.automation.engagement?.captureTargets ?? 'unknown'}
@@ -349,7 +354,7 @@ function nextAction(result) {
     return 'Fix the media upload path before opening the final thread handoff; the first post needs the generated image attached.';
   }
   if (result.automation.browserReadiness?.status === 'needs_x_login') {
-    return `Read ${result.paths.profileDiagnostics || 'the X profile diagnostics report'} for normal Chrome profile candidates. If diagnostics says the normal Chrome profile dir is locked without CDP, close normal Chrome before rerunning login-recovery with the listed --xProfileDir/--xProfileDirectory pair; otherwise log into the publishing Chrome profile and rerun browser readiness.`;
+    return `Read ${result.paths.loginHandoff || result.paths.profileDiagnostics || 'the X login handoff'} for the exact recovery command. If diagnostics says the normal Chrome profile dir is locked without CDP, close normal Chrome before rerunning login-recovery with the listed --xProfileDir/--xProfileDirectory pair; otherwise log into the publishing Chrome profile and rerun browser readiness.`;
   }
   if (result.automation.status === 'needs_copy_review') {
     return 'Run the X technical sharing brief and apply a copy override before opening Chrome for browser confirmation.';

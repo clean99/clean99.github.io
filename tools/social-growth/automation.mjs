@@ -44,6 +44,10 @@ import {
   writeXProfileDiagnostics,
 } from './xProfileDiagnostics.mjs';
 import {
+  buildLoginHandoff,
+  writeLoginHandoff,
+} from './loginHandoff.mjs';
+import {
   buildGrowthStatus,
   writeGrowthStatus,
 } from './status.mjs';
@@ -125,6 +129,7 @@ export async function runSafeAutomationCycle({
   profileDiagnosticsPath = '',
   profileDiagnosticsIncludeSystemChrome = false,
   profileDiagnosticsExtraDirs = [],
+  loginHandoffPath = '',
   engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
   engagementCaptureTemplatePath = join(engagementOpportunityDir, '_capture-template.md'),
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
@@ -257,6 +262,18 @@ export async function runSafeAutomationCycle({
     })
     : null;
   if (profileDiagnostics) await writeXProfileDiagnostics(profileDiagnostics, profileDiagnosticsPath);
+  const loginHandoff = loginHandoffPath
+    ? buildLoginHandoff({
+      browserReadiness,
+      profileDiagnostics,
+      day,
+      slot,
+      publishMode: xPublishPrep.publishMode,
+      generatedAt,
+      nodeCommand: process.execPath,
+    })
+    : null;
+  if (loginHandoff) await writeLoginHandoff(loginHandoff, loginHandoffPath);
   const publishConfirmation = buildPublishConfirmation({
     queue,
     preflight,
@@ -365,6 +382,7 @@ export async function runSafeAutomationCycle({
       blockers: browserReadiness.blockers,
     },
     profileDiagnostics: summarizeProfileDiagnostics(profileDiagnostics),
+    loginHandoff: summarizeLoginHandoff(loginHandoff),
     paths: {
       queue: queuePath,
       dailyReport: dailyReportPath,
@@ -382,6 +400,7 @@ export async function runSafeAutomationCycle({
       browserReadiness: browserReadinessPath,
       browserProbe: browserProbePath,
       profileDiagnostics: profileDiagnosticsPath || null,
+      loginHandoff: loginHandoffPath || null,
       engagementSearch: engagementSearchPath,
       engagementCaptureTemplate: engagementCaptureTemplatePath,
       engagementPlan: engagementPlanPath,
@@ -464,6 +483,7 @@ Status: ${result.status}
 - Browser readiness: \`${result.paths.browserReadiness}\`
 - Browser probe state: \`${result.paths.browserProbe}\`
 - X profile diagnostics: \`${result.paths.profileDiagnostics || 'not generated'}\`
+- X login handoff: \`${result.paths.loginHandoff || 'not generated'}\`
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement capture template: \`${result.paths.engagementCaptureTemplate}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
@@ -493,6 +513,8 @@ ${profileIssues}
 - Profiles in publishing dir: ${result.profileDiagnostics?.profiles ?? 'unknown'}
 - Alternate profile dirs: ${result.profileDiagnostics?.alternateProfileDirs ?? 'unknown'}
 - Recommendations: ${result.profileDiagnostics?.recommendations ?? 'unknown'}
+- Login handoff: ${result.loginHandoff?.status || 'unknown'}
+- Login handoff alternates: ${result.loginHandoff?.alternateProfiles ?? 'unknown'}
 
 ## Publish Confirmation
 
@@ -588,6 +610,19 @@ function summarizeProfileDiagnostics(diagnostics) {
     profiles: diagnostics.profiles.length,
     alternateProfileDirs: diagnostics.alternateProfileDirs?.length || 0,
     recommendations: diagnostics.recommendations.length,
+  };
+}
+
+function summarizeLoginHandoff(handoff) {
+  if (!handoff) {
+    return {
+      status: 'not_generated',
+      alternateProfiles: 0,
+    };
+  }
+  return {
+    status: handoff.status,
+    alternateProfiles: handoff.alternateProfiles.length,
   };
 }
 

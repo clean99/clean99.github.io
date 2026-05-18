@@ -120,6 +120,11 @@ import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../
 import { runScheduledGrowthLoop } from '../tools/social-growth/scheduledRun.mjs';
 import { buildGrowthStatus, formatGrowthStatusMarkdown, writeGrowthStatus } from '../tools/social-growth/status.mjs';
 import { runXGrowthDryRun } from '../tools/social-growth/flowDryRun.mjs';
+import {
+  buildLoginHandoff,
+  formatLoginHandoffMarkdown,
+  writeLoginHandoff,
+} from '../tools/social-growth/loginHandoff.mjs';
 import { buildXPublishPrep, formatXPublishPrepMarkdown, writeXPublishPrep } from '../tools/social-growth/xPrep.mjs';
 import {
   buildXTechnicalSharingBrief,
@@ -1868,6 +1873,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       browserReadinessPath: join(outDir, 'browser-readiness.md'),
       browserProbePath: join(outDir, 'browser-probe.local.json'),
       profileDiagnosticsPath: join(outDir, 'x-profile-diagnostics.md'),
+      loginHandoffPath: join(outDir, 'login-handoff.md'),
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
@@ -1893,6 +1899,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const confirmation = await readFile(join(outDir, 'publish-confirmation.md'), 'utf8');
     const browserReadiness = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
     const profileDiagnostics = await readFile(join(outDir, 'x-profile-diagnostics.md'), 'utf8');
+    const loginHandoff = await readFile(join(outDir, 'login-handoff.md'), 'utf8');
     const imageBacklog = await readFile(join(outDir, 'image-backlog.md'), 'utf8');
     const engagementSearch = await readFile(join(outDir, 'engagement-search.md'), 'utf8');
     const engagementCaptureTemplate = await readFile(join(outDir, 'engagement-opportunities/_capture-template.md'), 'utf8');
@@ -1913,6 +1920,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.equal(result.paths.publishConfirmation, join(outDir, 'publish-confirmation.md'));
     assert.equal(result.paths.browserReadiness, join(outDir, 'browser-readiness.md'));
     assert.equal(result.paths.profileDiagnostics, join(outDir, 'x-profile-diagnostics.md'));
+    assert.equal(result.paths.loginHandoff, join(outDir, 'login-handoff.md'));
     assert.equal(result.paths.engagementSearch, join(outDir, 'engagement-search.md'));
     assert.equal(result.paths.engagementCaptureTemplate, join(outDir, 'engagement-opportunities/_capture-template.md'));
     assert.equal(result.paths.engagementPlan, join(outDir, 'engagement-plan.md'));
@@ -1920,6 +1928,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.equal(result.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.profileDiagnostics.status, 'generated');
     assert.equal(result.profileDiagnostics.profiles, 1);
+    assert.equal(result.loginHandoff.status, 'not_needed');
     assert.equal(result.engagement.captureTemplateStatus, 'ready_for_capture');
     assert.equal(result.engagement.captureTargets, result.engagement.searchQueries);
     assert.equal(result.engagement.status, 'needs_opportunity_capture');
@@ -1931,6 +1940,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(report, /X publish prep/);
     assert.match(report, /Browser readiness/);
     assert.match(report, /X profile diagnostics/);
+    assert.match(report, /X login handoff/);
     assert.match(report, /Image backlog/);
     assert.match(imageBacklog, /X Image Backlog/);
     assert.match(imageBacklog, /social:register-image/);
@@ -1954,6 +1964,8 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(browserReadiness, /blocked_local_prep/);
     assert.match(profileDiagnostics, /X Profile Diagnostics/);
     assert.match(profileDiagnostics, /--xProfileDirectory 'Profile 1'/);
+    assert.match(loginHandoff, /X Login Handoff/);
+    assert.match(loginHandoff, /login-recovery/);
     assert.match(engagementSearch, /X Engagement Search Plan/);
     assert.match(engagementCaptureTemplate, /X Engagement Capture Template/);
     assert.match(engagementCaptureTemplate, /Keep \/ Skip Gate/);
@@ -2928,6 +2940,57 @@ test('x profile diagnostics does not treat generic compose URL titles as logged 
     title: 'X. It’s what’s happening / X',
     url: 'https://x.com/i/flow/login?redirect_after_login=%2Fcompose%2Fpost',
   }), 'logged_out');
+});
+
+test('login handoff centralizes recovery commands without public actions', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-login-handoff-'));
+  try {
+    const handoff = buildLoginHandoff({
+      generatedAt: '2026-05-18T00:00:00.000Z',
+      day: 2,
+      slot: 1,
+      publishMode: 'thread_fallback',
+      nodeCommand: '/path/to/node',
+      browserReadiness: {
+        status: 'needs_x_login',
+        blockers: ['The Chrome profile used for publishing is not logged into X.'],
+        currentUrl: 'https://x.com/i/flow/login?redirect_after_login=%2Fcompose%2Fpost',
+        profileDir: '',
+        profileDirectory: 'Profile 1',
+        selected: {
+          id: 'queue-id',
+          articleSlug: 'article-slug',
+          imagePath: 'output/imagegen/queue-id.png',
+        },
+      },
+      profileDiagnostics: {
+        profileDirState: { status: 'debuggable' },
+        alternateProfileDirs: [{
+          profileDir: '/Users/test/Library/Application Support/Google/Chrome',
+          profileDirState: { status: 'locked_without_debug' },
+          profiles: [{
+            id: 'Profile 3',
+            name: 'Daily Chrome',
+            accountHint: 'c***@example.com',
+            isLastUsed: true,
+          }],
+        }],
+      },
+    });
+    const markdown = formatLoginHandoffMarkdown(handoff);
+    const outPath = await writeLoginHandoff(handoff, join(outDir, 'login-handoff.md'));
+    const persisted = await readFile(outPath, 'utf8');
+
+    assert.equal(handoff.status, 'needs_x_login');
+    assert.equal(handoff.alternateProfiles[0].requiresChromeClose, true);
+    assert.match(markdown, /close normal Chrome/);
+    assert.match(markdown, /login-recovery/);
+    assert.match(markdown, /scheduled-run/);
+    assert.match(markdown, /must not publish/);
+    assert.match(persisted, /X Login Handoff/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
 });
 
 test('browser readiness surfaces missing bun runtime as an actionable blocker', async () => {
