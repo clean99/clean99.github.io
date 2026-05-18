@@ -1469,8 +1469,10 @@ test('daily execution brief surfaces browser blockers before ready publish slots
     assert.match(brief.browserReadinessCommand, /--xProfileDir '\/tmp\/x-profile'/);
     assert.equal(brief.dayReadiness.readySlots, 1);
     assert.equal(brief.manualPublishFallback.available, true);
+    assert.equal(brief.actionItems[0].priority, 'P0');
     assert.ok(brief.actionItems.some((item) => item.action.includes('Fix browser readiness')));
     assert.ok(brief.actionItems.some((item) => item.action.includes('manual publish kit')));
+    assert.ok(brief.actionItems.some((item) => item.priority === 'P2' && item.action.includes('remaining blocked publish slot')));
     assert.ok(brief.actionItems.some((item) => item.action.includes('prepare them only after browser readiness passes')));
     assert.match(markdown, /Browser Readiness/);
     assert.match(markdown, /Manual Publish Fallback/);
@@ -1554,6 +1556,7 @@ test('daily brief CLI reads stored browser probe before action order', async () 
     assert.match(markdown, /Manual Publish Fallback/);
     assert.match(markdown, /social:manual-publish-kit/);
     assert.match(markdown, /social:post-publish-recovery/);
+    assert.doesNotMatch(markdown, /P0: Fix 1 blocked publish slot/);
     assert.doesNotMatch(markdown, /Status: ready_to_publish/);
   } finally {
     await rm(outDir, { recursive: true, force: true });

@@ -374,9 +374,12 @@ function buildActionItems({
   const browserBlockers = blockingBrowserIssues(browserReadiness);
 
   if (blockedSlots.length) {
+    const hasReadySlots = readySlots.length > 0;
     actions.push({
-      priority: 'P0',
-      action: `Fix ${blockedSlots.length} blocked publish slot(s), usually by generating/registering the missing image and rerunning preflight.`,
+      priority: hasReadySlots ? 'P2' : 'P0',
+      action: hasReadySlots
+        ? `Fix ${blockedSlots.length} remaining blocked publish slot(s) without delaying ready slots.`
+        : `Fix ${blockedSlots.length} blocked publish slot(s), usually by generating/registering the missing image and rerunning preflight.`,
       reason: `${dayReadiness.readySlots}/${dayReadiness.totalSlots} publish slots are ready.`,
     });
   }
@@ -454,7 +457,23 @@ function buildActionItems({
     reason: 'The brief is a current-state runbook, not a static plan.',
   });
 
-  return actions;
+  return sortActionItems(actions);
+}
+
+function sortActionItems(actions) {
+  const order = new Map([
+    ['P0', 0],
+    ['P1', 1],
+    ['P2', 2],
+  ]);
+  return actions
+    .map((item, index) => ({ item, index }))
+    .sort((left, right) => {
+      const leftOrder = order.get(left.item.priority) ?? 99;
+      const rightOrder = order.get(right.item.priority) ?? 99;
+      return leftOrder - rightOrder || left.index - right.index;
+    })
+    .map(({ item }) => item);
 }
 
 function publishSurface(slots) {
