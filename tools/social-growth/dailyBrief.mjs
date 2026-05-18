@@ -361,6 +361,10 @@ function buildManualPublishFallback({
     available: false,
     selected: selected || null,
     slotLabel: selected ? `day ${dayReadiness.day} slot ${selected.slot}` : '',
+    batchIndexPath: manualPublishKitIndexPath(dayReadiness.day),
+    batchUrlTemplatePath: manualPublishUrlTemplatePath(dayReadiness.day),
+    batchKitCommand: manualPublishKitsCommand(dayReadiness.day, selected?.publishMode || readySlots[0]?.publishMode),
+    batchRecoveryCommand: manualPublishBatchRecoveryCommand(dayReadiness.day),
     kitPath: selectedItem?.kitPath || 'data/social-growth/manual-publish-kit.md',
     kitCommand: '',
     recoveryCommand: '',
@@ -418,9 +422,34 @@ ${item.recoveryCommand}
 
 Use this if a normal Chrome profile is already logged into \`@Clean993\` while the CDP publishing profile is blocked. This is a local kit only; every publish, media upload, reply, like, repost, follow, profile edit, and pin still requires action-time confirmation in Chrome.
 
+Batch index: \`${fallback.batchIndexPath}\`
+
+Batch URL template: \`${fallback.batchUrlTemplatePath}\`
+
+\`\`\`bash
+${fallback.batchKitCommand}
+${fallback.batchRecoveryCommand}
+\`\`\`
+
 ${commands}
 
 `;
+}
+
+function manualPublishKitsCommand(day, publishMode) {
+  return `npm run social:manual-publish-kits -- --day ${Number(day)}${publishModeArg(publishMode)} --out ${manualPublishKitIndexPath(day)}`;
+}
+
+function manualPublishKitIndexPath(day) {
+  return `data/social-growth/manual-publish-kits/day${Number(day)}-ready-slots.md`;
+}
+
+function manualPublishUrlTemplatePath(day) {
+  return `data/social-growth/manual-publish-kits/day${Number(day)}-published-urls.json`;
+}
+
+function manualPublishBatchRecoveryCommand(day) {
+  return `npm run social:post-publish-recovery-batch -- --input ${manualPublishUrlTemplatePath(day)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies`;
 }
 
 function manualPublishKitPath(day, slot) {
@@ -477,7 +506,7 @@ function buildActionItems({
     if (manualPublishFallback?.available) {
       actions.push({
         priority: 'P0',
-        action: `Generate manual publish kit(s) for ${manualPublishFallback.items.length || 1} ready slot(s), publish from a logged-in normal Chrome profile with confirmation, then run post-publish-recovery.`,
+        action: `Generate manual publish kit(s) for ${manualPublishFallback.items.length || 1} ready slot(s), publish from a logged-in normal Chrome profile with confirmation, then fill the batch URL template and run post-publish-recovery-batch.`,
         reason: manualPublishFallback.reason,
       });
     }

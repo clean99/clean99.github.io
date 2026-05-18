@@ -403,7 +403,9 @@ function buildManualPublishFallback({
     queueId: preflight?.selected?.id || '',
     publishMode,
     batchIndexPath: manualPublishKitIndexPath(commandStatus.selectedSlot.day),
+    batchUrlTemplatePath: manualPublishUrlTemplatePath(commandStatus.selectedSlot.day),
     batchKitCommand: manualPublishKitsCommand(commandStatus),
+    batchRecoveryCommand: manualPublishBatchRecoveryCommand(commandStatus.selectedSlot.day),
     kitPath: 'data/social-growth/manual-publish-kit.md',
     kitCommand: '',
     recoveryCommand: '',
@@ -465,13 +467,18 @@ Batch ready-slot index:
 
 \`${fallback.batchIndexPath}\`
 
+Batch URL template:
+
+\`${fallback.batchUrlTemplatePath}\`
+
 \`\`\`bash
 ${fallback.batchKitCommand}
 ${fallback.kitCommand}
 ${fallback.recoveryCommand}
+${fallback.batchRecoveryCommand}
 \`\`\`
 
-After confirmed publication, paste the public X status URL into the recovery command. The recovery command marks the queue item published, refreshes local metrics files, and writes the thread reply handoff.
+After confirmed publication, paste one public X status URL into the single recovery command, or fill the batch URL template for multiple posts and run the batch recovery command. Recovery marks queue items published, refreshes local metrics files, and writes thread reply handoffs.
 
 `;
 }
@@ -566,6 +573,14 @@ function manualPublishKitsCommand(status) {
 
 function manualPublishKitIndexPath(day) {
   return `data/social-growth/manual-publish-kits/day${Number(day || 1)}-ready-slots.md`;
+}
+
+function manualPublishUrlTemplatePath(day) {
+  return `data/social-growth/manual-publish-kits/day${Number(day || 1)}-published-urls.json`;
+}
+
+function manualPublishBatchRecoveryCommand(day) {
+  return cliCommand('post-publish-recovery-batch', `--input ${manualPublishUrlTemplatePath(day)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies`);
 }
 
 function postPublishRecoveryCommand(status, preflight) {
