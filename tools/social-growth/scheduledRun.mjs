@@ -70,6 +70,7 @@ export async function runScheduledGrowthLoop({
   xBunCommand,
   xProfileDir,
   publishMode,
+  browserProbe = {},
   preferReadyImage = true,
   packageLimit = 3,
   weeklyDays = 7,
@@ -110,6 +111,7 @@ export async function runScheduledGrowthLoop({
     xBunCommand,
     xProfileDir,
     publishMode,
+    browserProbe,
     preferReadyImage,
     packageLimit,
     weeklyDays,
@@ -266,6 +268,14 @@ function scheduledStatus(automationStatus, metricsStatus) {
   if (automationStatus === 'needs_copy_review') {
     return automationStatus;
   }
+  if (
+    automationStatus?.startsWith('needs_chrome_')
+    || automationStatus === 'needs_x_login'
+    || automationStatus === 'needs_media_upload_permission'
+    || automationStatus === 'needs_thread_fallback'
+  ) {
+    return automationStatus;
+  }
   if (automationStatus?.startsWith('blocked')) {
     return automationStatus;
   }
@@ -279,6 +289,15 @@ function scheduledStatus(automationStatus, metricsStatus) {
 }
 
 function nextAction(result) {
+  if (result.automation.browserReadiness?.status === 'needs_chrome_extension_reconnect') {
+    return 'Confirm opening a fresh Chrome window for the selected profile, then rerun browser readiness before preparing the thread.';
+  }
+  if (result.automation.browserReadiness?.status === 'needs_media_upload_permission') {
+    return 'Fix the media upload path before opening the final thread handoff; the first post needs the generated image attached.';
+  }
+  if (result.automation.browserReadiness?.status === 'needs_x_login') {
+    return 'Log into the expected X account in the publishing Chrome profile, then rerun browser readiness.';
+  }
   if (result.automation.status === 'needs_copy_review') {
     return 'Run the X technical sharing brief and apply a copy override before opening Chrome for browser confirmation.';
   }

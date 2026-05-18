@@ -105,6 +105,7 @@ export async function runSafeAutomationCycle({
   xBunCommand,
   xProfileDir,
   publishMode,
+  browserProbe = {},
   preferReadyImage = false,
   packageLimit = 3,
   weeklyDays = 7,
@@ -191,6 +192,15 @@ export async function runSafeAutomationCycle({
   const browserReadiness = buildBrowserReadiness({
     preflight,
     xPrep: xPublishPrep,
+    expectedAccount: browserProbe.expectedAccount,
+    observedAccount: browserProbe.observedAccount,
+    chromeRunning: browserProbe.chromeRunning,
+    extensionInstalled: browserProbe.extensionInstalled,
+    nativeHost: browserProbe.nativeHost,
+    extensionPipe: browserProbe.extensionPipe,
+    loginState: browserProbe.loginState,
+    articleAvailable: browserProbe.articleAvailable,
+    mediaUpload: browserProbe.mediaUpload,
     profileDir: xProfileDir,
     generatedAt,
   });
@@ -237,7 +247,7 @@ export async function runSafeAutomationCycle({
   const automationStatus = status.status === 'ready_for_browser_confirmation'
     && publishConfirmation.status === 'needs_copy_review'
     ? 'needs_copy_review'
-    : status.status;
+    : browserBlockingStatus(browserReadiness) || status.status;
 
   const metrics = await readJson(metricsPath);
   const dailyBrief = await buildDailyExecutionBrief({
@@ -266,6 +276,7 @@ export async function runSafeAutomationCycle({
     blockers: dedupe([
       ...preflight.blockers,
       ...xPublishPrep.blockers,
+      ...browserActionBlockers(browserReadiness),
     ]),
     profileConversion: summarizeProfileConversion(profileAudit),
     publishConfirmation: summarizePublishConfirmation(publishConfirmation),
@@ -445,4 +456,19 @@ function summarizePublishConfirmation(publishConfirmation) {
     contentReviewStatus: publishConfirmation?.contentReview?.status || 'unknown',
     contentIssues: publishConfirmation?.contentReview?.issues || [],
   };
+}
+
+function browserBlockingStatus(browserReadiness) {
+  if (!browserReadiness?.blockers?.length) return null;
+  if (browserReadiness.status === 'needs_browser_probe') return null;
+  if (browserReadiness.status === 'ready_for_browser_confirmation') return null;
+  if (browserReadiness.status === 'blocked_local_prep') return null;
+  return browserReadiness.status;
+}
+
+function browserActionBlockers(browserReadiness) {
+  return (browserReadiness?.blockers || []).filter((blocker) => (
+    !blocker.includes('Local publish preflight')
+    && !blocker.includes('X publish prep')
+  ));
 }

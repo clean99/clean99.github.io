@@ -1542,6 +1542,112 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
   }
 });
 
+test('scheduled growth loop preserves browser probe blockers in the run status', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-scheduled-browser-'));
+  try {
+    const articles = [
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+    ];
+    const expectedQueue = buildPublishQueue(articles, {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    const imageDir = join(outDir, 'images');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await writeFile(join(imageDir, `${expectedQueue.items[0].id}.png`), 'fake image');
+    await writeJson(join(outDir, 'ledger.json'), createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+    await writeFile(join(outDir, 'profile.local.txt'), [
+      'Clean99 | AI 工程化与前端性能',
+      '@Clean993',
+      '写 AI 工程化、前端性能、React 和测试。把真实工程问题压成可复用框架。',
+      'https://clean99.github.io',
+      'Pinned',
+      '30 Followers',
+    ].join('\n'));
+
+    const result = await runScheduledGrowthLoop({
+      articles,
+      now: '2026-05-18T00:00:00.000Z',
+      queuePath: join(outDir, 'queue.json'),
+      packageOutDir: join(outDir, 'packages'),
+      dailyReportPath: join(outDir, 'daily-run.md'),
+      dailyBriefPath: join(outDir, 'daily-brief.md'),
+      weeklyPlanPath: join(outDir, 'weekly-plan.md'),
+      ledgerPath: join(outDir, 'ledger.json'),
+      metricsPath: join(outDir, 'posts.local.json'),
+      statusPath: join(outDir, 'status.md'),
+      preflightPath: join(outDir, 'publish-preflight.md'),
+      profileTextPath: join(outDir, 'profile.local.txt'),
+      postTextDir: join(outDir, 'post-texts'),
+      profileAuditPath: join(outDir, 'profile-audit.md'),
+      profileUpdatePath: join(outDir, 'profile-update.md'),
+      automationReportPath: join(outDir, 'automation-run.md'),
+      metricsCyclePath: join(outDir, 'metrics-cycle.md'),
+      growthReportPath: join(outDir, 'growth-report.md'),
+      recommendationsPath: join(outDir, 'recommendations.md'),
+      funnelPath: join(outDir, 'funnel.md'),
+      scheduledReportPath: join(outDir, 'scheduled-run.md'),
+      imageBriefDir: join(outDir, 'image-briefs'),
+      imageBacklogPath: join(outDir, 'image-backlog.md'),
+      imageDir,
+      xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
+      publishConfirmationPath: join(outDir, 'publish-confirmation.md'),
+      browserReadinessPath: join(outDir, 'browser-readiness.md'),
+      engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
+      engagementPlanPath: join(outDir, 'engagement-plan.md'),
+      engagementSearchPath: join(outDir, 'engagement-search.md'),
+      xSkillDir: skillDir,
+      xBunCommand: 'bun',
+      publishMode: 'thread_fallback',
+      browserProbe: {
+        observedAccount: '@Clean993',
+        chromeRunning: 'yes',
+        extensionInstalled: 'yes',
+        nativeHost: 'yes',
+        extensionPipe: 'closed',
+        articleAvailable: 'no',
+        mediaUpload: 'blocked',
+      },
+      queueOptions: {
+        limit: 1,
+        lang: 'zh',
+        campaign: 'test',
+      },
+      packageLimit: 1,
+      env: {},
+    });
+    const scheduledReport = await readFile(join(outDir, 'scheduled-run.md'), 'utf8');
+    const readinessReport = await readFile(join(outDir, 'browser-readiness.md'), 'utf8');
+
+    assert.equal(result.status, 'needs_chrome_extension_reconnect');
+    assert.equal(result.automation.status, 'needs_chrome_extension_reconnect');
+    assert.equal(result.automation.browserReadiness.status, 'needs_chrome_extension_reconnect');
+    assert.match(result.automation.blockers.join('\n'), /native pipe/);
+    assert.match(result.automation.blockers.join('\n'), /Media upload/);
+    assert.match(scheduledReport, /Status: needs_chrome_extension_reconnect/);
+    assert.match(scheduledReport, /Confirm opening a fresh Chrome window/);
+    assert.match(readinessReport, /Extension pipe: closed/);
+    assert.match(readinessReport, /Media upload is blocked/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('full flow dry run simulates publication and metrics without touching real state', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-flow-dry-run-'));
   try {

@@ -284,6 +284,7 @@ if (command === 'articles') {
     xBunCommand: args.xBunCommand,
     xProfileDir: args.xProfileDir || args.profileDir,
     publishMode: args.publishMode || args.articleMode,
+    browserProbe: browserProbeFromArgs(args),
     preferReadyImage: args.preferReadyImage === 'true',
     packageLimit: args.packageLimit || 3,
     weeklyDays: args.days || 7,
@@ -344,6 +345,7 @@ if (command === 'articles') {
     xBunCommand: args.xBunCommand,
     xProfileDir: args.xProfileDir || args.profileDir,
     publishMode: args.publishMode || args.articleMode,
+    browserProbe: browserProbeFromArgs(args),
     preferReadyImage: args.preferReadyImage !== 'false',
     packageLimit: args.packageLimit || 3,
     weeklyDays: args.days || 7,
@@ -725,15 +727,7 @@ if (command === 'articles') {
   const readiness = buildBrowserReadiness({
     preflight,
     xPrep: prep,
-    expectedAccount: args.account || '@Clean993',
-    observedAccount: args.observedAccount,
-    chromeRunning: args.chromeRunning,
-    extensionInstalled: args.extensionInstalled,
-    nativeHost: args.nativeHost,
-    extensionPipe: args.extensionPipe,
-    loginState: args.loginState,
-    articleAvailable: args.articleAvailable,
-    mediaUpload: args.mediaUpload,
+    ...browserProbeFromArgs(args),
     profileDir: args.xProfileDir || args.profileDir,
     generatedAt: preflight.generatedAt,
   });
@@ -900,6 +894,20 @@ function parseArgs(rawArgs) {
 
 function toCamelKey(key) {
   return key.replace(/-([a-z])/g, (_, char) => char.toUpperCase());
+}
+
+function browserProbeFromArgs(options = {}) {
+  return {
+    expectedAccount: options.account || '@Clean993',
+    observedAccount: options.observedAccount,
+    chromeRunning: options.chromeRunning,
+    extensionInstalled: options.extensionInstalled,
+    nativeHost: options.nativeHost,
+    extensionPipe: options.extensionPipe,
+    loginState: options.loginState,
+    articleAvailable: options.articleAvailable,
+    mediaUpload: options.mediaUpload,
+  };
 }
 
 async function loadCliArticles(options = {}) {
