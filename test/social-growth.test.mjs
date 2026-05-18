@@ -3473,6 +3473,79 @@ test('growth status surfaces blocking browser readiness before publish prep', as
   }
 });
 
+test('status CLI reads stored browser probe before reporting readiness', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-status-cli-probe-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: 'Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路',
+        excerpt: '性能问题不再是某个页面慢，而是 first load、hot switch 和 background pressure 三条用户路径分别要守住。',
+        slug: 'Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure',
+        lang: 'zh',
+        tags: ['Frontend', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/workspace-tab-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const imageDir = join(outDir, 'images');
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(imageDir, `${queue.items[0].id}.png`), 'fake image');
+    const queuePath = join(outDir, 'queue.json');
+    const ledgerPath = join(outDir, 'ledger.json');
+    const probePath = join(outDir, 'browser-probe.local.json');
+    const profilePath = join(outDir, 'profile.txt');
+    const statusPath = join(outDir, 'status.md');
+    await writeJson(queuePath, queue);
+    await writeJson(ledgerPath, createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+    await writeFile(probePath, `${JSON.stringify({
+      expectedAccount: '@Clean993',
+      chromeRunning: 'yes',
+      loginState: 'logged_out',
+      articleAvailable: 'no',
+      mediaUpload: 'unknown',
+    }, null, 2)}\n`);
+    await writeFile(profilePath, [
+      'Clean99 | AI 工程化与前端性能',
+      '@Clean993',
+      '写 AI 工程化、前端性能、React 和测试。把真实工程问题压成可复用框架。',
+      'https://clean99.github.io',
+      'Pinned',
+      '30 Followers',
+    ].join('\n'));
+
+    const result = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'status',
+      '--queue', queuePath,
+      '--ledger', ledgerPath,
+      '--browser-probe', probePath,
+      '--profile-text', profilePath,
+      '--image-dir', imageDir,
+      '--package-out', join(outDir, 'packages'),
+      '--publishMode', 'thread_fallback',
+      '--out', statusPath,
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+    const markdown = await readFile(statusPath, 'utf8');
+
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.match(markdown, /Status: needs_x_login/);
+    assert.match(markdown, /The Chrome profile used for publishing is not logged into X/);
+    assert.doesNotMatch(markdown, /Status: ready_for_browser_confirmation/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('growth status treats blocked local X prep as a blocker', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-status-local-prep-'));
   try {

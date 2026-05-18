@@ -634,6 +634,41 @@ if (command === 'articles') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
   const profileText = await readOptionalText(args.profileText || 'data/social-growth/profile.local.txt');
+  const publishMode = args.publishMode || args.articleMode;
+  const preflight = await buildPublishPreflight({
+    queue,
+    ledger,
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    ensurePackage: args.ensurePackage === 'true',
+    preferReadyImage: args.preferReadyImage === 'true',
+  });
+  const prep = await buildXPublishPrep(preflight, {
+    skillDir: args.skillDir,
+    bunCommand: args.bunCommand,
+    articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
+    publishMode,
+    profileDir: args.xProfileDir || args.profileDir,
+  });
+  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
+  const storedProbe = await readBrowserProbe(probePath);
+  const inputProbe = browserProbeFromArgs(args);
+  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
+  if (hasBrowserProbeValues(inputProbe)) effectiveProbe.generatedAt = preflight.generatedAt;
+  if (args.writeProbe !== 'false' && hasBrowserProbeValues(effectiveProbe)) {
+    await writeBrowserProbe(effectiveProbe, probePath);
+  }
+  const browserReadiness = buildBrowserReadiness({
+    preflight,
+    xPrep: prep,
+    ...effectiveProbe,
+    profileDir: args.xProfileDir || args.profileDir,
+    generatedAt: preflight.generatedAt,
+  });
   const status = await buildGrowthStatus({
     queue,
     ledger,
@@ -643,8 +678,9 @@ if (command === 'articles') {
     imageDir: args.imageDir || 'output/imagegen',
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     profileText,
-    publishMode: args.publishMode || args.articleMode,
+    publishMode,
     xProfileDir: args.xProfileDir || args.profileDir,
+    browserReadiness,
     ensurePackage: args.ensurePackage === 'true',
     preferReadyImage: args.preferReadyImage === 'true',
   });

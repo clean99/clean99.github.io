@@ -349,10 +349,45 @@ async function findExistingDebugPort(profileDir) {
   try {
     const content = await readFile(join(profileDir, 'DevToolsActivePort'), 'utf8');
     const [port] = content.trim().split(/\s+/);
-    return Number(port) || null;
+    const parsedPort = Number(port) || null;
+    if (parsedPort) return parsedPort;
   } catch {
-    return null;
   }
+  return await findDebugPortFromProcessList(profileDir);
+}
+
+async function findDebugPortFromProcessList(profileDir) {
+  const output = await readProcessList().catch(() => '');
+  const normalizedProfileDir = resolve(profileDir);
+  for (const command of output.split('\n')) {
+    if (!command.includes('--remote-debugging-port=')) continue;
+    if (!command.includes(`--user-data-dir=${normalizedProfileDir}`)) continue;
+    const match = command.match(/--remote-debugging-port=(\d+)/);
+    if (match) return Number(match[1]) || null;
+  }
+  return null;
+}
+
+function readProcessList() {
+  return new Promise((resolveRead, rejectRead) => {
+    const ps = spawn('/bin/ps', ['axo', 'command'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    let stdout = '';
+    let stderr = '';
+    ps.stdout.on('data', (chunk) => {
+      stdout += String(chunk);
+    });
+    ps.stderr.on('data', (chunk) => {
+      stderr += String(chunk);
+    });
+    ps.on('error', rejectRead);
+    ps.on('close', (code) => {
+      if (code === 0) {
+        resolveRead(stdout);
+        return;
+      }
+      rejectRead(new Error(stderr || `ps exited with ${code}`));
+    });
+  });
 }
 
 function launchChrome({ chromePath, profileDir, port, url }) {
