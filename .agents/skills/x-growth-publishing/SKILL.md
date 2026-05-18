@@ -71,6 +71,8 @@ Prefer this handoff command because it writes both the JSON template and a sourc
 npm run social:x-tech-brief -- --day 1 --slot 1
 ```
 
+That brief also includes ledger-based growth feedback: target pace, measured variant performance, measured article/topic performance, and the next recommendations. Treat those signals as writing constraints before optimizing the next X copy.
+
 After the JSON is optimized, apply it locally:
 
 ```bash

@@ -692,10 +692,29 @@ test('x technical sharing brief packages source article and copy override templa
       createdAt: '2026-05-18T00:00:00.000Z',
       limit: 1,
     });
-    const ledger = createLedger({
+    const ledger = appendSnapshot(createLedger({
       startDate: '2026-05-18',
       baselineFollowers: 30,
       followersIn7Days: 1000,
+    }), {
+      date: '2026-05-19',
+      followers: 46,
+      posts: [
+        {
+          id: 'winning-post',
+          articleSlug: 'Automated-AI-Performance-Optimization',
+          variant: 'strong-thesis',
+          metrics: {
+            views: 1200,
+            likes: 18,
+            replies: 4,
+            reposts: 3,
+            bookmarks: 6,
+            profileClicks: 12,
+            follows: 4,
+          },
+        },
+      ],
     });
     const brief = await buildXTechnicalSharingBrief({
       articles: [article],
@@ -717,6 +736,11 @@ test('x technical sharing brief packages source article and copy override templa
     assert.equal(brief.template.source, 'x-technical-sharing');
     assert.equal(brief.template.contentStatus, 'needs_x_technical_sharing');
     assert.match(markdown, /Observable problem/);
+    assert.match(markdown, /Growth Feedback/);
+    assert.match(markdown, /Follower delta: 16 \/ 1000/);
+    assert.match(markdown, /strong-thesis: score/);
+    assert.match(markdown, /Automated-AI-Performance-Optimization: score/);
+    assert.match(markdown, /profile clicks 12/);
     assert.match(markdown, /npm run social:apply-copy/);
     assert.match(markdown, /Current Generated Copy/);
     const sourcePoints = markdown.split('## Current Generated Copy')[0];

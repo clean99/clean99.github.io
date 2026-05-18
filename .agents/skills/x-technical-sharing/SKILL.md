@@ -44,6 +44,7 @@ Read the source material before writing:
   ```
 
 Do not infer a mechanism from the title alone. If evidence is missing, write a more modest claim.
+When the brief includes a `Growth Feedback` section, use it as a constraint: preserve measured winning mechanisms, repair weak conversion signals, and avoid repeating failed variants or duplicated surface wording.
 
 ## Causality Chain
 
