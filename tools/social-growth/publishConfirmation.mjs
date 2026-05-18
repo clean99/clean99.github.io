@@ -73,6 +73,9 @@ export function buildPublishConfirmation({
       recordPublished: publishMode === 'thread_fallback'
         ? `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${item.id} --url ${THREAD_URL_PLACEHOLDER} --reply-out data/social-growth/thread-reply-handoff.md`
         : (preflight.browser?.recordCommand || `npm run social:mark-published -- --queue data/social-growth/queue.json --id ${item.id} --url <x-post-url> --article-url <x-article-url>`),
+      recoverPublished: publishMode === 'thread_fallback'
+        ? `npm run social:post-publish-recovery -- --queue data/social-growth/queue.json --id ${item.id} --url ${THREAD_URL_PLACEHOLDER} --reply-out data/social-growth/thread-reply-handoff.md`
+        : `npm run social:post-publish-recovery -- --queue data/social-growth/queue.json --id ${item.id} --url <x-post-url> --article-url <x-article-url> --reply-out data/social-growth/thread-reply-handoff.md`,
     },
     stopBefore: [
       publishMode === 'thread_fallback' ? null : 'final X Article publish click',
@@ -190,7 +193,13 @@ ${followUpReplyCommands}
 
 ## After Confirmed Publication
 
-Record the public URLs:
+Preferred command. Use this after manual or browser-confirmed publication to record the public URL, refresh metrics, write reply handoff, and run the read-only metrics cycle from local copied text:
+
+\`\`\`bash
+${packet.commands.recoverPublished}
+\`\`\`
+
+Legacy record-only command:
 
 \`\`\`bash
 ${packet.commands.recordPublished}

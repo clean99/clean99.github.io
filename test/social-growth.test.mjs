@@ -2875,6 +2875,7 @@ test('publish confirmation packet combines copy, commands, and public action sto
     assert.match(markdown, /X Article To Review/);
     assert.match(markdown, /Image-backed Short Post To Review/);
     assert.match(markdown, /final image-backed short-post publish click/);
+    assert.match(markdown, /social:post-publish-recovery/);
     assert.match(markdown, /social:mark-published/);
     assert.match(persisted, /This file is not permission to perform public X actions/);
   } finally {
@@ -2938,6 +2939,9 @@ test('publish confirmation uses thread fallback when X Article is unavailable', 
     assert.match(packet.content.imagePost, /工作台一上 Tab/);
     assert.match(packet.commands.recordPublished, /<x-thread-url>/);
     assert.match(packet.commands.recordPublished, /--reply-out data\/social-growth\/thread-reply-handoff\.md/);
+    assert.match(packet.commands.recoverPublished, /social:post-publish-recovery/);
+    assert.match(packet.commands.recoverPublished, /<x-thread-url>/);
+    assert.match(packet.commands.recoverPublished, /--reply-out data\/social-growth\/thread-reply-handoff\.md/);
     assert.equal(packet.commands.prepareThreadReplies.length, 2);
     assert.match(packet.commands.prepareThreadReplies[0].url, /https:\/\/x\.com\/intent\/tweet\?in_reply_to=THREAD_STATUS_ID&text=/);
     assert.match(decodeURIComponent(packet.commands.prepareThreadReplies[1].url), /完整过程/);
