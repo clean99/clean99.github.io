@@ -39,6 +39,7 @@ The code can automate safe local work:
 - generate a metrics capture template from published queue items;
 - run one post-publish metrics cycle that merges published posts, parses copied visible X text, updates the ledger when follower count is present, and writes the next recommendations;
 - run one scheduled-safe loop that combines local publish preparation and read-only metrics parsing without browser actions;
+- build a selective engagement plan from copied visible X thread text, with substantive reply drafts and stop-before-reply boundaries;
 - audit the X profile's follower-conversion signals from copied visible profile text;
 - produce image 2 / `gpt-image-2` image prompts for each candidate;
 - produce an X Article draft before the blog link;
@@ -118,6 +119,7 @@ This performs only local work:
 - writes `data/social-growth/publish-preflight.md`;
 - writes or refreshes the selected `data/social-growth/image-briefs/*.md`;
 - writes `data/social-growth/x-publish-prep.md` with `baoyu-post-to-x` Chrome prefill commands;
+- writes `data/social-growth/engagement-plan.md` from copied thread opportunities when available;
 - writes `data/social-growth/status.md`;
 - writes `data/social-growth/automation-run.md`.
 
@@ -130,6 +132,14 @@ npm run social:scheduled-run -- --day 1 --slot 1
 ```
 
 This combines `social:automation` and `social:metrics-cycle` into one recurring-safe local pass. It refreshes queue/packages/status/preflight/profile/image/X prep artifacts, parses copied visible X text when available, writes reports, and never opens Chrome or performs public X actions.
+
+Build the selective engagement plan:
+
+```bash
+npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md
+```
+
+This reads copied visible X thread text from `data/social-growth/engagement-opportunities/*.txt` or `*.md`, matches each thread against the current Chinese queue, and writes at most a few substantive reply candidates. It rejects obvious engagement bait and unrelated threads. It does not reply, like, repost, follow, quote, or open Chrome; every candidate still stops before the final public Reply click.
 
 Run the full local dry-run when content is not ready for real publishing:
 
@@ -457,16 +467,19 @@ Do not commit private analytics or account history.
 16. Stop before publishing the short post and confirm the exact content and account.
 17. Prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
 18. Stop before each public reply and confirm the exact content and account.
-19. If `profile-update.md` is still needed, prepare the profile edit and pinned-post flow in Chrome, stopping before every save/publish/pin action.
-19. Mark the published URL with `npm run social:mark-published`.
-20. Run `npm run social:metrics-template`.
-21. Use `npm run social:capture-metrics` when visible X text has been captured.
-22. Or run `npm run social:metrics-cycle` to merge capture, snapshot, report, and recommendations in one read-only local pass.
-23. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
-24. Run `npm run social:snapshot` if you did not use `social:metrics-cycle`.
-25. Run `npm run social:report -- --format markdown`.
-26. Run `npm run social:recommend -- --format markdown`.
-27. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+19. Capture 5-10 relevant technical X threads into `data/social-growth/engagement-opportunities/`.
+20. Run `npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md`.
+21. Prepare only the reply candidates that add a mechanism, proof caveat, checklist, or correction; stop before each public Reply click and confirm.
+22. If `profile-update.md` is still needed, prepare the profile edit and pinned-post flow in Chrome, stopping before every save/publish/pin action.
+23. Mark the published URL with `npm run social:mark-published`.
+24. Run `npm run social:metrics-template`.
+25. Use `npm run social:capture-metrics` when visible X text has been captured.
+26. Or run `npm run social:metrics-cycle` to merge capture, snapshot, report, and recommendations in one read-only local pass.
+27. Fill any missing follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
+28. Run `npm run social:snapshot` if you did not use `social:metrics-cycle`.
+29. Run `npm run social:report -- --format markdown`.
+30. Run `npm run social:recommend -- --format markdown`.
+31. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 For regular operation, replace steps 1-6 with:
 

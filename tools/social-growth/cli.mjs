@@ -16,6 +16,12 @@ import {
   formatDayReadinessMarkdown,
   writeDayReadiness,
 } from './dayReadiness.mjs';
+import {
+  buildEngagementPlan,
+  formatEngagementPlanMarkdown,
+  readEngagementOpportunityTexts,
+  writeEngagementPlan,
+} from './engagement.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';
 import {
   buildPublishPreflight,
@@ -234,6 +240,9 @@ if (command === 'articles') {
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
     imageDir: args.imageDir || 'output/imagegen',
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
+    engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
+    engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
+    engagementLimit: args.engagementLimit || 5,
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
     packageLimit: args.packageLimit || 3,
@@ -250,6 +259,7 @@ if (command === 'articles') {
     status: result.status,
     selected: result.selected,
     blockers: result.blockers,
+    engagement: result.engagement,
     paths: result.paths,
   }, null, 2));
 } else if (command === 'scheduled-run') {
@@ -279,6 +289,9 @@ if (command === 'articles') {
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
     imageDir: args.imageDir || 'output/imagegen',
     xPublishPrepPath: args.xPrepOut || 'data/social-growth/x-publish-prep.md',
+    engagementOpportunityDir: args.engagementOpportunities || 'data/social-growth/engagement-opportunities',
+    engagementPlanPath: args.engagementOut || 'data/social-growth/engagement-plan.md',
+    engagementLimit: args.engagementLimit || 5,
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
     packageLimit: args.packageLimit || 3,
@@ -319,6 +332,23 @@ if (command === 'articles') {
     console.log(JSON.stringify(readiness, null, 2));
   } else {
     console.log(formatDayReadinessMarkdown(readiness));
+  }
+} else if (command === 'engagement-plan') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const opportunities = await readEngagementOpportunityTexts(args.opportunities || 'data/social-growth/engagement-opportunities');
+  const plan = buildEngagementPlan({
+    queue,
+    opportunityTexts: opportunities,
+    now: args.now ? new Date(args.now) : new Date(),
+    limit: args.limit || 5,
+  });
+  if (args.out) {
+    await writeEngagementPlan(plan, args.out);
+    console.log(`Wrote X engagement plan to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(plan, null, 2));
+  } else {
+    console.log(formatEngagementPlanMarkdown(plan));
   }
 } else if (command === 'copy-template') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
@@ -688,6 +718,7 @@ function printHelp() {
   npm run social:automation -- --day 1 --slot 1
   npm run social:scheduled-run -- --day 1 --slot 1
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
+  npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md
   npm run social:copy-template -- --day 1 --slot 1
   npm run social:x-tech-brief -- --day 1 --slot 1
   npm run social:apply-copy -- --input data/social-growth/copy-overrides/<queue-id>.json

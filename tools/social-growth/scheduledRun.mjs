@@ -23,6 +23,8 @@ const DEFAULT_SCHEDULED_REPORT_PATH = 'data/social-growth/scheduled-run.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
+const DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
+const DEFAULT_ENGAGEMENT_PLAN_PATH = 'data/social-growth/engagement-plan.md';
 
 export async function runScheduledGrowthLoop({
   articles,
@@ -49,6 +51,9 @@ export async function runScheduledGrowthLoop({
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
   imageDir = DEFAULT_IMAGE_DIR,
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
+  engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
+  engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
+  engagementLimit = 5,
   xSkillDir,
   xBunCommand,
   packageLimit = 3,
@@ -78,6 +83,9 @@ export async function runScheduledGrowthLoop({
     imageBriefDir,
     imageDir,
     xPublishPrepPath,
+    engagementOpportunityDir,
+    engagementPlanPath,
+    engagementLimit,
     xSkillDir,
     xBunCommand,
     packageLimit,
@@ -105,6 +113,7 @@ export async function runScheduledGrowthLoop({
     automation: {
       status: automation.status,
       blockers: automation.blockers,
+      engagement: automation.engagement,
     },
     metrics: {
       status: metrics.status,
@@ -153,6 +162,9 @@ Status: ${result.status}
 - Status dashboard: \`${result.paths.status}\`
 - Preflight: \`${result.paths.preflight}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
+- Engagement plan: \`${result.paths.engagementPlan}\`
+- Engagement status: ${result.automation.engagement?.status || 'unknown'}
+- Ready reply candidates: ${result.automation.engagement?.readyCandidates ?? 'unknown'}
 
 Blockers:
 

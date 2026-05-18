@@ -22,6 +22,12 @@ import {
 import { expandQueueOptionsForWeeklyCoverage, runDailyGrowthPlan, selectPackageItems } from '../tools/social-growth/daily.mjs';
 import { buildDayReadiness, formatDayReadinessMarkdown, writeDayReadiness } from '../tools/social-growth/dayReadiness.mjs';
 import {
+  buildEngagementPlan,
+  formatEngagementPlanMarkdown,
+  readEngagementOpportunityTexts,
+  writeEngagementPlan,
+} from '../tools/social-growth/engagement.mjs';
+import {
   appendSnapshot,
   createLedger,
   createMetricsTemplateFromQueue,
@@ -753,6 +759,87 @@ test('x technical sharing brief packages source article and copy override templa
   }
 });
 
+test('engagement plan creates selective reply candidates from captured technical threads', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-engagement-'));
+  try {
+    const opportunityDir = join(outDir, 'opportunities');
+    await mkdir(opportunityDir, { recursive: true });
+    await writeFile(join(opportunityDir, 'ai-performance.txt'), [
+      'https://x.com/example/status/1',
+      '最近用 AI Agent 做前端性能优化，最大的问题不是模型不会写代码，而是每次优化后 baseline 口径都不一样。',
+      '如果没有 harness，所谓收益很难复现。',
+    ].join('\n'));
+    await writeFile(join(opportunityDir, 'giveaway.txt'), [
+      '转发抽奖',
+      '关注我领取福利。',
+    ].join('\n'));
+    const article = {
+      title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+      excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+      slug: 'Automated-AI-Performance-Optimization',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering', 'Web Performance'],
+      url: 'https://clean99.github.io/zh/automated-ai-performance/',
+    };
+    const queue = buildPublishQueue([article], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const opportunityTexts = await readEngagementOpportunityTexts(opportunityDir);
+    const plan = buildEngagementPlan({
+      queue,
+      opportunityTexts,
+      now: '2026-05-18T00:00:00.000Z',
+      limit: 2,
+    });
+    const markdown = formatEngagementPlanMarkdown(plan);
+    const outPath = join(outDir, 'engagement-plan.md');
+    await writeEngagementPlan(plan, outPath);
+    const persisted = await readFile(outPath, 'utf8');
+
+    assert.equal(plan.status, 'ready_for_browser_confirmation');
+    assert.equal(plan.selectedCount, 1);
+    assert.equal(plan.opportunities[0].queueId, queue.items[0].id);
+    assert.equal(plan.opportunities[0].browserAction.requiresConfirmation, true);
+    assert.match(plan.opportunities[0].draftReply, /可验证链路/);
+    assert.doesNotMatch(plan.opportunities[0].draftReply, /https?:\/\//);
+    assert.ok(plan.skipped.some((item) => item.status === 'skipped_low_value'));
+    assert.match(markdown, /final public Reply click/);
+    assert.match(persisted, /X Engagement Plan/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('engagement plan asks for captured opportunities before browser work', () => {
+  const queue = buildPublishQueue([
+    {
+      title: 'Agent Skills 探索实录 — AI Agent 时代的函数式蓝图',
+      excerpt: '本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践。',
+      slug: 'Agent-Skills',
+      lang: 'zh',
+      tags: ['AI', 'Software Engineering'],
+      url: 'https://clean99.github.io/zh/agent-skills/',
+    },
+  ], {
+    campaign: 'test',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  });
+
+  const plan = buildEngagementPlan({
+    queue,
+    opportunityTexts: [],
+    now: '2026-05-18T00:00:00.000Z',
+  });
+
+  assert.equal(plan.status, 'needs_opportunity_capture');
+  assert.equal(plan.selectedCount, 0);
+  assert.match(formatEngagementPlanMarkdown(plan), /engagement-opportunities/);
+  assert.match(plan.boundary, /Do not reply/);
+});
+
 test('daily growth run writes queue, packages, and a browser-safe report', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-'));
   try {
@@ -892,6 +979,8 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       imageBriefDir: join(outDir, 'image-briefs'),
       imageDir: join(outDir, 'images'),
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
+      engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
+      engagementPlanPath: join(outDir, 'engagement-plan.md'),
       xSkillDir: skillDir,
       xBunCommand: 'bun',
       packageLimit: 2,
@@ -909,20 +998,25 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     const profileAudit = await readFile(join(outDir, 'profile-audit.md'), 'utf8');
     const profileUpdate = await readFile(join(outDir, 'profile-update.md'), 'utf8');
     const xPrep = await readFile(join(outDir, 'x-publish-prep.md'), 'utf8');
+    const engagementPlan = await readFile(join(outDir, 'engagement-plan.md'), 'utf8');
 
     assert.equal(result.status, 'blocked_preflight');
     assert.match(result.blockers.join('\n'), /Image file is missing/);
     assert.match(result.blockers.join('\n'), /pin a post/);
     assert.ok(result.paths.imageBrief.endsWith('.md'));
     assert.equal(result.paths.xPublishPrep, join(outDir, 'x-publish-prep.md'));
+    assert.equal(result.paths.engagementPlan, join(outDir, 'engagement-plan.md'));
+    assert.equal(result.engagement.status, 'needs_opportunity_capture');
     assert.match(report, /No public X action was performed/);
     assert.match(report, /X publish prep/);
+    assert.match(report, /Engagement plan/);
     assert.match(report, /Profile update package/);
     assert.match(status, /Profile Conversion/);
     assert.match(preflight, /Status: blocked/);
     assert.match(profileAudit, /Status: needs_work/);
     assert.match(profileUpdate, /final profile save click/);
     assert.match(xPrep, /baoyu-post-to-x Bridge/);
+    assert.match(engagementPlan, /needs_opportunity_capture/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
@@ -990,6 +1084,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       imageBriefDir: join(outDir, 'image-briefs'),
       imageDir,
       xPublishPrepPath: join(outDir, 'x-publish-prep.md'),
+      engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
+      engagementPlanPath: join(outDir, 'engagement-plan.md'),
       xSkillDir: skillDir,
       xBunCommand: 'bun',
       queueOptions: {
@@ -1006,8 +1102,10 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.status, 'needs_candidates');
     assert.equal(result.automation.status, 'needs_candidates');
     assert.equal(result.metrics.status, 'needs_published_posts');
+    assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
     assert.equal(result.selected.id, expectedQueue.items[0].id);
     assert.match(scheduledReport, /Scheduled X Growth Run/);
+    assert.match(scheduledReport, /Engagement plan/);
     assert.match(scheduledReport, /safe for recurring execution/);
     assert.match(metricsReport, /No browser publish/);
   } finally {

@@ -6,6 +6,11 @@ import {
   imageBriefPath,
   writeImageBrief,
 } from './imageBrief.mjs';
+import {
+  buildEngagementPlan,
+  readEngagementOpportunityTexts,
+  writeEngagementPlan,
+} from './engagement.mjs';
 import { readJson } from './queue.mjs';
 import {
   buildProfileAudit,
@@ -42,6 +47,8 @@ const DEFAULT_AUTOMATION_REPORT_PATH = 'data/social-growth/automation-run.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
 const DEFAULT_X_PUBLISH_PREP_PATH = 'data/social-growth/x-publish-prep.md';
+const DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
+const DEFAULT_ENGAGEMENT_PLAN_PATH = 'data/social-growth/engagement-plan.md';
 
 export async function runSafeAutomationCycle({
   articles,
@@ -63,6 +70,9 @@ export async function runSafeAutomationCycle({
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
   imageDir = DEFAULT_IMAGE_DIR,
   xPublishPrepPath = DEFAULT_X_PUBLISH_PREP_PATH,
+  engagementOpportunityDir = DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR,
+  engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
+  engagementLimit = 5,
   xSkillDir,
   xBunCommand,
   packageLimit = 3,
@@ -132,6 +142,15 @@ export async function runSafeAutomationCycle({
   });
   await writeXPublishPrep(xPublishPrep, xPublishPrepPath);
 
+  const engagementOpportunities = await readEngagementOpportunityTexts(engagementOpportunityDir);
+  const engagementPlan = buildEngagementPlan({
+    queue,
+    opportunityTexts: engagementOpportunities,
+    now,
+    limit: engagementLimit,
+  });
+  await writeEngagementPlan(engagementPlan, engagementPlanPath);
+
   const status = await buildGrowthStatus({
     queue,
     ledger,
@@ -169,7 +188,13 @@ export async function runSafeAutomationCycle({
       profileUpdate: profileUpdatePath,
       imageBrief: imageBriefOutPath,
       xPublishPrep: xPublishPrepPath,
+      engagementPlan: engagementPlanPath,
       automationReport: automationReportPath,
+    },
+    engagement: {
+      status: engagementPlan.status,
+      readyCandidates: engagementPlan.selectedCount,
+      capturedOpportunities: engagementPlan.opportunityCount,
     },
     boundary: 'No public X action was performed. Chrome publishing, media upload, profile edits, replies, likes, reposts, follows, and final publish clicks still require action-time confirmation.',
   };
@@ -206,6 +231,13 @@ Status: ${result.status}
 - Profile update package: \`${result.paths.profileUpdate}\`
 - Image brief: \`${result.paths.imageBrief || 'not generated'}\`
 - X publish prep: \`${result.paths.xPublishPrep}\`
+- Engagement plan: \`${result.paths.engagementPlan}\`
+
+## Engagement
+
+- Status: ${result.engagement.status}
+- Captured opportunities: ${result.engagement.capturedOpportunities}
+- Ready reply candidates: ${result.engagement.readyCandidates}
 
 ## Local Blockers
 

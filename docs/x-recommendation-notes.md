@@ -144,7 +144,7 @@ Daily operating loop:
 
 1. Publish 2-4 original posts from blog material.
 2. Add 1-2 substantial replies to your own post when the reply expands the idea.
-3. Identify 5-10 relevant accounts or threads, but only reply when there is a real technical contribution.
+3. Capture 5-10 relevant accounts or threads into `data/social-growth/engagement-opportunities/`, run `npm run social:engagement`, and only reply when the generated candidate adds a real technical contribution.
 4. Record followers and interactions twice per day.
 5. Promote winning themes, kill weak templates fast.
 
