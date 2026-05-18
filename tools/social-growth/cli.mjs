@@ -10,6 +10,11 @@ import {
   registerPublishImage,
   writePublishPreflight,
 } from './preflight.mjs';
+import {
+  buildImageBrief,
+  imageBriefPath,
+  writeImageBrief,
+} from './imageBrief.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from './recommendations.mjs';
 import {
   buildWeeklyExecutionPlan,
@@ -174,6 +179,33 @@ if (command === 'articles') {
   } else {
     console.log(formatPublishPreflightMarkdown(preflight));
   }
+} else if (command === 'image-brief') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const preflight = await buildPublishPreflight({
+    queue,
+    ledger,
+    id: args.id,
+    day: args.day || 1,
+    slot: args.slot || 1,
+    now: args.now ? new Date(args.now) : new Date(),
+    imageDir: args.imageDir || 'output/imagegen',
+    packageOutDir: args.packageOut || 'data/social-growth/packages',
+    ensurePackage: args.ensurePackage !== 'false',
+  });
+  const brief = await buildImageBrief(preflight, {
+    sourcePlaceholder: args.source || '/absolute/path/to/generated.png',
+  });
+  const outPath = args.out || imageBriefPath(brief);
+  await writeImageBrief(brief, outPath);
+  console.log(JSON.stringify({
+    id: brief.selected.id,
+    status: brief.status,
+    outPath,
+    imagePath: brief.image.outputPath,
+    imageReady: brief.image.ready,
+    blockers: brief.blockers,
+  }, null, 2));
 } else if (command === 'register-image') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -298,6 +330,7 @@ function printHelp() {
   npm run social:daily -- --limit 5 --package-limit 3
   npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json
   npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-preflight.md
+  npm run social:image-brief -- --day 1 --slot 1
   npm run social:register-image -- --day 1 --slot 1 --source /path/to/generated.png
   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt

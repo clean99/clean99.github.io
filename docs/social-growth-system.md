@@ -22,6 +22,7 @@ The code can automate safe local work:
 - export a publish package with image, X Article, short post, thread fallback, and checklist files;
 - validate each candidate against the X publishing quality gate before daily packages are exported;
 - run a publish preflight that checks image readiness and the public-action confirmation boundary;
+- export an image brief with the exact `gpt-image-2` prompt, visual review checklist, expected output path, and register command;
 - run the local daily preparation loop in one command;
 - generate a 7-day execution plan from the queue, ledger, and quality gate;
 - generate a metrics capture template from published queue items;
@@ -152,6 +153,14 @@ npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-pr
 ```
 
 The preflight writes the selected queue id, package path, expected image path, `gpt-image-2` generation command, and browser stop points. It is allowed to create the local package, but it must not publish, upload, reply, like, repost, follow, or edit.
+
+Export the image generation and review handoff for the same slot:
+
+```bash
+npm run social:image-brief -- --day 1 --slot 1
+```
+
+This writes an ignored Markdown brief under `data/social-growth/image-briefs/`. It contains the short-post first screen, the X Article title, the exact image prompt, the `gpt-image-2` command, mobile-readability checks, and the command that registers an externally generated PNG back into the expected preflight path. Use it when the local image CLI is blocked by missing credentials or when the image needs human visual review before X upload.
 
 If the image was generated outside the local CLI, register it into the expected path:
 

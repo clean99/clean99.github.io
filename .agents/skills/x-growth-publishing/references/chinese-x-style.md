@@ -3,9 +3,12 @@
 Sources checked on 2026-05-18:
 
 - `@lxfater` Rattibha profile and threads: https://en.rattibha.com/lxfater
+- `@lxfater` public X profile (`铁锤人`): https://x.com/lxfater/with_replies
+- `@lxfater` TwStalker public mirror: https://www.twstalker.com/lxfater
 - `@lxfater` Karpathy knowledge-system thread: https://en.rattibha.com/thread/2039902366624010494
 - `@lxfater` OpenClaw memory-system thread: https://en.rattibha.com/thread/2033748548915741131
 - `@lidangzzz` Rattibha profile: https://en.rattibha.com/lidangzzz
+- `@lidangzzz` TwStalker public mirror: https://twstalker.com/lidangzzz
 - `@lidangzzz` Followin mirror: https://followin.io/zh-Hant/kol/4075583655
 - `@lidangzzz` example discussion mirror: https://pincong.rocks/article/84235
 - `@lxfater` SuperX profile sample and engagement snapshot: https://superx.so/creators/lxfater
@@ -21,6 +24,7 @@ Observed in `@lxfater` style technical posts:
 
 - Title states the useful discovery or measurable result, often with a number, ranking, saved cost, or concrete artifact.
 - First paragraph names the pain in the reader's own words.
+- The strongest posts translate a new paper/tool/agent trick into "what changed for my work tomorrow".
 - Middle section breaks the system into numbered steps.
 - Images are not decoration; they carry setup steps, architecture, or before/after proof.
 - Ending gives the reader the next action.
@@ -52,6 +56,7 @@ Observed in `@lidangzzz` style posts:
 - Lists are used to create argumentative momentum.
 - The conclusion tells the reader what to do or stop doing.
 - The useful part is the diagnostic frame. The toxic part is personal attack. Keep the first, drop the second.
+- When borrowing this structure, keep the certainty tied to a falsifiable engineering criterion.
 
 Use the structure, not the abusive tone. Avoid insults, slurs, personal attacks, and unsupported sweeping claims.
 

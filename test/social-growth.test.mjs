@@ -26,6 +26,12 @@ import {
   summarizeGrowthLedger,
 } from '../tools/social-growth/metrics.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from '../tools/social-growth/recommendations.mjs';
+import {
+  buildImageBrief,
+  formatImageBriefMarkdown,
+  imageBriefPath,
+  writeImageBrief,
+} from '../tools/social-growth/imageBrief.mjs';
 import { buildPublishPreflight, formatPublishPreflightMarkdown, registerPublishImage } from '../tools/social-growth/preflight.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
 import { validateQueue, validateQueueItem } from '../tools/social-growth/validation.mjs';
@@ -713,6 +719,56 @@ test('publish preflight reports missing image and confirmation boundary', async 
     assert.match(markdown, /OPENAI_API_KEY present: false/);
     assert.match(markdown, /OPENAI_API_KEY required now: true/);
     assert.doesNotMatch(preflight.image.command, /\n\+/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('image brief exports prompt, visual checks, and register command', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-image-brief-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '这篇文章讨论的是让每一轮修改都能被同一个 harness 复验。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const preflight = await buildPublishPreflight({
+      queue,
+      ledger: createLedger({
+        startDate: '2026-05-18',
+        baselineFollowers: 30,
+        followersIn7Days: 1000,
+      }),
+      id: queue.items[0].id,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir: join(outDir, 'images'),
+      packageOutDir: join(outDir, 'packages'),
+      env: {},
+    });
+
+    const brief = await buildImageBrief(preflight, {
+      sourcePlaceholder: '/tmp/generated.png',
+    });
+    const markdown = formatImageBriefMarkdown(brief);
+    const writtenPath = await writeImageBrief(brief, imageBriefPath(brief, join(outDir, 'briefs')));
+    const persisted = await readFile(writtenPath, 'utf8');
+
+    assert.equal(brief.image.outputPath, preflight.image.outputPath);
+    assert.match(brief.prompt, /Model: gpt-image-2/);
+    assert.match(markdown, /Visual Review Checklist/);
+    assert.match(markdown, /social:register-image/);
+    assert.match(markdown, /--source '\/tmp\/generated.png'/);
+    assert.match(markdown, /Do not open Chrome for publishing until preflight is ready/);
+    assert.match(persisted, /Short Post First Screen/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }

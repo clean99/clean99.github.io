@@ -48,6 +48,12 @@
       "prompt": "我已经用别的方式生成好图了，把它接到 Day 1 Slot 1 的发布包里。",
       "expected_output": "运行 social:register-image 或给出等价命令；复制到 preflight 期望路径；重跑 social:preflight，图片存在时不能再因为缺 OPENAI_API_KEY 阻塞。",
       "files": []
+    },
+    {
+      "id": 9,
+      "prompt": "没有 OPENAI_API_KEY，但我要先把 Day 1 Slot 1 的 gpt-image-2 生图需求固定下来，后面能接回发布流。",
+      "expected_output": "运行 social:image-brief；输出或写入 image brief，包含短帖首屏、X Article 标题、gpt-image-2 prompt、视觉审查清单、expected image path、register-image 命令和 preflight rerun 命令；不进入公开发布。",
+      "files": []
     }
   ]
 }

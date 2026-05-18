@@ -13,6 +13,7 @@
     "social:daily": "node tools/social-growth/cli.mjs daily",
     "social:draft": "node tools/social-growth/cli.mjs draft",
     "social:handoff": "node tools/social-growth/cli.mjs handoff",
+    "social:image-brief": "node tools/social-growth/cli.mjs image-brief",
     "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",
     "social:mark-published": "node tools/social-growth/cli.mjs mark-published",
     "social:metrics-template": "node tools/social-growth/cli.mjs metrics-template",

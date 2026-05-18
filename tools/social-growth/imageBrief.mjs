@@ -1,0 +1,146 @@
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+
+const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
+const DEFAULT_SOURCE_PLACEHOLDER = '/absolute/path/to/generated.png';
+
+export async function buildImageBrief(preflight, {
+  sourcePlaceholder = DEFAULT_SOURCE_PLACEHOLDER,
+} = {}) {
+  if (!preflight?.selected?.id) {
+    throw new Error('preflight with a selected item is required');
+  }
+
+  const packageDir = preflight.selected.packageDir;
+  const prompt = await readText(preflight.image.promptFile);
+  const shortPost = await readText(join(packageDir, 'short-post.txt'));
+  const xArticle = await readText(join(packageDir, 'x-article.md'));
+
+  return {
+    generatedAt: preflight.generatedAt,
+    status: preflight.status,
+    blockers: preflight.blockers,
+    selected: preflight.selected,
+    image: preflight.image,
+    shortPost: shortPost.trim(),
+    xArticleTitle: extractXArticleTitle(xArticle),
+    prompt: prompt.trim(),
+    commands: {
+      generate: preflight.image.command,
+      register: registerCommand(preflight.selected.id, sourcePlaceholder),
+      preflight: `npm run social:preflight -- --id ${preflight.selected.id} --out data/social-growth/publish-preflight.md`,
+    },
+    checklist: [
+      'Use gpt-image-2, 1536x1024 landscape, medium quality.',
+      'One large Chinese headline is readable on a phone screen.',
+      'The diagram explains the mechanism faster than the post text.',
+      'No platform logos, brand logos, fake UI, watermarks, mascots, or stock-photo people.',
+      'No tiny body paragraphs; labels should be short enough to read after X compression.',
+      'The image supports the short post claim instead of repeating the blog title.',
+      'Register the final PNG into the expected output path before browser publishing.',
+    ],
+  };
+}
+
+export function formatImageBriefMarkdown(brief) {
+  const blockers = brief.blockers.length
+    ? brief.blockers.map((blocker) => `- ${blocker}`).join('\n')
+    : '- No preflight blockers at the time this brief was generated.';
+  const checklist = brief.checklist.map((item) => `- ${item}`).join('\n');
+
+  return `# X Image Brief
+
+Generated at: ${brief.generatedAt}
+Preflight status: ${brief.status}
+
+## Selected Package
+
+- Queue id: ${brief.selected.id}
+- Article slug: ${brief.selected.articleSlug}
+- Variant: ${brief.selected.variant}
+- Package: \`${brief.selected.packageDir}\`
+- Expected image: \`${brief.image.outputPath}\`
+- Image ready: ${brief.image.ready}
+
+## Current Blockers
+
+${blockers}
+
+## Short Post First Screen
+
+\`\`\`text
+${brief.shortPost}
+\`\`\`
+
+## X Article
+
+- Title: ${brief.xArticleTitle}
+- Blog link stays at the end of the X Article, not in the short post.
+
+## Image Prompt
+
+\`\`\`text
+${brief.prompt}
+\`\`\`
+
+## Generate With gpt-image-2
+
+\`\`\`bash
+${brief.commands.generate}
+\`\`\`
+
+## Visual Review Checklist
+
+${checklist}
+
+## Register External Image
+
+If the image is generated outside the local CLI, register the final PNG back into the publish flow:
+
+\`\`\`bash
+${brief.commands.register}
+\`\`\`
+
+Then rerun preflight:
+
+\`\`\`bash
+${brief.commands.preflight}
+\`\`\`
+
+Do not open Chrome for publishing until preflight is ready. Uploading media and publishing on X still require action-time confirmation.
+`;
+}
+
+export function imageBriefPath(brief, outDir = DEFAULT_IMAGE_BRIEF_DIR) {
+  return join(outDir, `${safePathSegment(brief.selected.id)}.md`);
+}
+
+export async function writeImageBrief(brief, filePath = imageBriefPath(brief)) {
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${formatImageBriefMarkdown(brief).trimEnd()}\n`);
+  return filePath;
+}
+
+function registerCommand(id, sourcePlaceholder) {
+  return `npm run social:register-image -- --id ${id} --source ${shellQuote(sourcePlaceholder)}`;
+}
+
+async function readText(filePath) {
+  return readFile(filePath, 'utf8');
+}
+
+function extractXArticleTitle(source) {
+  const line = source
+    .split('\n')
+    .map((item) => item.trim())
+    .find((item) => item.startsWith('Title:'));
+  return line ? line.replace(/^Title:\s*/, '') : 'Untitled X Article';
+}
+
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, "'\\''")}'`;
+}
+
+function safePathSegment(value) {
+  return String(value).replace(/[^A-Za-z0-9._=-]+/g, '-');
+}

@@ -58,6 +58,13 @@ npm run social:preflight -- --day 1 --slot 1 --out data/social-growth/publish-pr
 ```
 
 Preflight checks the selected package, quality gate result, expected image file, `OPENAI_API_KEY`, and browser stop points. Do not open Chrome for publishing until the preflight blockers are understood.
+When the local image CLI is blocked or the image needs review, export the reusable image handoff:
+
+```bash
+npm run social:image-brief -- --day 1 --slot 1
+```
+
+The brief contains the selected short post, X Article title, exact `gpt-image-2` prompt, visual QA checklist, expected output path, register command, and preflight rerun command.
 If the image was generated outside the local CLI, register it with:
 
 ```bash
@@ -94,7 +101,11 @@ For single-item control:
    ```bash
    npm run social:preflight -- --id <queue-id> --out data/social-growth/publish-preflight.md
    ```
-6. Generate a `gpt-image-2` image from `image-prompt.txt`.
+6. Export the reusable image handoff:
+   ```bash
+   npm run social:image-brief -- --id <queue-id>
+   ```
+7. Generate a `gpt-image-2` image from `image-prompt.txt`.
    - Preferred CLI when the user explicitly asks for image model control:
      ```bash
      python "$HOME/.codex/skills/.system/imagegen/scripts/image_gen.py" generate \
@@ -105,49 +116,49 @@ For single-item control:
        --out output/imagegen/<slug>.png
      ```
    - If `OPENAI_API_KEY` is missing, stop and ask the user for the key or use built-in image generation as a preview path.
-7. If the image was generated outside the local CLI, register it:
+8. If the image was generated outside the local CLI, register it:
    ```bash
    npm run social:register-image -- --id <queue-id> --source /absolute/path/to/generated.png
    ```
-8. Re-run preflight and require the image blocker to be gone.
-9. In Chrome, prepare the X Article first. If X Article publishing is unavailable for the account, fall back to a thread using `thread-fallback.md`:
+9. Re-run preflight and require the image blocker to be gone.
+10. In Chrome, prepare the X Article first. If X Article publishing is unavailable for the account, fall back to a thread using `thread-fallback.md`:
    - title: `xArticle.title`;
    - body: `xArticle.body`;
    - attach the generated image when the UI supports it.
-10. Stop before the final Article publish click and ask for confirmation.
-11. After the X Article or thread is public, create the short X post:
+11. Stop before the final Article publish click and ask for confirmation.
+12. After the X Article or thread is public, create the short X post:
    - attach the generated image;
    - use `short-post.txt`;
    - include the X Article URL, not the blog URL.
-12. Stop before the final post click and ask for confirmation.
-13. After the short post is public, prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
-14. Stop before each public reply click and ask for confirmation.
-15. Record the published URL:
+13. Stop before the final post click and ask for confirmation.
+14. After the short post is public, prepare 1-2 substantive follow-up replies from `follow-up-replies.md`.
+15. Stop before each public reply click and ask for confirmation.
+16. Record the published URL:
    ```bash
    npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>
    ```
-16. Prepare the metrics template:
+17. Prepare the metrics template:
    ```bash
    npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
    ```
-17. Capture read-only visible X text into the metrics template when available:
+18. Capture read-only visible X text into the metrics template when available:
    ```bash
    npm run social:capture-metrics -- --metrics data/social-growth/posts.local.json --profile-text data/social-growth/profile.local.txt --post-text-dir data/social-growth/post-texts
    ```
-18. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
-19. Record metrics twice per day:
+19. Fill any missing `data/social-growth/posts.local.json` fields from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
+20. Record metrics twice per day:
    ```bash
    npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
    ```
-20. Review progress:
+21. Review progress:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```
-21. Generate the next optimization decision:
+22. Generate the next optimization decision:
    ```bash
    npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
    ```
-22. Regenerate the week-level plan after each queue or ledger update:
+23. Regenerate the week-level plan after each queue or ledger update:
    ```bash
    npm run social:week -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/weekly-plan.md
    ```
