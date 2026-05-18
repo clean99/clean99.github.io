@@ -13,6 +13,7 @@ import {
   writeJson,
 } from './queue.mjs';
 import {
+  createMetricsTemplateFromQueue,
   createLedger,
   formatMarkdownReport,
   publishedPostsFromQueue,
@@ -89,6 +90,7 @@ if (command === 'articles') {
     packageOutDir: args.packageOut || 'data/social-growth/packages',
     reportPath: args.report || 'data/social-growth/daily-run.md',
     ledgerPath: args.ledger || 'data/social-growth/ledger.json',
+    metricsPath: args.metrics || 'data/social-growth/posts.local.json',
     packageLimit: args.packageLimit || 3,
     now: args.now ? new Date(args.now) : new Date(),
     queueOptions: {
@@ -98,12 +100,22 @@ if (command === 'articles') {
     },
   });
   console.log(JSON.stringify(result, null, 2));
+} else if (command === 'metrics-template') {
+  const queue = await readJson(args.queue || 'data/social-growth/queue.json');
+  const template = createMetricsTemplateFromQueue(queue, {
+    date: args.date,
+    followers: args.followers || '',
+  });
+  const outPath = args.out || 'data/social-growth/posts.local.json';
+  await writeJson(outPath, template);
+  console.log(`Wrote metrics template for ${template.posts.length} published posts to ${outPath}`);
 } else if (command === 'mark-published') {
   const queuePath = args.queue || 'data/social-growth/queue.json';
   const queue = await readJson(queuePath);
   const updated = markQueueItemPublished(queue, {
     id: requiredArg(args, 'id'),
     xPostUrl: requiredArg(args, 'url'),
+    xArticleUrl: args.articleUrl,
     publishedAt: args.publishedAt,
   });
   await writeJson(queuePath, updated);
@@ -124,8 +136,8 @@ if (command === 'articles') {
     ledgerPath,
     postsFile: args.postsFile,
     snapshot: {
-      date: requiredArg(args, 'date'),
-      followers: requiredArg(args, 'followers'),
+      date: args.date,
+      followers: args.followers,
       posts: queue ? publishedPostsFromQueue(queue) : [],
     },
   });
@@ -184,8 +196,9 @@ function printHelp() {
   npm run social:handoff -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:package -- --queue data/social-growth/queue.json --id <queue-id>
   npm run social:daily -- --limit 5 --package-limit 3
+  npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
   npm run social:init-ledger -- --followers 1234 --out data/social-growth/ledger.json
-  npm run social:snapshot -- --ledger data/social-growth/ledger.json --date 2026-05-19 --followers 1300 --posts-file data/social-growth/posts.local.json
+  npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
   npm run social:report -- --ledger data/social-growth/example-ledger.json
   npm run social:report -- --ledger data/social-growth/example-ledger.json --format markdown
 `);

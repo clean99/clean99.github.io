@@ -110,6 +110,40 @@ export async function writePublishPackage(item, { outDir = 'data/social-growth/p
   };
 }
 
+export function mergePublishQueues(existingQueue, nextQueue) {
+  const existingById = new Map((existingQueue?.items || []).map((item) => [item.id, item]));
+  const nextIds = new Set((nextQueue?.items || []).map((item) => item.id));
+  const mergedItems = (nextQueue?.items || []).map((item) => mergeQueueItem(existingById.get(item.id), item));
+  const orphanPublishedItems = (existingQueue?.items || [])
+    .filter((item) => !nextIds.has(item.id))
+    .filter((item) => item.status === 'published' || item.xPostUrl || item.xArticleUrl);
+
+  return {
+    ...nextQueue,
+    items: [
+      ...mergedItems,
+      ...orphanPublishedItems,
+    ],
+  };
+}
+
+export function mergeQueueItem(existingItem, nextItem) {
+  if (!existingItem) return nextItem;
+  const hasPublicationState = existingItem.status === 'published'
+    || existingItem.xPostUrl
+    || existingItem.xArticleUrl
+    || existingItem.publishedAt;
+  if (!hasPublicationState) return nextItem;
+
+  return {
+    ...nextItem,
+    status: existingItem.status,
+    publishedAt: existingItem.publishedAt,
+    xPostUrl: existingItem.xPostUrl,
+    xArticleUrl: existingItem.xArticleUrl,
+  };
+}
+
 export function formatImagePrompt(image = {}) {
   return [
     `Model: ${image.model || 'gpt-image-2'}`,
@@ -162,7 +196,12 @@ export function formatPublishChecklist(item) {
   ].join('\n');
 }
 
-export function markQueueItemPublished(queue, { id, xPostUrl, publishedAt = new Date().toISOString() }) {
+export function markQueueItemPublished(queue, {
+  id,
+  xPostUrl,
+  xArticleUrl,
+  publishedAt = new Date().toISOString(),
+}) {
   return {
     ...queue,
     items: queue.items.map((item) => {
@@ -172,6 +211,7 @@ export function markQueueItemPublished(queue, { id, xPostUrl, publishedAt = new 
         status: 'published',
         publishedAt,
         xPostUrl,
+        xArticleUrl,
       };
     }),
   };

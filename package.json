@@ -14,6 +14,7 @@
     "social:handoff": "node tools/social-growth/cli.mjs handoff",
     "social:init-ledger": "node tools/social-growth/cli.mjs init-ledger",
     "social:mark-published": "node tools/social-growth/cli.mjs mark-published",
+    "social:metrics-template": "node tools/social-growth/cli.mjs metrics-template",
     "social:package": "node tools/social-growth/cli.mjs package",
     "social:plan": "node tools/social-growth/cli.mjs plan",
     "social:queue": "node tools/social-growth/cli.mjs queue",

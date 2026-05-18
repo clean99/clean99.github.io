@@ -6,14 +6,22 @@ import { join } from 'node:path';
 import { articleFromMarkdown, addUtm, parseFrontmatter } from '../tools/social-growth/articles.mjs';
 import { buildDistributionCandidates, buildXArticle, selectHashtags } from '../tools/social-growth/copy.mjs';
 import { runDailyGrowthPlan } from '../tools/social-growth/daily.mjs';
-import { appendSnapshot, createLedger, formatMarkdownReport } from '../tools/social-growth/ledger.mjs';
+import {
+  appendSnapshot,
+  createLedger,
+  createMetricsTemplateFromQueue,
+  formatMarkdownReport,
+  updateLedgerSnapshot,
+} from '../tools/social-growth/ledger.mjs';
 import { parseCompactNumber, postScore, summarizeGrowthLedger } from '../tools/social-growth/metrics.mjs';
 import {
   buildPublishPackage,
   buildPublishQueue,
   composePublishPosts,
   markQueueItemPublished,
+  mergePublishQueues,
   writePublishPackage,
+  writeJson,
 } from '../tools/social-growth/queue.mjs';
 
 test('parses Hexo frontmatter and builds canonical URLs', () => {
@@ -229,6 +237,28 @@ test('exports a browser publish package with image, article, and checklist artif
 test('daily growth run writes queue, packages, and a browser-safe report', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-'));
   try {
+    const existingQueue = buildPublishQueue([
+      {
+        title: '有用的系统',
+        excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+        slug: 'Useful-Systems',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-17T00:00:00.000Z',
+      limit: 1,
+    });
+    const publishedQueue = markQueueItemPublished(existingQueue, {
+      id: existingQueue.items[0].id,
+      xPostUrl: 'https://x.com/Clean993/status/1',
+      xArticleUrl: 'https://x.com/Clean993/articles/1',
+      publishedAt: '2026-05-17T01:00:00.000Z',
+    });
+    await writeJson(join(outDir, 'queue.json'), publishedQueue);
+
     const result = await runDailyGrowthPlan({
       articles: [
         {
@@ -245,6 +275,7 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
       packageOutDir: join(outDir, 'packages'),
       reportPath: join(outDir, 'daily-run.md'),
       ledgerPath: join(outDir, 'missing-ledger.json'),
+      metricsPath: join(outDir, 'posts.local.json'),
       packageLimit: 2,
       queueOptions: {
         limit: 1,
@@ -255,20 +286,113 @@ test('daily growth run writes queue, packages, and a browser-safe report', async
 
     assert.equal(result.queuedItems, 3);
     assert.equal(result.packages.length, 2);
+    assert.equal(result.metricPosts, 1);
     assert.equal(result.ledgerSummary, null);
 
     const queue = JSON.parse(await readFile(join(outDir, 'queue.json'), 'utf8'));
+    const metricsTemplate = JSON.parse(await readFile(join(outDir, 'posts.local.json'), 'utf8'));
     const report = await readFile(join(outDir, 'daily-run.md'), 'utf8');
     const shortPost = await readFile(join(result.packages[0].packageDir, 'short-post.txt'), 'utf8');
 
     assert.equal(queue.items.length, 3);
+    assert.equal(queue.items[0].status, 'published');
+    assert.equal(queue.items[0].xPostUrl, 'https://x.com/Clean993/status/1');
+    assert.equal(metricsTemplate.posts.length, 1);
+    assert.equal(metricsTemplate.posts[0].metrics.views, '');
     assert.ok(report.includes('Daily X Growth Run'));
     assert.ok(report.includes('Stop before the final public publish click'));
-    assert.ok(report.includes('npm run social:init-ledger'));
+    assert.ok(report.includes('Metrics Capture'));
     assert.ok(!shortPost.includes('https://clean99.github.io'));
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('metrics template includes only published posts and snapshot can read it', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-metrics-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '有用的系统',
+        excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+        slug: 'Useful-Systems',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering'],
+        url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const publishedQueue = markQueueItemPublished(queue, {
+      id: queue.items[1].id,
+      xPostUrl: 'https://x.com/Clean993/status/2',
+      publishedAt: '2026-05-18T01:00:00.000Z',
+    });
+    const template = createMetricsTemplateFromQueue(publishedQueue, {
+      date: '2026-05-19',
+      followers: '35',
+    });
+    template.posts[0].metrics.views = '1.2K';
+    template.posts[0].metrics.likes = '12';
+    template.posts[0].metrics.replies = '3';
+
+    const ledgerPath = join(outDir, 'ledger.json');
+    const postsPath = join(outDir, 'posts.local.json');
+    await writeJson(ledgerPath, createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    }));
+    await writeJson(postsPath, template);
+
+    const updated = await updateLedgerSnapshot({
+      ledgerPath,
+      postsFile: postsPath,
+      snapshot: {},
+    });
+
+    assert.equal(template.posts.length, 1);
+    assert.equal(updated.snapshots[1].followers, 35);
+    assert.equal(updated.snapshots[1].posts[0].metrics.views, 1200);
+    assert.equal(summarizeGrowthLedger(updated).followerDelta, 5);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('merges daily queues without losing published URLs', () => {
+  const articles = [
+    {
+      title: '有用的系统',
+      excerpt: '一个有用的系统，核心是保持数据模型足够小，同时让反馈闭环诚实。',
+      slug: 'Useful-Systems',
+      lang: 'zh',
+      tags: ['AI'],
+      url: 'https://clean99.github.io/zh/2026/05/18/Useful-Systems/',
+    },
+  ];
+  const existingQueue = markQueueItemPublished(buildPublishQueue(articles, {
+    campaign: 'old',
+    createdAt: '2026-05-18T00:00:00.000Z',
+    limit: 1,
+  }), {
+    id: 'Useful-Systems__zh__strong-thesis__00',
+    xPostUrl: 'https://x.com/Clean993/status/1',
+    publishedAt: '2026-05-18T01:00:00.000Z',
+  });
+  const nextQueue = buildPublishQueue(articles, {
+    campaign: 'new',
+    createdAt: '2026-05-19T00:00:00.000Z',
+    limit: 1,
+  });
+
+  const merged = mergePublishQueues(existingQueue, nextQueue);
+
+  assert.equal(merged.items[0].status, 'published');
+  assert.equal(merged.items[0].xPostUrl, 'https://x.com/Clean993/status/1');
+  assert.ok(merged.items[0].targetUrl.includes('utm_campaign=new'));
 });
 
 test('maps existing tags to Chinese audience hashtags', () => {

@@ -30,7 +30,7 @@ For the normal daily loop, start with:
 npm run social:daily -- --limit 5 --package-limit 3 --lang zh
 ```
 
-This creates `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, and writes `data/social-growth/daily-run.md`.
+This creates `data/social-growth/queue.json`, exports the first publish packages under `data/social-growth/packages/`, writes `data/social-growth/posts.local.json` for metrics capture, and writes `data/social-growth/daily-run.md`.
 
 For single-item control:
 
@@ -77,13 +77,18 @@ For single-item control:
 9. Stop before the final post click and ask for confirmation.
 10. Record the published URL:
    ```bash
-   npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url>
+   npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url <x-post-url> --article-url <x-article-url>
    ```
-11. Record metrics twice per day:
+11. Prepare the metrics template:
    ```bash
-   npm run social:snapshot -- --ledger data/social-growth/ledger.json --date YYYY-MM-DD --followers <count> --posts-file data/social-growth/posts.local.json
+   npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
    ```
-12. Review progress:
+12. Fill `data/social-growth/posts.local.json` from X with current followers and per-post metrics: views, likes, replies, reposts, quotes, bookmarks, profileClicks, follows.
+13. Record metrics twice per day:
+   ```bash
+   npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
+   ```
+14. Review progress:
    ```bash
    npm run social:report -- --ledger data/social-growth/ledger.json --format markdown
    ```

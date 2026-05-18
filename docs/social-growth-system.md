@@ -21,6 +21,7 @@ The code can automate safe local work:
 - prepare exact handoff text for Chrome;
 - export a publish package with image, X Article, short post, thread fallback, and checklist files;
 - run the local daily preparation loop in one command;
+- generate a metrics capture template from published queue items;
 - produce `gpt-image-2` image prompts for each candidate;
 - produce an X Article draft before the blog link;
 - mark published X URLs back into the queue;
@@ -71,6 +72,7 @@ This writes:
 
 - `data/social-growth/queue.json`;
 - `data/social-growth/packages/<queue-id>/...`;
+- `data/social-growth/posts.local.json`;
 - `data/social-growth/daily-run.md`.
 
 Draft X candidates for one post:
@@ -115,7 +117,13 @@ The package is written under `data/social-growth/packages/<queue-id>/` and conta
 After a confirmed browser publish, write the public X post URL back to the queue:
 
 ```bash
-npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url https://x.com/Clean993/status/<id>
+npm run social:mark-published -- --queue data/social-growth/queue.json --id <queue-id> --url https://x.com/Clean993/status/<id> --article-url https://x.com/Clean993/articles/<id>
+```
+
+Create the metrics template from published queue items:
+
+```bash
+npm run social:metrics-template -- --queue data/social-growth/queue.json --out data/social-growth/posts.local.json
 ```
 
 Initialize a one-week follower ledger:
@@ -127,7 +135,7 @@ npm run social:init-ledger -- --followers 1234 --target 1000 --out data/social-g
 Append a snapshot:
 
 ```bash
-npm run social:snapshot -- --ledger data/social-growth/ledger.json --date 2026-05-19 --followers 1300 --posts-file data/social-growth/posts.local.json
+npm run social:snapshot -- --ledger data/social-growth/ledger.json --posts-file data/social-growth/posts.local.json
 ```
 
 Summarize growth progress from a ledger:
@@ -179,27 +187,33 @@ Use `data/social-growth/example-ledger.json` as the shape. Real local data shoul
 
 Do not commit private analytics or account history.
 
-`posts.local.json` can be a plain array:
+`posts.local.json` can be a plain array, but the preferred format is a snapshot object:
 
 ```json
-[
-  {
-    "id": "Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops__en__sharp-take__00",
-    "articleSlug": "Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops",
-    "variant": "sharp-take",
-    "url": "https://x.com/Clean993/status/0000000000000000000",
-    "metrics": {
-      "replies": "2",
-      "reposts": "3",
-      "quotes": "1",
-      "likes": "40",
-      "bookmarks": "5",
-      "views": "1.5K",
-      "profileClicks": "8",
-      "follows": "4"
+{
+  "version": 1,
+  "date": "2026-05-19",
+  "followers": "1300",
+  "posts": [
+    {
+      "id": "Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops__zh__strong-thesis__00",
+      "articleSlug": "Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops",
+      "variant": "strong-thesis",
+      "url": "https://x.com/Clean993/status/0000000000000000000",
+      "xArticleUrl": "https://x.com/Clean993/articles/0000000000000000000",
+      "metrics": {
+        "views": "1.5K",
+        "likes": "40",
+        "replies": "2",
+        "reposts": "3",
+        "quotes": "1",
+        "bookmarks": "5",
+        "profileClicks": "8",
+        "follows": "4"
+      }
     }
-  }
-]
+  ]
+}
 ```
 
 ## First-Week Loop
@@ -215,10 +229,11 @@ Do not commit private analytics or account history.
 9. Use Chrome to prepare the short image-backed X post linking to the X Article.
 10. Stop before publishing the short post and confirm the exact content and account.
 11. Mark the published URL with `npm run social:mark-published`.
-12. Record follower count and post interactions twice per day.
-13. Run `npm run social:snapshot`.
-14. Run `npm run social:report -- --format markdown`.
-15. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
+12. Run `npm run social:metrics-template`.
+13. Fill follower count and post interactions twice per day in `data/social-growth/posts.local.json`.
+14. Run `npm run social:snapshot`.
+15. Run `npm run social:report -- --format markdown`.
+16. Double down on posts that create follows, replies, reposts, bookmarks, or profile clicks.
 
 For regular operation, replace steps 1-4 with:
 

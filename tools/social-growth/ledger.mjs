@@ -1,6 +1,17 @@
 import { readJson, writeJson } from './queue.mjs';
 import { normalizePostMetrics, summarizeGrowthLedger } from './metrics.mjs';
 
+export const METRIC_FIELDS = [
+  'views',
+  'likes',
+  'replies',
+  'reposts',
+  'quotes',
+  'bookmarks',
+  'profileClicks',
+  'follows',
+];
+
 export function createLedger({
   startDate,
   endDate,
@@ -54,6 +65,7 @@ export function normalizeSnapshotPost(post) {
     articleSlug: post.articleSlug,
     variant: post.variant,
     url: post.url,
+    xArticleUrl: post.xArticleUrl,
     metrics: normalizePostMetrics(post.metrics || {}),
   };
 }
@@ -66,8 +78,21 @@ export function publishedPostsFromQueue(queue) {
       articleSlug: item.articleSlug,
       variant: item.variant,
       url: item.xPostUrl,
+      xArticleUrl: item.xArticleUrl,
       metrics: {},
     }));
+}
+
+export function createMetricsTemplateFromQueue(queue, { date = today(), followers = '' } = {}) {
+  return {
+    version: 1,
+    date,
+    followers,
+    posts: publishedPostsFromQueue(queue).map((post) => ({
+      ...post,
+      metrics: emptyMetrics(),
+    })),
+  };
 }
 
 export function formatMarkdownReport(ledger) {
@@ -109,13 +134,35 @@ ${topPosts}
 
 export async function updateLedgerSnapshot({ ledgerPath, snapshot, postsFile }) {
   const ledger = await readJson(ledgerPath);
-  const posts = postsFile ? await readJson(postsFile) : snapshot.posts;
-  const updated = appendSnapshot(ledger, {
+  const postsInput = postsFile ? await readJson(postsFile) : null;
+  const posts = postsInput ? postsFromInput(postsInput) : snapshot.posts;
+  const inputSnapshot = postsInput && !Array.isArray(postsInput) ? postsInput : {};
+  const nextSnapshot = {
+    ...inputSnapshot,
     ...snapshot,
+    date: snapshot.date || inputSnapshot.date,
+    followers: snapshot.followers ?? inputSnapshot.followers,
     posts,
+  };
+
+  if (nextSnapshot.followers === undefined || nextSnapshot.followers === null || nextSnapshot.followers === '') {
+    throw new Error('Snapshot requires followers');
+  }
+
+  const updated = appendSnapshot(ledger, {
+    ...nextSnapshot,
   });
   await writeJson(ledgerPath, updated);
   return updated;
+}
+
+export function postsFromInput(input) {
+  if (Array.isArray(input)) return input;
+  return input.posts || [];
+}
+
+function emptyMetrics() {
+  return Object.fromEntries(METRIC_FIELDS.map((field) => [field, '']));
 }
 
 function today() {
