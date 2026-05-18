@@ -276,6 +276,7 @@ export async function runSafeAutomationCycle({
     xBunCommand,
     xProfileDir,
     publishMode,
+    browserReadiness,
     env,
   });
   await writeDailyExecutionBrief(dailyBrief, dailyBriefPath);

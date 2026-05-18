@@ -30,6 +30,7 @@ export async function buildDailyExecutionBrief({
   xBunCommand,
   xProfileDir,
   publishMode,
+  browserReadiness = null,
   env = process.env,
 } = {}) {
   const generatedAt = toIsoString(now);
@@ -77,6 +78,7 @@ export async function buildDailyExecutionBrief({
     metricsReadiness,
     profileAudit,
     funnel,
+    browserReadiness,
     day,
   });
 
@@ -88,6 +90,7 @@ export async function buildDailyExecutionBrief({
       metricsReadiness,
       profileAudit,
       funnel,
+      browserReadiness,
     }),
     day: dayReadiness.day,
     date: dayReadiness.date,
@@ -99,6 +102,7 @@ export async function buildDailyExecutionBrief({
     engagementPlan,
     metricsReadiness,
     profileAudit,
+    browserReadiness: summarizeBrowserReadiness(browserReadiness),
     actionItems,
     boundary: 'Local brief only. Publishing, media upload, reply, like, repost, follow, profile edit, and pin actions still require action-time confirmation in Chrome.',
   };
@@ -146,6 +150,19 @@ Timezone: ${brief.timezone}
 - Day status: ${brief.dayReadiness.status}
 
 ${slots}
+
+## Browser Readiness
+
+- Status: ${brief.browserReadiness.status}
+- Blockers: ${brief.browserReadiness.blockers.length}
+
+${formatBrowserBlockers(brief.browserReadiness.blockers)}
+
+Command:
+
+\`\`\`bash
+npm run social:browser-readiness -- --day ${brief.day} --slot 1 --out data/social-growth/browser-readiness.md
+\`\`\`
 
 ## Engagement
 
@@ -231,11 +248,13 @@ function buildActionItems({
   metricsReadiness,
   profileAudit,
   funnel,
+  browserReadiness,
   day,
 }) {
   const actions = [];
   const blockedSlots = dayReadiness.slots.filter((slot) => slot.preflightStatus !== 'ready' || slot.xPrepStatus !== 'ready');
   const readySlots = dayReadiness.slots.filter((slot) => slot.preflightStatus === 'ready' && slot.xPrepStatus === 'ready');
+  const browserBlockers = blockingBrowserIssues(browserReadiness);
 
   if (blockedSlots.length) {
     actions.push({
@@ -244,11 +263,24 @@ function buildActionItems({
       reason: `${dayReadiness.readySlots}/${dayReadiness.totalSlots} publish slots are ready.`,
     });
   }
-  if (readySlots.length) {
+  if (browserBlockers.length) {
+    actions.push({
+      priority: 'P0',
+      action: `Fix browser readiness before preparing public X editors: ${browserReadiness.status}.`,
+      reason: browserBlockers.join(' '),
+    });
+  }
+  if (readySlots.length && !browserBlockers.length) {
     actions.push({
       priority: 'P0',
       action: `Prepare ${readySlots.length} ready ${publishSurface(readySlots)} in Chrome, stopping before every public action for confirmation.`,
       reason: 'Ready slots are the direct path to measurable follower and interaction data.',
+    });
+  } else if (readySlots.length && browserBlockers.length) {
+    actions.push({
+      priority: 'P1',
+      action: `Keep ${readySlots.length} ready ${publishSurface(readySlots)} queued; prepare them only after browser readiness passes.`,
+      reason: 'Local packages are ready, but Chrome/media readiness is still blocked.',
     });
   }
   if (engagementSearch.status === 'ready_for_read_only_search' && engagementPlan.status === 'needs_opportunity_capture') {
@@ -308,8 +340,15 @@ function publishSurface(slots) {
   return 'X Article/image post slot(s)';
 }
 
-function briefStatus({ dayReadiness, metricsReadiness, profileAudit, funnel }) {
+function briefStatus({
+  dayReadiness,
+  metricsReadiness,
+  profileAudit,
+  funnel,
+  browserReadiness,
+}) {
   if (dayReadiness.readySlots === 0) return 'needs_publish_readiness';
+  if (blockingBrowserIssues(browserReadiness).length) return browserReadiness.status;
   if (!metricsReadiness.totalPosts) return 'ready_to_publish';
   if (!metricsReadiness.followersReady || metricsReadiness.postsWithAnyMetrics < metricsReadiness.totalPosts) {
     return 'needs_metrics_capture';
@@ -317,6 +356,27 @@ function briefStatus({ dayReadiness, metricsReadiness, profileAudit, funnel }) {
   if (profileAudit.status === 'needs_work') return 'needs_profile_conversion';
   if (funnel.status !== 'converting') return 'needs_funnel_optimization';
   return 'ready_for_next_iteration';
+}
+
+function summarizeBrowserReadiness(browserReadiness) {
+  return {
+    status: browserReadiness?.status || 'not_checked',
+    blockers: [...(browserReadiness?.blockers || [])],
+  };
+}
+
+function blockingBrowserIssues(browserReadiness) {
+  if (!browserReadiness?.blockers?.length) return [];
+  if (browserReadiness.status === 'needs_browser_probe') return [];
+  if (browserReadiness.status === 'ready_for_browser_confirmation') return [];
+  if (browserReadiness.status === 'blocked_local_prep') return [];
+  return browserReadiness.blockers;
+}
+
+function formatBrowserBlockers(blockers) {
+  return blockers.length
+    ? blockers.map((blocker) => `- ${blocker}`).join('\n')
+    : '- No browser blockers recorded in this brief.';
 }
 
 function round(value) {

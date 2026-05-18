@@ -1310,6 +1310,68 @@ test('daily execution brief combines publish, engagement, metrics, and profile a
   }
 });
 
+test('daily execution brief surfaces browser blockers before ready publish slots', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-brief-browser-'));
+  try {
+    const queue = buildPublishQueue([
+      {
+        title: '全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计',
+        excerpt: '核心是可度量的 harness、goal-driven loop，以及记录每个 baseline。',
+        slug: 'Automated-AI-Performance-Optimization',
+        lang: 'zh',
+        tags: ['AI', 'Software Engineering', 'Web Performance'],
+        url: 'https://clean99.github.io/zh/automated-ai-performance/',
+      },
+    ], {
+      campaign: 'test',
+      createdAt: '2026-05-18T00:00:00.000Z',
+      limit: 1,
+    });
+    const ledger = createLedger({
+      startDate: '2026-05-18',
+      baselineFollowers: 30,
+      followersIn7Days: 1000,
+    });
+    const skillDir = join(outDir, 'baoyu-post-to-x');
+    const imageDir = join(outDir, 'images');
+    await mkdir(join(skillDir, 'scripts'), { recursive: true });
+    await mkdir(imageDir, { recursive: true });
+    await writeFile(join(skillDir, 'scripts/x-browser.ts'), '// test script');
+    await writeFile(join(imageDir, `${queue.items[0].id}.png`), 'fake image');
+
+    const brief = await buildDailyExecutionBrief({
+      queue,
+      ledger,
+      day: 1,
+      now: '2026-05-18T00:00:00.000Z',
+      imageDir,
+      packageOutDir: join(outDir, 'packages'),
+      xSkillDir: skillDir,
+      xBunCommand: 'bun',
+      publishMode: 'thread_fallback',
+      browserReadiness: {
+        status: 'needs_chrome_extension_reconnect',
+        blockers: [
+          'Codex Chrome Extension native pipe is closed.',
+          'Media upload is blocked in the current browser automation path.',
+        ],
+      },
+      env: {},
+    });
+    const markdown = formatDailyExecutionBriefMarkdown(brief);
+
+    assert.equal(brief.status, 'needs_chrome_extension_reconnect');
+    assert.equal(brief.dayReadiness.readySlots, 1);
+    assert.ok(brief.actionItems.some((item) => item.action.includes('Fix browser readiness')));
+    assert.ok(brief.actionItems.some((item) => item.action.includes('prepare them only after browser readiness passes')));
+    assert.match(markdown, /Browser Readiness/);
+    assert.match(markdown, /Extension native pipe is closed|native pipe is closed/);
+    assert.doesNotMatch(markdown, /P0: Prepare 1 ready/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test('daily growth run writes queue, packages, and a browser-safe report', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-'));
   try {
