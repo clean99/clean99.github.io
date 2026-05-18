@@ -139,6 +139,7 @@ export function formatDailyExecutionBriefMarkdown(brief) {
   const slots = brief.dayReadiness.slots.length
     ? brief.dayReadiness.slots.map(formatSlot).join('\n')
     : '- No publish slots for this day.';
+  const blockedSlotFixes = formatBlockedSlotFixes(brief.dayReadiness);
   const manualPublishFallback = formatManualPublishFallback(brief.manualPublishFallback);
   const actions = brief.actionItems.length
     ? brief.actionItems.map((item) => `- ${item.priority}: ${item.action}\n  Reason: ${item.reason}`).join('\n')
@@ -172,6 +173,8 @@ Timezone: ${brief.timezone}
 - Day status: ${brief.dayReadiness.status}
 
 ${slots}
+
+${blockedSlotFixes}
 
 ## Browser Readiness
 
@@ -262,6 +265,28 @@ function formatSlot(slot) {
     : 'none';
   return `- ${slot.time}: ${slot.id}
   Image ready: ${slot.imageReady}; preflight: ${slot.preflightStatus}; X prep: ${slot.xPrepStatus}; mode: ${slot.publishMode}; blockers: ${blockers}`;
+}
+
+function formatBlockedSlotFixes(dayReadiness) {
+  const blockedSlots = (dayReadiness?.slots || [])
+    .filter((slot) => slot.preflightStatus !== 'ready' || slot.xPrepStatus !== 'ready');
+  if (!blockedSlots.length) return '';
+  const sections = blockedSlots.map((slot) => {
+    const register = `npm run social:register-image -- --id ${shellQuote(slot.id)} --source '/absolute/path/to/generated.png'`;
+    return `### Slot ${slot.slot}: ${slot.id}
+
+Blockers: ${slot.blockers.length ? slot.blockers.join('; ') : 'unknown'}
+
+\`\`\`bash
+${slot.commands.imageBrief}
+${register}
+${slot.commands.preflight}
+${slot.commands.xPrep}
+\`\`\``;
+  }).join('\n\n');
+  return `## Blocked Slot Fixes
+
+${sections}`;
 }
 
 function selectedSlot(dayReadiness, slot) {

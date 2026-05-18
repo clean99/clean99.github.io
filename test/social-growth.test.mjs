@@ -1847,6 +1847,9 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(report, /Image backlog/);
     assert.match(imageBacklog, /X Image Backlog/);
     assert.match(imageBacklog, /social:register-image/);
+    assert.match(dailyBrief, /Blocked Slot Fixes/);
+    assert.match(dailyBrief, /social:image-brief/);
+    assert.match(dailyBrief, /social:register-image/);
     assert.match(report, /Engagement plan/);
     assert.match(report, /Manual publish kits/);
     assert.match(report, /Profile update package/);
