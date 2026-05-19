@@ -2,6 +2,10 @@
 title: "Workspace v2 Tab System Performance: First Load, Hot Switch, And Background Pressure"
 date: 2026-05-18 16:31:00
 tags: [Frontend, Web Performance, Software Engineering, React]
+area: engineering
+summary: "A performance model for workspace tabs that separates first load, hot switch, background pressure, and regression gates."
+featured: true
+audience: [public, interviewers]
 lang: en
 i18n_key: Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure
 ---

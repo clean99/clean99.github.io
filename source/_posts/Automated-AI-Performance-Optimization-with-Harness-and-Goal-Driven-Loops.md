@@ -2,6 +2,10 @@
 title: "Automated AI Performance Optimization with Harness and Goal-Driven Loops"
 date: 2026-05-16 12:30:31
 tags: [AI, Software Engineering, Web Performance, Frontend]
+area: ai
+summary: "A practical AI performance optimization loop built around strict measurement, a harness, goal-driven iteration, and a ledger."
+featured: true
+audience: [public, interviewers]
 lang: en
 i18n_key: Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops
 ---

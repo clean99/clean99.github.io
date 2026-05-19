@@ -2,6 +2,9 @@
 title: Building Fault Tolerant React App With Error Boundary(Error Boundary Best Practice)
 date: 2024-05-06 16:45:11
 tags: [frontend, react, error-handling, error-boundary, fault-tolerance, robustness, reliability]
+area: engineering
+summary: "How to use React Error Boundaries as a practical reliability boundary instead of a decorative catch-all."
+audience: [public, interviewers]
 lang: en
 i18n_key: Building-Fault-Tolerant-React-App-With-Error-Boundary
 ---
@@ -117,4 +120,3 @@ Features:
 
 1. Handling Error & Fallback: Catch error and display a fallback(can customize) to user without affecting other modules.
 2. Report error: log to slardar with component name and error message for debugging.
-

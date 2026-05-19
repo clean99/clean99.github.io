@@ -2,6 +2,9 @@
 title: "Vibe Coding vs Spec-Driven Coding: The Evolution of AI-Assisted Development"
 date: 2026-03-18 15:00:00
 tags: [AI, Software Engineering, Claude Code, OpenSpec, code generation]
+area: ai
+summary: "A comparison of vibe coding and spec-driven coding as two different operating modes for AI-assisted software development."
+audience: [public, interviewers]
 lang: en
 i18n_key: Vibe-Coding-VS-Spec-Driven-Coding
 ---

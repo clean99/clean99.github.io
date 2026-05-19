@@ -1,36 +1,78 @@
-<div class="row">
-  <div class="column">
-    <!-- Main information from i18n -->
-    <h2 class="mb-2"><%= __('owner') %></h2>
-    <p><%= __('info') %></p>
-    <p><%= __('desc') %></p>
-  </div>
-</div>
-
-<h3><%= __('index.recent_posts') %></h3>
-
 <%
 var currentLang = page.lang || (page.path && page.path.indexOf('zh/') === 0 ? 'zh' : 'en');
-var filteredPosts = site.posts.filter(function(p) {
-  return (p.lang || 'en') === currentLang;
-}).sort('date', -1).limit(theme.max_post);
+var latestPosts = posts_for_lang(currentLang, 6);
+var paths = [
+  {
+    key: 'engineering',
+    title: 'Engineering',
+    description: 'Frontend systems, reliability, performance, testing, and architecture.'
+  },
+  {
+    key: 'ai',
+    title: 'AI & Agents',
+    description: 'AI-assisted development, agent systems, automation, and human-AI workflows.'
+  },
+  {
+    key: 'systems',
+    title: 'Systems & Learning',
+    description: 'How I learn, reason, build mental models, and connect ideas across domains.'
+  },
+  {
+    key: 'mind',
+    title: 'Mind & Practice',
+    description: 'Buddhism, attention, reading notes, and reflections on living well.'
+  }
+];
 %>
-<% filteredPosts.forEach(function(post){ %>
-<div class="row">
 
-  <div class="three columns left lit">
-    <p class="bottom"><%- full_date(post.date, 'll') %></p>
+<section class="hero">
+  <p class="eyebrow">Engineer&rsquo;s Field Notes</p>
+  <h1>Koh Hom</h1>
+  <p class="hero__lede">Software engineer exploring frontend systems, AI agents, learning, and inner practice.</p>
+  <p>I write about building reliable software, working with AI, understanding complex systems, and practicing a clearer way of living.</p>
+  <div class="cta-row">
+    <a class="cta-link" href="<%- lang_url('/writing') %>#engineering">Start with Engineering</a>
+    <a class="cta-link" href="<%- lang_url('/interviewers') %>">For Interviewers</a>
+    <a class="cta-link" href="#latest-writing">Latest Writing</a>
   </div>
-  <div class="nine columns left mb-3">
-    <a href="<%- url_for(post.path) %>" >
-      <% if (post.title == "") { %>
-        no title
-      <% } else { %>
-        <%- post.title %>
-      <% } %>
-    </a>
-  </div>
-</div>
-<% }) %>
+</section>
 
-<h4> <a href="<%- lang_url('archives') %>"><%= __('index.all_posts') %></a></h4>
+<section class="section-block" aria-labelledby="featured-paths-title">
+  <div class="section-heading">
+    <p class="eyebrow">Featured paths</p>
+    <h2 id="featured-paths-title">Ways into the notebook</h2>
+  </div>
+  <div class="path-grid">
+    <% paths.forEach(function(path) { var count = posts_in_area(path.key, 1, currentLang).length; %>
+      <article class="path-card">
+        <h3><%- path.title %></h3>
+        <p><%- path.description %></p>
+        <% if (count) { %>
+          <a href="<%- lang_url('/writing') %>#<%- path.key %>">View essays</a>
+        <% } else { %>
+          <span class="muted">Coming soon</span>
+        <% } %>
+      </article>
+    <% }) %>
+  </div>
+</section>
+
+<section class="section-block interview-highlight" aria-labelledby="interviewers-title">
+  <p class="eyebrow">For interviewers</p>
+  <h2 id="interviewers-title">A shorter path to the engineering signal</h2>
+  <p>If you&rsquo;re evaluating my engineering work, start here: selected essays and projects on frontend architecture, performance, reliability, testing, and AI-assisted development.</p>
+  <a class="cta-link" href="<%- lang_url('/interviewers') %>">Open the interviewers page</a>
+</section>
+
+<section class="section-block" id="latest-writing" aria-labelledby="latest-writing-title">
+  <div class="section-heading">
+    <p class="eyebrow">Latest writing</p>
+    <h2 id="latest-writing-title">Recent notes</h2>
+  </div>
+  <div class="post-list">
+    <% latestPosts.forEach(function(post) { %>
+      <%- partial('partial/post_card', { post: post }) %>
+    <% }) %>
+  </div>
+  <p class="section-link"><a href="<%- lang_url('/writing') %>">Browse all writing</a></p>
+</section>

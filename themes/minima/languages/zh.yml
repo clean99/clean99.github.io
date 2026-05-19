@@ -1,9 +1,12 @@
-owner: "我是许峰(Koh Hom)⛰️"
-info: "软件工程师，2022年毕业于华南师范大学，目前在 TikTok🇸🇬 担任前端开发。"
-desc: "我喜欢读有深度的书📖，目前专注于代码质量提升和软件测试。热爱健身，追求健康极简的生活方式。欢迎来到我的博客，希望你会喜欢😊。"
+owner: "许峰 Koh Hom"
+info: "探索前端系统、AI Agent、学习方法与内在实践的软件工程师。"
+desc: "关于 software、AI、systems，以及如何更好生活的长期笔记。"
 
 nav:
   home: 首页
+  writing: 写作
+  projects: 项目
+  interviewers: 面试官入口
   works: 作品
   about: 关于
   links: 友链

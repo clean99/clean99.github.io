@@ -2,6 +2,9 @@
 title: React Server Component Internals(Source Code Review)
 date: 2024-04-10 18:51:00
 tags: [React, Software Engineering, Frontend]
+area: engineering
+summary: "A source-level walkthrough of React Server Components and the engineering model behind server-driven component rendering."
+audience: [public, interviewers]
 lang: en
 i18n_key: React-Server-Component-Internals
 ---

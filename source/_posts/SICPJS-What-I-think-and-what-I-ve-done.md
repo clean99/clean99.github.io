@@ -2,6 +2,8 @@
 title: SICPJS thinking about the book and study plan / catalog
 date: 2022-04-24 20:48:38
 tags: sicpjs
+area: systems
+summary: "A learning note on why SICPJS matters and how I approached the book as a long-term abstraction practice."
 lang: en
 i18n_key: SICPJS-What-I-think-and-what-I-ve-done
 ---

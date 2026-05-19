@@ -25,7 +25,7 @@
     </h1>
   </div>
 
-  <div class="six columns ml-1">
+  <div class="six columns site-title-wrap">
     <h1 class="mt-2">
       <a href="<%- lang_root() %>" style="text-decoration:none;color:inherit"><%= theme.title %></a>
     </h1>
@@ -33,21 +33,14 @@
 
   <div class="twelve columns">
     <div class="row">
-      <div class="nine columns left">
+      <nav class="site-nav nine columns left" aria-label="Primary navigation">
         <a href="<%- lang_root() %>"><%= __('nav.home') %></a>
         <% for (name in theme.menu) { %>
           <% if (theme.menu[name]) { %>
           <a href="<%- lang_url(theme.menu[name]) %>" class="ml"><%- __('nav.' + name.toLowerCase()) %></a>
           <% } %>
         <% } %>
-        <% if (theme.email) { %>
-          <% if (typeof obfuscate === "function") { %>
-            <a href="mailto:<%- obfuscate(theme.email) %>" target="_blank" class="ml"><%= __('nav.email') %></a>
-          <% } else { %>
-            <a href="mailto:<%= theme.email %>" target="_blank" class="ml"><%= __('nav.email') %></a>
-          <% } %>
-        <% } %>
-      </div>
+      </nav>
     </div>
     <hr style="margin-bottom: 2.6rem">
   </div>

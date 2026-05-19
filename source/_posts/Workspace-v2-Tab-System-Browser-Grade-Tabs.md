@@ -2,6 +2,10 @@
 title: "Workspace v2 Tab System: Building Browser Tabs Inside Workspace"
 date: 2026-05-18 16:30:00
 tags: [Frontend, React, Software Engineering]
+area: engineering
+summary: "A browser-grade tab architecture for a workspace product: URL ownership, persistent tab state, runtime cache, sandbox isolation, and foreground control."
+featured: true
+audience: [public, interviewers]
 lang: en
 i18n_key: Workspace-v2-Tab-System-Browser-Grade-Tabs
 ---

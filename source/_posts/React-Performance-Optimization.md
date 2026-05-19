@@ -2,6 +2,9 @@
 title: React Runtime Performance Optimization
 date: 2024-04-16 08:32:53
 tags: [Software Engineering, Frontend, React]
+area: engineering
+summary: "A practical tour of React runtime performance bottlenecks, rendering cost, memoization, and browser-side calculation limits."
+audience: [public, interviewers]
 lang: en
 i18n_key: React-Performance-Optimization
 ---

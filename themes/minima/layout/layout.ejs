@@ -28,6 +28,16 @@
   } else {
     pageTitle = config.title;
   }
+  var pageDescription;
+  if (is_page() && page.description) {
+    pageDescription = page.description;
+  } else if ((is_post() || is_page()) && page.summary) {
+    pageDescription = page.summary;
+  } else if (page.content) {
+    pageDescription = strip_html(page.content).replace(/\n/g, " ").replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150);
+  } else {
+    pageDescription = config.description;
+  }
   %>
   <title><%= pageTitle %></title>
   <% if (config.sitemap) { %>
@@ -37,13 +47,7 @@
   <link rel="alternate" hreflang="<%= page_lang() === 'zh' ? 'en' : 'zh' %>" href="<%= config.url %><%= alternate_url() %>" />
   <link rel="alternate" hreflang="<%= page_lang() %>" href="<%= url.replace(/index\.html$/, '') %>" />
   <link rel="alternate" hreflang="x-default" href="<%= page_lang() === 'en' ? url.replace(/index\.html$/, '') : config.url + alternate_url() %>" />
-  <% if (is_page()){ %>
-  <meta name="description" content="<%= page.description %>">
-  <% } else if (page.content){ %>
-  <meta name="description" content="<%= strip_html(page.content).replace(/\n/g, " ").replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150) %>">
-  <% } else { %>
-  <meta name="description" content="<%= config.description %>">
-  <% } %>
+  <meta name="description" content="<%= pageDescription %>">
   <% if (config.keywords) { %>
   <meta name="keywords" content="<%= config.keywords %>">
   <% } %>
@@ -70,26 +74,14 @@
   <meta property="og:title" content="<%= pageTitle %>" />
   <meta property="og:locale" content="<%= page_lang() === 'zh' ? 'zh_CN' : 'en_US' %>" />
   <meta property="og:locale:alternate" content="<%= page_lang() === 'zh' ? 'en_US' : 'zh_CN' %>" />
-  <% if (is_page()){ %>
-  <meta property="og:description" content="<%= page.description %>">
-  <% } else if (page.content){ %>
-  <meta property="og:description" content="<%= strip_html(page.content).replace(/\n/g, " ").replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150) %>">
-  <% } else { %>
-  <meta property="og:description" content="<%= config.description %>">
-  <% } %>
+  <meta property="og:description" content="<%= pageDescription %>">
   <meta property="og:url" content="<%= url.replace(/index\.html$/, '') %>" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@Clean993">
   <meta name="twitter:creator" content="@Clean993">
   <meta name="twitter:title" content="<%= pageTitle %>">
-  <% if (is_page()){ %>
-  <meta name="twitter:description" content="<%= page.description %>">
-  <% } else if (page.content){ %>
-  <meta name="twitter:description" content="<%= strip_html(page.content).replace(/\n/g, " ").replace(/^\s*/, '').replace(/\s*$/, '').substring(0, 150) %>">
-  <% } else { %>
-  <meta name="twitter:description" content="<%= config.description %>">
-  <% } %>
+  <meta name="twitter:description" content="<%= pageDescription %>">
   <meta name="twitter:image" content="<%-config.url + ogImage %>">
   <meta name="twitter:url" content="<%= url.replace(/index\.html$/, '') %>" />
 

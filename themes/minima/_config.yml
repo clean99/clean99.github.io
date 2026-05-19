@@ -1,19 +1,20 @@
 #title in header
-title: "Hi Folks."
+title: "Koh Hom"
 
 #main info
 #owner
-owner: "I am Koh Hom(许峰)⛰️"
+owner: "Koh Hom"
 email: xff9924@gmail.com
-info: "99年生人，潮汕人。本科就读于华南师范大学网络工程专业。曾在蚂蚁集团-体验技术部、字节跳动-今日头条部门实习。毕业后先后在新加坡Shopee、TikTok工作至今。"
+info: "Software engineer exploring frontend systems, AI agents, learning, and inner practice."
 #description
-desc: "A software engineer from Chaoshan, China. Graduated from South China Normal University (SCNU) with a degree in Network Engineering. Interned at Ant Group and ByteDance. Now working at TikTok in Singapore. Welcome to my blog! Hope you enjoy it😊 ."
+desc: "Notes on software, AI, systems, and the practice of living well."
 
 #menu
 menu:
-  Works: /Works
+  Writing: /writing
+  Projects: /projects
+  Interviewers: /interviewers
   About: /About
-  Links: /Links
 
 #index/main page max show posts (in number)
 max_post: 12

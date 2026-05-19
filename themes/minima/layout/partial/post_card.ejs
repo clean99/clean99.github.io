@@ -1,0 +1,27 @@
+<%
+var area = post_area(post);
+var tags = post_tag_names(post).slice(0, 4);
+var summary = post_summary(post, 180);
+%>
+<article class="post-card">
+  <div class="post-card__meta">
+    <time datetime="<%= post.date.toISOString() %>"><%- full_date(post.date, 'll') %></time>
+    <span class="pill"><%- area_label(area) %></span>
+    <% var readTime = post_reading_time(post); if (readTime) { %>
+      <span><%- readTime %></span>
+    <% } %>
+  </div>
+  <h3 class="post-card__title">
+    <a href="<%- url_for(post.path) %>"><%- post.title || 'Untitled' %></a>
+  </h3>
+  <% if (summary) { %>
+    <p class="post-card__summary"><%- summary %></p>
+  <% } %>
+  <% if (tags.length) { %>
+    <div class="tag-list" aria-label="Tags">
+      <% tags.forEach(function(tag) { %>
+        <span><%- tag %></span>
+      <% }) %>
+    </div>
+  <% } %>
+</article>

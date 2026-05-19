@@ -3,10 +3,10 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Koh Hom's Blog | Frontend & Testing Blog
-subtitle: 'Frontend Development, E2E & Unit Testing, Software Engineering Tips & Tutorials'
-description: 'A software engineer from Chaoshan, China. Graduated from SCNU, interned at Ant Group & ByteDance, now working at TikTok in Singapore. Writes about frontend, testing, software engineering, and more.'
-keywords: 'frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog'
+title: Koh Hom — Software, AI, and Inner Practice
+subtitle: 'Notes on software, AI, systems, and the practice of living well.'
+description: 'Notes on software, AI, systems, and the practice of living well.'
+keywords: 'software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom'
 author: Koh Hom
 language:
   - en

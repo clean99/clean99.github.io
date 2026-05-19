@@ -2,6 +2,10 @@
 title: "Agent Skills: The Functional Blueprint for AI Agents"
 date: 2026-03-23 16:00:00
 tags: [AI, Software Engineering, Claude Code, Agent, Skills]
+area: ai
+summary: "A practical model for treating agent skills as reusable functions with clear triggers, inputs, outputs, and composition rules."
+featured: true
+audience: [public, interviewers]
 lang: en
 i18n_key: Agent-Skills-The-Functional-Blueprint-for-AI-Agents
 ---

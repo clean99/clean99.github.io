@@ -1,0 +1,39 @@
+<%
+var currentLang = page.lang || page_lang();
+var projects = project_posts(currentLang);
+%>
+
+<article class="page-shell">
+  <header class="page-hero">
+    <p class="eyebrow">Projects</p>
+    <h1>Projects</h1>
+    <p>Selected projects, experiments, and tools I&rsquo;ve built or explored.</p>
+  </header>
+
+  <% if (projects.length) { %>
+    <div class="project-list">
+      <% projects.forEach(function(post) { %>
+        <article class="project-card">
+          <p class="eyebrow"><%- area_label(post_area(post)) %></p>
+          <h2><a href="<%- url_for(post.path) %>"><%- post.title %></a></h2>
+          <p><%- post_summary(post, 180) %></p>
+          <div class="tag-list">
+            <% post_tag_names(post).slice(0, 5).forEach(function(tag) { %>
+              <span><%- tag %></span>
+            <% }) %>
+          </div>
+          <p class="project-card__links"><a href="<%- url_for(post.path) %>">Read the project note</a></p>
+        </article>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <section class="section-block">
+      <p>Selected projects will be added here soon. For now, see my writing on engineering systems and AI-assisted development.</p>
+      <a class="cta-link" href="<%- lang_url('/writing') %>">Browse writing</a>
+    </section>
+  <% } %>
+
+  <section class="section-block">
+    <p class="muted">This page only lists projects or experiments with existing notes in this repository. I am not inventing demos or repositories that do not exist.</p>
+  </section>
+</article>

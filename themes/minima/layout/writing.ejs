@@ -1,0 +1,60 @@
+<%
+var currentLang = page.lang || page_lang();
+var areas = [
+  ['engineering', 'Engineering'],
+  ['ai', 'AI & Agents'],
+  ['systems', 'Systems & Learning'],
+  ['mind', 'Mind & Practice'],
+  ['life', 'Life']
+];
+var allPosts = posts_for_lang(currentLang);
+%>
+
+<article class="page-shell">
+  <header class="page-hero">
+    <p class="eyebrow">Writing</p>
+    <h1>Writing</h1>
+    <p>Essays and notes on software, AI, systems, learning, and inner practice.</p>
+  </header>
+
+  <nav class="area-nav" aria-label="Writing sections">
+    <a href="#all">All</a>
+    <% areas.forEach(function(area) { %>
+      <a href="#<%- area[0] %>"><%- area[1] %></a>
+    <% }) %>
+  </nav>
+
+  <% areas.forEach(function(area) { var posts = posts_in_area(area[0], 6, currentLang); %>
+    <section class="section-block" id="<%- area[0] %>" aria-labelledby="<%- area[0] %>-title">
+      <div class="section-heading">
+        <p class="eyebrow"><%- area[1] %></p>
+        <h2 id="<%- area[0] %>-title"><%- area[1] %></h2>
+      </div>
+      <% if (posts.length) { %>
+        <div class="post-list">
+          <% posts.forEach(function(post) { %>
+            <%- partial('partial/post_card', { post: post }) %>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p class="muted">Coming soon.</p>
+      <% } %>
+    </section>
+  <% }) %>
+
+  <section class="section-block" id="all" aria-labelledby="all-posts-title">
+    <div class="section-heading">
+      <p class="eyebrow">Archive</p>
+      <h2 id="all-posts-title">All posts</h2>
+    </div>
+    <div class="archive-list">
+      <% allPosts.forEach(function(post) { %>
+        <div class="archive-list__item">
+          <time datetime="<%= post.date.toISOString() %>"><%- full_date(post.date, 'll') %></time>
+          <span class="pill"><%- area_label(post_area(post)) %></span>
+          <a href="<%- url_for(post.path) %>"><%- post.title || 'Untitled' %></a>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+</article>

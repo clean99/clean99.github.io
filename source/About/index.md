@@ -1,15 +1,31 @@
 ---
 title: About
-date: 2026-03-10 17:00:00
+date: 2026-05-19 10:00:00
+description: About Koh Hom and this long-running field notebook.
 lang: en
 ---
 
-# Hey, I'm Xu Feng (许峰) 👋
+I'm Koh Hom (Xu Feng), a software engineer currently working on frontend systems.
 
-A frontend engineer graduated from **SCNU (华南师范大学)** with a degree in Network Engineering. Been around the block — from **Shopee** to **Ant Group (蚂蚁集团)**, and now building the customer service platform at **TikTok**.
+I care about building reliable software, improving code quality, understanding how systems behave, and using AI to learn and build faster. My background is in frontend engineering, with experience across Shopee, Ant Group, ByteDance, and TikTok.
 
-I spend my days crafting interfaces that (hopefully) don't make people cry, and my nights diving into computer science books that definitely make *me* cry. Currently obsessed with exploring how **AI** can be a real collaborator — not just a fancy autocomplete, but a thinking partner for learning and building.
+This site is where I keep my notes on engineering, AI, reading, Buddhism, and the practice of living well. That is why a React performance note can sit next to an AI-agent essay, a SICP reading note, or a reflection on attention. They are all part of the same long-term practice: learning how to build, think, and live with more clarity.
 
-When I'm not staring at a screen, you'll find me **lifting weights** 🏋️, **singing my heart out** 🎤 (quality not guaranteed), or plotting world domination over a **board game** 🎲.
+## Areas I'm exploring
 
-Welcome to my blog — where I write about code, ideas, and whatever rabbit hole I've fallen into lately. Glad you're here.
+- Frontend architecture and performance
+- Testing, reliability, and maintainability
+- AI agents and AI-assisted development
+- Learning systems and mental models
+- Buddhism, attention, and inner practice
+
+## Outside work
+
+I like thoughtful books, lifting weights, singing, board games, and a relatively minimal lifestyle. The point is not to optimize every hour. The point is to stay curious without losing the human side of the work.
+
+## Contact
+
+- Email: [xff9924@gmail.com](mailto:xff9924@gmail.com)
+- GitHub: [clean99](https://github.com/clean99)
+- RSS: [/atom.xml](/atom.xml)
+- Links: [/Links](/Links)

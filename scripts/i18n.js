@@ -1,6 +1,7 @@
 'use strict';
 
 const pagination = require('hexo-pagination');
+const postMeta = require('./post-meta');
 
 const DEFAULT_LANG = 'en';
 
@@ -53,6 +54,43 @@ hexo.extend.helper.register('lang_url', function(path) {
 
 hexo.extend.helper.register('lang_root', function() {
   return this.page_lang() === 'zh' ? this.url_for('zh/') : this.url_for('/');
+});
+
+hexo.extend.helper.register('posts_for_lang', function(lang, limit) {
+  var posts = postMeta.sortedPosts(this.site.posts, lang || this.page_lang());
+  return limit ? posts.slice(0, limit) : posts;
+});
+
+hexo.extend.helper.register('posts_in_area', function(area, limit, lang) {
+  return postMeta.postsInArea(this.site.posts, lang || this.page_lang(), area, limit);
+});
+
+hexo.extend.helper.register('post_area', function(post) {
+  return postMeta.inferArea(post);
+});
+
+hexo.extend.helper.register('area_label', function(area) {
+  return postMeta.areaLabel(area);
+});
+
+hexo.extend.helper.register('post_summary', function(post, maxLength) {
+  return postMeta.postSummary(post, this.strip_html.bind(this), maxLength);
+});
+
+hexo.extend.helper.register('post_reading_time', function(post) {
+  return postMeta.readingTime(post);
+});
+
+hexo.extend.helper.register('post_tag_names', function(post) {
+  return postMeta.tagNames(post);
+});
+
+hexo.extend.helper.register('interviewer_posts', function(limit, lang) {
+  return postMeta.interviewerPosts(this.site.posts, lang || this.page_lang(), limit);
+});
+
+hexo.extend.helper.register('project_posts', function(lang) {
+  return postMeta.projectPosts(this.site.posts, lang || this.page_lang());
 });
 
 // --------------- Generators ---------------

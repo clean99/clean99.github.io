@@ -2,6 +2,9 @@
 title: How to Design GOOD Test Cases
 date: 2024-04-10 18:47:43
 tags: [Software Engineering, Testing]
+area: engineering
+summary: "A testing note on designing cases around real risk, behavior coverage, and maintainable feedback loops."
+audience: [public, interviewers]
 lang: en
 i18n_key: How-to-Design-GOOD-Test-Cases
 ---
