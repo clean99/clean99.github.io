@@ -11,6 +11,12 @@ import {
   buildGoalAudit,
   writeGoalAudit,
 } from './goalAudit.mjs';
+import {
+  buildPublicActionHandoff,
+  parsePublicActionChecklistMarkdown,
+  selectPublicAction,
+  writePublicActionHandoff,
+} from './publicActionHandoff.mjs';
 
 const DEFAULT_QUEUE_PATH = 'data/social-growth/queue.json';
 const DEFAULT_PACKAGE_DIR = 'data/social-growth/packages';
@@ -32,6 +38,7 @@ const DEFAULT_RECOMMENDATIONS_PATH = 'data/social-growth/recommendations.md';
 const DEFAULT_FUNNEL_PATH = 'data/social-growth/funnel.md';
 const DEFAULT_EXPERIMENT_PLAN_PATH = 'data/social-growth/experiment-plan.md';
 const DEFAULT_GOAL_AUDIT_PATH = 'data/social-growth/goal-audit.md';
+const DEFAULT_PUBLIC_ACTION_HANDOFF_PATH = 'data/social-growth/public-action-handoff.md';
 const DEFAULT_SCHEDULED_REPORT_PATH = 'data/social-growth/scheduled-run.md';
 const DEFAULT_RECOMMENDATION_DOC_PATH = '.agents/skills/x-growth-publishing/references/x-recommendation-system.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
@@ -72,6 +79,8 @@ export async function runScheduledGrowthLoop({
   funnelPath = DEFAULT_FUNNEL_PATH,
   experimentPlanPath = DEFAULT_EXPERIMENT_PLAN_PATH,
   goalAuditPath = DEFAULT_GOAL_AUDIT_PATH,
+  publicActionHandoffPath = DEFAULT_PUBLIC_ACTION_HANDOFF_PATH,
+  publicActionHandoffType = 'publish_image_thread',
   recommendationDocPath = DEFAULT_RECOMMENDATION_DOC_PATH,
   recommendationDocText = '',
   scheduledReportPath = DEFAULT_SCHEDULED_REPORT_PATH,
@@ -195,6 +204,18 @@ export async function runScheduledGrowthLoop({
     generatedAt: now,
   });
   await writeGoalAudit(goalAudit, goalAuditPath);
+  const publicActionChecklistText = await readOptionalText(resolvedPublicActionChecklistPath);
+  const publicActions = parsePublicActionChecklistMarkdown(publicActionChecklistText);
+  const selectedPublicAction = selectPublicAction(publicActions, {
+    actionType: publicActionHandoffType,
+  });
+  const publicActionHandoff = buildPublicActionHandoff({
+    checklistText: publicActionChecklistText,
+    actionType: publicActionHandoffType,
+    sourceText: selectedPublicAction?.source ? await readOptionalText(selectedPublicAction.source) : '',
+    generatedAt: now,
+  });
+  await writePublicActionHandoff(publicActionHandoff, publicActionHandoffPath);
   const result = {
     generatedAt,
     status: scheduledStatus(automation.status, metrics.status, manualPublishUrls),
@@ -224,6 +245,12 @@ export async function runScheduledGrowthLoop({
         targetFollowers: goalAudit.completion.targetFollowers,
         unprovedRequirements: goalAudit.requirements.filter((item) => item.status !== 'proved').length,
       },
+      publicActionHandoff: {
+        status: publicActionHandoff.status,
+        actionId: publicActionHandoff.action?.actionId || null,
+        actionType: publicActionHandoff.action?.type || publicActionHandoffType,
+        source: publicActionHandoff.action?.source || null,
+      },
     },
     metrics: {
       status: metrics.status,
@@ -239,6 +266,7 @@ export async function runScheduledGrowthLoop({
       funnel: funnelPath,
       experimentPlan: experimentPlanPath,
       goalAudit: goalAuditPath,
+      publicActionHandoff: publicActionHandoffPath,
       scheduledReport: scheduledReportPath,
     },
     boundary: [
@@ -348,6 +376,7 @@ ${humanGate(result)}
 - Funnel report: \`${result.paths.funnel}\`
 - Experiment plan: \`${result.paths.experimentPlan}\`
 - Goal audit: \`${result.paths.goalAudit}\`
+- Public action handoff: \`${result.paths.publicActionHandoff}\`
 
 ## Experiment Plan
 
@@ -363,6 +392,14 @@ ${humanGate(result)}
 - Target delta: ${result.automation.goalAudit?.targetFollowers ?? 'unknown'}
 - Unproved requirements: ${result.automation.goalAudit?.unprovedRequirements ?? 'unknown'}
 - Report: \`${result.paths.goalAudit || 'not generated'}\`
+
+## Public Action Handoff
+
+- Status: ${result.automation.publicActionHandoff?.status || 'unknown'}
+- Action id: ${result.automation.publicActionHandoff?.actionId || 'none'}
+- Action type: ${result.automation.publicActionHandoff?.actionType || 'unknown'}
+- Source: \`${result.automation.publicActionHandoff?.source || 'not selected'}\`
+- Report: \`${result.paths.publicActionHandoff || 'not generated'}\`
 
 ## Next Action
 

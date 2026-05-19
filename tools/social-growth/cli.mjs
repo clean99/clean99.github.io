@@ -476,6 +476,8 @@ if (command === 'articles') {
     funnelPath: args.funnelOut || 'data/social-growth/funnel.md',
     experimentPlanPath: args.experimentOut || 'data/social-growth/experiment-plan.md',
     goalAuditPath: args.goalAuditOut || 'data/social-growth/goal-audit.md',
+    publicActionHandoffPath: args.publicActionHandoffOut || 'data/social-growth/public-action-handoff.md',
+    publicActionHandoffType: args.publicActionHandoffType || args.actionType || 'publish_image_thread',
     recommendationDocPath: args.recommendationDoc || '.agents/skills/x-growth-publishing/references/x-recommendation-system.md',
     scheduledReportPath: args.out || 'data/social-growth/scheduled-run.md',
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
