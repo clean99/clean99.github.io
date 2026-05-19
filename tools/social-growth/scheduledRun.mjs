@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { runSafeAutomationCycle } from './automation.mjs';
 import { runPostPublishMetricsCycle } from './metricsCycle.mjs';
@@ -7,6 +7,10 @@ import {
   buildGrowthExperimentPlan,
   writeGrowthExperimentPlan,
 } from './experimentPlan.mjs';
+import {
+  buildGoalAudit,
+  writeGoalAudit,
+} from './goalAudit.mjs';
 
 const DEFAULT_QUEUE_PATH = 'data/social-growth/queue.json';
 const DEFAULT_PACKAGE_DIR = 'data/social-growth/packages';
@@ -27,7 +31,9 @@ const DEFAULT_GROWTH_REPORT_PATH = 'data/social-growth/growth-report.md';
 const DEFAULT_RECOMMENDATIONS_PATH = 'data/social-growth/recommendations.md';
 const DEFAULT_FUNNEL_PATH = 'data/social-growth/funnel.md';
 const DEFAULT_EXPERIMENT_PLAN_PATH = 'data/social-growth/experiment-plan.md';
+const DEFAULT_GOAL_AUDIT_PATH = 'data/social-growth/goal-audit.md';
 const DEFAULT_SCHEDULED_REPORT_PATH = 'data/social-growth/scheduled-run.md';
+const DEFAULT_RECOMMENDATION_DOC_PATH = '.agents/skills/x-growth-publishing/references/x-recommendation-system.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
 const DEFAULT_IMAGE_BACKLOG_PATH = 'data/social-growth/image-backlog.md';
 const DEFAULT_IMAGE_DIR = 'output/imagegen';
@@ -65,6 +71,9 @@ export async function runScheduledGrowthLoop({
   recommendationsPath = DEFAULT_RECOMMENDATIONS_PATH,
   funnelPath = DEFAULT_FUNNEL_PATH,
   experimentPlanPath = DEFAULT_EXPERIMENT_PLAN_PATH,
+  goalAuditPath = DEFAULT_GOAL_AUDIT_PATH,
+  recommendationDocPath = DEFAULT_RECOMMENDATION_DOC_PATH,
+  recommendationDocText = '',
   scheduledReportPath = DEFAULT_SCHEDULED_REPORT_PATH,
   imageBriefDir = DEFAULT_IMAGE_BRIEF_DIR,
   imageBacklogPath = DEFAULT_IMAGE_BACKLOG_PATH,
@@ -164,6 +173,7 @@ export async function runScheduledGrowthLoop({
   });
   const queue = await readJson(queuePath);
   const ledger = await readJson(ledgerPath);
+  const metricsTemplate = await readOptionalJson(metricsPath);
   const manualPublishUrls = await summarizeManualPublishUrls(automation.paths.manualPublishUrlTemplate);
   const experimentPlan = buildGrowthExperimentPlan({
     queue,
@@ -172,6 +182,19 @@ export async function runScheduledGrowthLoop({
     selectedId: automation.selected?.id,
   });
   await writeGrowthExperimentPlan(experimentPlan, experimentPlanPath);
+  const goalAudit = buildGoalAudit({
+    articles,
+    queue,
+    ledger,
+    metrics: metricsTemplate,
+    recommendationDocText: recommendationDocText || await readOptionalText(recommendationDocPath),
+    statusText: await readOptionalText(statusPath),
+    publicActionChecklistText: await readOptionalText(resolvedPublicActionChecklistPath),
+    browserReadinessText: await readOptionalText(browserReadinessPath),
+    manualPublishUrls: await readOptionalJson(automation.paths.manualPublishUrlTemplate),
+    generatedAt: now,
+  });
+  await writeGoalAudit(goalAudit, goalAuditPath);
   const result = {
     generatedAt,
     status: scheduledStatus(automation.status, metrics.status, manualPublishUrls),
@@ -194,6 +217,13 @@ export async function runScheduledGrowthLoop({
         experiments: experimentPlan.experiments.length,
         metricToMove: experimentPlan.algorithmLens.metricToMove,
       },
+      goalAudit: {
+        status: goalAudit.status,
+        achieved: goalAudit.completion.achieved,
+        followerDelta: goalAudit.completion.followerDelta,
+        targetFollowers: goalAudit.completion.targetFollowers,
+        unprovedRequirements: goalAudit.requirements.filter((item) => item.status !== 'proved').length,
+      },
     },
     metrics: {
       status: metrics.status,
@@ -208,6 +238,7 @@ export async function runScheduledGrowthLoop({
       recommendations: recommendationsPath,
       funnel: funnelPath,
       experimentPlan: experimentPlanPath,
+      goalAudit: goalAuditPath,
       scheduledReport: scheduledReportPath,
     },
     boundary: [
@@ -316,12 +347,22 @@ ${humanGate(result)}
 - Recommendations: \`${result.paths.recommendations}\`
 - Funnel report: \`${result.paths.funnel}\`
 - Experiment plan: \`${result.paths.experimentPlan}\`
+- Goal audit: \`${result.paths.goalAudit}\`
 
 ## Experiment Plan
 
 - Status: ${result.automation.experimentPlan?.status || 'unknown'}
 - Experiments: ${result.automation.experimentPlan?.experiments ?? 'unknown'}
 - Metric to move: ${result.automation.experimentPlan?.metricToMove || 'unknown'}
+
+## Goal Audit
+
+- Status: ${result.automation.goalAudit?.status || 'unknown'}
+- Achieved: ${result.automation.goalAudit?.achieved ?? 'unknown'}
+- Follower delta: ${result.automation.goalAudit?.followerDelta ?? 'unknown'}
+- Target delta: ${result.automation.goalAudit?.targetFollowers ?? 'unknown'}
+- Unproved requirements: ${result.automation.goalAudit?.unprovedRequirements ?? 'unknown'}
+- Report: \`${result.paths.goalAudit || 'not generated'}\`
 
 ## Next Action
 
@@ -468,6 +509,26 @@ async function summarizeManualPublishUrls(filePath) {
     })),
     recoveryCommand: `npm run social:post-publish-recovery-batch -- --input ${shellQuote(filePath)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies --launch-window-dir data/social-growth/launch-windows`,
   };
+}
+
+async function readOptionalText(filePath) {
+  if (!filePath) return '';
+  try {
+    return await readFile(filePath, 'utf8');
+  } catch (error) {
+    if (error?.code === 'ENOENT') return '';
+    throw error;
+  }
+}
+
+async function readOptionalJson(filePath) {
+  if (!filePath) return null;
+  try {
+    return await readJson(filePath);
+  } catch (error) {
+    if (error?.code === 'ENOENT') return null;
+    throw error;
+  }
 }
 
 function shellQuote(value) {

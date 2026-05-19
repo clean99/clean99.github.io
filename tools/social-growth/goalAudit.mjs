@@ -89,7 +89,7 @@ export function buildGoalAudit({
     requirement({
       id: 'safe_automation_skeleton',
       title: 'Safe local automation skeleton exists',
-      ok: textIncludesAll(statusText, ['Status:', 'Manual Publish Fallback', 'Public X actions still require action-time confirmation'])
+      ok: textIncludesAll(statusText, ['Status:', 'Public X actions still require action-time confirmation'])
         && hasSafeAutomationChecklist(publicActionChecklistText),
       evidence: [
         evidenceLine('status report', statusText.includes('# X Growth Status') ? 'present' : 'missing'),

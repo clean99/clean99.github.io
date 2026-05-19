@@ -443,6 +443,8 @@ if (command === 'articles') {
     recommendationsPath: args.recommendations || 'data/social-growth/recommendations.md',
     funnelPath: args.funnelOut || 'data/social-growth/funnel.md',
     experimentPlanPath: args.experimentOut || 'data/social-growth/experiment-plan.md',
+    goalAuditPath: args.goalAuditOut || 'data/social-growth/goal-audit.md',
+    recommendationDocPath: args.recommendationDoc || '.agents/skills/x-growth-publishing/references/x-recommendation-system.md',
     scheduledReportPath: args.out || 'data/social-growth/scheduled-run.md',
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',
     imageBacklogPath: args.imageBacklogOut || 'data/social-growth/image-backlog.md',

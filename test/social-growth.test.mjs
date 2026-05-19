@@ -2224,6 +2224,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       recommendationsPath: join(outDir, 'recommendations.md'),
       funnelPath: join(outDir, 'funnel.md'),
       experimentPlanPath: join(outDir, 'experiment-plan.md'),
+      goalAuditPath: join(outDir, 'goal-audit.md'),
+      recommendationDocText: 'X Help\nxai-org/x-algorithm\ntwitter/the-algorithm\nMapping To Clean993 Metrics\nCandidate entry',
       scheduledReportPath: join(outDir, 'scheduled-run.md'),
       imageBriefDir: join(outDir, 'image-briefs'),
       imageBacklogPath: join(outDir, 'image-backlog.md'),
@@ -2255,6 +2257,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const engagementCaptureTemplate = await readFile(join(outDir, 'engagement-opportunities/_capture-template.md'), 'utf8');
     const publicActionChecklist = await readFile(join(outDir, 'public-action-checklist.md'), 'utf8');
     const experimentPlan = await readFile(join(outDir, 'experiment-plan.md'), 'utf8');
+    const goalAudit = await readFile(join(outDir, 'goal-audit.md'), 'utf8');
     const manualPublishKits = await readFile(join(outDir, 'manual-publish-kits/day1-ready-slots.md'), 'utf8');
 
     assert.equal(result.status, 'ready_for_browser_confirmation');
@@ -2265,6 +2268,9 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.automation.launchWindow.status, 'needs_public_url');
     assert.equal(result.automation.browserReadiness.status, 'needs_browser_probe');
     assert.equal(result.automation.experimentPlan.status, 'ready');
+    assert.equal(result.automation.goalAudit.status, 'needs_confirmed_publication');
+    assert.equal(result.automation.goalAudit.achieved, false);
+    assert.equal(result.automation.goalAudit.unprovedRequirements, 2);
     assert.equal(result.automation.engagement.searchStatus, 'ready_for_read_only_search');
     assert.equal(result.automation.engagement.captureTemplateStatus, 'ready_for_capture');
     assert.equal(result.automation.engagement.captureTargets, result.automation.engagement.searchQueries);
@@ -2293,6 +2299,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Profile Conversion/);
     assert.match(scheduledReport, /Funnel report/);
     assert.match(scheduledReport, /Experiment plan/);
+    assert.match(scheduledReport, /Goal audit/);
     assert.match(scheduledReport, /safe for recurring execution/);
     assert.match(metricsReport, /No browser publish/);
     assert.match(funnelReport, /X Growth Funnel/);
@@ -2310,6 +2317,9 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(experimentPlan, /X Growth Experiment Plan/);
     assert.match(experimentPlan, new RegExp(`### exp-1: ${expectedQueue.items[0].id}`));
     assert.match(experimentPlan, /Selected aligned: yes/);
+    assert.match(goalAudit, /X Growth Goal Audit/);
+    assert.match(goalAudit, /Status: needs_confirmed_publication/);
+    assert.match(goalAudit, /Published posts: 0/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
