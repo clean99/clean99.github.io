@@ -78,9 +78,9 @@ Subapps only express intent. The host decides how to execute it.
 | Source | Input | Host Decision |
 | --- | --- | --- |
 | User tab click | tab row id | Restore saved tab URL, activate runtime, write browser URL. |
-| React subapp SDK | `openWorkstreamTab`, `openSubappViewTab`, `openSubApp` | Normalize payload, find existing tab, create if needed. |
 | MF event bus | `TAB_OPEN_REQUEST`, `NAVIGATE_TO_URL` | Focus existing tab, absorb into current tab, create a tab, or open a new browser window. |
 | Seto iframe | `window.postMessage` envelope | Validate origin and payload, then convert to a host event bus request. |
+| Subapp SDK | `openWorkstreamTab`, `openSubappViewTab`, `openSubApp`, usually exposed through a host event bridge | Normalize payload, find existing tab, create if needed. |
 
 Simplified pseudocode:
 ```typescript
@@ -88,6 +88,22 @@ Simplified pseudocode:
 function openSubappView(viewType, viewId) {
   emit('TAB_OPEN_REQUEST', { itemType: 'SUBAPP_VIEW', viewType, viewId });
 }
+
+// An iframe posts intent to the host. The host still owns validation and routing.
+window.parent.postMessage({
+  type: 'MF_EVENT',
+  payload: {
+    type: 'TAB_OPEN_REQUEST',
+    data: {
+      itemType: 'WORKSTREAM',
+      workstreamId: 'from-iframe',
+    },
+    metadata: {
+      source: 'REPORT_CENTER',
+      timestamp: Date.now(),
+    },
+  },
+}, targetOrigin);
 
 function handleTabOpenRequest(raw) {
   const input = normalizeAndValidate(raw);
@@ -238,6 +254,8 @@ URL is both a user contract and a runtime locator. Users must see shareable busi
 
 Users see three concrete failures if tab state is only local: refresh loses the tab row, add/remove/pin feels delayed if every mutation waits for the server, and two browser windows drift apart after one window mutates the tab list.
 
+The tab-list API can also be relatively slow because adding or reordering a tab may fan out across several backend services. The frontend therefore needs optimistic interaction without treating local state as the final source of truth.
+
 ### Solution
 
 Persistent state is handled by BFF plus React Query.
@@ -250,7 +268,7 @@ Persistent state is handled by BFF plus React Query.
 | --- | --- |
 | BFF tab controller | `list/add/remove/pin/unpin/reorder`, plus merging opened tabs and pinned tabs. |
 | React Query | Single tab-list cache key, stale-time policy, focus refetch. |
-| Optimistic mutation | Insert a temporary tab before server response; replace it when BFF returns the final tab. |
+| Optimistic mutation | Insert a temporary tab before server response; replace it when BFF returns the final tab. Temporary tabs are locked from actions such as pin, unpin, and delete until the real id arrives. |
 | BroadcastChannel | After mutation succeeds, tell other windows to invalidate and refetch. |
 
 Simplified flow:
@@ -314,12 +332,30 @@ Idle prewarm:
 ```typescript
 afterFirstScreenReady(() => {
   requestIdleCallback(() => {
-    for (const candidate of predictLikelyNextTabs()) {
+    for (const candidate of selectIdlePrewarmTabs({ tabs, focusedTabId, hotTabs })) {
       if (foregroundTabIsSettling()) break;
       prewarmRuntime(candidate);
     }
   });
 });
+
+function selectIdlePrewarmTabs({ tabs, focusedTabId, hotTabs }) {
+  if (!focusedTabId) return [];
+
+  const hotIds = new Set(hotTabs.map(tab => tab.id));
+  const recentIds = loadRecentHotTabIds(agentId);
+
+  return sortRecentTabsBeforeOtherTabs(tabs, recentIds)
+    .filter(tab => tab.id !== focusedTabId)
+    .filter(tab => !hotIds.has(tab.id))
+    .filter(tab => tab.isLocked !== true)
+    .slice(0, 2);
+}
+
+// 1. Idle queue selects a candidate with id, URL, and runtime kind.
+// 2. WarmPool promotes the candidate.
+// 3. WorkspaceContentHost subscribes to WarmPool through useSyncExternalStore.
+// 4. HotTabFrame mounts the runtime before the user clicks back.
 
 ```
 
@@ -358,6 +394,7 @@ We did not start from a list of Seto APIs. We started from the invariant users n
 | A modal/toast from tab A covers tab B; dropdown aligns to the wrong place. | Component libraries append Modal/Dropdown/Toast to global `document.body`. | Route document/body operations to a tab-owned overlay root. |
 | Modal is contained, but Dropdown/Tooltip position drifts. | Floating overlays depend on the trigger's coordinate system. | Separate content overlays from floating overlays. |
 | A background tab receives `TAB_FOCUSED` and starts refreshing. | Lifecycle events are global by default. | Filter focus/blur by tab id. |
+| Background runtime consumes CPU during an active tab switch. | Hidden runtimes can continue timers, lifecycle prime, prewarm, or refresh work while the foreground tab is settling. | Use a foreground lease and background scheduler; defer background work until the active tab is stable. |
 
 Seto capabilities used:
 
@@ -404,6 +441,17 @@ function SetoTabRuntime({ tabId, entry, initialUrl }) {
 ```
 
 ### History / Window Scope
+
+Seto has several history surfaces, and patching only the host `window.history` is not enough:
+
+| History Surface | Belongs To | Risk |
+| --- | --- | --- |
+| `window.history` | Workspace host | Directly changes the visible address bar. |
+| `iframeWin.history` | Seto sandbox subapp | Does not know whether its Workspace tab is active. |
+| `iframeWin.RAW_HISTORY` | Seto history plugin | Internal Seto push/replace can bypass host history checks. |
+| `scopedHistory` | Workspace isolation layer | Decides whether a write belongs to the focused tab. |
+| `window.parent.history` | Escape hatch from subapp to host | Can write the host URL unless proxied. |
+
 ```typescript
 function scopedPushState(state, unused, url) {
   const target = getNavigationTargetFromStateOrPreparedScope(state, url);
@@ -420,6 +468,17 @@ function scopedPushState(state, unused, url) {
 
   rawHistory.pushState({ ...state, workspaceTargetTabId: target.tabId }, unused, url);
 }
+
+// Seto internal raw history is the surface the sandbox really uses.
+frame.rawHistory.pushState = frame.patchedPushState;
+frame.rawHistory.replaceState = frame.patchedReplaceState;
+
+// Subapps still see window.history, but it is the scoped one.
+Object.defineProperty(frame.iframeWin, 'history', {
+  get() {
+    return frame.scopedHistory;
+  },
+});
 
 ```
 
@@ -468,6 +527,39 @@ Overlay types are different:
 - Modal, Drawer, Toast, and Notification are content overlays and should be constrained to the tab content area.
 - Large-overlay geometry heuristics should only apply to `position: fixed`, otherwise absolute dropdowns drift.
 
+### Foreground Leasing
+
+During tab activation, foreground work should win over hidden prewarm, lifecycle prime, polling, and other background tasks. We model that as a short foreground lease.
+
+```javascript
+// Triggered when the user focuses a tab.
+beginWorkspaceForegroundTabTask({
+  tabId: targetTabId,
+  reason: 'tab_activation',
+});
+
+function beginWorkspaceForegroundTabTask({ tabId, reason }) {
+  foregroundLease = {
+    tabId,
+    reason,
+    expiresAt: Date.now() + WORKSPACE_FOREGROUND_TASK_LEASE_MS,
+  };
+}
+
+// Before background work such as prewarm or lifecycle prime executes:
+if (shouldDeferWorkspaceBackgroundTask({ tabId: candidate.id })) {
+  scheduleNext(1000);
+  return;
+}
+
+function shouldDeferWorkspaceBackgroundTask({ tabId }) {
+  const lease = activeForegroundLease();
+  if (!lease) return false;
+  if (lease.tabId === null) return true;
+  return tabId !== lease.tabId;
+}
+```
+
 ### Difficulty
 
 A hidden runtime can still produce visible side effects. Without tab owner boundaries around sandbox window and document APIs, "hidden" only means invisible; it does not mean safe.
@@ -490,13 +582,13 @@ The user sees one current tab, but the host may keep native Workstream, Seto ifr
 
 Every hot tab gets a stable frame. The frame is not decoration; it normalizes different runtimes into host semantics.
 
-| Frame Responsibility | Why It Matters |
-| --- | --- |
-| Stable DOM container | Switching away does not unmount hot runtime; switching back can keep DOM/iframe state. |
-| Focused / hidden state | Only focused tab is visible and clickable; hidden tabs stay warm but do not participate in current interaction. |
-| Per-tab location | The focused tab uses current browser URL; hidden hot tabs use their saved URL. |
-| Owner synchronization | Switching updates Seto runtime owner, overlay owner, and event owner together. |
-| Unified visible timing | Tab-switch metric reports when the frame is actually visible, not when an arbitrary runtime says ready. |
+| Step | What Is Set | Where It Is Used |
+| --- | --- | --- |
+| Seto runtime focus | `focusedRuntimeTabId` | Scoped history checks whether a sandbox history write may update the host URL. |
+| Overlay focus | `focusedWorkspaceOverlayTabId` | Tab-owned overlay roots are shown or hidden by `data-workspace-overlay-tab-id`. |
+| Warm runtime | WarmPool entry and LRU timestamp | WorkspaceContentHost renders or reuses the matching HotTabFrame. |
+| Lifecycle event | `TAB_BLURRED` / `TAB_FOCUSED` with `tabId` | Subapps, MF components, and SDK listeners filter lifecycle events by tab id. |
+| Switch metric | visible timestamp for `nextTabId` | Tab switch metrics distinguish shell activation from real frame visibility. |
 
 ```plaintext
 function HotTabFrame({ tab, isFocused, location }) {
@@ -522,11 +614,20 @@ function HotTabFrame({ tab, isFocused, location }) {
 Switching becomes an ownership update:
 ```typescript
 function commitFocusedTab(nextTabId) {
-  setVisibleFrame(nextTabId);
-  setRuntimeOwner(nextTabId);
-  setOverlayOwner(nextTabId);
-  publishTabLifecycle('TAB_FOCUSED', nextTabId);
-  reportTabSwitchVisible(nextTabId);
+  // 1. URL owner for Seto runtimes.
+  setFocusedSetoRuntimeTab(nextTabId);
+
+  // 2. Overlay owner.
+  setFocusedWorkspaceOverlayTab(nextTabId);
+
+  // 3. Runtime owner.
+  warmPool.promote(nextTabId, currentLocation, runtimeKind);
+
+  // 4. Lifecycle owner.
+  publishTabLifecycleTransition(prevTabId, nextTabId);
+
+  // 5. Metric owner.
+  notifyTabSwitchFrameVisible(nextTabId);
 }
 
 ```
