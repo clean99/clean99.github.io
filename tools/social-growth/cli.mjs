@@ -515,6 +515,12 @@ if (command === 'articles') {
 } else if (command === 'day-readiness') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
+  const probePath = args.browserProbe || args.probeOut || 'data/social-growth/browser-probe.local.json';
+  const storedProbe = await readBrowserProbe(probePath);
+  const inputProbe = browserProbeFromArgs(args);
+  const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
+  const publishMode = args.publishMode || args.articleMode || inferPublishModeFromProbe(effectiveProbe);
+  const profileDirectory = args.xProfileDirectory || args.profileDirectory || effectiveProbe.profileDirectory;
   const readiness = await buildDayReadiness({
     queue,
     ledger,
@@ -526,8 +532,8 @@ if (command === 'articles') {
     xSkillDir: args.xSkillDir,
     xBunCommand: args.xBunCommand,
     xProfileDir: args.xProfileDir || args.profileDir,
-    xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
-    publishMode: args.publishMode || args.articleMode,
+    xProfileDirectory: profileDirectory,
+    publishMode,
   });
   if (args.out) {
     await writeDayReadiness(readiness, args.out);
@@ -812,7 +818,7 @@ if (command === 'articles') {
   const storedProbe = await readBrowserProbe(probePath);
   const inputProbe = browserProbeFromArgs(args);
   const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
-  const publishMode = args.publishMode || args.articleMode;
+  const publishMode = args.publishMode || args.articleMode || inferPublishModeFromProbe(effectiveProbe);
   const profileDir = args.xProfileDir || args.profileDir;
   const profileDirectory = args.xProfileDirectory || args.profileDirectory || effectiveProbe.profileDirectory;
   const preflight = await buildPublishPreflight({
@@ -1045,11 +1051,12 @@ if (command === 'articles') {
   const effectiveProbe = mergeBrowserProbe(storedProbe, inputProbe);
   const profileDir = args.xProfileDir || args.profileDir;
   const profileDirectory = args.xProfileDirectory || args.profileDirectory || effectiveProbe.profileDirectory;
+  const publishMode = args.publishMode || args.articleMode || inferPublishModeFromProbe(effectiveProbe);
   const prep = await buildXPublishPrep(preflight, {
     skillDir: args.skillDir,
     bunCommand: args.bunCommand,
     articleUrlPlaceholder: args.articleUrl || '<x-article-url>',
-    publishMode: args.publishMode || args.articleMode,
+    publishMode,
     profileDir,
     profileDirectory,
   });

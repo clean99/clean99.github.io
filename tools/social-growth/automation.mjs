@@ -237,13 +237,14 @@ export async function runSafeAutomationCycle({
   const effectiveBrowserProbe = mergeBrowserProbe(storedBrowserProbe, browserProbe);
   if (hasBrowserProbeValues(browserProbe)) effectiveBrowserProbe.generatedAt = generatedAt;
   const effectiveProfileDirectory = xProfileDirectory || effectiveBrowserProbe.profileDirectory;
+  const effectivePublishMode = publishMode || inferPublishModeFromProbe(effectiveBrowserProbe);
 
   const xPublishPrep = await buildXPublishPrep(preflight, {
     skillDir: xSkillDir,
     bunCommand: xBunCommand,
     profileDir: xProfileDir,
     profileDirectory: effectiveProfileDirectory,
-    publishMode,
+    publishMode: effectivePublishMode,
   });
   await writeXPublishPrep(xPublishPrep, xPublishPrepPath);
   if (hasBrowserProbeValues(browserProbe) || hasBrowserProbeValues(storedBrowserProbe)) {
@@ -343,7 +344,7 @@ export async function runSafeAutomationCycle({
     imageDir,
     packageOutDir,
     profileText,
-    publishMode,
+    publishMode: effectivePublishMode,
     xProfileDir,
     xProfileDirectory,
     browserReadiness,
@@ -373,7 +374,7 @@ export async function runSafeAutomationCycle({
     xBunCommand,
     xProfileDir,
     xProfileDirectory,
-    publishMode,
+    publishMode: effectivePublishMode,
     browserReadiness,
     loginHandoff,
     loginHandoffPath,
@@ -392,7 +393,7 @@ export async function runSafeAutomationCycle({
     xBunCommand,
     xProfileDir,
     xProfileDirectory,
-    publishMode,
+    publishMode: effectivePublishMode,
     profileTextPath,
     postTextDir,
     outDir: manualPublishKitDir || join(dirname(dailyBriefPath), 'manual-publish-kits'),
@@ -637,6 +638,12 @@ export async function writeAutomationReport(result, filePath) {
 function toIsoString(value) {
   if (value instanceof Date) return value.toISOString();
   return new Date(value).toISOString();
+}
+
+function inferPublishModeFromProbe(probe = {}) {
+  return String(probe.articleAvailable || '').toLowerCase() === 'no'
+    ? 'thread_fallback'
+    : undefined;
 }
 
 function dedupe(items) {

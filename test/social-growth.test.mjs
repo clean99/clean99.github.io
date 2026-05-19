@@ -4735,25 +4735,39 @@ test('CLI resolves --day today from the ledger start date in project timezone', 
         tags: ['AI'],
         url: 'https://clean99.github.io/zh/agent-skills/',
       },
+      {
+        title: 'Vibe Coding VS Spec-Driven Coding',
+        excerpt: '复杂改动需要先固定意图、边界和验收标准。',
+        slug: 'Spec-Driven-Coding',
+        lang: 'zh',
+        tags: ['AI'],
+        url: 'https://clean99.github.io/zh/spec/',
+      },
     ], {
       campaign: 'test',
       createdAt: '2026-05-18T00:00:00.000Z',
-      limit: 1,
+      limit: 2,
     });
     const queuePath = join(outDir, 'queue.json');
     const ledgerPath = join(outDir, 'ledger.json');
+    const probePath = join(outDir, 'browser-probe.local.json');
     await writeJson(queuePath, queue);
     await writeJson(ledgerPath, createLedger({
       startDate: '2026-05-18',
       baselineFollowers: 30,
       followersIn7Days: 1000,
     }));
+    await writeJson(probePath, {
+      articleAvailable: 'no',
+      profileDirectory: 'Profile 1',
+    });
 
     const result = spawnSync(process.execPath, [
       'tools/social-growth/cli.mjs',
       'day-readiness',
       '--queue', queuePath,
       '--ledger', ledgerPath,
+      '--browser-probe', probePath,
       '--day', 'today',
       '--now', '2026-05-19T03:00:00.000Z',
       '--format', 'json',
@@ -4768,6 +4782,8 @@ test('CLI resolves --day today from the ledger start date in project timezone', 
     assert.equal(payload.day, 2);
     assert.equal(payload.date, '2026-05-19');
     assert.equal(payload.cumulativeFollowerTarget, 286);
+    assert.equal(payload.slots[0].publishMode, 'thread_fallback');
+    assert.match(payload.slots[0].commands.xPrep, /--publishMode thread_fallback --xProfileDirectory 'Profile 1'/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
