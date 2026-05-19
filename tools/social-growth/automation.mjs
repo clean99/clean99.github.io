@@ -464,6 +464,7 @@ export async function runSafeAutomationCycle({
       searchQueries: engagementSearch.searchCount,
       readyCandidates: engagementPlan.selectedCount,
       capturedOpportunities: engagementPlan.opportunityCount,
+      browserCaptureCommand: engagementBrowserCaptureCommand(engagementSearch),
     },
     dailyBrief: {
       status: dailyBrief.status,
@@ -554,6 +555,7 @@ Status: ${result.status}
 - Search queries: ${result.engagement.searchQueries}
 - Captured opportunities: ${result.engagement.capturedOpportunities}
 - Ready reply candidates: ${result.engagement.readyCandidates}
+- Read-only browser capture: \`${result.engagement.browserCaptureCommand}\`
 
 ## Profile Conversion
 
@@ -627,6 +629,11 @@ ${blockers}
 
 ${result.boundary}
 `;
+}
+
+function engagementBrowserCaptureCommand(engagementSearch) {
+  const limit = engagementSearch?.searchCount ? Math.min(3, engagementSearch.searchCount) : 3;
+  return `npm run social:engagement-browser-capture -- --limit ${limit} --out data/social-growth/engagement-browser-capture.md`;
 }
 
 export async function writeAutomationReport(result, filePath) {

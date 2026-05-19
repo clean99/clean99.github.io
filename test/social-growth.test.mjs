@@ -2136,6 +2136,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.equal(result.engagement.captureTemplateStatus, 'ready_for_capture');
     assert.equal(result.engagement.captureTargets, result.engagement.searchQueries);
     assert.equal(result.engagement.status, 'needs_opportunity_capture');
+    assert.match(result.engagement.browserCaptureCommand, /social:engagement-browser-capture/);
     assert.equal(result.manualPublishKits.status, 'no_ready_slots');
     assert.equal(result.manualPublishKits.readyKits, 0);
     assert.equal(result.publicActionChecklist.status, 'pending_confirmation');
@@ -2156,6 +2157,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
     assert.match(dailyBrief, /social:register-image/);
     assert.match(report, /Engagement plan/);
     assert.match(report, /Engagement capture template/);
+    assert.match(report, /social:engagement-browser-capture/);
     assert.match(report, /Manual publish kits/);
     assert.match(report, /Public action checklist/);
     assert.match(report, /Profile update package/);
@@ -2306,6 +2308,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.automation.engagement.captureTemplateStatus, 'ready_for_capture');
     assert.equal(result.automation.engagement.captureTargets, result.automation.engagement.searchQueries);
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
+    assert.match(result.automation.engagement.browserCaptureCommand, /social:engagement-browser-capture/);
     assert.equal(result.automation.manualPublishKits.status, 'ready_for_manual_confirmation');
     assert.equal(result.automation.manualPublishKits.readyKits, 1);
     assert.equal(result.automation.publicActionChecklist.status, 'pending_confirmation');
@@ -2323,6 +2326,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Engagement search/);
     assert.match(scheduledReport, /Engagement capture template/);
     assert.match(scheduledReport, /Engagement plan/);
+    assert.match(scheduledReport, /Read-only engagement capture: `npm run social:engagement-browser-capture/);
     assert.match(scheduledReport, /Manual publish kits ready: 1\/3/);
     assert.match(scheduledReport, /Public actions pending confirmation: 1/);
     assert.match(scheduledReport, /Publish confirmation/);

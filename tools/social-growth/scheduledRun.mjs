@@ -344,6 +344,7 @@ Status: ${result.status}
 - Engagement capture targets: ${result.automation.engagement?.captureTargets ?? 'unknown'}
 - Engagement status: ${result.automation.engagement?.status || 'unknown'}
 - Ready reply candidates: ${result.automation.engagement?.readyCandidates ?? 'unknown'}
+- Read-only engagement capture: \`${result.automation.engagement?.browserCaptureCommand || 'not generated'}\`
 - Manual publish kits ready: ${result.automation.manualPublishKits?.readyKits ?? 'unknown'}/${result.automation.manualPublishKits?.totalSlots ?? 'unknown'}
 - Public actions pending confirmation: ${result.automation.publicActionChecklist?.actionCount ?? 'unknown'}
 - Manual publish URLs filled: ${result.automation.manualPublishUrls?.filled ?? 'unknown'}/${result.automation.manualPublishUrls?.total ?? 'unknown'}
