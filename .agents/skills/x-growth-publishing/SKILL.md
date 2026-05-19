@@ -95,6 +95,7 @@ It writes `data/social-growth/engagement-plan.md` from copied relevant thread op
 It writes `data/social-growth/experiment-plan.md` to turn the current Algorithm Lens into concrete hypotheses, candidate queue ids, edit focus, success metrics, and stop conditions for the next publish package.
 It writes `data/social-growth/daily-brief.md` as the single operator-facing action order across publish readiness, engagement, metrics, conversion funnel, and profile conversion.
 It writes `data/social-growth/manual-publish-kits/day<N>-ready-slots.md` plus one kit per ready slot so a logged-in normal Chrome profile can continue confirmed publishing when the CDP publishing profile is blocked.
+It writes `data/social-growth/publish-session.md` as the single first-publish operator page. Use this before opening Chrome: it names the selected queue id, source kit, browser state, URL capture mode, manual URL fill command when timeline discovery is blocked, batch recovery command, metrics handoff, and profile action handoff. This file is local-only; it never authorizes publishing, media upload, replies, likes, reposts, follows, profile edits, pins, or final X button clicks.
 
 For day-level readiness across all publish slots, run:
 
@@ -465,9 +466,9 @@ For recurring safe jobs, prefer:
 /Users/bytedance/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node tools/social-growth/cli.mjs scheduled-run --day today --slot 1 --publishMode thread_fallback --funnel-out data/social-growth/funnel.md
 ```
 
-This combines safe local publishing preparation with read-only metrics-cycle parsing and writes `data/social-growth/scheduled-run.md`.
+This combines safe local publishing preparation with read-only metrics-cycle parsing and writes `data/social-growth/scheduled-run.md` plus `data/social-growth/publish-session.md`.
 The scheduled run also writes `data/social-growth/funnel.md` so each recurring pass exposes the current views -> interactions -> profile clicks -> follows bottleneck before the next writing or publishing decision.
-The Codex App automation `x-growth-safe-automation` runs this safe scheduled loop. Keep the older `prepare-x-growth-daily-run` automation paused unless it is deliberately repurposed, because it duplicates part of the same local report generation.
+The Codex App automation `x-growth-safe-automation` runs this safe scheduled loop hourly. Its report should summarize `data/social-growth/publish-session.md` first when `published_posts=0`, because the next real bottleneck is usually action-time confirmation of the first public post and local URL recovery. Keep the older `prepare-x-growth-daily-run` automation paused unless it is deliberately repurposed, because it duplicates part of the same local report generation.
 
 For selective distribution into relevant technical conversations, capture copied visible X thread text into `data/social-growth/engagement-opportunities/*.txt`, then run:
 
