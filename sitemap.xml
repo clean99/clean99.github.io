@@ -155,15 +155,6 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
-    
-    <lastmod>2026-03-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://clean99.github.io/zh/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
     
     <lastmod>2026-03-18</lastmod>
@@ -173,7 +164,16 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/</loc>
+    <loc>https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
+    
+    <lastmod>2026-03-18</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/</loc>
     
     <lastmod>2026-03-10</lastmod>
     
@@ -182,7 +182,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/</loc>
+    <loc>https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/</loc>
     
     <lastmod>2026-03-10</lastmod>
     
@@ -263,7 +263,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/</loc>
+    <loc>https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/</loc>
     
     <lastmod>2024-04-10</lastmod>
     
@@ -272,7 +272,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/</loc>
+    <loc>https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/</loc>
     
     <lastmod>2024-04-10</lastmod>
     
@@ -353,15 +353,6 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/</loc>
-    
-    <lastmod>2023-04-01</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/</loc>
     
     <lastmod>2023-04-01</lastmod>
@@ -371,7 +362,16 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/</loc>
+    <loc>https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/</loc>
+    
+    <lastmod>2023-04-01</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/</loc>
     
     <lastmod>2023-03-04</lastmod>
     
@@ -380,7 +380,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/</loc>
+    <loc>https://clean99.github.io/zh/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/</loc>
     
     <lastmod>2023-03-04</lastmod>
     

@@ -165,15 +165,18 @@
   (function() {
     var stored = localStorage.getItem('preferredLang');
     if (stored) return;
+    var path = window.location.pathname;
+    var isZhPath = path === '/zh' || path.indexOf('/zh/') === 0;
+    if (isZhPath) {
+      localStorage.setItem('preferredLang', 'zh');
+      return;
+    }
+    if (path !== '/') return;
     var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
     stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
     localStorage.setItem('preferredLang', stored);
-    var isZh = window.location.pathname.indexOf('/zh/') === 0 || window.location.pathname === '/zh';
-    var current = isZh ? 'zh' : 'en';
-    if (stored !== current) {
-      var path = window.location.pathname;
-      var newPath = stored === 'zh' ? '/zh' + path : path.replace(/^\/zh(\/|$)/, '/');
-      if (newPath !== path) window.location.replace(newPath + window.location.search + window.location.hash);
+    if (stored === 'zh') {
+      window.location.replace('/zh/' + window.location.search + window.location.hash);
     }
   })();
   </script>
