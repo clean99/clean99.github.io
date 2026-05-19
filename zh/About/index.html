@@ -177,71 +177,63 @@
     <div class="row">
       <div>
 
-        <div class="row">
-  <div class="two columns" style="max-width: 50px">
-    <h1 class="mt-2 mode">
-      <div onclick=setDarkMode(true) id="darkBtn">🌑</div>
-      <div onclick=setDarkMode(false) id="lightBtn" class=hidden>☀️</div>
-      <script >
-        if (localStorage.getItem('preferredTheme') == 'dark') {
-          setDarkMode(true)
-        }
-        function setDarkMode(isDark) {
-          var darkBtn = document.getElementById('darkBtn')
-          var lightBtn = document.getElementById('lightBtn')
-          if (isDark) {
-            lightBtn.style.display = "block"
-            darkBtn.style.display = "none"
-            localStorage.setItem('preferredTheme', 'dark');
-          } else {
-            lightBtn.style.display = "none"
-            darkBtn.style.display = "block"
-            localStorage.removeItem('preferredTheme');
-          }
-          document.body.classList.toggle("darkmode");
-        }
-      </script>
-    </h1>
-  </div>
+        <header class="site-header">
+  <div class="site-header__top">
+    <a class="site-wordmark" href="/zh/" aria-label="Koh Hom home">
+      <span class="site-wordmark__mark" aria-hidden="true">KH</span>
+      <span class="site-wordmark__name">Koh Hom</span>
+    </a>
 
-  <div class="six columns site-title-wrap">
-    <h1 class="mt-2">
-      <a href="/zh/" style="text-decoration:none;color:inherit">Koh Hom</a>
-    </h1>
-  </div>
-
-  <div class="twelve columns">
-    <div class="row">
-      <nav class="site-nav nine columns left" aria-label="Primary navigation">
-        <a href="/zh/">首页</a>
-        
-          
-          <a href="/zh/writing" class="ml">写作</a>
-          
-        
-          
-          <a href="/zh/projects" class="ml">项目</a>
-          
-        
-          
-          <a href="/zh/interviewers" class="ml">面试官入口</a>
-          
-        
-          
-          <a href="/zh/About" class="ml">关于</a>
-          
-        
-        <a
-          href="/About/"
-          class="ml language-switch"
-          onclick="localStorage.setItem('preferredLang', 'en')"
-          aria-label="Read in English"
-        >English</a>
-      </nav>
+    <div class="site-actions">
+      <button class="theme-toggle" type="button" onclick="setDarkMode(!document.body.classList.contains('darkmode'))" aria-label="Toggle color theme">
+        <span id="themeIcon" aria-hidden="true">◐</span>
+      </button>
+      <a
+        href="/About/"
+        class="language-switch"
+        onclick="localStorage.setItem('preferredLang', 'en')"
+        aria-label="Read in English"
+      >EN</a>
     </div>
-    <hr style="margin-bottom: 2.6rem">
   </div>
-</div>
+
+  <nav class="site-nav" aria-label="Primary navigation">
+    <a href="/zh/">首页</a>
+    
+      
+        <a href="/zh/writing">写作</a>
+      
+    
+      
+        <a href="/zh/projects">项目</a>
+      
+    
+      
+        <a href="/zh/interviewers">面试官入口</a>
+      
+    
+      
+        <a href="/zh/About">关于</a>
+      
+    
+  </nav>
+</header>
+
+<script>
+  if (localStorage.getItem('preferredTheme') === 'dark') {
+    setDarkMode(true);
+  }
+  function setDarkMode(isDark) {
+    document.body.classList.toggle('darkmode', isDark);
+    var icon = document.getElementById('themeIcon');
+    if (icon) icon.textContent = isDark ? '◑' : '◐';
+    if (isDark) {
+      localStorage.setItem('preferredTheme', 'dark');
+    } else {
+      localStorage.removeItem('preferredTheme');
+    }
+  }
+</script>
 
         <div class="trans">
           <article class="page-shell">
@@ -293,11 +285,6 @@
 
     <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
     <div class="four columns mb-3 posisi" >
-
-      <!-- Language switcher (globe icon) -->
-      <a class="ml-0 footer-link icon" href="/About/" onclick="localStorage.setItem('preferredLang', 'en')" style="text-decoration: none" aria-label="Read in English" title="Read in English">
-        <svg class="svg-hov" width="18" role="img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><title>English</title><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-      </a>
 
       
       <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
