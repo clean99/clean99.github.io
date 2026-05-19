@@ -2232,6 +2232,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       experimentPlanPath: join(outDir, 'experiment-plan.md'),
       goalAuditPath: join(outDir, 'goal-audit.md'),
       publicActionHandoffPath: join(outDir, 'public-action-handoff.md'),
+      profileActionHandoffPath: join(outDir, 'profile-action-handoff.md'),
       recommendationDocText: 'X Help\nxai-org/x-algorithm\ntwitter/the-algorithm\nMapping To Clean993 Metrics\nCandidate entry',
       scheduledReportPath: join(outDir, 'scheduled-run.md'),
       imageBriefDir: join(outDir, 'image-briefs'),
@@ -2264,6 +2265,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const engagementCaptureTemplate = await readFile(join(outDir, 'engagement-opportunities/_capture-template.md'), 'utf8');
     const publicActionChecklist = await readFile(join(outDir, 'public-action-checklist.md'), 'utf8');
     const publicActionHandoff = await readFile(join(outDir, 'public-action-handoff.md'), 'utf8');
+    const profileActionHandoff = await readFile(join(outDir, 'profile-action-handoff.md'), 'utf8');
     const experimentPlan = await readFile(join(outDir, 'experiment-plan.md'), 'utf8');
     const goalAudit = await readFile(join(outDir, 'goal-audit.md'), 'utf8');
     const manualPublishKits = await readFile(join(outDir, 'manual-publish-kits/day1-ready-slots.md'), 'utf8');
@@ -2290,6 +2292,9 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.automation.publicActionHandoff.status, 'ready_for_action_time_confirmation');
     assert.equal(result.automation.publicActionHandoff.actionId, `publish:${expectedQueue.items[0].id}`);
     assert.equal(result.automation.publicActionHandoff.actionType, 'publish_image_thread');
+    assert.equal(result.automation.profileActionHandoff.status, 'not_found');
+    assert.equal(result.automation.profileActionHandoff.actionId, null);
+    assert.equal(result.automation.profileActionHandoff.actionType, 'edit_profile');
     assert.equal(result.selected.id, expectedQueue.items[0].id);
     assert.match(scheduledReport, /Scheduled X Growth Run/);
     assert.match(scheduledReport, /Daily brief/);
@@ -2312,6 +2317,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Experiment plan/);
     assert.match(scheduledReport, /Goal audit/);
     assert.match(scheduledReport, /Public action handoff/);
+    assert.match(scheduledReport, /Profile action handoff/);
     assert.match(scheduledReport, /safe for recurring execution/);
     assert.match(metricsReport, /No browser publish/);
     assert.match(funnelReport, /X Growth Funnel/);
@@ -2326,6 +2332,9 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(publicActionHandoff, /Public X Action Handoff/);
     assert.match(publicActionHandoff, new RegExp(`Action id: \`publish:${expectedQueue.items[0].id}\``));
     assert.match(publicActionHandoff, /Status: ready_for_action_time_confirmation/);
+    assert.match(profileActionHandoff, /Public X Action Handoff/);
+    assert.match(profileActionHandoff, /Status: not_found/);
+    assert.match(profileActionHandoff, /Requested action type: `edit_profile`/);
     assert.match(manualPublishKits, /Manual X Publish Kits/);
     assert.match(manualPublishKits, /Ready slots: 1\/3/);
     assert.match(manualPublishKits, /post-publish-recovery/);

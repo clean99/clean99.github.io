@@ -478,6 +478,8 @@ if (command === 'articles') {
     goalAuditPath: args.goalAuditOut || 'data/social-growth/goal-audit.md',
     publicActionHandoffPath: args.publicActionHandoffOut || 'data/social-growth/public-action-handoff.md',
     publicActionHandoffType: args.publicActionHandoffType || args.actionType || 'publish_image_thread',
+    profileActionHandoffPath: args.profileActionHandoffOut || 'data/social-growth/profile-action-handoff.md',
+    profileActionHandoffType: args.profileActionHandoffType || 'edit_profile',
     recommendationDocPath: args.recommendationDoc || '.agents/skills/x-growth-publishing/references/x-recommendation-system.md',
     scheduledReportPath: args.out || 'data/social-growth/scheduled-run.md',
     imageBriefDir: args.imageBriefDir || 'data/social-growth/image-briefs',

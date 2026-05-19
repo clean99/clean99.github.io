@@ -39,6 +39,7 @@ const DEFAULT_FUNNEL_PATH = 'data/social-growth/funnel.md';
 const DEFAULT_EXPERIMENT_PLAN_PATH = 'data/social-growth/experiment-plan.md';
 const DEFAULT_GOAL_AUDIT_PATH = 'data/social-growth/goal-audit.md';
 const DEFAULT_PUBLIC_ACTION_HANDOFF_PATH = 'data/social-growth/public-action-handoff.md';
+const DEFAULT_PROFILE_ACTION_HANDOFF_PATH = 'data/social-growth/profile-action-handoff.md';
 const DEFAULT_SCHEDULED_REPORT_PATH = 'data/social-growth/scheduled-run.md';
 const DEFAULT_RECOMMENDATION_DOC_PATH = '.agents/skills/x-growth-publishing/references/x-recommendation-system.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
@@ -81,6 +82,8 @@ export async function runScheduledGrowthLoop({
   goalAuditPath = DEFAULT_GOAL_AUDIT_PATH,
   publicActionHandoffPath = DEFAULT_PUBLIC_ACTION_HANDOFF_PATH,
   publicActionHandoffType = 'publish_image_thread',
+  profileActionHandoffPath = DEFAULT_PROFILE_ACTION_HANDOFF_PATH,
+  profileActionHandoffType = 'edit_profile',
   recommendationDocPath = DEFAULT_RECOMMENDATION_DOC_PATH,
   recommendationDocText = '',
   scheduledReportPath = DEFAULT_SCHEDULED_REPORT_PATH,
@@ -206,16 +209,20 @@ export async function runScheduledGrowthLoop({
   await writeGoalAudit(goalAudit, goalAuditPath);
   const publicActionChecklistText = await readOptionalText(resolvedPublicActionChecklistPath);
   const publicActions = parsePublicActionChecklistMarkdown(publicActionChecklistText);
-  const selectedPublicAction = selectPublicAction(publicActions, {
-    actionType: publicActionHandoffType,
-  });
-  const publicActionHandoff = buildPublicActionHandoff({
+  const publicActionHandoff = await buildScheduledActionHandoff({
     checklistText: publicActionChecklistText,
+    actions: publicActions,
     actionType: publicActionHandoffType,
-    sourceText: selectedPublicAction?.source ? await readOptionalText(selectedPublicAction.source) : '',
     generatedAt: now,
   });
   await writePublicActionHandoff(publicActionHandoff, publicActionHandoffPath);
+  const profileActionHandoff = await buildScheduledActionHandoff({
+    checklistText: publicActionChecklistText,
+    actions: publicActions,
+    actionType: profileActionHandoffType,
+    generatedAt: now,
+  });
+  await writePublicActionHandoff(profileActionHandoff, profileActionHandoffPath);
   const result = {
     generatedAt,
     status: scheduledStatus(automation.status, metrics.status, manualPublishUrls),
@@ -251,6 +258,12 @@ export async function runScheduledGrowthLoop({
         actionType: publicActionHandoff.action?.type || publicActionHandoffType,
         source: publicActionHandoff.action?.source || null,
       },
+      profileActionHandoff: {
+        status: profileActionHandoff.status,
+        actionId: profileActionHandoff.action?.actionId || null,
+        actionType: profileActionHandoff.action?.type || profileActionHandoffType,
+        source: profileActionHandoff.action?.source || null,
+      },
     },
     metrics: {
       status: metrics.status,
@@ -267,6 +280,7 @@ export async function runScheduledGrowthLoop({
       experimentPlan: experimentPlanPath,
       goalAudit: goalAuditPath,
       publicActionHandoff: publicActionHandoffPath,
+      profileActionHandoff: profileActionHandoffPath,
       scheduledReport: scheduledReportPath,
     },
     boundary: [
@@ -377,6 +391,7 @@ ${humanGate(result)}
 - Experiment plan: \`${result.paths.experimentPlan}\`
 - Goal audit: \`${result.paths.goalAudit}\`
 - Public action handoff: \`${result.paths.publicActionHandoff}\`
+- Profile action handoff: \`${result.paths.profileActionHandoff}\`
 
 ## Experiment Plan
 
@@ -400,6 +415,14 @@ ${humanGate(result)}
 - Action type: ${result.automation.publicActionHandoff?.actionType || 'unknown'}
 - Source: \`${result.automation.publicActionHandoff?.source || 'not selected'}\`
 - Report: \`${result.paths.publicActionHandoff || 'not generated'}\`
+
+## Profile Action Handoff
+
+- Status: ${result.automation.profileActionHandoff?.status || 'unknown'}
+- Action id: ${result.automation.profileActionHandoff?.actionId || 'none'}
+- Action type: ${result.automation.profileActionHandoff?.actionType || 'unknown'}
+- Source: \`${result.automation.profileActionHandoff?.source || 'not selected'}\`
+- Report: \`${result.paths.profileActionHandoff || 'not generated'}\`
 
 ## Next Action
 
@@ -509,6 +532,21 @@ function humanGate(result) {
   }
 
   return lines.join('\n');
+}
+
+async function buildScheduledActionHandoff({
+  checklistText,
+  actions,
+  actionType,
+  generatedAt,
+}) {
+  const selected = selectPublicAction(actions, { actionType });
+  return buildPublicActionHandoff({
+    checklistText,
+    actionType,
+    sourceText: selected?.source ? await readOptionalText(selected.source) : '',
+    generatedAt,
+  });
 }
 
 async function summarizeManualPublishUrls(filePath) {
