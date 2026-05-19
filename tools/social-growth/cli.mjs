@@ -85,6 +85,11 @@ import { runXGrowthDryRun } from './flowDryRun.mjs';
 import { buildGrowthRecommendations, formatRecommendationsMarkdown } from './recommendations.mjs';
 import { buildGrowthFunnel, formatGrowthFunnelMarkdown } from './funnel.mjs';
 import {
+  buildGoalAudit,
+  formatGoalAuditMarkdown,
+  writeGoalAudit,
+} from './goalAudit.mjs';
+import {
   buildWeeklyExecutionPlan,
   formatWeeklyExecutionPlanMarkdown,
   writeWeeklyExecutionPlan,
@@ -200,6 +205,28 @@ if (command === 'articles') {
     console.log(formatGrowthFunnelMarkdown(ledger));
   } else {
     console.log(JSON.stringify(buildGrowthFunnel(ledger), null, 2));
+  }
+} else if (command === 'goal-audit') {
+  const articles = await loadCliArticles(args);
+  const audit = buildGoalAudit({
+    articles,
+    queue: await readOptionalJson(args.queue || 'data/social-growth/queue.json'),
+    ledger: await readOptionalJson(args.ledger || 'data/social-growth/ledger.json'),
+    metrics: await readOptionalJson(args.metrics || 'data/social-growth/posts.local.json'),
+    recommendationDocText: await readOptionalText(args.recommendationDoc || '.agents/skills/x-growth-publishing/references/x-recommendation-system.md'),
+    statusText: await readOptionalText(args.statusInput || 'data/social-growth/status.md'),
+    publicActionChecklistText: await readOptionalText(args.publicActionChecklist || 'data/social-growth/public-action-checklist.md'),
+    browserReadinessText: await readOptionalText(args.browserReadiness || 'data/social-growth/browser-readiness.md'),
+    manualPublishUrls: await readOptionalJson(args.manualPublishUrls || 'data/social-growth/manual-publish-kits/day2-published-urls.json'),
+    generatedAt: args.now ? new Date(args.now) : new Date(),
+  });
+  if (args.out) {
+    await writeGoalAudit(audit, args.out);
+    console.log(`Wrote X growth goal audit to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(audit, null, 2));
+  } else {
+    console.log(formatGoalAuditMarkdown(audit));
   }
 } else if (command === 'experiments') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
@@ -2224,6 +2251,7 @@ function printHelp() {
   npm run social:report -- --ledger data/social-growth/example-ledger.json --format markdown
   npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
   npm run social:funnel -- --ledger data/social-growth/ledger.json --format markdown
+  npm run social:goal-audit -- --out data/social-growth/goal-audit.md
   npm run social:experiments -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/experiment-plan.md
   npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
   npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md

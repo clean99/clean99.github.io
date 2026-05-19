@@ -62,6 +62,10 @@ import {
   formatGrowthFunnelMarkdown,
 } from '../tools/social-growth/funnel.mjs';
 import {
+  buildGoalAudit,
+  formatGoalAuditMarkdown,
+} from '../tools/social-growth/goalAudit.mjs';
+import {
   appendSnapshot,
   createLedger,
   createMetricsTemplateFromQueue,
@@ -477,6 +481,134 @@ test('growth funnel treats follows as conversion even when profile clicks are un
 
   assert.equal(funnel.status, 'converting');
   assert.equal(funnel.posts[0].bottleneck, 'converting');
+});
+
+test('goal audit maps the full X growth objective to evidence and current gaps', () => {
+  const articles = [{
+    title: 'Agent Skills 探索实录',
+    excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+    slug: 'Agent-Skills',
+    lang: 'zh',
+    tags: ['AI', 'Software Engineering'],
+    url: 'https://clean99.github.io/zh/agent-skills/',
+  }];
+  const queue = buildPublishQueue(articles, { lang: 'zh', limit: 1 });
+  const ledger = createLedger({
+    startDate: '2026-05-18',
+    baselineFollowers: 30,
+    followersIn7Days: 1000,
+  });
+  const audit = buildGoalAudit({
+    articles,
+    queue,
+    ledger,
+    metrics: {
+      followers: '30',
+      posts: [],
+    },
+    recommendationDocText: [
+      'X Help',
+      'xai-org/x-algorithm',
+      'twitter/the-algorithm',
+      'Mapping To Clean993 Metrics',
+      'Candidate entry',
+    ].join('\n'),
+    statusText: '# X Growth Status\nStatus: ready_via_user_chrome_confirmation\nManual Publish Fallback\nPublic X actions still require action-time confirmation',
+    publicActionChecklistText: 'Action id: `publish:Agent-Skills__zh__strong-thesis`\nneeds_action_time_confirmation\n## Prohibited Automation\npublish a post or X Article\nupload media\nEvery public X action must stop before final click',
+    browserReadinessText: '# X Browser Readiness\nStatus: ready_via_user_chrome_confirmation',
+    manualPublishUrls: {
+      status: 'ready_for_url_capture',
+      items: [{
+        id: 'Agent-Skills__zh__strong-thesis',
+        url: '',
+      }],
+    },
+    generatedAt: '2026-05-19T00:00:00.000Z',
+  });
+  const markdown = formatGoalAuditMarkdown(audit);
+
+  assert.equal(audit.status, 'needs_confirmed_publication');
+  assert.equal(audit.completion.achieved, false);
+  assert.equal(audit.requirements.find((item) => item.id === 'x_recommendation_research').status, 'proved');
+  assert.equal(audit.requirements.find((item) => item.id === 'public_distribution_feedback').status, 'not_proven');
+  assert.deepEqual(audit.nextActions.slice(0, 1), [
+    'Confirm and complete public action `publish:Agent-Skills__zh__strong-thesis`, then record the public X URL.',
+  ]);
+  assert.match(markdown, /X Growth Goal Audit/);
+  assert.match(markdown, /Follower delta: 0/);
+  assert.match(markdown, /Published posts: 0/);
+});
+
+test('goal audit only marks completion when the follower target and evidence are proved', () => {
+  const articles = [{
+    title: 'Agent Skills 探索实录',
+    excerpt: '拆解 Skill 的本质、设计原则和工程实践。',
+    slug: 'Agent-Skills',
+    lang: 'zh',
+    tags: ['AI'],
+    url: 'https://clean99.github.io/zh/agent-skills/',
+  }];
+  const queue = markQueueItemPublished(
+    buildPublishQueue(articles, { lang: 'zh', limit: 1 }),
+    {
+      id: 'Agent-Skills__zh__strong-thesis',
+      xPostUrl: 'https://x.com/Clean993/status/123',
+      publishedAt: '2026-05-19T01:00:00.000Z',
+    },
+  );
+  const ledger = appendSnapshot(createLedger({
+    startDate: '2026-05-18',
+    baselineFollowers: 30,
+    followersIn7Days: 1000,
+  }), {
+    date: '2026-05-25',
+    followers: 1030,
+    posts: [{
+      id: 'Agent-Skills__zh__strong-thesis',
+      articleSlug: 'Agent-Skills',
+      variant: 'strong-thesis',
+      url: 'https://x.com/Clean993/status/123',
+      metrics: {
+        views: 50000,
+        likes: 1200,
+        replies: 80,
+        follows: 1000,
+      },
+    }],
+  });
+  const audit = buildGoalAudit({
+    articles,
+    queue,
+    ledger,
+    metrics: {
+      followers: '1030',
+      posts: [{
+        id: 'Agent-Skills__zh__strong-thesis',
+        url: 'https://x.com/Clean993/status/123',
+        metrics: {
+          views: 50000,
+          follows: 1000,
+        },
+      }],
+    },
+    recommendationDocText: 'X Help\nxai-org/x-algorithm\ntwitter/the-algorithm\nMapping To Clean993 Metrics\nCandidate entry',
+    statusText: '# X Growth Status\nStatus: ready\nManual Publish Fallback\nPublic X actions still require action-time confirmation',
+    publicActionChecklistText: '## Prohibited Automation\npublish a post or X Article\nupload media\nEvery public X action must stop before final click',
+    browserReadinessText: '# X Browser Readiness\nStatus: ready_via_user_chrome_confirmation',
+    manualPublishUrls: {
+      status: 'ready_for_url_capture',
+      items: [{
+        id: 'Agent-Skills__zh__strong-thesis',
+        url: 'https://x.com/Clean993/status/123',
+      }],
+    },
+    generatedAt: '2026-05-25T00:00:00.000Z',
+  });
+
+  assert.equal(audit.status, 'complete');
+  assert.equal(audit.completion.achieved, true);
+  assert.equal(audit.completion.followerDelta, 1000);
+  assert.ok(audit.requirements.every((item) => item.status === 'proved'));
 });
 
 test('growth experiment plan turns the algorithm lens into measurable next experiments', async () => {

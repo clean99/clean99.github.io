@@ -28,6 +28,7 @@
     "social:experiments": "node tools/social-growth/cli.mjs experiments",
     "social:flow-dry-run": "node tools/social-growth/cli.mjs flow-dry-run",
     "social:funnel": "node tools/social-growth/cli.mjs funnel",
+    "social:goal-audit": "node tools/social-growth/cli.mjs goal-audit",
     "social:handoff": "node tools/social-growth/cli.mjs handoff",
     "social:image-backlog": "node tools/social-growth/cli.mjs image-backlog",
     "social:image-brief": "node tools/social-growth/cli.mjs image-brief",
