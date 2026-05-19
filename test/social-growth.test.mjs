@@ -2298,6 +2298,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       engagementBrowserCapturePath: join(outDir, 'engagement-browser-capture.md'),
       xSkillDir: skillDir,
       xBunCommand: 'bun',
+      xProfileDirectory: 'Profile 1',
       queueOptions: {
         limit: 1,
         lang: 'zh',
@@ -2365,6 +2366,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Browser readiness/);
     assert.match(scheduledReport, /Human Gate/);
     assert.match(scheduledReport, /Manual Publish URL Capture/);
+    assert.match(scheduledReport, /Timeline discovery command: `npm run social:discover-published-urls -- --input .* --xProfileDirectory 'Profile 1'`/);
     assert.match(scheduledReport, /Fill command: `npm run social:manual-publish-url -- --input .* --id .* --url <x-thread-url>`/);
     assert.match(scheduledReport, /Publish confirmation packet: ready_for_confirmation/);
     assert.match(scheduledReport, /Public-action boundary: every publish, media upload, reply, like, repost, follow, profile edit, and pin still requires action-time confirmation in Chrome/);
@@ -4216,6 +4218,7 @@ test('manual publish kits CLI writes all ready fallback kits and an index', asyn
       '--skill-dir', skillDir,
       '--bun-command', 'bun',
       '--publishMode', 'thread_fallback',
+      '--xProfileDirectory', 'Profile 1',
       '--day', '1',
       '--out-dir', kitDir,
       '--out', indexPath,
@@ -4241,6 +4244,7 @@ test('manual publish kits CLI writes all ready fallback kits and an index', asyn
     assert.match(indexMarkdown, /urlHint/);
     assert.match(indexMarkdown, /postTextPath/);
     assert.match(indexMarkdown, /manual-publish-url/);
+    assert.match(indexMarkdown, /discover-published-urls -- --input .* --xProfileDirectory 'Profile 1'/);
     assert.equal(urlTemplate.status, 'ready_for_recovery');
     assert.equal(urlTemplate.items.length, 2);
     assert.equal(urlTemplate.items[0].id, plannedSlots[0].item.id);
@@ -6679,6 +6683,11 @@ test('published URL discovery matches timeline statuses to pending manual publis
     });
     await writeJson(statusesPath, {
       statuses: [
+        {
+          url: 'https://x.com/OtherAccount/status/1111111111111111111',
+          author: '@OtherAccount',
+          text: `OtherAccount @OtherAccount · 1m\n${firstPost}\n99 Views`,
+        },
         {
           url: 'https://x.com/Clean993/status/3333333333333333333?s=20',
           author: '@Clean993',

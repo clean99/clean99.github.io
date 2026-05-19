@@ -822,6 +822,8 @@ async function writeReadyManualPublishKits({
       day: dayReadiness?.day || 1,
       outDir,
     }),
+    xProfileDir,
+    xProfileDirectory,
   });
   const resolvedUrlTemplatePath = index.batchRecovery.urlTemplatePath;
   const nextUrlTemplate = buildManualPublishUrlTemplate({

@@ -188,7 +188,10 @@ export async function runScheduledGrowthLoop({
   const queue = await readJson(queuePath);
   const ledger = await readJson(ledgerPath);
   const metricsTemplate = await readOptionalJson(metricsPath);
-  const manualPublishUrls = await summarizeManualPublishUrls(automation.paths.manualPublishUrlTemplate);
+  const manualPublishUrls = await summarizeManualPublishUrls(automation.paths.manualPublishUrlTemplate, {
+    xProfileDir,
+    xProfileDirectory,
+  });
   const experimentPlan = buildGrowthExperimentPlan({
     queue,
     ledger,
@@ -565,7 +568,10 @@ async function buildScheduledActionHandoff({
   });
 }
 
-async function summarizeManualPublishUrls(filePath) {
+async function summarizeManualPublishUrls(filePath, {
+  xProfileDir = '',
+  xProfileDirectory = '',
+} = {}) {
   const fallback = {
     status: 'missing',
     path: filePath || '',
@@ -609,7 +615,10 @@ async function summarizeManualPublishUrls(filePath) {
       postTextPath: item.postTextPath || '',
       fillCommand: `npm run social:manual-publish-url -- --input ${shellQuote(filePath)} --id ${shellQuote(item.id)} --url <x-thread-url>`,
     })),
-    discoveryCommand: `npm run social:discover-published-urls -- --input ${shellQuote(filePath)}`,
+    discoveryCommand: publishedUrlDiscoveryCommand(filePath, {
+      xProfileDir,
+      xProfileDirectory,
+    }),
     recoveryCommand: `npm run social:post-publish-recovery-batch -- --input ${shellQuote(filePath)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies --launch-window-dir data/social-growth/launch-windows`,
   };
 }
@@ -659,6 +668,16 @@ function summarizeEngagementBrowserCapture(text, filePath) {
     loginRequiredRuns,
     capturedOpportunityFiles,
   };
+}
+
+function publishedUrlDiscoveryCommand(filePath, { xProfileDir = '', xProfileDirectory = '' } = {}) {
+  const args = [
+    'npm run social:discover-published-urls -- --input',
+    shellQuote(filePath),
+  ];
+  if (xProfileDir) args.push('--xProfileDir', shellQuote(xProfileDir));
+  if (xProfileDirectory) args.push('--xProfileDirectory', shellQuote(xProfileDirectory));
+  return args.join(' ');
 }
 
 async function readOptionalText(filePath) {

@@ -1224,6 +1224,8 @@ if (command === 'articles') {
       day: dayReadiness.day,
       outDir,
     }),
+    xProfileDir: args.xProfileDir || args.profileDir,
+    xProfileDirectory: args.xProfileDirectory || args.profileDirectory,
   });
   const urlTemplatePath = index.batchRecovery.urlTemplatePath;
   const nextUrlTemplate = buildManualPublishUrlTemplate({
@@ -1825,7 +1827,7 @@ async function runPublishedUrlDiscovery(options = {}) {
   }
 
   const statusPayloadPath = statusesPath || statusesOut;
-  const statuses = await readStatusesFromFile(statusPayloadPath);
+  const statuses = await readStatusesFromFile(statusPayloadPath, { account });
   const template = await readJson(inputPath);
   const discovery = await discoverPublishedUrlsFromStatuses({
     template,
@@ -1840,7 +1842,9 @@ async function runPublishedUrlDiscovery(options = {}) {
 
   return {
     generatedAt: (options.now ? new Date(options.now) : new Date()).toISOString(),
-    status: discovery.status,
+    status: captureRuns.some((run) => run.loginRequired) && !discovery.matched
+      ? 'needs_x_login'
+      : discovery.status,
     inputPath,
     outPath,
     account,
@@ -1908,7 +1912,7 @@ ${result.boundary}
 `;
 }
 
-async function readStatusesFromFile(filePath) {
+async function readStatusesFromFile(filePath, { account = '' } = {}) {
   const payload = await readExistingJson(filePath);
   if (!payload) return [];
   const statuses = Array.isArray(payload) ? payload : payload.statuses;
@@ -1916,7 +1920,20 @@ async function readStatusesFromFile(filePath) {
     url: normalizeXStatusUrl(status.url),
     author: status.author || '',
     text: String(status.text || ''),
-  })).filter((status) => status.url && status.text.trim());
+  })).filter((status) => (
+    status.url
+    && status.text.trim()
+    && statusBelongsToAccount(status, account)
+  ));
+}
+
+function statusBelongsToAccount(status, account) {
+  const expected = String(account || '').replace(/^@/, '').toLowerCase();
+  if (!expected) return true;
+  const urlAccount = status.url.split('/').filter(Boolean)[2]?.toLowerCase() || '';
+  if (urlAccount) return urlAccount === expected;
+  const author = String(status.author || '').replace(/^@/, '').toLowerCase();
+  return !author || author === expected;
 }
 
 async function runEngagementBrowserCapture(options = {}) {

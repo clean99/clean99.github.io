@@ -256,6 +256,8 @@ export function buildManualPublishKitIndex({
   kits = [],
   urlTemplatePath = '',
   batchRecoveryCommand = '',
+  xProfileDir = '',
+  xProfileDirectory = '',
 } = {}) {
   const recoveryCommand = batchRecoveryCommand || (
     urlTemplatePath
@@ -272,6 +274,10 @@ export function buildManualPublishKitIndex({
     kits,
     batchRecovery: {
       urlTemplatePath,
+      discoveryCommand: publishedUrlDiscoveryCommand(urlTemplatePath, {
+        xProfileDir,
+        xProfileDirectory,
+      }),
       command: recoveryCommand,
     },
     boundary: 'Manual publish kits only. Publishing, uploading media, replying, liking, reposting, following, editing the profile, and pinning content still require action-time confirmation in Chrome.',
@@ -346,7 +352,7 @@ function formatBatchRecovery(index) {
   return `1. After confirmed publication, let the local system try to discover fresh status URLs from the account timeline:
 
 \`\`\`bash
-npm run social:discover-published-urls -- --input ${shellQuote(index.batchRecovery.urlTemplatePath)}
+${index.batchRecovery.discoveryCommand || publishedUrlDiscoveryCommand(index.batchRecovery.urlTemplatePath)}
 \`\`\`
 
 2. If discovery misses a post, fill \`url\` for each published item in \`${index.batchRecovery.urlTemplatePath}\`.
@@ -363,6 +369,16 @@ function shellQuote(value) {
   const text = String(value);
   if (/^[A-Za-z0-9_./:=+-]+$/.test(text)) return text;
   return `'${text.replace(/'/g, "'\\''")}'`;
+}
+
+function publishedUrlDiscoveryCommand(urlTemplatePath, { xProfileDir = '', xProfileDirectory = '' } = {}) {
+  const args = [
+    'npm run social:discover-published-urls -- --input',
+    shellQuote(urlTemplatePath),
+  ];
+  if (xProfileDir) args.push('--xProfileDir', shellQuote(xProfileDir));
+  if (xProfileDirectory) args.push('--xProfileDirectory', shellQuote(xProfileDirectory));
+  return args.join(' ');
 }
 
 function safePathSegment(value) {
