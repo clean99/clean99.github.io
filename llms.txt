@@ -1,25 +1,32 @@
-# Koh Hom's Blog
+# Koh Hom — Software, AI, and Inner Practice
 
-> A software engineering blog by Koh Hom (许峰), focusing on frontend development, testing, React, and AI-assisted coding. Bilingual content in English and Chinese.
+> Notes on software, AI, systems, and the practice of living well. A bilingual personal knowledge site by Koh Hom (Xu Feng).
 
 ## About the Author
 
-Koh Hom is a software engineer from Chaoshan, China. Graduated from South China Normal University (SCNU). Previously interned at Ant Group and ByteDance. Currently working at TikTok in Singapore.
+Koh Hom is a software engineer currently working on frontend systems. His writing covers reliable software, frontend architecture, AI-assisted development, learning systems, and inner practice.
 
-## Topics Covered
+## Main Paths
 
-- Frontend Development (React, Redux, Hooks, Server Components, Performance Optimization)
-- Software Testing (TDD, Test Case Design, React Testing, E2E Testing)
-- Software Engineering (SDLC, Agile, Code Complexity, Tailwind CSS Architecture)
-- AI & Code Generation (ChatGPT, GitHub Copilot, Modular Design with AI, Agent Skills)
-- Web Performance (Core Web Vitals, Browser Internals)
-- Computer Science Fundamentals (SICP, Data Abstraction)
+- Engineering: frontend systems, reliability, performance, testing, and architecture.
+- AI & Agents: AI-assisted development, agent systems, automation, and human-AI workflows.
+- Systems & Learning: learning methods, abstractions, mental models, and computer science notes.
+- Mind & Practice: Buddhism, attention, reading notes, and reflections on living well.
 
-## Recent Posts
+## Key Pages
 
+- Home: https://clean99.github.io/
+- Writing: https://clean99.github.io/writing/
+- Projects: https://clean99.github.io/projects/
+- For Interviewers: https://clean99.github.io/interviewers/
+- About: https://clean99.github.io/About/
+
+## Selected Engineering and AI Posts
+
+- [Workspace v2 Tab System: Building Browser Tabs Inside Workspace](https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/)
+- [Workspace v2 Tab System Performance: First Load, Hot Switch, And Background Pressure](https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/)
+- [Automated AI Performance Optimization with Harness and Goal-Driven Loops](https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/)
 - [Agent Skills: The Functional Blueprint for AI Agents](https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/)
-- [Vibe Coding VS Spec-Driven Coding](https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/)
-- [A Complete SEO Overhaul for My Hexo Blog](https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/)
 
 ## Links
 

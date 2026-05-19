@@ -11,7 +11,7 @@
   <meta charset="utf-8">
 
   
-  <title>React 运行时性能优化 | Koh Hom&#39;s Blog</title>
+  <title>React 运行时性能优化 | Koh Hom — Software, AI, and Inner Practice</title>
   
   <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
@@ -19,16 +19,14 @@
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/16/React-Performance-Optimization/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2024/04/16/React-Performance-Optimization/" />
   <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/16/React-Performance-Optimization/" />
-  
   <meta name="description" content="优化 React 应用的性能，主要有两个方向：  渲染（Rendering）：渲染过程是 React 应用中开销最大的部分之一（包含 Diff 计算）。 计算（Calculation）：受限于浏览器的有限资源，浏览器并不适合执行重计算任务。  渲染React.memo当一个组件重新渲染时，无论父组件">
   
-  
-  <meta name="keywords" content="frontend development, e2e testing, unit testing, software engineering, TikTok, computer science, Singapore, Koh Hom, developer blog">
+  <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
   
   <meta name="author" content="Koh Hom">
   
   <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
-  <meta property="og:site_name" content="Koh Hom&#39;s Blog | Frontend &amp; Testing Blog" />
+  <meta property="og:site_name" content="Koh Hom — Software, AI, and Inner Practice" />
   
   <meta property="og:type" content="article" />
   <meta property="article:published_time" content="2024-04-16T00:32:53.000Z" />
@@ -42,21 +40,17 @@
   <meta property="article:tag" content="React" />
   
   
-  <meta property="og:title" content="React 运行时性能优化 | Koh Hom&#39;s Blog" />
+  <meta property="og:title" content="React 运行时性能优化 | Koh Hom — Software, AI, and Inner Practice" />
   <meta property="og:locale" content="zh_CN" />
   <meta property="og:locale:alternate" content="en_US" />
-  
   <meta property="og:description" content="优化 React 应用的性能，主要有两个方向：  渲染（Rendering）：渲染过程是 React 应用中开销最大的部分之一（包含 Diff 计算）。 计算（Calculation）：受限于浏览器的有限资源，浏览器并不适合执行重计算任务。  渲染React.memo当一个组件重新渲染时，无论父组件">
-  
   <meta property="og:url" content="https://clean99.github.io/zh/2024/04/16/React-Performance-Optimization/" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@Clean993">
   <meta name="twitter:creator" content="@Clean993">
-  <meta name="twitter:title" content="React 运行时性能优化 | Koh Hom&#39;s Blog">
-  
+  <meta name="twitter:title" content="React 运行时性能优化 | Koh Hom — Software, AI, and Inner Practice">
   <meta name="twitter:description" content="优化 React 应用的性能，主要有两个方向：  渲染（Rendering）：渲染过程是 React 应用中开销最大的部分之一（包含 Diff 计算）。 计算（Calculation）：受限于浏览器的有限资源，浏览器并不适合执行重计算任务。  渲染React.memo当一个组件重新渲染时，无论父组件">
-  
   <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2024/04/16/React-Performance-Optimization/" />
 
@@ -186,7 +180,7 @@
   })();
   </script>
 
-<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom's Blog | Frontend & Testing Blog" type="application/atom+xml">
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom — Software, AI, and Inner Practice" type="application/atom+xml">
 </head>
 
 <body>
@@ -221,35 +215,34 @@
     </h1>
   </div>
 
-  <div class="six columns ml-1">
+  <div class="six columns site-title-wrap">
     <h1 class="mt-2">
-      <a href="/zh/" style="text-decoration:none;color:inherit">Hi Folks.</a>
+      <a href="/zh/" style="text-decoration:none;color:inherit">Koh Hom</a>
     </h1>
   </div>
 
   <div class="twelve columns">
     <div class="row">
-      <div class="nine columns left">
+      <nav class="site-nav nine columns left" aria-label="Primary navigation">
         <a href="/zh/">首页</a>
         
           
-          <a href="/zh/Works" class="ml">作品</a>
+          <a href="/zh/writing" class="ml">写作</a>
+          
+        
+          
+          <a href="/zh/projects" class="ml">项目</a>
+          
+        
+          
+          <a href="/zh/interviewers" class="ml">面试官入口</a>
           
         
           
           <a href="/zh/About" class="ml">关于</a>
           
         
-          
-          <a href="/zh/Links" class="ml">友链</a>
-          
-        
-        
-          
-            <a href="mailto:xff9924@gmail.com" target="_blank" class="ml">邮箱</a>
-          
-        
-      </div>
+      </nav>
     </div>
     <hr style="margin-bottom: 2.6rem">
   </div>
@@ -332,13 +325,15 @@
           <div class="row mt-2">
   
     <div class="eight columns">
-      <p id="madewith">用 ❤ 和
-        <a class="footer-link icon" href="https://hexo.io" target="_blank" style="text-decoration: none;" rel="noreferrer" aria-label="Hexo.io">
-        <svg class="hexo svg-hov" width="14" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>Hexo.js</title><path d="M12 .007L1.57 6.056V18.05L12 23.995l10.43-6.049V5.952L12 .007zm4.798 17.105l-.939.521-.939-.521V12.94H9.08v4.172l-.94.521-.938-.521V6.89l.939-.521.939.521v4.172h5.84V6.89l.94-.521.938.521v10.222z"/></svg>
-        </a>
+      <p id="madewith">
+        &copy; 2026 Koh Hom.
         
-        制作于 <a href="https://en.wikipedia.org/wiki/Earth" target="_blank" rel="noreferrer">Earth</a>.</p>
+          <a href="mailto:xff9924@gmail.com">邮箱</a>
         
+        <a href="https://github.com/clean99" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="/atom.xml">RSS</a>
+        <a href="/zh/Links">友链</a>
+      </p>
     </div>
 
     <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->

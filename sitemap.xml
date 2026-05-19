@@ -11,6 +11,78 @@
   </url>
   
   <url>
+    <loc>https://clean99.github.io/About/</loc>
+    
+    <lastmod>2026-05-19</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/interviewers/</loc>
+    
+    <lastmod>2026-05-19</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/projects/</loc>
+    
+    <lastmod>2026-05-19</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/writing/</loc>
+    
+    <lastmod>2026-05-19</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/zh/About/</loc>
+    
+    <lastmod>2026-05-19</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/zh/interviewers/</loc>
+    
+    <lastmod>2026-05-19</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/zh/projects/</loc>
+    
+    <lastmod>2026-05-19</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/zh/writing/</loc>
+    
+    <lastmod>2026-05-19</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/</loc>
     
     <lastmod>2026-05-18</lastmod>
@@ -29,7 +101,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/</loc>
+    <loc>https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/</loc>
     
     <lastmod>2026-05-18</lastmod>
     
@@ -38,7 +110,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/</loc>
+    <loc>https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/</loc>
     
     <lastmod>2026-05-18</lastmod>
     
@@ -95,24 +167,6 @@
     <loc>https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
     
     <lastmod>2026-03-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/About/</loc>
-    
-    <lastmod>2026-03-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/About/</loc>
-    
-    <lastmod>2026-03-10</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -245,7 +299,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2024/04/10/Web-Performance-Optimization/</loc>
+    <loc>https://clean99.github.io/zh/2024/04/10/Web-Performance-Optimization/</loc>
     
     <lastmod>2024-04-10</lastmod>
     
@@ -254,7 +308,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2024/04/10/Web-Performance-Optimization/</loc>
+    <loc>https://clean99.github.io/2024/04/10/Web-Performance-Optimization/</loc>
     
     <lastmod>2024-04-10</lastmod>
     
@@ -299,7 +353,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/</loc>
+    <loc>https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/</loc>
     
     <lastmod>2023-04-01</lastmod>
     
@@ -308,7 +362,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/</loc>
+    <loc>https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/</loc>
     
     <lastmod>2023-04-01</lastmod>
     
@@ -461,7 +515,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/</loc>
+    <loc>https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/</loc>
     
     <lastmod>2022-04-27</lastmod>
     
@@ -470,7 +524,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/</loc>
+    <loc>https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/</loc>
     
     <lastmod>2022-04-27</lastmod>
     
