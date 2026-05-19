@@ -40,6 +40,12 @@
           <a href="<%- lang_url(theme.menu[name]) %>" class="ml"><%- __('nav.' + name.toLowerCase()) %></a>
           <% } %>
         <% } %>
+        <a
+          href="<%- alternate_url() %>"
+          class="ml language-switch"
+          onclick="localStorage.setItem('preferredLang', '<%= is_zh() ? 'en' : 'zh' %>')"
+          aria-label="<%= __('post.lang_switch') %>"
+        ><%= is_zh() ? 'English' : '中文' %></a>
       </nav>
     </div>
     <hr style="margin-bottom: 2.6rem">

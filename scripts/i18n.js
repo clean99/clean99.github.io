@@ -70,7 +70,7 @@ hexo.extend.helper.register('post_area', function(post) {
 });
 
 hexo.extend.helper.register('area_label', function(area) {
-  return postMeta.areaLabel(area);
+  return postMeta.areaLabel(area, this.page_lang());
 });
 
 hexo.extend.helper.register('post_summary', function(post, maxLength) {
@@ -78,11 +78,49 @@ hexo.extend.helper.register('post_summary', function(post, maxLength) {
 });
 
 hexo.extend.helper.register('post_reading_time', function(post) {
-  return postMeta.readingTime(post);
+  var readTime = postMeta.readingTime(post);
+  if (this.page_lang() !== 'zh') return readTime;
+  return readTime.replace(' min read', ' 分钟阅读');
 });
 
 hexo.extend.helper.register('post_tag_names', function(post) {
   return postMeta.tagNames(post);
+});
+
+hexo.extend.helper.register('tag_label', function(tag) {
+  if (this.page_lang() !== 'zh') return tag;
+  var labels = {
+    'Software Engineering': '软件工程',
+    'software engineering': '软件工程',
+    'Frontend': '前端',
+    'frontend': '前端',
+    'React': 'React',
+    'react': 'React',
+    'Web Performance': 'Web 性能',
+    'Testing': '测试',
+    'testing': '测试',
+    'AI': 'AI',
+    'ChatGPT': 'ChatGPT',
+    'Claude Code': 'Claude Code',
+    'Agent': 'Agent',
+    'Skills': 'Skills',
+    'OpenSpec': 'OpenSpec',
+    'code generation': '代码生成',
+    'copilot': 'Copilot',
+    'tdd': 'TDD',
+    'sdlc': 'SDLC',
+    'agile': '敏捷',
+    'browser': '浏览器',
+    'development': '开发',
+    'error-handling': '错误处理',
+    'error-boundary': 'Error Boundary',
+    'fault-tolerance': '容错',
+    'robustness': '健壮性',
+    'reliability': '可靠性',
+    'SEO': 'SEO',
+    'sicpjs': 'SICPJS'
+  };
+  return labels[tag] || tag;
 });
 
 hexo.extend.helper.register('interviewer_posts', function(limit, lang) {

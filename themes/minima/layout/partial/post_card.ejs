@@ -20,7 +20,7 @@ var summary = post_summary(post, 180);
   <% if (tags.length) { %>
     <div class="tag-list" aria-label="Tags">
       <% tags.forEach(function(tag) { %>
-        <span><%- tag %></span>
+        <span><%- tag_label(tag) %></span>
       <% }) %>
     </div>
   <% } %>

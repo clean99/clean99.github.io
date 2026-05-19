@@ -1,13 +1,30 @@
 <%
 var currentLang = page.lang || page_lang();
 var projects = project_posts(currentLang);
+var copy = currentLang === 'zh' ? {
+  eyebrow: '项目',
+  title: '项目',
+  intro: '我构建或探索过的项目、实验和工具。',
+  readNote: '阅读项目笔记',
+  empty: '精选项目会逐步补充。现在可以先看我关于工程系统和 AI 辅助开发的文章。',
+  browseWriting: '浏览写作',
+  note: '这个页面只列出当前仓库中已有笔记支撑的项目或实验。我不会编造不存在的 demo 或仓库。'
+} : {
+  eyebrow: 'Projects',
+  title: 'Projects',
+  intro: 'Selected projects, experiments, and tools I&rsquo;ve built or explored.',
+  readNote: 'Read the project note',
+  empty: 'Selected projects will be added here soon. For now, see my writing on engineering systems and AI-assisted development.',
+  browseWriting: 'Browse writing',
+  note: 'This page only lists projects or experiments with existing notes in this repository. I am not inventing demos or repositories that do not exist.'
+};
 %>
 
 <article class="page-shell">
   <header class="page-hero">
-    <p class="eyebrow">Projects</p>
-    <h1>Projects</h1>
-    <p>Selected projects, experiments, and tools I&rsquo;ve built or explored.</p>
+    <p class="eyebrow"><%- copy.eyebrow %></p>
+    <h1><%- copy.title %></h1>
+    <p><%- copy.intro %></p>
   </header>
 
   <% if (projects.length) { %>
@@ -19,21 +36,21 @@ var projects = project_posts(currentLang);
           <p><%- post_summary(post, 180) %></p>
           <div class="tag-list">
             <% post_tag_names(post).slice(0, 5).forEach(function(tag) { %>
-              <span><%- tag %></span>
+              <span><%- tag_label(tag) %></span>
             <% }) %>
           </div>
-          <p class="project-card__links"><a href="<%- url_for(post.path) %>">Read the project note</a></p>
+          <p class="project-card__links"><a href="<%- url_for(post.path) %>"><%- copy.readNote %></a></p>
         </article>
       <% }) %>
     </div>
   <% } else { %>
     <section class="section-block">
-      <p>Selected projects will be added here soon. For now, see my writing on engineering systems and AI-assisted development.</p>
-      <a class="cta-link" href="<%- lang_url('/writing') %>">Browse writing</a>
+      <p><%- copy.empty %></p>
+      <a class="cta-link" href="<%- lang_url('/writing') %>"><%- copy.browseWriting %></a>
     </section>
   <% } %>
 
   <section class="section-block">
-    <p class="muted">This page only lists projects or experiments with existing notes in this repository. I am not inventing demos or repositories that do not exist.</p>
+    <p class="muted"><%- copy.note %></p>
   </section>
 </article>

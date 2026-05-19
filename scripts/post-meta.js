@@ -9,6 +9,15 @@ const AREA_LABELS = {
   life: 'Life'
 };
 
+const AREA_LABELS_ZH = {
+  engineering: '工程',
+  ai: 'AI 与 Agent',
+  systems: '系统与学习',
+  learning: '系统与学习',
+  mind: '心智与实践',
+  life: '生活'
+};
+
 const AREA_SLUGS = Object.keys(AREA_LABELS);
 
 function asArray(value) {
@@ -67,8 +76,9 @@ function inferArea(post) {
   return 'engineering';
 }
 
-function areaLabel(area) {
-  return AREA_LABELS[normalizeArea(area) || area] || AREA_LABELS[inferArea({ area: area })] || 'Engineering';
+function areaLabel(area, lang) {
+  var labels = lang === 'zh' ? AREA_LABELS_ZH : AREA_LABELS;
+  return labels[normalizeArea(area) || area] || labels[inferArea({ area: area })] || labels.engineering;
 }
 
 function cleanText(value, stripHtml) {
@@ -242,6 +252,7 @@ function projectPosts(posts, lang) {
 
 module.exports = {
   AREA_LABELS,
+  AREA_LABELS_ZH,
   asArray,
   areaLabel,
   inferArea,

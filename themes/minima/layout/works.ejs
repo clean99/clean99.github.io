@@ -1,8 +1,23 @@
+<%
+var currentLang = page.lang || page_lang();
+var copy = currentLang === 'zh' ? {
+  eyebrow: '已迁移',
+  title: 'Works 已改为项目页',
+  body: '这个网站现在使用项目页展示精选实验、工具和项目笔记。',
+  cta: '前往项目页'
+} : {
+  eyebrow: 'Moved',
+  title: 'Works is now Projects',
+  body: 'This site now uses Projects for selected experiments, tools, and project notes.',
+  cta: 'Go to Projects'
+};
+%>
+
 <article class="page-shell">
   <header class="page-hero">
-    <p class="eyebrow">Moved</p>
-    <h1>Works is now Projects</h1>
-    <p>This site now uses Projects for selected experiments, tools, and project notes.</p>
-    <a class="cta-link" href="<%- lang_url('/projects') %>">Go to Projects</a>
+    <p class="eyebrow"><%- copy.eyebrow %></p>
+    <h1><%- copy.title %></h1>
+    <p><%- copy.body %></p>
+    <a class="cta-link" href="<%- lang_url('/projects') %>"><%- copy.cta %></a>
   </header>
 </article>

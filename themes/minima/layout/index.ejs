@@ -1,46 +1,76 @@
 <%
 var currentLang = page.lang || (page.path && page.path.indexOf('zh/') === 0 ? 'zh' : 'en');
 var latestPosts = posts_for_lang(currentLang, 6);
-var paths = [
-  {
-    key: 'engineering',
-    title: 'Engineering',
-    description: 'Frontend systems, reliability, performance, testing, and architecture.'
-  },
-  {
-    key: 'ai',
-    title: 'AI & Agents',
-    description: 'AI-assisted development, agent systems, automation, and human-AI workflows.'
-  },
-  {
-    key: 'systems',
-    title: 'Systems & Learning',
-    description: 'How I learn, reason, build mental models, and connect ideas across domains.'
-  },
-  {
-    key: 'mind',
-    title: 'Mind & Practice',
-    description: 'Buddhism, attention, reading notes, and reflections on living well.'
-  }
-];
+var copy = currentLang === 'zh' ? {
+  eyebrow: '工程师现场笔记',
+  name: '许峰 Koh Hom',
+  lede: '探索前端系统、AI Agent、学习方法与内在实践的软件工程师。',
+  intro: '我写关于可靠软件、AI 协作、复杂系统理解，以及如何更清楚地生活的长期笔记。',
+  startEngineering: '从工程文章开始',
+  interviewers: '面试官入口',
+  latestWriting: '最新文章',
+  featuredEyebrow: '主题路径',
+  featuredTitle: '进入这个笔记本的几条路径',
+  viewEssays: '查看文章',
+  comingSoon: '即将补充',
+  interviewerTitle: '更快看到工程能力',
+  interviewerBody: '如果你正在评估我的工程能力，可以从这里开始：精选的前端架构、性能、可靠性、测试和 AI 辅助开发文章与项目笔记。',
+  interviewerCta: '打开面试官入口',
+  latestEyebrow: '最新写作',
+  latestTitle: '最近笔记',
+  browseAll: '浏览全部文章',
+  paths: [
+    ['engineering', '工程', '前端系统、可靠性、性能、测试与架构。'],
+    ['ai', 'AI 与 Agent', 'AI 辅助开发、Agent 系统、自动化和人机协作工作流。'],
+    ['systems', '系统与学习', '我如何学习、推理、建立心智模型，并连接不同领域的想法。'],
+    ['mind', '心智与实践', '佛学、注意力、阅读笔记，以及关于好好生活的反思。']
+  ]
+} : {
+  eyebrow: 'Engineer&rsquo;s Field Notes',
+  name: 'Koh Hom',
+  lede: 'Software engineer exploring frontend systems, AI agents, learning, and inner practice.',
+  intro: 'I write about building reliable software, working with AI, understanding complex systems, and practicing a clearer way of living.',
+  startEngineering: 'Start with Engineering',
+  interviewers: 'For Interviewers',
+  latestWriting: 'Latest Writing',
+  featuredEyebrow: 'Featured paths',
+  featuredTitle: 'Ways into the notebook',
+  viewEssays: 'View essays',
+  comingSoon: 'Coming soon',
+  interviewerTitle: 'A shorter path to the engineering signal',
+  interviewerBody: 'If you&rsquo;re evaluating my engineering work, start here: selected essays and projects on frontend architecture, performance, reliability, testing, and AI-assisted development.',
+  interviewerCta: 'Open the interviewers page',
+  latestEyebrow: 'Latest writing',
+  latestTitle: 'Recent notes',
+  browseAll: 'Browse all writing',
+  paths: [
+    ['engineering', 'Engineering', 'Frontend systems, reliability, performance, testing, and architecture.'],
+    ['ai', 'AI & Agents', 'AI-assisted development, agent systems, automation, and human-AI workflows.'],
+    ['systems', 'Systems & Learning', 'How I learn, reason, build mental models, and connect ideas across domains.'],
+    ['mind', 'Mind & Practice', 'Buddhism, attention, reading notes, and reflections on living well.']
+  ]
+};
+var paths = copy.paths.map(function(item) {
+  return { key: item[0], title: item[1], description: item[2] };
+});
 %>
 
 <section class="hero">
-  <p class="eyebrow">Engineer&rsquo;s Field Notes</p>
-  <h1>Koh Hom</h1>
-  <p class="hero__lede">Software engineer exploring frontend systems, AI agents, learning, and inner practice.</p>
-  <p>I write about building reliable software, working with AI, understanding complex systems, and practicing a clearer way of living.</p>
+  <p class="eyebrow"><%- copy.eyebrow %></p>
+  <h1><%- copy.name %></h1>
+  <p class="hero__lede"><%- copy.lede %></p>
+  <p><%- copy.intro %></p>
   <div class="cta-row">
-    <a class="cta-link" href="<%- lang_url('/writing') %>#engineering">Start with Engineering</a>
-    <a class="cta-link" href="<%- lang_url('/interviewers') %>">For Interviewers</a>
-    <a class="cta-link" href="#latest-writing">Latest Writing</a>
+    <a class="cta-link" href="<%- lang_url('/writing') %>#engineering"><%- copy.startEngineering %></a>
+    <a class="cta-link" href="<%- lang_url('/interviewers') %>"><%- copy.interviewers %></a>
+    <a class="cta-link" href="#latest-writing"><%- copy.latestWriting %></a>
   </div>
 </section>
 
 <section class="section-block" aria-labelledby="featured-paths-title">
   <div class="section-heading">
-    <p class="eyebrow">Featured paths</p>
-    <h2 id="featured-paths-title">Ways into the notebook</h2>
+    <p class="eyebrow"><%- copy.featuredEyebrow %></p>
+    <h2 id="featured-paths-title"><%- copy.featuredTitle %></h2>
   </div>
   <div class="path-grid">
     <% paths.forEach(function(path) { var count = posts_in_area(path.key, 1, currentLang).length; %>
@@ -48,9 +78,9 @@ var paths = [
         <h3><%- path.title %></h3>
         <p><%- path.description %></p>
         <% if (count) { %>
-          <a href="<%- lang_url('/writing') %>#<%- path.key %>">View essays</a>
+          <a href="<%- lang_url('/writing') %>#<%- path.key %>"><%- copy.viewEssays %></a>
         <% } else { %>
-          <span class="muted">Coming soon</span>
+          <span class="muted"><%- copy.comingSoon %></span>
         <% } %>
       </article>
     <% }) %>
@@ -58,21 +88,21 @@ var paths = [
 </section>
 
 <section class="section-block interview-highlight" aria-labelledby="interviewers-title">
-  <p class="eyebrow">For interviewers</p>
-  <h2 id="interviewers-title">A shorter path to the engineering signal</h2>
-  <p>If you&rsquo;re evaluating my engineering work, start here: selected essays and projects on frontend architecture, performance, reliability, testing, and AI-assisted development.</p>
-  <a class="cta-link" href="<%- lang_url('/interviewers') %>">Open the interviewers page</a>
+  <p class="eyebrow"><%- copy.interviewers %></p>
+  <h2 id="interviewers-title"><%- copy.interviewerTitle %></h2>
+  <p><%- copy.interviewerBody %></p>
+  <a class="cta-link" href="<%- lang_url('/interviewers') %>"><%- copy.interviewerCta %></a>
 </section>
 
 <section class="section-block" id="latest-writing" aria-labelledby="latest-writing-title">
   <div class="section-heading">
-    <p class="eyebrow">Latest writing</p>
-    <h2 id="latest-writing-title">Recent notes</h2>
+    <p class="eyebrow"><%- copy.latestEyebrow %></p>
+    <h2 id="latest-writing-title"><%- copy.latestTitle %></h2>
   </div>
   <div class="post-list">
     <% latestPosts.forEach(function(post) { %>
       <%- partial('partial/post_card', { post: post }) %>
     <% }) %>
   </div>
-  <p class="section-link"><a href="<%- lang_url('/writing') %>">Browse all writing</a></p>
+  <p class="section-link"><a href="<%- lang_url('/writing') %>"><%- copy.browseAll %></a></p>
 </section>

@@ -1,20 +1,51 @@
 <%
 var currentLang = page.lang || page_lang();
 var posts = interviewer_posts(6, currentLang);
+var copy = currentLang === 'zh' ? {
+  eyebrow: '面试官入口',
+  title: '面试官入口',
+  intro1: '我是一名软件工程师，关注可靠、高性能、可维护的前端系统。最近也在持续探索 AI 辅助开发和 Agent 工作流。',
+  intro2: '如果你正在评估我的工程能力，可以从这些内容开始。',
+  focusEyebrow: '工程重点',
+  focusTitle: '精选文章',
+  projectsEyebrow: '项目 / 实验',
+  projectsTitle: '来自现有文章的项目笔记',
+  projectsIntro: '独立项目页会逐步补充。当前最强的工程证据在上面的工程与 AI 文章，以及下面这些项目笔记里。',
+  careEyebrow: '工程品味',
+  careTitle: '我关心什么',
+  careItems: ['可靠的前端系统', '清晰抽象与可维护代码', '真实约束下的性能', 'AI 辅助工程工作流'],
+  contactEyebrow: '联系',
+  contactTitle: '下一步'
+} : {
+  eyebrow: 'For interviewers',
+  title: 'For Interviewers',
+  intro1: 'I&rsquo;m a software engineer focused on building reliable, performant, and maintainable frontend systems. Recently, I&rsquo;ve also been exploring AI-assisted development and agentic workflows.',
+  intro2: 'If you&rsquo;re reviewing my work, these are the best starting points.',
+  focusEyebrow: 'Engineering focus',
+  focusTitle: 'Selected essays',
+  projectsEyebrow: 'Projects / experiments',
+  projectsTitle: 'Project notes from existing writing',
+  projectsIntro: 'Selected projects will be expanded here as standalone project pages. For now, the strongest evidence lives in the engineering and AI writeups above, plus the project notes below.',
+  careEyebrow: 'Engineering taste',
+  careTitle: 'What I care about',
+  careItems: ['Reliable frontend systems', 'Clear abstractions and maintainable code', 'Performance under real-world constraints', 'AI-assisted engineering workflows'],
+  contactEyebrow: 'Contact',
+  contactTitle: 'Where to go next'
+};
 %>
 
 <article class="page-shell">
   <header class="page-hero">
-    <p class="eyebrow">For interviewers</p>
-    <h1>For Interviewers</h1>
-    <p>I&rsquo;m a software engineer focused on building reliable, performant, and maintainable frontend systems. Recently, I&rsquo;ve also been exploring AI-assisted development and agentic workflows.</p>
-    <p>If you&rsquo;re reviewing my work, these are the best starting points.</p>
+    <p class="eyebrow"><%- copy.eyebrow %></p>
+    <h1><%- copy.title %></h1>
+    <p><%- copy.intro1 %></p>
+    <p><%- copy.intro2 %></p>
   </header>
 
   <section class="section-block" aria-labelledby="engineering-focus-title">
     <div class="section-heading">
-      <p class="eyebrow">Engineering focus</p>
-      <h2 id="engineering-focus-title">Selected essays</h2>
+      <p class="eyebrow"><%- copy.focusEyebrow %></p>
+      <h2 id="engineering-focus-title"><%- copy.focusTitle %></h2>
     </div>
     <div class="post-list">
       <% posts.forEach(function(post) { %>
@@ -25,10 +56,10 @@ var posts = interviewer_posts(6, currentLang);
 
   <section class="section-block" aria-labelledby="interviewer-projects-title">
     <div class="section-heading">
-      <p class="eyebrow">Projects / experiments</p>
-      <h2 id="interviewer-projects-title">Project notes from existing writing</h2>
+      <p class="eyebrow"><%- copy.projectsEyebrow %></p>
+      <h2 id="interviewer-projects-title"><%- copy.projectsTitle %></h2>
     </div>
-    <p>Selected projects will be expanded here as standalone project pages. For now, the strongest evidence lives in the engineering and AI writeups above, plus the project notes below.</p>
+    <p><%- copy.projectsIntro %></p>
     <div class="project-list">
       <% project_posts(currentLang).slice(0, 3).forEach(function(post) { %>
         <article class="project-card">
@@ -36,7 +67,7 @@ var posts = interviewer_posts(6, currentLang);
           <p><%- post_summary(post, 150) %></p>
           <div class="tag-list">
             <% post_tag_names(post).slice(0, 4).forEach(function(tag) { %>
-              <span><%- tag %></span>
+              <span><%- tag_label(tag) %></span>
             <% }) %>
           </div>
         </article>
@@ -46,21 +77,20 @@ var posts = interviewer_posts(6, currentLang);
 
   <section class="section-block" aria-labelledby="care-title">
     <div class="section-heading">
-      <p class="eyebrow">Engineering taste</p>
-      <h2 id="care-title">What I care about</h2>
+      <p class="eyebrow"><%- copy.careEyebrow %></p>
+      <h2 id="care-title"><%- copy.careTitle %></h2>
     </div>
     <ul class="compact-list">
-      <li>Reliable frontend systems</li>
-      <li>Clear abstractions and maintainable code</li>
-      <li>Performance under real-world constraints</li>
-      <li>AI-assisted engineering workflows</li>
+      <% copy.careItems.forEach(function(item) { %>
+        <li><%- item %></li>
+      <% }) %>
     </ul>
   </section>
 
   <section class="section-block" aria-labelledby="contact-title">
     <div class="section-heading">
-      <p class="eyebrow">Contact</p>
-      <h2 id="contact-title">Where to go next</h2>
+      <p class="eyebrow"><%- copy.contactEyebrow %></p>
+      <h2 id="contact-title"><%- copy.contactTitle %></h2>
     </div>
     <p>
       <a href="<%- lang_url('/About') %>">About</a>

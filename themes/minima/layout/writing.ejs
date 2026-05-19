@@ -1,24 +1,41 @@
 <%
 var currentLang = page.lang || page_lang();
 var areas = [
-  ['engineering', 'Engineering'],
-  ['ai', 'AI & Agents'],
-  ['systems', 'Systems & Learning'],
-  ['mind', 'Mind & Practice'],
-  ['life', 'Life']
+  ['engineering', area_label('engineering')],
+  ['ai', area_label('ai')],
+  ['systems', area_label('systems')],
+  ['mind', area_label('mind')],
+  ['life', area_label('life')]
 ];
 var allPosts = posts_for_lang(currentLang);
+var copy = currentLang === 'zh' ? {
+  eyebrow: '写作',
+  title: '写作',
+  intro: '关于 software、AI、systems、learning 与 inner practice 的文章和笔记。',
+  all: '全部',
+  comingSoon: '即将补充。',
+  archiveEyebrow: '归档',
+  archiveTitle: '全部文章'
+} : {
+  eyebrow: 'Writing',
+  title: 'Writing',
+  intro: 'Essays and notes on software, AI, systems, learning, and inner practice.',
+  all: 'All',
+  comingSoon: 'Coming soon.',
+  archiveEyebrow: 'Archive',
+  archiveTitle: 'All posts'
+};
 %>
 
 <article class="page-shell">
   <header class="page-hero">
-    <p class="eyebrow">Writing</p>
-    <h1>Writing</h1>
-    <p>Essays and notes on software, AI, systems, learning, and inner practice.</p>
+    <p class="eyebrow"><%- copy.eyebrow %></p>
+    <h1><%- copy.title %></h1>
+    <p><%- copy.intro %></p>
   </header>
 
   <nav class="area-nav" aria-label="Writing sections">
-    <a href="#all">All</a>
+    <a href="#all"><%- copy.all %></a>
     <% areas.forEach(function(area) { %>
       <a href="#<%- area[0] %>"><%- area[1] %></a>
     <% }) %>
@@ -37,15 +54,15 @@ var allPosts = posts_for_lang(currentLang);
           <% }) %>
         </div>
       <% } else { %>
-        <p class="muted">Coming soon.</p>
+        <p class="muted"><%- copy.comingSoon %></p>
       <% } %>
     </section>
   <% }) %>
 
   <section class="section-block" id="all" aria-labelledby="all-posts-title">
     <div class="section-heading">
-      <p class="eyebrow">Archive</p>
-      <h2 id="all-posts-title">All posts</h2>
+      <p class="eyebrow"><%- copy.archiveEyebrow %></p>
+      <h2 id="all-posts-title"><%- copy.archiveTitle %></h2>
     </div>
     <div class="archive-list">
       <% allPosts.forEach(function(post) { %>
