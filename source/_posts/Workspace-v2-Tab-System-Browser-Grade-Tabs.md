@@ -352,10 +352,23 @@ function selectIdlePrewarmTabs({ tabs, focusedTabId, hotTabs }) {
     .slice(0, 2);
 }
 
-// 1. Idle queue selects a candidate with id, URL, and runtime kind.
+// 1. Idle queue selects a candidate.
+const candidate = {
+  id: tab.id,
+  location: tab.location,
+  runtimeKind: tab.runtimeKind, // native / subapp / seto
+};
+
 // 2. WarmPool promotes the candidate.
-// 3. WorkspaceContentHost subscribes to WarmPool through useSyncExternalStore.
-// 4. HotTabFrame mounts the runtime before the user clicks back.
+warmPool.promote(candidate);
+
+// 3. React subscribes to WarmPool through useSyncExternalStore.
+const hotTabs = useWarmPool(warmPool);
+
+// 4. WorkspaceContentHost re-renders the hot tab list.
+hotTabs.map(tab => <HotTabFrame key={tab.id} tab={tab} />);
+
+// 5. HotTabFrame mounts the runtime before the user clicks back.
 
 ```
 
@@ -506,26 +519,100 @@ function publishTabLifecycle(type, targetTabId) {
 ### DOM / Overlay Scope
 
 The user-facing issue is simple: a popup or dropdown looks like UI of the current tab, but many libraries append it to global `document.body`. If the host does not intercept that, hidden tab overlays can cover the current tab or dropdowns can drift because their coordinate system changed.
-```typescript
-function appendChild(parent, node) {
-  const owner = resolveOwnerFromCurrentSandboxCallStack();
-
-  if (parent === rawDocument.body && owner) {
-    const overlayRoot = getOverlayRoot(owner.tabId, node);
-    overlayRoot.appendChild(node);
-    return node;
-  }
-
-  return rawAppendChild(parent, node);
-}
-
-```
 
 Overlay types are different:
 
 - Select, Dropdown, and Tooltip are floating overlays and need trigger-relative positioning.
 - Modal, Drawer, Toast, and Notification are content overlays and should be constrained to the tab content area.
 - Large-overlay geometry heuristics should only apply to `position: fixed`, otherwise absolute dropdowns drift.
+
+Step 1: make document APIs resolve inside the tab.
+
+When sandbox code calls `document.body`, `document.querySelector(...)`, or `document.getElementsByClassName(...)`, the host resolves the current sandbox first, finds its registered tab root, and answers from that root.
+
+```javascript
+docUse('body', ctx => {
+  return scopedRoot(ctx) ?? realDocument.body;
+});
+
+docUse('querySelector', ctx => {
+  const root = scopedRoot(ctx);
+  if (!root) return realDocument.querySelector(...ctx.args);
+
+  return root.querySelector(...ctx.args);
+});
+
+```
+
+Step 2: create two overlay roots for each tab.
+
+```plaintext
+HotTabFrame(tab A)
+  └── Seto app content root
+
+workspace-overlay-root
+  └── workspace-subapp-overlay-root[data-tab-id="tab A"]
+        └── workspace-subapp-content-overlay-root
+```
+
+| Root | Used For |
+| --- | --- |
+| `workspace-subapp-overlay-root` | Floating overlays: dropdown, tooltip, popover, listbox. |
+| `workspace-subapp-content-overlay-root` | Modal-like content: dialog, drawer, toast, large blocking overlays. |
+
+This split matters. A Modal should be contained with the tab, but a Dropdown often depends on trigger coordinates. If every overlay is forced into the same content root, dropdowns can drift.
+
+Step 3: intercept append and route the node.
+
+When a library calls `document.body.appendChild(node)`, or when Seto inserts body children into the scoped root, the host classifies the node before keeping it there.
+
+```javascript
+function routeRuntimeBodyNode(node, tabRoot) {
+  if (!isElement(node)) return;
+
+  const target = chooseOverlayTarget(node);
+
+  if (target) {
+    target.appendChild(node);
+    return;
+  }
+
+  rawAppendChild(tabRoot, node);
+}
+
+function chooseOverlayTarget(node) {
+  if (hasFloatingDescendant(node) || isPositionedOverlay(node)) {
+    return tabOverlayRoot;
+  }
+
+  if (hasDialogDescendant(node) || isLargeOverlay(node)) {
+    return tabContentOverlayRoot;
+  }
+
+  return null;
+}
+
+```
+
+Step 4: hide overlay roots that do not belong to the focused tab.
+
+Warm pool keeps hidden tabs mounted, so their overlay roots may still exist. On focus change, Workspace updates the visible overlay owner:
+
+```javascript
+useLayoutEffect(() => {
+  setFocusedWorkspaceOverlayTab(effectiveFocusedTabId);
+}, [effectiveFocusedTabId]);
+
+function updateSubappOverlayFocus(root) {
+  const tabId = root.getAttribute('data-workspace-overlay-tab-id');
+  const visible = tabId === focusedWorkspaceOverlayTabId;
+
+  root.style.display = visible ? '' : 'none';
+  root.style.visibility = visible ? 'visible' : 'hidden';
+  root.style.pointerEvents = 'none';
+}
+
+```
 
 ### Foreground Leasing
 

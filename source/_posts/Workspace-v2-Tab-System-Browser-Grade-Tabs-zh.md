@@ -409,10 +409,23 @@ function selectIdlePrewarmTabs({ tabs, focusedTabId, hotTabs }) {
     .slice(0, 2);
 }
 
-// 1. idle queue 选出带 id、URL、runtime kind 的 candidate。
+// 1. idle queue 选出 candidate。
+const candidate = {
+  id: tab.id,
+  location: tab.location,
+  runtimeKind: tab.runtimeKind, // native / subapp / seto
+};
+
 // 2. WarmPool promote 这个 candidate。
-// 3. WorkspaceContentHost 通过 useSyncExternalStore 订阅 WarmPool。
-// 4. HotTabFrame 在用户点回前先把 runtime mount 好。
+warmPool.promote(candidate);
+
+// 3. React 通过 useSyncExternalStore 订阅 WarmPool。
+const hotTabs = useWarmPool(warmPool);
+
+// 4. WorkspaceContentHost 重新渲染 hot tab 列表。
+hotTabs.map(tab => <HotTabFrame key={tab.id} tab={tab} />);
+
+// 5. HotTabFrame 在用户点回前先把 runtime mount 好。
 
 ```
 
@@ -482,26 +495,23 @@ function SetoTabRuntime({ tabId, entry, initialUrl }) {
   return (
     <HTMLSandbox
       entry={entry}
-      getContainer={() => {
-        // 目标 1：Seto 内容必须挂到当前 tab 的容器。
-        // 这里还不能假设 sandbox 已 ready，所以先返回 root；
-        // 如果 sandboxRef 已经有值，再把 sandbox 和 root 绑定成 DOM scope。
-        if (sandboxRef) {
-          registerDomScope({ sandbox: sandboxRef, root, tabId });
-        }
-        return root;
-      }}
-      onSandboxReady={sandbox => {
-        // 目标 2：sandbox window ready 后，马上接管运行时边界。
-        sandboxRef = sandbox;
-        registerDomScope({ sandbox, root, tabId });
+      url={initialUrl}
 
-        // 目标 3：history、parent、event 不能直接用裸 iframe window。
+      // DOM 必须挂到这个 tab 的 frame 里，不能挂到全局容器。
+      getContainer={() => root}
+
+      onSandboxReady={sandbox => {
+        sandboxRef = sandbox;
+
         registerRuntimeFrame({
           tabId,
-          iframeWin: sandbox.raw.win,
-          initialUrl,
+          window: sandbox.raw.win,
+          rawHistory: sandbox.raw.win.RAW_HISTORY,
         });
+
+        installScopedHistory(tabId, sandbox.raw.win);
+        installScopedParentProxy(tabId, sandbox.raw.win);
+        installScopedEventBridge(tabId, sandbox.raw.win);
       }}
     />
   );
@@ -509,7 +519,7 @@ function SetoTabRuntime({ tabId, entry, initialUrl }) {
 
 ```
 
-这个顺序很关键：`getContainer()` 解决“挂到哪里”，`onSandboxReady()` 解决“拿到哪个 window 可以 patch”，DOM scope 解决“document/body 属于谁”，runtime frame 解决“history、parent、event 属于谁”。
+这个顺序很关键：`getContainer()` 解决“挂到哪里”，`onSandboxReady()` 解决“拿到哪个 window 可以 patch”，runtime frame 解决“history、parent、event 属于谁”。
 
 ### History / Window scope
 
@@ -526,30 +536,38 @@ Seto 里有多层 history，只 patch 宿主 `window.history` 不够：
 核心逻辑不是“禁止所有 history 写入”，而是只允许目标 tab 写。
 ```typescript
 function scopedPushState(state, unused, url) {
-  const targetTabId =
-    preparedNavigation?.url === url
-      ? preparedNavigation.targetTabId
-      : readTabIdFromHistoryState(state) ?? resolveTabIdFromUrl(url);
+  const target = getNavigationTargetFromStateOrPreparedScope(state, url);
 
-  if (targetTabId !== currentFrame.tabId) {
-    reportScopeDrop('history_drop');
+  if (target.tabId !== currentRuntime.tabId) {
+    recordScopeDrop({
+      reason: 'history-write-to-wrong-tab',
+      from: currentRuntime.tabId,
+      to: target.tabId,
+      url,
+    });
     return;
   }
 
-  rawHistory.pushState(state, unused, url);
-
-  if (focusedRuntimeTabId === currentFrame.tabId) {
-    hostHistory.pushState(addTabIdToState(state, currentFrame.tabId), unused, url);
-  }
+  rawHistory.pushState({ ...state, workspaceTargetTabId: target.tabId }, unused, url);
 }
+
+// Seto internal raw history 是 sandbox 真正使用的 surface。
+frame.rawHistory.pushState = frame.patchedPushState;
+frame.rawHistory.replaceState = frame.patchedReplaceState;
+
+// 子应用仍然看到 window.history，但拿到的是 scopedHistory。
+Object.defineProperty(frame.iframeWin, 'history', {
+  get() {
+    return frame.scopedHistory;
+  }
+});
 
 ```
 
 `window.parent` 也不是裸宿主窗口，而是 Proxy：
 ```typescript
 parentProxy.get('history')  -> scopedHistory
-parentProxy.get('document') -> iframeWin.document
-parentProxy.get('location') -> iframeWin.location
+parentProxy.get('document') -> scopedDocumentFacade
 parentProxy.get('__workspaceMFEventBus__') -> scopedEventBus
 
 ```
@@ -596,34 +614,96 @@ scopedEventBus.listen(listener) {
 
 这里的用户问题是：弹窗和下拉看起来是“当前 tab 的 UI”，但底层组件库经常把节点挂到全局 `document.body`。如果宿主不接管，hidden tab 的弹窗会盖到当前 tab，或者下拉框因为坐标系变了而漂移。
 
-子应用仍然认为自己在 append 到 `document.body`，但宿主会按规则把节点路由到当前 tab 的内容层或弹层层。
-```typescript
-function appendToRuntimeBody(node) {
-  if (isAppShell(node)) {
-    scopedRoot.appendChild(node);
-    return;
-  }
-
-  if (isContentOverlay(node)) {
-    contentOverlayRoot.appendChild(node);
-    return;
-  }
-
-  if (isFloatingOverlay(node)) {
-    floatingOverlayRoot.appendChild(node);
-    return;
-  }
-
-  scopedRoot.appendChild(node);
-}
-
-```
-
 分类规则里最容易出 bug 的是 floating overlay 和 content overlay：
 
 - Select、Dropdown、Tooltip 这类 floating overlay 需要跟触发器定位；
 - Modal、Drawer、Toast、Notification 这类 content overlay 需要限制在 tab 内容区域；
 - 大面积 overlay 的几何启发式只应用于 `position: fixed`，避免 absolute 下拉层因为坐标系变化而漂移。
+
+第一步：让 document API 在 tab 内解析。
+
+当 sandbox 里的代码调用 `document.body`、`document.querySelector(...)` 或 `document.getElementsByClassName(...)` 时，宿主先解析当前 sandbox，再找到它注册过的 tab root，从这个 root 里返回结果。
+
+```javascript
+docUse('body', ctx => {
+  return scopedRoot(ctx) ?? realDocument.body;
+});
+
+docUse('querySelector', ctx => {
+  const root = scopedRoot(ctx);
+  if (!root) return realDocument.querySelector(...ctx.args);
+
+  return root.querySelector(...ctx.args);
+});
+```
+
+第二步：每个 tab 创建两层 overlay root。
+
+```plaintext
+HotTabFrame(tab A)
+  └── Seto app content root
+
+workspace-overlay-root
+  └── workspace-subapp-overlay-root[data-tab-id="tab A"]
+        └── workspace-subapp-content-overlay-root
+```
+
+| Root | 用途 |
+| --- | --- |
+| `workspace-subapp-overlay-root` | floating overlay：dropdown、tooltip、popover、listbox |
+| `workspace-subapp-content-overlay-root` | 类 modal 内容：dialog、drawer、toast、大面积阻塞弹层 |
+
+这个拆分很关键。Modal 应该被限制在 tab 内容区，但 Dropdown 通常依赖触发器坐标。如果所有 overlay 都塞进同一个 content root，Dropdown 很容易漂移。
+
+第三步：拦截 append，并把节点路由到正确层。
+
+当组件库调用 `document.body.appendChild(node)`，或者 Seto runtime 往 scoped root 插入 body child 时，宿主先分类节点，再决定保留在哪里。
+
+```javascript
+function routeRuntimeBodyNode(node, tabRoot) {
+  if (!isElement(node)) return;
+
+  const target = chooseOverlayTarget(node);
+
+  if (target) {
+    target.appendChild(node);
+    return;
+  }
+
+  rawAppendChild(tabRoot, node);
+}
+
+function chooseOverlayTarget(node) {
+  if (hasFloatingDescendant(node) || isPositionedOverlay(node)) {
+    return tabOverlayRoot;
+  }
+
+  if (hasDialogDescendant(node) || isLargeOverlay(node)) {
+    return tabContentOverlayRoot;
+  }
+
+  return null;
+}
+```
+
+第四步：隐藏不属于当前 focused tab 的 overlay root。
+
+WarmPool 会让 hidden tab 仍然保持 mounted，因此它们的 overlay root 也可能还在。focus 变化时，Workspace 只展示当前 tab 的 overlay owner。
+
+```javascript
+useLayoutEffect(() => {
+  setFocusedWorkspaceOverlayTab(effectiveFocusedTabId);
+}, [effectiveFocusedTabId]);
+
+function updateSubappOverlayFocus(root) {
+  const tabId = root.getAttribute('data-workspace-overlay-tab-id');
+  const visible = tabId === focusedWorkspaceOverlayTabId;
+
+  root.style.display = visible ? '' : 'none';
+  root.style.visibility = visible ? 'visible' : 'hidden';
+  root.style.pointerEvents = 'none';
+}
+```
 
 ### Foreground Leasing
 
