@@ -191,6 +191,7 @@ export async function runScheduledGrowthLoop({
   const manualPublishUrls = await summarizeManualPublishUrls(automation.paths.manualPublishUrlTemplate, {
     xProfileDir,
     xProfileDirectory,
+    browserReadiness: automation.browserReadiness,
   });
   const experimentPlan = buildGrowthExperimentPlan({
     queue,
@@ -571,7 +572,9 @@ async function buildScheduledActionHandoff({
 async function summarizeManualPublishUrls(filePath, {
   xProfileDir = '',
   xProfileDirectory = '',
+  browserReadiness = {},
 } = {}) {
+  const discovery = manualUrlDiscoveryReadiness(browserReadiness);
   const fallback = {
     status: 'missing',
     path: filePath || '',
@@ -580,6 +583,8 @@ async function summarizeManualPublishUrls(filePath, {
     pending: 0,
     filledItems: [],
     pendingItems: [],
+    discoveryStatus: discovery.status,
+    discoveryBlockedReason: discovery.blockedReason,
     discoveryCommand: '',
     recoveryCommand: '',
   };
@@ -615,6 +620,8 @@ async function summarizeManualPublishUrls(filePath, {
       postTextPath: item.postTextPath || '',
       fillCommand: `npm run social:manual-publish-url -- --input ${shellQuote(filePath)} --id ${shellQuote(item.id)} --url <x-thread-url>`,
     })),
+    discoveryStatus: discovery.status,
+    discoveryBlockedReason: discovery.blockedReason,
     discoveryCommand: publishedUrlDiscoveryCommand(filePath, {
       xProfileDir,
       xProfileDirectory,
@@ -638,6 +645,8 @@ function formatManualPublishUrlCapture(summary = {}) {
 - Template: \`${summary.path || 'not generated'}\`
 - Filled: ${summary.filled ?? 'unknown'}/${summary.total ?? 'unknown'}
 - Pending: ${summary.pending ?? 'unknown'}
+- Timeline discovery status: ${summary.discoveryStatus || 'unknown'}
+- Timeline discovery blocker: ${summary.discoveryBlockedReason || 'none'}
 - Timeline discovery command: \`${summary.discoveryCommand || 'not generated'}\`
 - Batch recovery command: \`${summary.recoveryCommand || 'not generated'}\`
 
@@ -667,6 +676,21 @@ function summarizeEngagementBrowserCapture(text, filePath) {
     path: filePath,
     loginRequiredRuns,
     capturedOpportunityFiles,
+  };
+}
+
+function manualUrlDiscoveryReadiness(browserReadiness = {}) {
+  const loginState = browserReadiness?.loginState || 'unknown';
+  const userBrowserUsable = Boolean(browserReadiness?.userBrowserSession?.usable);
+  if (loginState === 'logged_out' && userBrowserUsable) {
+    return {
+      status: 'blocked',
+      blockedReason: 'CDP publishing profile is logged out; use manual URL fill after normal Chrome publication, or log into the CDP profile before running timeline discovery',
+    };
+  }
+  return {
+    status: 'ready',
+    blockedReason: '',
   };
 }
 

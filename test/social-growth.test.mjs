@@ -112,10 +112,12 @@ import {
 } from '../tools/social-growth/publishConfirmation.mjs';
 import {
   buildManualPublishKit,
+  buildManualPublishKitIndex,
   buildManualPublishUrlTemplate,
   fillManualPublishUrlTemplate,
   mergeManualPublishUrlTemplate,
   formatManualPublishKitMarkdown,
+  formatManualPublishKitIndexMarkdown,
 } from '../tools/social-growth/manualPublishKit.mjs';
 import {
   buildProfileAudit,
@@ -4265,6 +4267,37 @@ test('manual publish kits CLI writes all ready fallback kits and an index', asyn
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('manual publish kit index marks timeline discovery blocked when CDP profile is logged out', () => {
+  const index = buildManualPublishKitIndex({
+    generatedAt: '2026-05-19T00:00:00.000Z',
+    day: 2,
+    date: '2026-05-19',
+    readySlots: 1,
+    totalSlots: 3,
+    urlTemplatePath: 'data/social-growth/manual-publish-kits/day2-published-urls.json',
+    xProfileDirectory: 'Profile 1',
+    discoveryStatus: 'blocked',
+    discoveryBlockedReason: 'the CDP publishing profile is logged out',
+    kits: [
+      {
+        slot: 1,
+        id: 'Agent-Skills__zh__strong-thesis',
+        status: 'ready_for_manual_confirmation',
+        path: 'data/social-growth/manual-publish-kits/day2-slot1-Agent-Skills.md',
+        imageAbsolutePath: '/tmp/agent-skills.png',
+        recoveryCommand: 'npm run social:post-publish-recovery -- --id Agent-Skills__zh__strong-thesis --url <x-thread-url>',
+      },
+    ],
+  });
+  const markdown = formatManualPublishKitIndexMarkdown(index);
+
+  assert.equal(index.batchRecovery.discoveryStatus, 'blocked');
+  assert.match(markdown, /Timeline auto-discovery is blocked right now/);
+  assert.match(markdown, /the CDP publishing profile is logged out/);
+  assert.match(markdown, /discover-published-urls -- --input .* --xProfileDirectory 'Profile 1'/);
+  assert.match(markdown, /If discovery is blocked or misses a post/);
 });
 
 test('public action checklist centralizes confirmation boundaries', async () => {

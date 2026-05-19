@@ -258,6 +258,8 @@ export function buildManualPublishKitIndex({
   batchRecoveryCommand = '',
   xProfileDir = '',
   xProfileDirectory = '',
+  discoveryStatus = 'ready',
+  discoveryBlockedReason = '',
 } = {}) {
   const recoveryCommand = batchRecoveryCommand || (
     urlTemplatePath
@@ -274,6 +276,8 @@ export function buildManualPublishKitIndex({
     kits,
     batchRecovery: {
       urlTemplatePath,
+      discoveryStatus,
+      discoveryBlockedReason,
       discoveryCommand: publishedUrlDiscoveryCommand(urlTemplatePath, {
         xProfileDir,
         xProfileDirectory,
@@ -349,13 +353,23 @@ function formatBatchRecovery(index) {
   if (!index.kits?.length) {
     return '- Not available because no ready kits were generated.';
   }
-  return `1. After confirmed publication, let the local system try to discover fresh status URLs from the account timeline:
+  const discoveryStep = index.batchRecovery.discoveryStatus === 'blocked'
+    ? `1. Timeline auto-discovery is blocked right now: ${index.batchRecovery.discoveryBlockedReason || 'the configured browser profile is not ready for read-only X capture'}.
+
+After that browser profile is logged into X, run:
 
 \`\`\`bash
 ${index.batchRecovery.discoveryCommand || publishedUrlDiscoveryCommand(index.batchRecovery.urlTemplatePath)}
-\`\`\`
+\`\`\``
+    : `1. After confirmed publication, let the local system try to discover fresh status URLs from the account timeline:
 
-2. If discovery misses a post, fill \`url\` for each published item in \`${index.batchRecovery.urlTemplatePath}\`.
+\`\`\`bash
+${index.batchRecovery.discoveryCommand || publishedUrlDiscoveryCommand(index.batchRecovery.urlTemplatePath)}
+\`\`\``;
+
+  return `${discoveryStep}
+
+2. If discovery is blocked or misses a post, fill \`url\` for each published item in \`${index.batchRecovery.urlTemplatePath}\`.
 3. Leave unpublished items blank.
 4. Use the \`kit\`, \`urlHint\`, \`recoveryCommand\`, and \`postTextPath\` fields in that JSON to avoid mixing slots.
 5. Run the batch recovery command:

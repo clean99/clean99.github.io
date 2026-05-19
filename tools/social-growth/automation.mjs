@@ -398,6 +398,7 @@ export async function runSafeAutomationCycle({
     postTextDir,
     outDir: manualPublishKitDir || join(dirname(dailyBriefPath), 'manual-publish-kits'),
     indexPath: manualPublishKitIndexOutPath,
+    browserReadiness,
     env,
   });
   const publicActionChecklist = buildPublicActionChecklist({
@@ -425,6 +426,10 @@ export async function runSafeAutomationCycle({
     browserReadiness: {
       status: browserReadiness.status,
       blockers: browserReadiness.blockers,
+      loginState: browserReadiness.signals?.loginState || 'unknown',
+      profileDirectory: browserReadiness.profileDirectory || '',
+      currentUrl: browserReadiness.currentUrl || '',
+      userBrowserSession: browserReadiness.userBrowserSession || null,
     },
     profileDiagnostics: summarizeProfileDiagnostics(profileDiagnostics),
     loginHandoff: summarizeLoginHandoff(loginHandoff),
@@ -756,6 +761,7 @@ async function writeReadyManualPublishKits({
   outDir,
   indexPath,
   urlTemplatePath,
+  browserReadiness,
   env,
 } = {}) {
   const entries = [];
@@ -824,6 +830,7 @@ async function writeReadyManualPublishKits({
     }),
     xProfileDir,
     xProfileDirectory,
+    ...manualPublishDiscoveryReadiness(browserReadiness),
   });
   const resolvedUrlTemplatePath = index.batchRecovery.urlTemplatePath;
   const nextUrlTemplate = buildManualPublishUrlTemplate({
@@ -848,6 +855,21 @@ async function writeReadyManualPublishKits({
     indexPath: resolvedIndexPath,
     urlTemplatePath: resolvedUrlTemplatePath,
     entries,
+  };
+}
+
+function manualPublishDiscoveryReadiness(browserReadiness = {}) {
+  const loginState = browserReadiness?.signals?.loginState || 'unknown';
+  const userBrowserUsable = Boolean(browserReadiness?.userBrowserSession?.usable);
+  if (loginState === 'logged_out' && userBrowserUsable) {
+    return {
+      discoveryStatus: 'blocked',
+      discoveryBlockedReason: 'the CDP publishing profile is logged out; normal Chrome is logged in, so publish confirmation can continue there, but automated timeline URL discovery needs a logged-in CDP profile or manual URL fill',
+    };
+  }
+  return {
+    discoveryStatus: 'ready',
+    discoveryBlockedReason: '',
   };
 }
 
