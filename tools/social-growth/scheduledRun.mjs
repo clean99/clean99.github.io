@@ -17,6 +17,10 @@ import {
   selectPublicAction,
   writePublicActionHandoff,
 } from './publicActionHandoff.mjs';
+import {
+  buildPublishSession,
+  writePublishSession,
+} from './publishSession.mjs';
 
 const DEFAULT_QUEUE_PATH = 'data/social-growth/queue.json';
 const DEFAULT_PACKAGE_DIR = 'data/social-growth/packages';
@@ -40,6 +44,7 @@ const DEFAULT_EXPERIMENT_PLAN_PATH = 'data/social-growth/experiment-plan.md';
 const DEFAULT_GOAL_AUDIT_PATH = 'data/social-growth/goal-audit.md';
 const DEFAULT_PUBLIC_ACTION_HANDOFF_PATH = 'data/social-growth/public-action-handoff.md';
 const DEFAULT_PROFILE_ACTION_HANDOFF_PATH = 'data/social-growth/profile-action-handoff.md';
+const DEFAULT_PUBLISH_SESSION_PATH = 'data/social-growth/publish-session.md';
 const DEFAULT_SCHEDULED_REPORT_PATH = 'data/social-growth/scheduled-run.md';
 const DEFAULT_RECOMMENDATION_DOC_PATH = '.agents/skills/x-growth-publishing/references/x-recommendation-system.md';
 const DEFAULT_IMAGE_BRIEF_DIR = 'data/social-growth/image-briefs';
@@ -85,6 +90,7 @@ export async function runScheduledGrowthLoop({
   publicActionHandoffType = 'publish_image_thread',
   profileActionHandoffPath = DEFAULT_PROFILE_ACTION_HANDOFF_PATH,
   profileActionHandoffType = 'edit_profile',
+  publishSessionPath = DEFAULT_PUBLISH_SESSION_PATH,
   recommendationDocPath = DEFAULT_RECOMMENDATION_DOC_PATH,
   recommendationDocText = '',
   scheduledReportPath = DEFAULT_SCHEDULED_REPORT_PATH,
@@ -233,6 +239,28 @@ export async function runScheduledGrowthLoop({
     generatedAt: now,
   });
   await writePublicActionHandoff(profileActionHandoff, profileActionHandoffPath);
+  const publishSession = buildPublishSession({
+    generatedAt: now,
+    selected: automation.selected,
+    metrics: {
+      status: metrics.status,
+      followers: metrics.followers,
+      publishedPosts: metrics.publishedPosts,
+    },
+    browserReadiness: automation.browserReadiness,
+    manualPublishUrls,
+    publicActionHandoff,
+    profileActionHandoff,
+    paths: {
+      publicActionHandoff: publicActionHandoffPath,
+      profileActionHandoff: profileActionHandoffPath,
+      manualPublishKitIndex: automation.paths.manualPublishKitIndex,
+      manualPublishUrlTemplate: automation.paths.manualPublishUrlTemplate,
+      metricsCycle: metricsCyclePath,
+      launchWindow: automation.paths.launchWindow,
+    },
+  });
+  await writePublishSession(publishSession, publishSessionPath);
   const result = {
     generatedAt,
     status: scheduledStatus(automation.status, metrics.status, manualPublishUrls),
@@ -275,6 +303,11 @@ export async function runScheduledGrowthLoop({
         actionType: profileActionHandoff.action?.type || profileActionHandoffType,
         source: profileActionHandoff.action?.source || null,
       },
+      publishSession: {
+        status: publishSession.status,
+        urlCaptureMode: publishSession.urlCapture.mode,
+        urlDiscoveryStatus: publishSession.urlCapture.discoveryStatus,
+      },
     },
     metrics: {
       status: metrics.status,
@@ -292,6 +325,7 @@ export async function runScheduledGrowthLoop({
       goalAudit: goalAuditPath,
       publicActionHandoff: publicActionHandoffPath,
       profileActionHandoff: profileActionHandoffPath,
+      publishSession: publishSessionPath,
       engagementBrowserCapture: engagementBrowserCapturePath,
       scheduledReport: scheduledReportPath,
     },
@@ -412,6 +446,7 @@ ${formatManualPublishUrlCapture(result.automation.manualPublishUrls)}
 - Goal audit: \`${result.paths.goalAudit}\`
 - Public action handoff: \`${result.paths.publicActionHandoff}\`
 - Profile action handoff: \`${result.paths.profileActionHandoff}\`
+- Publish session: \`${result.paths.publishSession}\`
 
 ## Experiment Plan
 
@@ -443,6 +478,13 @@ ${formatManualPublishUrlCapture(result.automation.manualPublishUrls)}
 - Action type: ${result.automation.profileActionHandoff?.actionType || 'unknown'}
 - Source: \`${result.automation.profileActionHandoff?.source || 'not selected'}\`
 - Report: \`${result.paths.profileActionHandoff || 'not generated'}\`
+
+## Publish Session
+
+- Status: ${result.automation.publishSession?.status || 'unknown'}
+- URL capture mode: ${result.automation.publishSession?.urlCaptureMode || 'unknown'}
+- URL discovery status: ${result.automation.publishSession?.urlDiscoveryStatus || 'unknown'}
+- Report: \`${result.paths.publishSession || 'not generated'}\`
 
 ## Next Action
 

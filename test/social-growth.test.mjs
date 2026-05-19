@@ -137,6 +137,10 @@ import {
   parsePublicActionChecklistMarkdown,
   selectPublicAction,
 } from '../tools/social-growth/publicActionHandoff.mjs';
+import {
+  buildPublishSession,
+  formatPublishSessionMarkdown,
+} from '../tools/social-growth/publishSession.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
 import { runScheduledGrowthLoop } from '../tools/social-growth/scheduledRun.mjs';
 import { buildGrowthStatus, formatGrowthStatusMarkdown, writeGrowthStatus } from '../tools/social-growth/status.mjs';
@@ -2284,6 +2288,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       goalAuditPath: join(outDir, 'goal-audit.md'),
       publicActionHandoffPath: join(outDir, 'public-action-handoff.md'),
       profileActionHandoffPath: join(outDir, 'profile-action-handoff.md'),
+      publishSessionPath: join(outDir, 'publish-session.md'),
       recommendationDocText: 'X Help\nxai-org/x-algorithm\ntwitter/the-algorithm\nMapping To Clean993 Metrics\nCandidate entry',
       scheduledReportPath: join(outDir, 'scheduled-run.md'),
       imageBriefDir: join(outDir, 'image-briefs'),
@@ -2319,6 +2324,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     const publicActionChecklist = await readFile(join(outDir, 'public-action-checklist.md'), 'utf8');
     const publicActionHandoff = await readFile(join(outDir, 'public-action-handoff.md'), 'utf8');
     const profileActionHandoff = await readFile(join(outDir, 'profile-action-handoff.md'), 'utf8');
+    const publishSession = await readFile(join(outDir, 'publish-session.md'), 'utf8');
     const experimentPlan = await readFile(join(outDir, 'experiment-plan.md'), 'utf8');
     const goalAudit = await readFile(join(outDir, 'goal-audit.md'), 'utf8');
     const manualPublishKits = await readFile(join(outDir, 'manual-publish-kits/day1-ready-slots.md'), 'utf8');
@@ -2351,6 +2357,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.automation.profileActionHandoff.status, 'not_found');
     assert.equal(result.automation.profileActionHandoff.actionId, null);
     assert.equal(result.automation.profileActionHandoff.actionType, 'edit_profile');
+    assert.equal(result.automation.publishSession.status, 'ready_for_first_publish_confirmation');
+    assert.equal(result.automation.publishSession.urlCaptureMode, 'timeline_discovery_first');
     assert.equal(result.selected.id, expectedQueue.items[0].id);
     assert.match(scheduledReport, /Scheduled X Growth Run/);
     assert.match(scheduledReport, /Daily brief/);
@@ -2380,6 +2388,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Goal audit/);
     assert.match(scheduledReport, /Public action handoff/);
     assert.match(scheduledReport, /Profile action handoff/);
+    assert.match(scheduledReport, /Publish session/);
     assert.match(scheduledReport, /safe for recurring execution/);
     assert.match(metricsReport, /No browser publish/);
     assert.match(funnelReport, /X Growth Funnel/);
@@ -2397,6 +2406,10 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(profileActionHandoff, /Public X Action Handoff/);
     assert.match(profileActionHandoff, /Status: not_found/);
     assert.match(profileActionHandoff, /Requested action type: `edit_profile`/);
+    assert.match(publishSession, /X Publish Session/);
+    assert.match(publishSession, /Status: ready_for_first_publish_confirmation/);
+    assert.match(publishSession, /After the first post is public, try timeline URL discovery first/);
+    assert.match(publishSession, /post-publish-recovery-batch/);
     assert.match(manualPublishKits, /Manual X Publish Kits/);
     assert.match(manualPublishKits, /Ready slots: 1\/3/);
     assert.match(manualPublishKits, /post-publish-recovery/);
@@ -4298,6 +4311,70 @@ test('manual publish kit index marks timeline discovery blocked when CDP profile
   assert.match(markdown, /the CDP publishing profile is logged out/);
   assert.match(markdown, /discover-published-urls -- --input .* --xProfileDirectory 'Profile 1'/);
   assert.match(markdown, /If discovery is blocked or misses a post/);
+});
+
+test('publish session condenses first publish, URL fill, and recovery steps', () => {
+  const session = buildPublishSession({
+    generatedAt: '2026-05-19T00:00:00.000Z',
+    selected: {
+      id: 'Agent-Skills__zh__strong-thesis',
+      articleSlug: 'Agent-Skills',
+      variant: 'strong-thesis',
+    },
+    metrics: {
+      followers: '30',
+      publishedPosts: 0,
+    },
+    browserReadiness: {
+      status: 'ready_via_user_chrome_confirmation',
+      loginState: 'logged_out',
+      profileDirectory: 'Profile 1',
+      currentUrl: 'https://x.com/i/flow/login',
+      userBrowserSession: {
+        account: '@Clean993',
+        currentUrl: 'https://x.com/home',
+        usable: true,
+      },
+    },
+    publicActionHandoff: {
+      status: 'ready_for_action_time_confirmation',
+      action: {
+        actionId: 'publish:Agent-Skills__zh__strong-thesis',
+        type: 'publish_image_thread',
+        source: 'data/social-growth/manual-publish-kits/day2-slot1-Agent-Skills.md',
+        stopBefore: 'final public publish click',
+      },
+    },
+    profileActionHandoff: {
+      status: 'ready_for_action_time_confirmation',
+      action: {
+        actionId: 'profile:edit',
+        type: 'edit_profile',
+        source: 'data/social-growth/profile-update.md',
+      },
+    },
+    manualPublishUrls: {
+      status: 'ready_for_url_capture',
+      discoveryStatus: 'blocked',
+      discoveryBlockedReason: 'CDP publishing profile is logged out',
+      pending: 1,
+      filled: 0,
+      total: 1,
+      pendingItems: [{
+        fillCommand: 'npm run social:manual-publish-url -- --input data/social-growth/manual-publish-kits/day2-published-urls.json --id Agent-Skills__zh__strong-thesis --url <x-thread-url>',
+      }],
+      recoveryCommand: 'npm run social:post-publish-recovery-batch -- --input data/social-growth/manual-publish-kits/day2-published-urls.json',
+    },
+  });
+  const markdown = formatPublishSessionMarkdown(session);
+
+  assert.equal(session.status, 'ready_for_first_publish_confirmation');
+  assert.equal(session.urlCapture.mode, 'manual_url_fill');
+  assert.match(markdown, /X Publish Session/);
+  assert.match(markdown, /Timeline URL discovery is blocked/);
+  assert.match(markdown, /manual-publish-url/);
+  assert.match(markdown, /post-publish-recovery-batch/);
+  assert.match(markdown, /Publishing, uploading media/);
 });
 
 test('public action checklist centralizes confirmation boundaries', async () => {
