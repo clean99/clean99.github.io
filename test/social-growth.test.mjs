@@ -126,6 +126,11 @@ import {
   buildPublicActionChecklist,
   formatPublicActionChecklistMarkdown,
 } from '../tools/social-growth/publicActionChecklist.mjs';
+import {
+  buildPublicActionHandoff,
+  formatPublicActionHandoffMarkdown,
+  parsePublicActionChecklistMarkdown,
+} from '../tools/social-growth/publicActionHandoff.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
 import { runScheduledGrowthLoop } from '../tools/social-growth/scheduledRun.mjs';
 import { buildGrowthStatus, formatGrowthStatusMarkdown, writeGrowthStatus } from '../tools/social-growth/status.mjs';
@@ -4233,6 +4238,72 @@ test('public action checklist centralizes confirmation boundaries', async () => 
   assert.match(markdown, /final public Reply click/);
   assert.match(markdown, /Prohibited Automation/);
   assert.match(markdown, /post-publish recovery after a confirmed public X status URL/);
+});
+
+test('public action handoff resolves one action id from the checklist', () => {
+  const checklist = buildPublicActionChecklist({
+    generatedAt: '2026-05-18T00:00:00.000Z',
+    manualPublishKits: {
+      entries: [{
+        id: 'Agent-Skills__zh__strong-thesis',
+        status: 'ready_for_manual_confirmation',
+        path: 'data/social-growth/manual-publish-kits/day1-slot1-Agent-Skills.md',
+        recoveryCommand: 'npm run social:post-publish-recovery -- --url <x-thread-url>',
+      }],
+    },
+    profileUpdate: {
+      status: 'needs_browser_confirmation',
+    },
+  });
+  const checklistMarkdown = formatPublicActionChecklistMarkdown(checklist);
+  const actions = parsePublicActionChecklistMarkdown(checklistMarkdown);
+  const handoff = buildPublicActionHandoff({
+    checklistText: checklistMarkdown,
+    actionId: 'publish:Agent-Skills__zh__strong-thesis',
+    sourceText: '# Manual X Publish Kit\n\n## First Post\n\n```text\n第一条内容\n```',
+    generatedAt: '2026-05-18T00:00:00.000Z',
+  });
+  const markdown = formatPublicActionHandoffMarkdown(handoff);
+
+  assert.deepEqual(actions.map((item) => item.actionId), [
+    'profile:edit',
+    'profile:publish-pinned-post',
+    'profile:pin-post',
+    'publish:Agent-Skills__zh__strong-thesis',
+  ]);
+  assert.equal(handoff.status, 'ready_for_action_time_confirmation');
+  assert.equal(handoff.action.type, 'publish_image_thread');
+  assert.equal(handoff.action.queueId, 'Agent-Skills__zh__strong-thesis');
+  assert.match(markdown, /Public X Action Handoff/);
+  assert.match(markdown, /Action id: `publish:Agent-Skills__zh__strong-thesis`/);
+  assert.match(markdown, /Stop before: final public publish click/);
+  assert.match(markdown, /第一条内容/);
+  assert.match(markdown, /still require action-time confirmation in Chrome/);
+});
+
+test('public action handoff lists valid ids when the requested id is unknown', () => {
+  const checklistMarkdown = formatPublicActionChecklistMarkdown(buildPublicActionChecklist({
+    generatedAt: '2026-05-18T00:00:00.000Z',
+    manualPublishKits: {
+      entries: [{
+        id: 'Agent-Skills__zh__strong-thesis',
+        status: 'ready_for_manual_confirmation',
+        path: 'data/social-growth/manual-publish-kits/day1-slot1-Agent-Skills.md',
+      }],
+    },
+  }));
+  const handoff = buildPublicActionHandoff({
+    checklistText: checklistMarkdown,
+    actionId: 'publish:missing',
+    generatedAt: '2026-05-18T00:00:00.000Z',
+  });
+  const markdown = formatPublicActionHandoffMarkdown(handoff);
+
+  assert.equal(handoff.status, 'not_found');
+  assert.deepEqual(handoff.availableActionIds, ['publish:Agent-Skills__zh__strong-thesis']);
+  assert.match(markdown, /Status: not_found/);
+  assert.match(markdown, /`publish:Agent-Skills__zh__strong-thesis`/);
+  assert.match(markdown, /No public X action is authorized/);
 });
 
 test('manual publish URL template maps ready kits to fillable published URL records', () => {

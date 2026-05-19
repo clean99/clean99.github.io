@@ -90,6 +90,12 @@ import {
   writeGoalAudit,
 } from './goalAudit.mjs';
 import {
+  buildPublicActionHandoff,
+  formatPublicActionHandoffMarkdown,
+  parsePublicActionChecklistMarkdown,
+  writePublicActionHandoff,
+} from './publicActionHandoff.mjs';
+import {
   buildWeeklyExecutionPlan,
   formatWeeklyExecutionPlanMarkdown,
   writeWeeklyExecutionPlan,
@@ -227,6 +233,26 @@ if (command === 'articles') {
     console.log(JSON.stringify(audit, null, 2));
   } else {
     console.log(formatGoalAuditMarkdown(audit));
+  }
+} else if (command === 'public-action-handoff') {
+  const checklistPath = args.checklist || args.publicActionChecklist || 'data/social-growth/public-action-checklist.md';
+  const checklistText = await readOptionalText(checklistPath);
+  const requestedActionId = requiredArg(args, 'id');
+  const parsedActions = parsePublicActionChecklistMarkdown(checklistText);
+  const action = parsedActions.find((item) => item.actionId === requestedActionId);
+  const handoff = buildPublicActionHandoff({
+    checklistText,
+    actionId: requestedActionId,
+    sourceText: action?.source ? await readOptionalText(action.source) : '',
+    generatedAt: args.now ? new Date(args.now) : new Date(),
+  });
+  if (args.out) {
+    await writePublicActionHandoff(handoff, args.out);
+    console.log(`Wrote public X action handoff to ${args.out}`);
+  } else if (args.format === 'json') {
+    console.log(JSON.stringify(handoff, null, 2));
+  } else {
+    console.log(formatPublicActionHandoffMarkdown(handoff));
   }
 } else if (command === 'experiments') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
@@ -2254,6 +2280,7 @@ function printHelp() {
   npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
   npm run social:funnel -- --ledger data/social-growth/ledger.json --format markdown
   npm run social:goal-audit -- --out data/social-growth/goal-audit.md
+  npm run social:public-action-handoff -- --id publish:<queue-id> --out data/social-growth/public-action-handoff.md
   npm run social:experiments -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/experiment-plan.md
   npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
   npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md

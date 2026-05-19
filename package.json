@@ -50,6 +50,7 @@
     "social:preflight": "node tools/social-growth/cli.mjs preflight",
     "social:profile-audit": "node tools/social-growth/cli.mjs profile-audit",
     "social:profile-package": "node tools/social-growth/cli.mjs profile-package",
+    "social:public-action-handoff": "node tools/social-growth/cli.mjs public-action-handoff",
     "social:queue": "node tools/social-growth/cli.mjs queue",
     "social:recommend": "node tools/social-growth/cli.mjs recommend",
     "social:register-image": "node tools/social-growth/cli.mjs register-image",
