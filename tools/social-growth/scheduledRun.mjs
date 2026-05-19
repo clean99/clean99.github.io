@@ -574,6 +574,7 @@ async function summarizeManualPublishUrls(filePath) {
     pending: 0,
     filledItems: [],
     pendingItems: [],
+    discoveryCommand: '',
     recoveryCommand: '',
   };
   if (!filePath) return fallback;
@@ -608,6 +609,7 @@ async function summarizeManualPublishUrls(filePath) {
       postTextPath: item.postTextPath || '',
       fillCommand: `npm run social:manual-publish-url -- --input ${shellQuote(filePath)} --id ${shellQuote(item.id)} --url <x-thread-url>`,
     })),
+    discoveryCommand: `npm run social:discover-published-urls -- --input ${shellQuote(filePath)}`,
     recoveryCommand: `npm run social:post-publish-recovery-batch -- --input ${shellQuote(filePath)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies --launch-window-dir data/social-growth/launch-windows`,
   };
 }
@@ -627,6 +629,7 @@ function formatManualPublishUrlCapture(summary = {}) {
 - Template: \`${summary.path || 'not generated'}\`
 - Filled: ${summary.filled ?? 'unknown'}/${summary.total ?? 'unknown'}
 - Pending: ${summary.pending ?? 'unknown'}
+- Timeline discovery command: \`${summary.discoveryCommand || 'not generated'}\`
 - Batch recovery command: \`${summary.recoveryCommand || 'not generated'}\`
 
 Pending items:

@@ -176,6 +176,9 @@ import {
   formatLaunchWindowPlanMarkdown,
   writeLaunchWindowPlan,
 } from './launchWindow.mjs';
+import {
+  discoverPublishedUrlsFromStatuses,
+} from './publishedUrlDiscovery.mjs';
 
 const command = process.argv[2] || 'help';
 const args = parseArgs(process.argv.slice(3));
@@ -1273,6 +1276,13 @@ if (command === 'articles') {
       clickedSubmit: false,
     },
   }, null, 2));
+} else if (command === 'discover-published-urls') {
+  const result = await runPublishedUrlDiscovery(args);
+  if (args.format === 'markdown') {
+    console.log(formatPublishedUrlDiscoveryMarkdown(result));
+  } else {
+    console.log(JSON.stringify(result, null, 2));
+  }
 } else if (command === 'register-image') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
   const ledger = await readJson(args.ledger || 'data/social-growth/ledger.json');
@@ -1781,6 +1791,132 @@ async function runBrowserMetricsCapture(options = {}) {
       funnel: metricsCycle.funnelPath,
     },
   };
+}
+
+async function runPublishedUrlDiscovery(options = {}) {
+  const inputPath = requiredArg(options, 'input');
+  const outPath = options.out || inputPath;
+  const account = options.account || '@Clean993';
+  const profileDir = options.xProfileDir || options.profileDir;
+  const profileDirectory = options.xProfileDirectory || options.profileDirectory;
+  const captureDir = options.captureDir || 'data/social-growth/timeline-captures';
+  const statusesPath = options.statuses || options.statusJson || '';
+  const statusesOut = options.statusesOut || `${captureDir}/${safePathSegment(String(account).replace(/^@/, ''))}.statuses.json`;
+  const profileTextOut = options.profileText || 'data/social-growth/profile.local.txt';
+  const skipBrowser = booleanOption(options.skipBrowser) || Boolean(statusesPath);
+  const continueOnCaptureError = booleanOption(options.continueOnCaptureError);
+  const captureRuns = [];
+
+  if (!skipBrowser) {
+    captureRuns.push(runXBrowserRead({
+      url: options.url || `https://x.com/${String(account).replace(/^@/, '')}`,
+      textOut: profileTextOut,
+      statusJsonOut: statusesOut,
+      statusLimit: options.statusLimit || options.limit || 20,
+      profileDir,
+      profileDirectory,
+      timeoutMs: options.timeoutMs || 30000,
+      label: 'timeline',
+    }));
+    const failed = captureRuns.filter((run) => run.exitCode !== 0);
+    if (failed.length && !continueOnCaptureError) {
+      throw new Error(`Published URL discovery capture failed: ${failed.map((run) => run.stderr || run.stdout || run.exitCode).join('; ')}`);
+    }
+  }
+
+  const statusPayloadPath = statusesPath || statusesOut;
+  const statuses = await readStatusesFromFile(statusPayloadPath);
+  const template = await readJson(inputPath);
+  const discovery = await discoverPublishedUrlsFromStatuses({
+    template,
+    statuses,
+    now: options.now ? new Date(options.now) : new Date(),
+    threshold: options.threshold,
+  });
+
+  if (options.dryRun !== 'true') {
+    await writeJson(outPath, discovery.template);
+  }
+
+  return {
+    generatedAt: (options.now ? new Date(options.now) : new Date()).toISOString(),
+    status: discovery.status,
+    inputPath,
+    outPath,
+    account,
+    capture: {
+      skipped: skipBrowser,
+      statusesPath: statusPayloadPath,
+      statuses: statuses.length,
+      runs: captureRuns.map((run) => ({
+        label: run.label,
+        exitCode: run.exitCode,
+        status: run.status,
+        currentUrl: run.currentUrl,
+        loginRequired: run.loginRequired,
+        textOut: run.textOut,
+      })),
+    },
+    matched: discovery.matched,
+    pending: discovery.pending,
+    matches: discovery.matches,
+    unmatched: discovery.unmatched,
+    publicActions: discovery.publicActions,
+    boundary: 'Read-only profile timeline matching only. It does not publish, upload media, reply, like, repost, follow, edit the profile, or pin content.',
+  };
+}
+
+function formatPublishedUrlDiscoveryMarkdown(result) {
+  const matches = result.matches.length
+    ? result.matches.map((item) => `- Slot ${item.slot}: ${item.id} -> ${item.url} (${item.source}, ${item.score.toFixed(3)})`).join('\n')
+    : '- No published URLs matched pending manual publish items.';
+  const unmatched = result.unmatched.length
+    ? result.unmatched.map((item) => `- Slot ${item.slot}: ${item.id} (${item.reason})`).join('\n')
+    : '- None.';
+  const runs = result.capture.runs.length
+    ? result.capture.runs.map((run) => `- ${run.label}: ${run.status}${run.loginRequired ? ', login required' : ''}${run.currentUrl ? `, ${run.currentUrl}` : ''}`).join('\n')
+    : '- Browser capture skipped or not needed.';
+
+  return `# Published URL Discovery
+
+Generated at: ${result.generatedAt}
+Status: ${result.status}
+
+## Scope
+
+- Input: \`${result.inputPath}\`
+- Output: \`${result.outPath}\`
+- Account: \`${result.account}\`
+- Statuses: ${result.capture.statuses}
+- Status payload: \`${result.capture.statusesPath}\`
+
+## Capture Runs
+
+${runs}
+
+## Matches
+
+${matches}
+
+## Unmatched
+
+${unmatched}
+
+## Boundary
+
+${result.boundary}
+`;
+}
+
+async function readStatusesFromFile(filePath) {
+  const payload = await readExistingJson(filePath);
+  if (!payload) return [];
+  const statuses = Array.isArray(payload) ? payload : payload.statuses;
+  return (statuses || []).map((status) => ({
+    url: normalizeXStatusUrl(status.url),
+    author: status.author || '',
+    text: String(status.text || ''),
+  })).filter((status) => status.url && status.text.trim());
 }
 
 async function runEngagementBrowserCapture(options = {}) {
@@ -2520,6 +2656,7 @@ function printHelp() {
   npm run social:confirmation -- --day today --slot 1 --out data/social-growth/publish-confirmation.md
   npm run social:manual-publish-kit -- --day today --slot 1 --out data/social-growth/manual-publish-kit.md
   npm run social:manual-publish-kits -- --day today --out-dir data/social-growth/manual-publish-kits
+  npm run social:discover-published-urls -- --input data/social-growth/manual-publish-kits/day1-published-urls.json
   npm run social:manual-publish-url -- --input data/social-growth/manual-publish-kits/day1-published-urls.json --id <queue-id> --url <x-thread-url>
   npm run social:register-image -- --day today --slot 1 --source /path/to/generated.png
   npm run social:mark-published -- --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out data/social-growth/thread-reply-handoff.md --id <queue-id> --url <x-post-url>

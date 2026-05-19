@@ -343,10 +343,16 @@ function formatBatchRecovery(index) {
   if (!index.kits?.length) {
     return '- Not available because no ready kits were generated.';
   }
-  return `1. After confirmed publication, fill \`url\` for each published item in \`${index.batchRecovery.urlTemplatePath}\`.
-2. Leave unpublished items blank.
-3. Use the \`kit\`, \`urlHint\`, \`recoveryCommand\`, and \`postTextPath\` fields in that JSON to avoid mixing slots.
-4. Run the batch recovery command:
+  return `1. After confirmed publication, let the local system try to discover fresh status URLs from the account timeline:
+
+\`\`\`bash
+npm run social:discover-published-urls -- --input ${shellQuote(index.batchRecovery.urlTemplatePath)}
+\`\`\`
+
+2. If discovery misses a post, fill \`url\` for each published item in \`${index.batchRecovery.urlTemplatePath}\`.
+3. Leave unpublished items blank.
+4. Use the \`kit\`, \`urlHint\`, \`recoveryCommand\`, and \`postTextPath\` fields in that JSON to avoid mixing slots.
+5. Run the batch recovery command:
 
 \`\`\`bash
 ${index.batchRecovery.command}

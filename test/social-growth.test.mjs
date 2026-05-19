@@ -149,6 +149,10 @@ import {
   formatLaunchWindowPlanMarkdown,
   writeLaunchWindowPlan,
 } from '../tools/social-growth/launchWindow.mjs';
+import {
+  extractFirstPostFromManualKit,
+  matchPublishedStatus,
+} from '../tools/social-growth/publishedUrlDiscovery.mjs';
 import { buildXPublishPrep, formatXPublishPrepMarkdown, writeXPublishPrep } from '../tools/social-growth/xPrep.mjs';
 import {
   buildXTechnicalSharingBrief,
@@ -6651,6 +6655,77 @@ test('post-publish recovery marks a manually published X URL and runs local metr
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('published URL discovery matches timeline statuses to pending manual publish kits', async () => {
+  const outDir = await mkdtemp(join(tmpdir(), 'social-growth-published-url-discovery-'));
+  try {
+    const kitPath = join(outDir, 'slot1.md');
+    const inputPath = join(outDir, 'published-urls.json');
+    const statusesPath = join(outDir, 'statuses.json');
+    const firstPost = '技术博客 SEO 最该优化的不是关键词，是一条能反复验证的闭环。';
+    await writeFile(kitPath, `# Manual X Publish Kit\n\n## First Post\n\n\`\`\`text\n${firstPost}\n\`\`\`\n`);
+    await writeJson(inputPath, {
+      version: 1,
+      status: 'ready_for_url_capture',
+      items: [
+        {
+          slot: 1,
+          id: 'Seo-Loop__zh__strong-thesis',
+          kit: kitPath,
+          url: '',
+        },
+      ],
+    });
+    await writeJson(statusesPath, {
+      statuses: [
+        {
+          url: 'https://x.com/Clean993/status/3333333333333333333?s=20',
+          author: '@Clean993',
+          text: `Clean993 @Clean993 · 1m\n${firstPost}\n12 Views`,
+        },
+      ],
+    });
+
+    const result = spawnSync(process.execPath, [
+      'tools/social-growth/cli.mjs',
+      'discover-published-urls',
+      '--input', inputPath,
+      '--statuses', statusesPath,
+      '--now', '2026-05-19T03:00:00.000Z',
+    ], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const payload = JSON.parse(result.stdout);
+    const updated = JSON.parse(await readFile(inputPath, 'utf8'));
+
+    assert.equal(payload.status, 'updated');
+    assert.equal(payload.matched, 1);
+    assert.equal(payload.publicActions.typedText, false);
+    assert.equal(updated.status, 'ready_for_recovery');
+    assert.equal(updated.items[0].url, 'https://x.com/Clean993/status/3333333333333333333');
+    assert.equal(updated.items[0].discoveredBy, 'timeline_match');
+    assert.equal(updated.items[0].publishedAt, '2026-05-19T03:00:00.000Z');
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test('published URL discovery exposes matching primitives for kit text', () => {
+  const kit = '## First Post\n\n```text\n不要把 AI 当代码生成器，要把它当一个可审计的执行系统。\n```';
+  const firstPost = extractFirstPostFromManualKit(kit);
+  const match = matchPublishedStatus(firstPost, [
+    'Clean993',
+    '@Clean993',
+    '不要把 AI 当代码生成器，要把它当一个可审计的执行系统。',
+    '88 Views',
+  ].join('\n'));
+
+  assert.equal(firstPost, '不要把 AI 当代码生成器，要把它当一个可审计的执行系统。');
+  assert.equal(match.source, 'full_text');
+  assert.equal(match.score, 1);
 });
 
 test('post-publish recovery batch marks filled URLs and skips blank slots', async () => {
