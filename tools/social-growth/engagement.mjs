@@ -294,6 +294,12 @@ Then run:
 npm run social:engagement -- --opportunities ${plan.captureDirectory} --out data/social-growth/engagement-plan.md
 \`\`\`
 
+Optional read-only browser capture:
+
+\`\`\`bash
+npm run social:engagement-browser-capture -- --limit 3 --out data/social-growth/engagement-browser-capture.md
+\`\`\`
+
 Capture only threads where a reply can add a mechanism, proof caveat, checklist, or correction. Skip trends, outrage, giveaways, job posts, and generic engagement bait.
 
 ## Boundary
@@ -393,6 +399,29 @@ ${skippedLines}
 
 ${plan.boundary}
 `;
+}
+
+export function formatCapturedStatusOpportunity(status, {
+  reason = '',
+  sourceUrl = '',
+} = {}) {
+  const url = String(status?.url || sourceUrl || '').trim();
+  const author = String(status?.author || '').trim();
+  const text = cleanText(status?.text || '');
+  const why = String(reason || 'Visible X status matched a current Chinese technical queue topic.').trim();
+  return `URL: ${url || 'not captured'}
+Author: ${author || 'not captured'}
+Why relevant: ${why}
+
+${text}
+`;
+}
+
+export function capturedStatusOpportunityId(status, fallback = 'x-status') {
+  const url = String(status?.url || '');
+  const match = url.match(/\/status(?:es)?\/(\d+)/i);
+  if (match) return `x-${match[1]}`;
+  return safeId(fallback);
 }
 
 function buildEngagementCandidate(input, queueItems) {

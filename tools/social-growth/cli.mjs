@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from 'node:child_process';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { loadArticles } from './articles.mjs';
 import { runSafeAutomationCycle } from './automation.mjs';
 import { parseXPostMetrics, parseXProfileMetrics, updateMetricsTemplateFromText } from './capture.mjs';
@@ -41,6 +42,8 @@ import {
   buildEngagementPlan,
   buildEngagementCaptureTemplate,
   buildEngagementSearchPlan,
+  capturedStatusOpportunityId,
+  formatCapturedStatusOpportunity,
   formatEngagementCaptureTemplateMarkdown,
   formatEngagementPlanMarkdown,
   formatEngagementSearchPlanMarkdown,
@@ -677,6 +680,13 @@ if (command === 'articles') {
     console.log(JSON.stringify(template, null, 2));
   } else {
     console.log(formatEngagementCaptureTemplateMarkdown(template));
+  }
+} else if (command === 'engagement-browser-capture') {
+  const result = await runEngagementBrowserCapture(args);
+  if (args.format === 'json') {
+    console.log(JSON.stringify(result, null, 2));
+  } else {
+    console.log(formatEngagementBrowserCaptureMarkdown(result));
   }
 } else if (command === 'copy-template') {
   const queue = await readJson(args.queue || 'data/social-growth/queue.json');
@@ -1772,6 +1782,215 @@ async function runBrowserMetricsCapture(options = {}) {
   };
 }
 
+async function runEngagementBrowserCapture(options = {}) {
+  const queuePath = options.queue || 'data/social-growth/queue.json';
+  const queue = await readJson(queuePath);
+  const opportunityDir = options.opportunities || 'data/social-growth/engagement-opportunities';
+  const captureDir = options.captureDir || 'data/social-growth/engagement-search-captures';
+  const engagementPlanPath = options.engagementOut || 'data/social-growth/engagement-plan.md';
+  const reportPath = options.out || '';
+  const limit = Number(options.limit || 3);
+  const statusLimit = Number(options.statusLimit || options.postsPerSearch || 2);
+  const skipBrowser = booleanOption(options.skipBrowser);
+  const continueOnCaptureError = booleanOption(options.continueOnCaptureError);
+  const profileDir = options.xProfileDir || options.profileDir;
+  const profileDirectory = options.xProfileDirectory || options.profileDirectory;
+  const timeoutMs = Number(options.timeoutMs || 30000);
+  const now = options.now ? new Date(options.now) : new Date();
+  const searchPlan = buildEngagementSearchPlan({
+    queue,
+    now,
+    limit: options.searchLimit || Math.max(limit, 3),
+    daysBack: options.daysBack || 7,
+  });
+  const targets = engagementBrowserTargets(searchPlan).slice(0, Math.max(1, limit));
+  const runs = [];
+  const writtenOpportunities = [];
+
+  if (!skipBrowser && targets.length) {
+    await mkdir(captureDir, { recursive: true });
+    await mkdir(opportunityDir, { recursive: true });
+    for (const [index, target] of targets.entries()) {
+      const slug = safePathSegment(`${index + 1}-${target.id}`);
+      const textOut = `${captureDir}/${slug}.txt`;
+      const statusJsonOut = `${captureDir}/${slug}.statuses.json`;
+      const run = runXBrowserRead({
+        url: target.url,
+        textOut,
+        statusJsonOut,
+        statusLimit,
+        profileDir,
+        profileDirectory,
+        timeoutMs,
+        label: target.id,
+      });
+      const statuses = run.exitCode === 0 ? await readCapturedStatuses(statusJsonOut) : [];
+      runs.push({
+        ...run,
+        targetType: target.type,
+        statusJsonOut,
+        capturedStatuses: statuses.length,
+      });
+      if (run.exitCode !== 0 && !continueOnCaptureError) {
+        throw new Error(`Engagement browser capture failed for ${target.id}: ${run.stderr || run.stdout || run.exitCode}`);
+      }
+      for (const [statusIndex, status] of statuses.entries()) {
+        const id = capturedStatusOpportunityId(status, `${target.id}-${statusIndex + 1}`);
+        const outPath = `${opportunityDir}/auto-${safePathSegment(id)}.txt`;
+        await writeFile(outPath, formatCapturedStatusOpportunity(status, {
+          reason: target.reason,
+          sourceUrl: target.url,
+        }));
+        writtenOpportunities.push({
+          id,
+          url: status.url,
+          sourceTarget: target.id,
+          outPath,
+        });
+      }
+    }
+  }
+
+  const opportunityTexts = await readEngagementOpportunityTexts(opportunityDir);
+  const engagementPlan = buildEngagementPlan({
+    queue,
+    opportunityTexts,
+    now,
+    limit: options.replyLimit || options.engagementLimit || 5,
+  });
+  await writeEngagementPlan(engagementPlan, engagementPlanPath);
+  const result = {
+    generatedAt: now.toISOString(),
+    status: engagementBrowserCaptureStatus({
+      skipBrowser,
+      targets,
+      runs,
+      writtenOpportunities,
+      engagementPlan,
+    }),
+    queuePath,
+    searchPlan: {
+      status: searchPlan.status,
+      searchCount: searchPlan.searchCount,
+      creatorSeedCount: searchPlan.creatorSeedCount,
+    },
+    capture: {
+      skipped: skipBrowser,
+      targetCount: targets.length,
+      statusLimit,
+      captureDir,
+      opportunityDir,
+      writtenOpportunities: writtenOpportunities.length,
+      runs: runs.map((run) => ({
+        label: run.label,
+        url: run.url,
+        exitCode: run.exitCode,
+        status: run.status,
+        textOut: run.textOut,
+        statusJsonOut: run.statusJsonOut,
+        capturedStatuses: run.capturedStatuses,
+      })),
+    },
+    engagementPlan: {
+      path: engagementPlanPath,
+      status: engagementPlan.status,
+      capturedOpportunities: engagementPlan.opportunityCount,
+      readyReplyCandidates: engagementPlan.selectedCount,
+    },
+    publicActions: {
+      typedText: false,
+      uploadedMedia: false,
+      clickedSubmit: false,
+      replied: false,
+      liked: false,
+      reposted: false,
+      followed: false,
+    },
+    boundary: 'Read-only X page capture only. Do not reply, like, repost, follow, quote, post, edit profile, or pin without action-time confirmation in Chrome.',
+  };
+
+  if (reportPath) {
+    await mkdir(dirnameFromPath(reportPath), { recursive: true });
+    await writeFile(reportPath, `${formatEngagementBrowserCaptureMarkdown(result).trimEnd()}\n`);
+  }
+  return result;
+}
+
+function engagementBrowserTargets(searchPlan) {
+  const searches = (searchPlan.searches || []).map((item, index) => ({
+    id: `${item.topic || 'topic'}-${index + 1}`,
+    type: 'search',
+    url: item.url,
+    reason: item.reason,
+  }));
+  const creatorSeeds = (searchPlan.creatorSeeds || []).map((item) => ({
+    id: `creator-${item.handle}`,
+    type: 'creator_seed',
+    url: item.searchUrl || item.profileUrl,
+    reason: item.reason,
+  }));
+  return [...searches, ...creatorSeeds].filter((item) => item.url);
+}
+
+async function readCapturedStatuses(filePath) {
+  try {
+    const parsed = JSON.parse(await readFile(filePath, 'utf8'));
+    return Array.isArray(parsed.statuses) ? parsed.statuses : [];
+  } catch (error) {
+    if (error?.code === 'ENOENT') return [];
+    throw error;
+  }
+}
+
+function engagementBrowserCaptureStatus({
+  skipBrowser,
+  targets,
+  runs,
+  writtenOpportunities,
+  engagementPlan,
+}) {
+  if (skipBrowser) return 'skipped';
+  if (!targets.length) return 'needs_search_targets';
+  if (runs.some((run) => run.exitCode !== 0)) return 'capture_failed';
+  if (!writtenOpportunities.length) return 'needs_visible_statuses';
+  return engagementPlan.selectedCount ? 'ready_for_reply_confirmation' : engagementPlan.status;
+}
+
+function formatEngagementBrowserCaptureMarkdown(result) {
+  const runs = result.capture.runs.length
+    ? result.capture.runs.map((run) => `- ${run.label}: ${run.status}, statuses ${run.capturedStatuses}, ${run.url}`).join('\n')
+    : '- No browser captures were run.';
+  return `# X Engagement Browser Capture
+
+Generated at: ${result.generatedAt}
+Status: ${result.status}
+
+## Scope
+
+- Queue: \`${result.queuePath}\`
+- Search targets: ${result.capture.targetCount}
+- Statuses per target: ${result.capture.statusLimit}
+- Captured opportunity files: ${result.capture.writtenOpportunities}
+- Opportunity dir: \`${result.capture.opportunityDir}\`
+- Raw capture dir: \`${result.capture.captureDir}\`
+
+## Runs
+
+${runs}
+
+## Engagement Plan
+
+- Status: ${result.engagementPlan.status}
+- Captured opportunities: ${result.engagementPlan.capturedOpportunities}
+- Ready reply candidates: ${result.engagementPlan.readyReplyCandidates}
+- Report: \`${result.engagementPlan.path}\`
+
+## Boundary
+
+${result.boundary}
+`;
+}
+
 function inferPublishModeFromProbe(probe = {}) {
   return String(probe.articleAvailable || '').toLowerCase() === 'no'
     ? 'thread_fallback'
@@ -2182,6 +2401,8 @@ function booleanOption(value) {
 function runXBrowserRead({
   url,
   textOut,
+  statusJsonOut,
+  statusLimit,
   profileDir,
   profileDirectory,
   timeoutMs,
@@ -2197,6 +2418,10 @@ function runXBrowserRead({
     '--timeout-ms',
     String(timeoutMs),
   ];
+  if (statusJsonOut) {
+    readArgs.push('--status-json-out', statusJsonOut);
+    readArgs.push('--status-limit', String(statusLimit || 10));
+  }
   if (profileDir) readArgs.push('--profile', profileDir);
   if (profileDirectory) readArgs.push('--profile-directory', profileDirectory);
   const result = spawnSync(process.execPath, readArgs, {
@@ -2265,6 +2490,7 @@ function printHelp() {
   npm run social:day-readiness -- --day 1 --out data/social-growth/day-readiness.md
   npm run social:daily-brief -- --day 1 --out data/social-growth/daily-brief.md
   npm run social:engagement-search -- --out data/social-growth/engagement-search.md
+  npm run social:engagement-browser-capture -- --limit 3 --out data/social-growth/engagement-browser-capture.md
   npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md
   npm run social:copy-template -- --day today --slot 1
   npm run social:x-tech-brief -- --day today --slot 1

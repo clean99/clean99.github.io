@@ -166,6 +166,8 @@ async function probeBrowser({
 async function captureVisibleText({
   readUrl,
   textOut = '',
+  statusJsonOut = '',
+  statusLimit = 0,
   timeoutMs = DEFAULT_TIMEOUT_MS,
   profileDir = defaultProfileDir(),
   profileDirectory = '',
@@ -188,10 +190,28 @@ async function captureVisibleText({
     await waitForDocument(cdp, Math.min(timeoutMs, 30_000));
     const text = await waitForVisibleText(cdp, Math.min(timeoutMs, 30_000));
     const currentUrl = await cdp.evaluate(`window.location.href`).catch(() => targetUrl);
+    const statuses = statusJsonOut || Number(statusLimit) > 0
+      ? await waitForVisibleStatuses(cdp, Math.min(timeoutMs, 30_000), Number(statusLimit || 10))
+      : [];
 
     if (textOut) {
       await mkdir(dirname(textOut), { recursive: true });
       await writeFile(textOut, `${text.trimEnd()}\n`);
+    }
+    if (statusJsonOut) {
+      await mkdir(dirname(statusJsonOut), { recursive: true });
+      await writeFile(statusJsonOut, `${JSON.stringify({
+        generatedAt: new Date().toISOString(),
+        requestedUrl: targetUrl,
+        currentUrl,
+        statusCount: statuses.length,
+        statuses,
+        publicActions: {
+          typedText: false,
+          uploadedMedia: false,
+          clickedSubmit: false,
+        },
+      }, null, 2)}\n`);
     }
 
     const result = {
@@ -200,7 +220,10 @@ async function captureVisibleText({
       profileDirectory: session.profileDirectory,
       currentUrl,
       textOut,
+      statusJsonOut,
       textLength: text.length,
+      statusCount: statuses.length,
+      statuses,
       attachedToExistingChrome: Boolean(session.existingPort),
       publicActions: {
         typedText: false,
@@ -399,6 +422,55 @@ async function waitForVisibleText(cdp, timeoutMs) {
   return latest;
 }
 
+async function waitForVisibleStatuses(cdp, timeoutMs, limit) {
+  const start = Date.now();
+  let latest = [];
+  while (Date.now() - start < timeoutMs) {
+    latest = await extractVisibleStatuses(cdp, limit).catch(() => []);
+    if (latest.length > 0) return latest;
+    await sleep(500);
+  }
+  return latest;
+}
+
+async function extractVisibleStatuses(cdp, limit) {
+  const raw = await cdp.evaluate(`
+    (() => {
+      const articles = [...document.querySelectorAll('article')];
+      const statuses = [];
+      const seen = new Set();
+      for (const article of articles) {
+        const links = [...article.querySelectorAll('a[href*="/status/"]')];
+        const href = links.map((link) => link.href || link.getAttribute('href') || '').find(Boolean);
+        const text = String(article.innerText || article.textContent || '').trim();
+        if (!href || !text || seen.has(href)) continue;
+        seen.add(href);
+        const author = text.match(/@[A-Za-z0-9_]{1,15}/)?.[0] || '';
+        statuses.push({ url: href, author, text: text.slice(0, 4000) });
+      }
+      return JSON.stringify(statuses);
+    })()
+  `);
+  const parsed = JSON.parse(String(raw || '[]'));
+  const normalized = [];
+  const seen = new Set();
+  for (const item of parsed) {
+    const url = normalizeStatusUrl(item.url);
+    if (!url || seen.has(url)) continue;
+    const text = String(item.text || '').trim();
+    if (text.length < 20) continue;
+    seen.add(url);
+    const author = String(item.author || '').trim();
+    normalized.push({
+      url,
+      author: author ? author.replace(/^@?/, '@') : '',
+      text,
+    });
+    if (normalized.length >= Math.max(1, Number(limit || 10))) break;
+  }
+  return normalized;
+}
+
 function normalizeReadUrl(value) {
   const url = new URL(String(value || ''));
   const hostname = url.hostname.toLowerCase();
@@ -409,6 +481,23 @@ function normalizeReadUrl(value) {
     throw new Error('Read-only capture requires an HTTPS X URL.');
   }
   return url.toString();
+}
+
+function normalizeStatusUrl(value) {
+  let parsed;
+  try {
+    parsed = new URL(String(value || ''), 'https://x.com');
+  } catch {
+    return '';
+  }
+  const host = parsed.hostname.replace(/^www\./, '').replace(/^mobile\./, '').toLowerCase();
+  if (host !== 'x.com' && host !== 'twitter.com') return '';
+  const parts = parsed.pathname.split('/').filter(Boolean);
+  const statusIndex = parts.findIndex((part) => part.toLowerCase() === 'status' || part.toLowerCase() === 'statuses');
+  const account = parts[statusIndex - 1];
+  const statusId = parts[statusIndex + 1];
+  if (statusIndex <= 0 || !account || !/^\d+$/.test(statusId || '')) return '';
+  return `https://x.com/${account}/status/${statusId}`;
 }
 
 async function hasFileInput(cdp) {
@@ -671,6 +760,8 @@ function parseArgs(args) {
     probe: false,
     readUrl: '',
     textOut: '',
+    statusJsonOut: '',
+    statusLimit: 0,
     json: false,
     probeOut: '',
     expectedAccount: '',
@@ -693,6 +784,10 @@ function parseArgs(args) {
       options.readUrl = args[++index];
     } else if (arg === '--text-out' && args[index + 1]) {
       options.textOut = args[++index];
+    } else if (arg === '--status-json-out' && args[index + 1]) {
+      options.statusJsonOut = args[++index];
+    } else if (arg === '--status-limit' && args[index + 1]) {
+      options.statusLimit = Number(args[++index]) || 0;
     } else if (arg === '--json') {
       options.json = true;
     } else if (arg === '--probe-out' && args[index + 1]) {
@@ -752,6 +847,9 @@ Options:
   --probe              Check Chrome/X compose readiness without typing or uploading
   --read-url <url>     Read visible text from an X URL without typing or uploading
   --text-out <path>    Write visible text captured by --read-url
+  --status-json-out <path>
+                       Write visible X status links/text captured by --read-url
+  --status-limit <n>   Max visible statuses to capture with --status-json-out
   --json               Print probe result as JSON
   --probe-out <path>   Write browser-readiness probe state JSON
   --account <handle>   Expected X account handle for probe state

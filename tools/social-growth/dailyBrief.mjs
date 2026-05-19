@@ -696,7 +696,7 @@ function buildActionItems({
   if (engagementSearch.status === 'ready_for_read_only_search' && engagementPlan.status === 'needs_opportunity_capture') {
     actions.push({
       priority: 'P1',
-      action: 'Open read-only X search URLs, capture 5-10 relevant technical threads, then rerun the engagement plan.',
+      action: 'Run social:engagement-browser-capture or open read-only X search URLs, capture 5-10 relevant technical threads, then rerun the engagement plan.',
       reason: 'Second-degree technical conversations are missing; the plan has search queries but no captured opportunities.',
     });
   } else if (engagementPlan.status === 'ready_for_browser_confirmation') {

@@ -44,6 +44,8 @@ import {
   buildEngagementPlan,
   buildEngagementCaptureTemplate,
   buildEngagementSearchPlan,
+  capturedStatusOpportunityId,
+  formatCapturedStatusOpportunity,
   formatEngagementCaptureTemplateMarkdown,
   formatEngagementPlanMarkdown,
   formatEngagementSearchPlanMarkdown,
@@ -1482,11 +1484,29 @@ test('engagement search plan creates read-only X searches from queue topics', as
     assert.ok(plan.searches.every((item) => item.captureHint.includes('engagement-opportunities')));
     assert.match(markdown, /Read-only discovery/);
     assert.match(markdown, /Creator Seed Accounts/);
+    assert.match(markdown, /engagement-browser-capture/);
     assert.match(markdown, /铁锤人/);
     assert.match(persisted, /X Engagement Search Plan/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
+});
+
+test('formats read-only browser status captures as engagement opportunities', () => {
+  const status = {
+    url: 'https://x.com/example/status/123456789',
+    author: '@example',
+    text: 'React 性能优化不能只看 render 次数，还要把交互、网络和首屏指标拆开看。',
+  };
+  const text = formatCapturedStatusOpportunity(status, {
+    reason: 'Find recent Chinese React performance threads that match current queue anchors.',
+  });
+
+  assert.equal(capturedStatusOpportunityId(status), 'x-123456789');
+  assert.match(text, /URL: https:\/\/x\.com\/example\/status\/123456789/);
+  assert.match(text, /Author: @example/);
+  assert.match(text, /Why relevant: Find recent Chinese React performance threads/);
+  assert.match(text, /React 性能优化/);
 });
 
 test('daily execution brief combines publish, engagement, metrics, and profile actions', async () => {

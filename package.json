@@ -23,6 +23,7 @@
     "social:day-readiness": "node tools/social-growth/cli.mjs day-readiness",
     "social:draft": "node tools/social-growth/cli.mjs draft",
     "social:engagement": "node tools/social-growth/cli.mjs engagement-plan",
+    "social:engagement-browser-capture": "node tools/social-growth/cli.mjs engagement-browser-capture",
     "social:engagement-capture-template": "node tools/social-growth/cli.mjs engagement-capture-template",
     "social:engagement-search": "node tools/social-growth/cli.mjs engagement-search",
     "social:experiments": "node tools/social-growth/cli.mjs experiments",
