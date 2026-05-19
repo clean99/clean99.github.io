@@ -1573,6 +1573,7 @@ test('daily execution brief combines publish, engagement, metrics, and profile a
     assert.ok(brief.actionItems.some((item) => item.action.includes('Prepare 1 ready X Article')));
     assert.match(markdown, /Daily X Growth Brief/);
     assert.match(markdown, /Conversion Funnel/);
+    assert.match(markdown, /social:engagement-browser-capture/);
     assert.match(markdown, /Action Order/);
     assert.match(persisted, /metrics-cycle/);
   } finally {

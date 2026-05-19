@@ -215,6 +215,7 @@ Commands:
 
 \`\`\`bash
 npm run social:engagement-search -- --out data/social-growth/engagement-search.md
+npm run social:engagement-browser-capture -- --limit ${brief.engagementSearch.searchCount ? Math.min(3, brief.engagementSearch.searchCount) : 3} --out data/social-growth/engagement-browser-capture.md
 npm run social:engagement -- --opportunities data/social-growth/engagement-opportunities --out data/social-growth/engagement-plan.md
 \`\`\`
 
