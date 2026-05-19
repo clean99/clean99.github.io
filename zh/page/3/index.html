@@ -231,6 +231,12 @@
           <a href="/zh/About" class="ml">关于</a>
           
         
+        <a
+          href="/page/3/"
+          class="ml language-switch"
+          onclick="localStorage.setItem('preferredLang', 'en')"
+          aria-label="Read in English"
+        >English</a>
       </nav>
     </div>
     <hr style="margin-bottom: 2.6rem">
@@ -241,53 +247,53 @@
           
 
 <section class="hero">
-  <p class="eyebrow">Engineer&rsquo;s Field Notes</p>
-  <h1>Koh Hom</h1>
-  <p class="hero__lede">Software engineer exploring frontend systems, AI agents, learning, and inner practice.</p>
-  <p>I write about building reliable software, working with AI, understanding complex systems, and practicing a clearer way of living.</p>
+  <p class="eyebrow">工程师现场笔记</p>
+  <h1>许峰 Koh Hom</h1>
+  <p class="hero__lede">探索前端系统、AI Agent、学习方法与内在实践的软件工程师。</p>
+  <p>我写关于可靠软件、AI 协作、复杂系统理解，以及如何更清楚地生活的长期笔记。</p>
   <div class="cta-row">
-    <a class="cta-link" href="/zh/writing#engineering">Start with Engineering</a>
-    <a class="cta-link" href="/zh/interviewers">For Interviewers</a>
-    <a class="cta-link" href="#latest-writing">Latest Writing</a>
+    <a class="cta-link" href="/zh/writing#engineering">从工程文章开始</a>
+    <a class="cta-link" href="/zh/interviewers">面试官入口</a>
+    <a class="cta-link" href="#latest-writing">最新文章</a>
   </div>
 </section>
 
 <section class="section-block" aria-labelledby="featured-paths-title">
   <div class="section-heading">
-    <p class="eyebrow">Featured paths</p>
-    <h2 id="featured-paths-title">Ways into the notebook</h2>
+    <p class="eyebrow">主题路径</p>
+    <h2 id="featured-paths-title">进入这个笔记本的几条路径</h2>
   </div>
   <div class="path-grid">
     
       <article class="path-card">
-        <h3>Engineering</h3>
-        <p>Frontend systems, reliability, performance, testing, and architecture.</p>
+        <h3>工程</h3>
+        <p>前端系统、可靠性、性能、测试与架构。</p>
         
-          <a href="/zh/writing#engineering">View essays</a>
-        
-      </article>
-    
-      <article class="path-card">
-        <h3>AI & Agents</h3>
-        <p>AI-assisted development, agent systems, automation, and human-AI workflows.</p>
-        
-          <a href="/zh/writing#ai">View essays</a>
+          <a href="/zh/writing#engineering">查看文章</a>
         
       </article>
     
       <article class="path-card">
-        <h3>Systems & Learning</h3>
-        <p>How I learn, reason, build mental models, and connect ideas across domains.</p>
+        <h3>AI 与 Agent</h3>
+        <p>AI 辅助开发、Agent 系统、自动化和人机协作工作流。</p>
         
-          <a href="/zh/writing#systems">View essays</a>
+          <a href="/zh/writing#ai">查看文章</a>
         
       </article>
     
       <article class="path-card">
-        <h3>Mind & Practice</h3>
-        <p>Buddhism, attention, reading notes, and reflections on living well.</p>
+        <h3>系统与学习</h3>
+        <p>我如何学习、推理、建立心智模型，并连接不同领域的想法。</p>
         
-          <a href="/zh/writing#mind">View essays</a>
+          <a href="/zh/writing#systems">查看文章</a>
+        
+      </article>
+    
+      <article class="path-card">
+        <h3>心智与实践</h3>
+        <p>佛学、注意力、阅读笔记，以及关于好好生活的反思。</p>
+        
+          <a href="/zh/writing#mind">查看文章</a>
         
       </article>
     
@@ -295,16 +301,16 @@
 </section>
 
 <section class="section-block interview-highlight" aria-labelledby="interviewers-title">
-  <p class="eyebrow">For interviewers</p>
-  <h2 id="interviewers-title">A shorter path to the engineering signal</h2>
-  <p>If you&rsquo;re evaluating my engineering work, start here: selected essays and projects on frontend architecture, performance, reliability, testing, and AI-assisted development.</p>
-  <a class="cta-link" href="/zh/interviewers">Open the interviewers page</a>
+  <p class="eyebrow">面试官入口</p>
+  <h2 id="interviewers-title">更快看到工程能力</h2>
+  <p>如果你正在评估我的工程能力，可以从这里开始：精选的前端架构、性能、可靠性、测试和 AI 辅助开发文章与项目笔记。</p>
+  <a class="cta-link" href="/zh/interviewers">打开面试官入口</a>
 </section>
 
 <section class="section-block" id="latest-writing" aria-labelledby="latest-writing-title">
   <div class="section-heading">
-    <p class="eyebrow">Latest writing</p>
-    <h2 id="latest-writing-title">Recent notes</h2>
+    <p class="eyebrow">最新写作</p>
+    <h2 id="latest-writing-title">最近笔记</h2>
   </div>
   <div class="post-list">
     
@@ -312,9 +318,9 @@
 <article class="post-card">
   <div class="post-card__meta">
     <time datetime="2026-05-18T08:31:00.000Z">May 18, 2026</time>
-    <span class="pill">Engineering</span>
+    <span class="pill">工程</span>
     
-      <span>11 min read</span>
+      <span>11 分钟阅读</span>
     
   </div>
   <h3 class="post-card__title">
@@ -326,11 +332,11 @@
   
     <div class="tag-list" aria-label="Tags">
       
-        <span>Frontend</span>
+        <span>前端</span>
       
-        <span>Software Engineering</span>
+        <span>软件工程</span>
       
-        <span>Web Performance</span>
+        <span>Web 性能</span>
       
         <span>React</span>
       
@@ -343,9 +349,9 @@
 <article class="post-card">
   <div class="post-card__meta">
     <time datetime="2026-05-18T08:30:00.000Z">May 18, 2026</time>
-    <span class="pill">Engineering</span>
+    <span class="pill">工程</span>
     
-      <span>21 min read</span>
+      <span>21 分钟阅读</span>
     
   </div>
   <h3 class="post-card__title">
@@ -357,9 +363,9 @@
   
     <div class="tag-list" aria-label="Tags">
       
-        <span>Frontend</span>
+        <span>前端</span>
       
-        <span>Software Engineering</span>
+        <span>软件工程</span>
       
         <span>React</span>
       
@@ -372,9 +378,9 @@
 <article class="post-card">
   <div class="post-card__meta">
     <time datetime="2026-05-16T04:30:31.000Z">May 16, 2026</time>
-    <span class="pill">AI & Agents</span>
+    <span class="pill">AI 与 Agent</span>
     
-      <span>6 min read</span>
+      <span>6 分钟阅读</span>
     
   </div>
   <h3 class="post-card__title">
@@ -386,11 +392,11 @@
   
     <div class="tag-list" aria-label="Tags">
       
-        <span>Frontend</span>
+        <span>前端</span>
       
-        <span>Software Engineering</span>
+        <span>软件工程</span>
       
-        <span>Web Performance</span>
+        <span>Web 性能</span>
       
         <span>AI</span>
       
@@ -403,9 +409,9 @@
 <article class="post-card">
   <div class="post-card__meta">
     <time datetime="2026-03-23T08:00:00.000Z">Mar 23, 2026</time>
-    <span class="pill">AI & Agents</span>
+    <span class="pill">AI 与 Agent</span>
     
-      <span>3 min read</span>
+      <span>3 分钟阅读</span>
     
   </div>
   <h3 class="post-card__title">
@@ -417,7 +423,7 @@
   
     <div class="tag-list" aria-label="Tags">
       
-        <span>Software Engineering</span>
+        <span>软件工程</span>
       
         <span>AI</span>
       
@@ -434,9 +440,9 @@
 <article class="post-card">
   <div class="post-card__meta">
     <time datetime="2026-03-18T07:00:00.000Z">Mar 18, 2026</time>
-    <span class="pill">AI & Agents</span>
+    <span class="pill">AI 与 Agent</span>
     
-      <span>3 min read</span>
+      <span>3 分钟阅读</span>
     
   </div>
   <h3 class="post-card__title">
@@ -448,13 +454,13 @@
   
     <div class="tag-list" aria-label="Tags">
       
-        <span>Software Engineering</span>
+        <span>软件工程</span>
       
         <span>AI</span>
       
         <span>Claude Code</span>
       
-        <span>code generation</span>
+        <span>代码生成</span>
       
     </div>
   
@@ -465,9 +471,9 @@
 <article class="post-card">
   <div class="post-card__meta">
     <time datetime="2026-03-10T06:00:00.000Z">Mar 10, 2026</time>
-    <span class="pill">AI & Agents</span>
+    <span class="pill">AI 与 Agent</span>
     
-      <span>8 min read</span>
+      <span>8 分钟阅读</span>
     
   </div>
   <h3 class="post-card__title">
@@ -479,11 +485,11 @@
   
     <div class="tag-list" aria-label="Tags">
       
-        <span>Frontend</span>
+        <span>前端</span>
       
-        <span>Software Engineering</span>
+        <span>软件工程</span>
       
-        <span>Web Performance</span>
+        <span>Web 性能</span>
       
         <span>SEO</span>
       
@@ -493,7 +499,7 @@
 
     
   </div>
-  <p class="section-link"><a href="/zh/writing">Browse all writing</a></p>
+  <p class="section-link"><a href="/zh/writing">浏览全部文章</a></p>
 </section>
 
           <div class="row mt-2">
