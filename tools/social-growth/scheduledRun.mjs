@@ -379,6 +379,10 @@ ${confirmationIssues}
 
 ${humanGate(result)}
 
+## Manual Publish URL Capture
+
+${formatManualPublishUrlCapture(result.automation.manualPublishUrls)}
+
 ## Metrics
 
 - Status: ${result.metrics.status}
@@ -558,6 +562,7 @@ async function summarizeManualPublishUrls(filePath) {
     filled: 0,
     pending: 0,
     filledItems: [],
+    pendingItems: [],
     recoveryCommand: '',
   };
   if (!filePath) return fallback;
@@ -572,6 +577,7 @@ async function summarizeManualPublishUrls(filePath) {
 
   const items = template.items || [];
   const filledItems = items.filter((item) => item.url);
+  const pendingItems = items.filter((item) => !item.url);
   return {
     status: template.status || (filledItems.length ? 'ready_for_recovery' : 'ready_for_url_capture'),
     path: filePath,
@@ -583,8 +589,42 @@ async function summarizeManualPublishUrls(filePath) {
       id: item.id,
       url: item.url,
     })),
+    pendingItems: pendingItems.map((item) => ({
+      slot: item.slot,
+      id: item.id,
+      urlHint: item.urlHint || '',
+      kit: item.kit || '',
+      postTextPath: item.postTextPath || '',
+      fillCommand: `npm run social:manual-publish-url -- --input ${shellQuote(filePath)} --id ${shellQuote(item.id)} --url <x-thread-url>`,
+    })),
     recoveryCommand: `npm run social:post-publish-recovery-batch -- --input ${shellQuote(filePath)} --queue data/social-growth/queue.json --metrics data/social-growth/posts.local.json --reply-out-dir data/social-growth/thread-replies --launch-window-dir data/social-growth/launch-windows`,
   };
+}
+
+function formatManualPublishUrlCapture(summary = {}) {
+  const pendingLines = summary.pendingItems?.length
+    ? summary.pendingItems.slice(0, 10).map((item) => `- Slot ${item.slot}: ${item.id}
+  - URL hint: \`${item.urlHint || 'https://x.com/Clean993/status/<status-id>'}\`
+  - Kit: \`${item.kit || 'not generated'}\`
+  - Fill command: \`${item.fillCommand}\``).join('\n')
+    : '- No pending URL items.';
+  const filledLines = summary.filledItems?.length
+    ? summary.filledItems.map((item) => `- Slot ${item.slot}: ${item.id} -> ${item.url}`).join('\n')
+    : '- No filled URLs yet.';
+
+  return `- Status: ${summary.status || 'unknown'}
+- Template: \`${summary.path || 'not generated'}\`
+- Filled: ${summary.filled ?? 'unknown'}/${summary.total ?? 'unknown'}
+- Pending: ${summary.pending ?? 'unknown'}
+- Batch recovery command: \`${summary.recoveryCommand || 'not generated'}\`
+
+Pending items:
+
+${pendingLines}
+
+Filled items:
+
+${filledLines}`;
 }
 
 async function readOptionalText(filePath) {

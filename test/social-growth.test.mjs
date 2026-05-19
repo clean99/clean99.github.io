@@ -2333,6 +2333,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Launch window/);
     assert.match(scheduledReport, /Browser readiness/);
     assert.match(scheduledReport, /Human Gate/);
+    assert.match(scheduledReport, /Manual Publish URL Capture/);
+    assert.match(scheduledReport, /Fill command: `npm run social:manual-publish-url -- --input .* --id .* --url <x-thread-url>`/);
     assert.match(scheduledReport, /Publish confirmation packet: ready_for_confirmation/);
     assert.match(scheduledReport, /Public-action boundary: every publish, media upload, reply, like, repost, follow, profile edit, and pin still requires action-time confirmation in Chrome/);
     assert.match(scheduledReport, /Current human action: review/);
@@ -2600,8 +2602,11 @@ test('scheduled growth loop prioritizes filled manual publish URLs before browse
     assert.equal(result.status, 'needs_post_publish_recovery');
     assert.equal(result.automation.manualPublishUrls.filled, 1);
     assert.equal(result.automation.manualPublishUrls.pending, 0);
+    assert.equal(result.automation.manualPublishUrls.pendingItems.length, 0);
     assert.equal(urlTemplate.items[0].url, 'https://x.com/Clean993/status/1234567890');
     assert.match(scheduledReport, /Manual publish URLs filled: 1\/1/);
+    assert.match(scheduledReport, /Manual Publish URL Capture/);
+    assert.match(scheduledReport, /Filled items:\n\n- Slot 1: .* -> https:\/\/x\.com\/Clean993\/status\/1234567890/);
     assert.match(scheduledReport, /Current local action: run `npm run social:post-publish-recovery-batch/);
     assert.match(scheduledReport, /## Next Action\n\nRun the local batch recovery command/);
   } finally {
