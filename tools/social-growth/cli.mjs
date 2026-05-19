@@ -47,6 +47,7 @@ import {
   formatEngagementCaptureTemplateMarkdown,
   formatEngagementPlanMarkdown,
   formatEngagementSearchPlanMarkdown,
+  isXLoginRedirectUrl,
   readEngagementOpportunityTexts,
   writeEngagementCaptureTemplate,
   writeEngagementPlan,
@@ -1884,12 +1885,15 @@ async function runEngagementBrowserCapture(options = {}) {
       runs: runs.map((run) => ({
         label: run.label,
         url: run.url,
+        currentUrl: run.currentUrl,
         exitCode: run.exitCode,
         status: run.status,
+        loginRequired: run.loginRequired,
         textOut: run.textOut,
         statusJsonOut: run.statusJsonOut,
         capturedStatuses: run.capturedStatuses,
       })),
+      loginRequiredRuns: runs.filter((run) => run.loginRequired).length,
     },
     engagementPlan: {
       path: engagementPlanPath,
@@ -1952,14 +1956,18 @@ function engagementBrowserCaptureStatus({
   if (skipBrowser) return 'skipped';
   if (!targets.length) return 'needs_search_targets';
   if (runs.some((run) => run.exitCode !== 0)) return 'capture_failed';
+  if (runs.some((run) => run.loginRequired) && !writtenOpportunities.length) return 'needs_x_login';
   if (!writtenOpportunities.length) return 'needs_visible_statuses';
   return engagementPlan.selectedCount ? 'ready_for_reply_confirmation' : engagementPlan.status;
 }
 
 function formatEngagementBrowserCaptureMarkdown(result) {
   const runs = result.capture.runs.length
-    ? result.capture.runs.map((run) => `- ${run.label}: ${run.status}, statuses ${run.capturedStatuses}, ${run.url}`).join('\n')
+    ? result.capture.runs.map((run) => `- ${run.label}: ${run.status}${run.loginRequired ? ', login required' : ''}, statuses ${run.capturedStatuses}, ${run.url}${run.currentUrl ? `\n  - Current URL: ${run.currentUrl}` : ''}`).join('\n')
     : '- No browser captures were run.';
+  const blockers = result.capture.loginRequiredRuns
+    ? `- ${result.capture.loginRequiredRuns} read-only capture target(s) redirected to X login. Log into the Chrome/CDP profile used by this command, or keep using normal Chrome for manual read-only capture.`
+    : '- No capture blockers detected.';
   return `# X Engagement Browser Capture
 
 Generated at: ${result.generatedAt}
@@ -1971,12 +1979,17 @@ Status: ${result.status}
 - Search targets: ${result.capture.targetCount}
 - Statuses per target: ${result.capture.statusLimit}
 - Captured opportunity files: ${result.capture.writtenOpportunities}
+- Login-required runs: ${result.capture.loginRequiredRuns}
 - Opportunity dir: \`${result.capture.opportunityDir}\`
 - Raw capture dir: \`${result.capture.captureDir}\`
 
 ## Runs
 
 ${runs}
+
+## Capture Blockers
+
+${blockers}
 
 ## Engagement Plan
 
@@ -2440,6 +2453,8 @@ function runXBrowserRead({
     textOut,
     exitCode: result.status ?? 1,
     status: parsed?.status || 'unknown',
+    currentUrl: parsed?.currentUrl || '',
+    loginRequired: isXLoginRedirectUrl(parsed?.currentUrl || ''),
     stdout: result.stdout,
     stderr: result.stderr,
   };

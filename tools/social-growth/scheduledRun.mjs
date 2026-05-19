@@ -53,6 +53,7 @@ const DEFAULT_BROWSER_PROBE_PATH = 'data/social-growth/browser-probe.local.json'
 const DEFAULT_ENGAGEMENT_OPPORTUNITY_DIR = 'data/social-growth/engagement-opportunities';
 const DEFAULT_ENGAGEMENT_PLAN_PATH = 'data/social-growth/engagement-plan.md';
 const DEFAULT_ENGAGEMENT_SEARCH_PATH = 'data/social-growth/engagement-search.md';
+const DEFAULT_ENGAGEMENT_BROWSER_CAPTURE_PATH = 'data/social-growth/engagement-browser-capture.md';
 
 export async function runScheduledGrowthLoop({
   articles,
@@ -103,6 +104,7 @@ export async function runScheduledGrowthLoop({
   engagementCaptureTemplatePath = join(engagementOpportunityDir, '_capture-template.md'),
   engagementPlanPath = DEFAULT_ENGAGEMENT_PLAN_PATH,
   engagementSearchPath = DEFAULT_ENGAGEMENT_SEARCH_PATH,
+  engagementBrowserCapturePath = DEFAULT_ENGAGEMENT_BROWSER_CAPTURE_PATH,
   engagementLimit = 5,
   xSkillDir,
   xBunCommand,
@@ -209,6 +211,10 @@ export async function runScheduledGrowthLoop({
   await writeGoalAudit(goalAudit, goalAuditPath);
   const publicActionChecklistText = await readOptionalText(resolvedPublicActionChecklistPath);
   const publicActions = parsePublicActionChecklistMarkdown(publicActionChecklistText);
+  const engagementBrowserCapture = summarizeEngagementBrowserCapture(
+    await readOptionalText(engagementBrowserCapturePath),
+    engagementBrowserCapturePath,
+  );
   const publicActionHandoff = await buildScheduledActionHandoff({
     checklistText: publicActionChecklistText,
     actions: publicActions,
@@ -237,6 +243,7 @@ export async function runScheduledGrowthLoop({
       loginHandoff: automation.loginHandoff,
       launchWindow: automation.launchWindow,
       engagement: automation.engagement,
+      engagementBrowserCapture,
       manualPublishKits: automation.manualPublishKits,
       publicActionChecklist: automation.publicActionChecklist,
       manualPublishUrls,
@@ -281,6 +288,7 @@ export async function runScheduledGrowthLoop({
       goalAudit: goalAuditPath,
       publicActionHandoff: publicActionHandoffPath,
       profileActionHandoff: profileActionHandoffPath,
+      engagementBrowserCapture: engagementBrowserCapturePath,
       scheduledReport: scheduledReportPath,
     },
     boundary: [
@@ -334,6 +342,7 @@ Status: ${result.status}
 - Engagement search: \`${result.paths.engagementSearch}\`
 - Engagement capture template: \`${result.paths.engagementCaptureTemplate}\`
 - Engagement plan: \`${result.paths.engagementPlan}\`
+- Engagement browser capture: \`${result.paths.engagementBrowserCapture || 'not generated'}\`
 - Manual publish kits: \`${result.paths.manualPublishKitIndex}\`
 - Profile diagnostics recommendations: ${result.automation.profileDiagnostics?.recommendations ?? 'unknown'}
 - Login handoff status: ${result.automation.loginHandoff?.status || 'unknown'}
@@ -345,6 +354,8 @@ Status: ${result.status}
 - Engagement status: ${result.automation.engagement?.status || 'unknown'}
 - Ready reply candidates: ${result.automation.engagement?.readyCandidates ?? 'unknown'}
 - Read-only engagement capture: \`${result.automation.engagement?.browserCaptureCommand || 'not generated'}\`
+- Last engagement browser capture status: ${result.automation.engagementBrowserCapture?.status || 'missing'}
+- Last engagement browser capture login-required runs: ${result.automation.engagementBrowserCapture?.loginRequiredRuns ?? 'unknown'}
 - Manual publish kits ready: ${result.automation.manualPublishKits?.readyKits ?? 'unknown'}/${result.automation.manualPublishKits?.totalSlots ?? 'unknown'}
 - Public actions pending confirmation: ${result.automation.publicActionChecklist?.actionCount ?? 'unknown'}
 - Manual publish URLs filled: ${result.automation.manualPublishUrls?.filled ?? 'unknown'}/${result.automation.manualPublishUrls?.total ?? 'unknown'}
@@ -625,6 +636,26 @@ ${pendingLines}
 Filled items:
 
 ${filledLines}`;
+}
+
+function summarizeEngagementBrowserCapture(text, filePath) {
+  if (!text.trim()) {
+    return {
+      status: 'missing',
+      path: filePath,
+      loginRequiredRuns: 0,
+      capturedOpportunityFiles: 0,
+    };
+  }
+  const status = text.match(/^Status:\s*(.+)$/m)?.[1]?.trim() || 'unknown';
+  const loginRequiredRuns = Number(text.match(/^- Login-required runs:\s*(\d+)/m)?.[1] || 0);
+  const capturedOpportunityFiles = Number(text.match(/^- Captured opportunity files:\s*(\d+)/m)?.[1] || 0);
+  return {
+    status,
+    path: filePath,
+    loginRequiredRuns,
+    capturedOpportunityFiles,
+  };
 }
 
 async function readOptionalText(filePath) {

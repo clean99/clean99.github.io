@@ -424,6 +424,16 @@ export function capturedStatusOpportunityId(status, fallback = 'x-status') {
   return safeId(fallback);
 }
 
+export function isXLoginRedirectUrl(value) {
+  try {
+    const parsed = new URL(String(value || ''));
+    return parsed.hostname.replace(/^www\./, '').toLowerCase() === 'x.com'
+      && parsed.pathname.startsWith('/i/flow/login');
+  } catch {
+    return false;
+  }
+}
+
 function buildEngagementCandidate(input, queueItems) {
   const opportunity = parseOpportunity(input);
   const lowValueReason = lowValueReasonFor(opportunity.text);

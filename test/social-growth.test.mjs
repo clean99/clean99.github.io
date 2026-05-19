@@ -49,6 +49,7 @@ import {
   formatEngagementCaptureTemplateMarkdown,
   formatEngagementPlanMarkdown,
   formatEngagementSearchPlanMarkdown,
+  isXLoginRedirectUrl,
   readEngagementOpportunityTexts,
   writeEngagementCaptureTemplate,
   writeEngagementPlan,
@@ -1509,6 +1510,15 @@ test('formats read-only browser status captures as engagement opportunities', ()
   assert.match(text, /React 性能优化/);
 });
 
+test('detects X login redirects in read-only engagement capture', () => {
+  assert.equal(
+    isXLoginRedirectUrl('https://x.com/i/flow/login?redirect_after_login=%2Fsearch%3Fq%3DAI'),
+    true,
+  );
+  assert.equal(isXLoginRedirectUrl('https://x.com/search?q=AI&src=typed_query&f=live'), false);
+  assert.equal(isXLoginRedirectUrl('not-a-url'), false);
+});
+
 test('daily execution brief combines publish, engagement, metrics, and profile actions', async () => {
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-daily-brief-'));
   try {
@@ -2076,6 +2086,7 @@ test('safe automation cycle prepares local artifacts without public X actions', 
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
+      engagementBrowserCapturePath: join(outDir, 'engagement-browser-capture.md'),
       xSkillDir: skillDir,
       xProfileDir,
       xBunCommand: 'bun',
@@ -2230,6 +2241,17 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       'Pinned',
       '30 Followers',
     ].join('\n'));
+    await writeFile(join(outDir, 'engagement-browser-capture.md'), [
+      '# X Engagement Browser Capture',
+      '',
+      'Generated at: 2026-05-18T00:00:00.000Z',
+      'Status: needs_x_login',
+      '',
+      '## Scope',
+      '',
+      '- Captured opportunity files: 0',
+      '- Login-required runs: 3',
+    ].join('\n'));
 
     const result = await runScheduledGrowthLoop({
       articles,
@@ -2269,6 +2291,7 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
+      engagementBrowserCapturePath: join(outDir, 'engagement-browser-capture.md'),
       xSkillDir: skillDir,
       xBunCommand: 'bun',
       queueOptions: {
@@ -2309,6 +2332,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.equal(result.automation.engagement.captureTargets, result.automation.engagement.searchQueries);
     assert.equal(result.automation.engagement.status, 'needs_opportunity_capture');
     assert.match(result.automation.engagement.browserCaptureCommand, /social:engagement-browser-capture/);
+    assert.equal(result.automation.engagementBrowserCapture.status, 'needs_x_login');
+    assert.equal(result.automation.engagementBrowserCapture.loginRequiredRuns, 3);
     assert.equal(result.automation.manualPublishKits.status, 'ready_for_manual_confirmation');
     assert.equal(result.automation.manualPublishKits.readyKits, 1);
     assert.equal(result.automation.publicActionChecklist.status, 'pending_confirmation');
@@ -2327,6 +2352,8 @@ test('scheduled growth loop combines safe prep and read-only metrics cycle', asy
     assert.match(scheduledReport, /Engagement capture template/);
     assert.match(scheduledReport, /Engagement plan/);
     assert.match(scheduledReport, /Read-only engagement capture: `npm run social:engagement-browser-capture/);
+    assert.match(scheduledReport, /Last engagement browser capture status: needs_x_login/);
+    assert.match(scheduledReport, /Last engagement browser capture login-required runs: 3/);
     assert.match(scheduledReport, /Manual publish kits ready: 1\/3/);
     assert.match(scheduledReport, /Public actions pending confirmation: 1/);
     assert.match(scheduledReport, /Publish confirmation/);
@@ -2584,6 +2611,7 @@ test('scheduled growth loop prioritizes filled manual publish URLs before browse
       engagementOpportunityDir: join(outDir, 'engagement-opportunities'),
       engagementPlanPath: join(outDir, 'engagement-plan.md'),
       engagementSearchPath: join(outDir, 'engagement-search.md'),
+      engagementBrowserCapturePath: join(outDir, 'engagement-browser-capture.md'),
       manualPublishKitDir: manualKitDir,
       xSkillDir: skillDir,
       xBunCommand: 'bun',
