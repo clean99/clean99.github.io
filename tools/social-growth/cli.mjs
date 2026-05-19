@@ -93,6 +93,7 @@ import {
   buildPublicActionHandoff,
   formatPublicActionHandoffMarkdown,
   parsePublicActionChecklistMarkdown,
+  selectPublicAction,
   writePublicActionHandoff,
 } from './publicActionHandoff.mjs';
 import {
@@ -237,12 +238,17 @@ if (command === 'articles') {
 } else if (command === 'public-action-handoff') {
   const checklistPath = args.checklist || args.publicActionChecklist || 'data/social-growth/public-action-checklist.md';
   const checklistText = await readOptionalText(checklistPath);
-  const requestedActionId = requiredArg(args, 'id');
+  const requestedActionId = args.id || '';
+  const requestedActionType = args.type || args.actionType || '';
   const parsedActions = parsePublicActionChecklistMarkdown(checklistText);
-  const action = parsedActions.find((item) => item.actionId === requestedActionId);
+  const action = selectPublicAction(parsedActions, {
+    actionId: requestedActionId,
+    actionType: requestedActionType,
+  });
   const handoff = buildPublicActionHandoff({
     checklistText,
     actionId: requestedActionId,
+    actionType: requestedActionType,
     sourceText: action?.source ? await readOptionalText(action.source) : '',
     generatedAt: args.now ? new Date(args.now) : new Date(),
   });
@@ -2287,7 +2293,7 @@ function printHelp() {
   npm run social:recommend -- --ledger data/social-growth/ledger.json --format markdown
   npm run social:funnel -- --ledger data/social-growth/ledger.json --format markdown
   npm run social:goal-audit -- --out data/social-growth/goal-audit.md
-  npm run social:public-action-handoff -- --id publish:<queue-id> --out data/social-growth/public-action-handoff.md
+  npm run social:public-action-handoff -- --type publish_image_thread --out data/social-growth/public-action-handoff.md
   npm run social:experiments -- --queue data/social-growth/queue.json --ledger data/social-growth/ledger.json --out data/social-growth/experiment-plan.md
   npm run social:profile-audit -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-audit.md
   npm run social:profile-package -- --profile-text data/social-growth/profile.local.txt --out data/social-growth/profile-update.md

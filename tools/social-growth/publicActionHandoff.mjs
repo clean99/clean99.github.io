@@ -6,17 +6,19 @@ const DEFAULT_OUT_PATH = 'data/social-growth/public-action-handoff.md';
 export function buildPublicActionHandoff({
   checklistText = '',
   actionId = '',
+  actionType = '',
   sourceText = '',
   generatedAt = new Date(),
 } = {}) {
   const actions = parsePublicActionChecklistMarkdown(checklistText);
-  const action = actions.find((item) => item.actionId === actionId);
+  const action = selectPublicAction(actions, { actionId, actionType });
 
   if (!action) {
     return {
       generatedAt: toIsoString(generatedAt),
       status: 'not_found',
       requestedActionId: actionId,
+      requestedActionType: actionType,
       availableActionIds: actions.map((item) => item.actionId).filter(Boolean),
       action: null,
       sourceExcerpt: '',
@@ -27,7 +29,9 @@ export function buildPublicActionHandoff({
   return {
     generatedAt: toIsoString(generatedAt),
     status: 'ready_for_action_time_confirmation',
-    requestedActionId: actionId,
+    requestedActionId: actionId || action.actionId,
+    requestedActionType: actionType,
+    selectedBy: actionId ? 'action_id' : (actionType ? 'action_type' : 'next_pending_action'),
     availableActionIds: actions.map((item) => item.actionId).filter(Boolean),
     action,
     sourceExcerpt: sourceExcerpt(sourceText),
@@ -46,6 +50,7 @@ export function formatPublicActionHandoffMarkdown(handoff) {
 Generated at: ${handoff.generatedAt}
 Status: ${handoff.status}
 Requested action id: \`${handoff.requestedActionId || 'missing'}\`
+Requested action type: \`${handoff.requestedActionType || 'any'}\`
 
 ## Available Action IDs
 
@@ -99,6 +104,13 @@ export async function writePublicActionHandoff(handoff, filePath = DEFAULT_OUT_P
   await mkdir(dirname(filePath), { recursive: true });
   await writeFile(filePath, `${formatPublicActionHandoffMarkdown(handoff).trimEnd()}\n`);
   return filePath;
+}
+
+export function selectPublicAction(actions = [], { actionId = '', actionType = '' } = {}) {
+  const candidates = Array.isArray(actions) ? actions.filter((item) => item?.actionId) : [];
+  if (actionId) return candidates.find((item) => item.actionId === actionId) || null;
+  if (actionType) return candidates.find((item) => item.type === actionType) || null;
+  return candidates.find((item) => item.status === 'needs_action_time_confirmation') || candidates[0] || null;
 }
 
 export function parsePublicActionChecklistMarkdown(markdown = '') {

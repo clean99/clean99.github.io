@@ -130,6 +130,7 @@ import {
   buildPublicActionHandoff,
   formatPublicActionHandoffMarkdown,
   parsePublicActionChecklistMarkdown,
+  selectPublicAction,
 } from '../tools/social-growth/publicActionHandoff.mjs';
 import { buildWeeklyExecutionPlan, formatWeeklyExecutionPlanMarkdown } from '../tools/social-growth/schedule.mjs';
 import { runScheduledGrowthLoop } from '../tools/social-growth/scheduledRun.mjs';
@@ -4279,6 +4280,63 @@ test('public action handoff resolves one action id from the checklist', () => {
   assert.match(markdown, /Stop before: final public publish click/);
   assert.match(markdown, /第一条内容/);
   assert.match(markdown, /still require action-time confirmation in Chrome/);
+});
+
+test('public action handoff can select the next publish action by type', () => {
+  const checklist = buildPublicActionChecklist({
+    generatedAt: '2026-05-18T00:00:00.000Z',
+    manualPublishKits: {
+      entries: [{
+        id: 'Agent-Skills__zh__strong-thesis',
+        status: 'ready_for_manual_confirmation',
+        path: 'data/social-growth/manual-publish-kits/day1-slot1-Agent-Skills.md',
+        recoveryCommand: 'npm run social:post-publish-recovery -- --url <x-thread-url>',
+      }],
+    },
+    profileUpdate: {
+      status: 'needs_browser_confirmation',
+    },
+  });
+  const checklistMarkdown = formatPublicActionChecklistMarkdown(checklist);
+  const actions = parsePublicActionChecklistMarkdown(checklistMarkdown);
+  const selected = selectPublicAction(actions, { actionType: 'publish_image_thread' });
+  const handoff = buildPublicActionHandoff({
+    checklistText: checklistMarkdown,
+    actionType: 'publish_image_thread',
+    sourceText: '# Manual X Publish Kit\n\n## First Post\n\n```text\n第一条内容\n```',
+    generatedAt: '2026-05-18T00:00:00.000Z',
+  });
+
+  assert.equal(selected.actionId, 'publish:Agent-Skills__zh__strong-thesis');
+  assert.equal(handoff.status, 'ready_for_action_time_confirmation');
+  assert.equal(handoff.selectedBy, 'action_type');
+  assert.equal(handoff.requestedActionId, 'publish:Agent-Skills__zh__strong-thesis');
+  assert.equal(handoff.action.type, 'publish_image_thread');
+});
+
+test('public action handoff defaults to the next pending checklist action', () => {
+  const checklistMarkdown = formatPublicActionChecklistMarkdown(buildPublicActionChecklist({
+    generatedAt: '2026-05-18T00:00:00.000Z',
+    manualPublishKits: {
+      entries: [{
+        id: 'Agent-Skills__zh__strong-thesis',
+        status: 'ready_for_manual_confirmation',
+        path: 'data/social-growth/manual-publish-kits/day1-slot1-Agent-Skills.md',
+      }],
+    },
+    profileUpdate: {
+      status: 'needs_browser_confirmation',
+    },
+  }));
+  const handoff = buildPublicActionHandoff({
+    checklistText: checklistMarkdown,
+    generatedAt: '2026-05-18T00:00:00.000Z',
+  });
+
+  assert.equal(handoff.status, 'ready_for_action_time_confirmation');
+  assert.equal(handoff.selectedBy, 'next_pending_action');
+  assert.equal(handoff.action.actionId, 'profile:edit');
+  assert.equal(handoff.requestedActionId, 'profile:edit');
 });
 
 test('public action handoff lists valid ids when the requested id is unknown', () => {
