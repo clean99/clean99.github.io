@@ -9,7 +9,10 @@
         class="language-switch"
         onclick="localStorage.setItem('preferredLang', '<%= is_zh() ? 'en' : 'zh' %>')"
         aria-label="<%= __('post.lang_switch') %>"
-      ><%= is_zh() ? 'EN' : '中文' %></a>
+      >
+        <span class="language-switch__full"><%= is_zh() ? 'EN' : '中文' %></span>
+        <span class="language-switch__short" aria-hidden="true"><%= is_zh() ? 'EN' : '中' %></span>
+      </a>
     </div>
   </div>
 
