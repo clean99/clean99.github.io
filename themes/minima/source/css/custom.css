@@ -798,11 +798,16 @@ body.darkmode {
 }
 
 .interview-highlight {
+  border-top: 0;
   background: linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 78%, transparent), transparent);
   margin-left: calc(clamp(10px, 3vw, 20px) * -1);
   margin-right: calc(clamp(10px, 3vw, 20px) * -1);
   padding-left: clamp(10px, 3vw, 20px);
   padding-right: clamp(10px, 3vw, 20px);
+}
+
+.interview-highlight + .section-block {
+  border-top: 0;
 }
 
 .compact-list {
