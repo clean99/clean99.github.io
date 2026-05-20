@@ -459,23 +459,9 @@ body.darkmode {
 .site-wordmark {
   display: inline-flex;
   align-items: baseline;
-  gap: 1.15rem;
   color: var(--ink);
   text-decoration: none;
   white-space: nowrap;
-}
-
-.site-wordmark__mark {
-  display: inline-grid;
-  place-items: center;
-  width: 3.2rem;
-  height: 3.2rem;
-  border: 1px solid var(--rule-strong);
-  border-radius: 50%;
-  color: var(--accent);
-  font-family: "Inter", "Helvetica Neue", sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0;
 }
 
 .site-wordmark__name {
@@ -496,8 +482,10 @@ body.darkmode {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 3.8rem;
+  width: 4.7rem;
+  min-width: 4.7rem;
   min-height: 3.2rem;
+  padding: 0;
   border: 1px solid var(--rule);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.54);
@@ -507,10 +495,6 @@ body.darkmode {
   line-height: 1;
   text-decoration: none;
   cursor: pointer;
-}
-
-.language-switch {
-  padding: 0 1.1rem;
 }
 
 .theme-toggle:hover,
@@ -912,14 +896,6 @@ body.darkmode .tag-list span {
 
   .site-wordmark {
     min-width: 0;
-    gap: 0.7rem;
-  }
-
-  .site-wordmark__mark {
-    flex: 0 0 auto;
-    width: 2.55rem;
-    height: 2.55rem;
-    font-size: 0.86rem;
   }
 
   .site-wordmark__name {
@@ -933,13 +909,10 @@ body.darkmode .tag-list span {
 
   .theme-toggle,
   .language-switch {
-    min-width: 3.2rem;
+    width: 3.8rem;
+    min-width: 3.8rem;
     min-height: 2.8rem;
     font-size: 1.12rem;
-  }
-
-  .language-switch {
-    padding: 0 0.8rem;
   }
 
   .site-nav {
