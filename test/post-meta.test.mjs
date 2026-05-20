@@ -16,6 +16,7 @@ const {
 test('infers high-level writing areas from explicit metadata and tags', () => {
   assert.equal(inferArea({ area: 'ai', tags: ['Frontend'] }), 'ai');
   assert.equal(inferArea({ title: 'React Runtime Performance Optimization', tags: ['React'] }), 'engineering');
+  assert.equal(inferArea({ title: 'Testing Best Practice Tdd', tags: ['testing', 'tdd'] }), 'engineering');
   assert.equal(inferArea({ title: 'Agent Skills', tags: ['AI', 'Agent'] }), 'ai');
   assert.equal(inferArea({ title: 'SICPJS 1', tags: 'sicpjs' }), 'systems');
 });

@@ -70,9 +70,9 @@ function inferArea(post) {
 
   var text = lowerText(post);
   if (/\b(ai|chatgpt|copilot|agent|agents|claude|openspec|vibe coding|skill)\b/.test(text)) return 'ai';
+  if (/\b(frontend|react|testing|tdd|performance|reliability|browser|redux|tailwind|error-boundary|architecture|software engineering|web performance)\b/.test(text)) return 'engineering';
   if (/\b(sicp|sicpjs|abstraction|learning|mental model|model)\b/.test(text)) return 'systems';
-  if (/\b(buddhism|attention|meditation|mind|practice|living|life)\b/.test(text)) return 'mind';
-  if (/\b(frontend|react|testing|performance|reliability|browser|redux|tailwind|error-boundary|architecture|software engineering|web performance)\b/.test(text)) return 'engineering';
+  if (/\b(buddhism|attention|meditation|mind|inner practice|living well|life)\b/.test(text)) return 'mind';
   return 'engineering';
 }
 
