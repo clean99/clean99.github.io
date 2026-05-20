@@ -484,7 +484,9 @@ body.darkmode {
   justify-content: center;
   width: 4.7rem;
   min-width: 4.7rem;
+  height: 3.2rem;
   min-height: 3.2rem;
+  margin: 0;
   padding: 0;
   border: 1px solid var(--rule);
   border-radius: 999px;
@@ -492,8 +494,11 @@ body.darkmode {
   color: var(--muted-ink);
   font: inherit;
   font-size: 1.35rem;
-  line-height: 1;
+  line-height: 3.2rem;
   text-decoration: none;
+  text-transform: none;
+  letter-spacing: 0;
+  appearance: none;
   cursor: pointer;
 }
 
@@ -916,8 +921,10 @@ body.darkmode .tag-list span {
   .language-switch {
     width: 3.8rem;
     min-width: 3.8rem;
+    height: 2.8rem;
     min-height: 2.8rem;
     font-size: 1.12rem;
+    line-height: 2.8rem;
   }
 
   .site-nav {
