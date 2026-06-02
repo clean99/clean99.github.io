@@ -2,11 +2,17 @@
 title: "Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路"
 date: 2026-05-18 16:31:00
 tags: [Frontend, Web Performance, Software Engineering, React]
+area: engineering
+summary: "一次跨 Workspace shell 和多个子应用的性能系统设计：分离首屏、热切换和后台压力，用严格 profiling、E2E gate 和失败回滚证明收益。"
+featured: true
+audience: [public, interviewers]
 lang: zh
 i18n_key: Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure
 permalink: zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/
 ---
 ## 背景和目标
+
+这不是一次“把某个页面从慢改快”的优化，而是一次跨 Workspace shell 和多个子应用的性能系统设计。
 
 Tab system 引入后，工作台不再只有一个前台页面。用户可以同时打开多个 workstream、子应用和对象页，系统背后也会同时存在更多 route、runtime、iframe、SDK 和后台任务。性能问题因此不再是“某个页面慢”，而是三条用户路径分别要守住。
 
@@ -35,6 +41,43 @@ Tab system 引入后，工作台不再只有一个前台页面。用户可以同
 ![performance map](/img/workspace-v2-tab-system-performance/performance-map.png)
 
 图 P1：Performance optimization map。它把优化分成首屏关键路径、热切换、后台压力三类，也列出几个被拒绝的伪收益。
+
+## 面试官视角：这篇文章到底证明什么
+
+如果我是面试官，我不会只看“FMP 降了多少”。数字当然重要，但更重要的是这些数字背后有没有工程判断。
+
+这类项目真正能证明的能力是：
+
+| 面试官会看什么 | 这篇文章给出的证据 |
+| --- | --- |
+| 问题规模 | 不是单页优化，而是 Workspace shell + 多个子应用 + tab runtime + SDK/background task 的组合问题 |
+| 指标定义 | FMP、hot switch、post-visible blocking、background pressure 分开度量，不把不同口径混成一个总收益 |
+| 架构判断 | opened tabs、hot runtime、view cache、foreground scheduler 分层；当前 tab 拥有前台资源 |
+| 取舍能力 | 不无限保活，不盲目 preload，不把资源数量减少当性能收益 |
+| 验证闭环 | strict preview profile、本地 stress gate、E2E correctness gate、失败实验记录和回滚 |
+| 复用价值 | 最后沉淀的是资源归属和调度原则，不是一次性的 patch 列表 |
+
+一个好的性能项目，应该能回答三个问题：
+
+1. **为什么慢。** 哪些资源、API、long task 或 runtime 行为挡住了用户路径。
+1. **为什么这个改动有效。** blocker 是否前移、消失、缩短，或者移到了 first screen / tab switch 之后。
+1. **为什么没有破坏别的东西。** 刷新、分享、tab 状态、overlay、SDK open intent、后台任务和多窗口同步是否仍然正确。
+
+## 项目规模和结果口径
+
+线上周报口径里，目标是：Workspace shell P90 接近 `1s`，子应用 on Workspace P90 接近 `2.5s`。早期基线里，所有主要模块都没达标，Scheduling 和 Report Center 这类路径尤其明显。
+
+下面这张表只用于说明项目规模和趋势。它是周报 P90 口径，不等同于后文每个 round 的 strict preview profile。
+
+| Module | Early weekly FMP | Later weekly FMP | Target | Trend |
+| --- | ---: | ---: | ---: | ---: |
+| Workspace shell | `2049ms` | `1718ms` | `1000ms` | `-16.2%` |
+| Report Center | `6996.95ms` | `2741ms` | `2500ms` | `-60.8%` |
+| Scheduling | `8313ms` | `2342ms` | `2500ms` | `-71.8%` |
+| Omni Workbench | `3186.9ms` | `2485ms` | `2500ms` | `-22.0%` |
+| Field Management | `4054.56ms` | `3613ms` | `2500ms` | `-10.9%` |
+
+这个表的意义不是“所有问题都解决了”。恰恰相反，它说明这件事不是靠一个技巧收尾：有些模块已经接近或达到目标，有些还需要继续拆瓶颈。后文的 strict profile 只对具体改动负责，不拿周报趋势冒充单轮收益。
 
 ## 结论和收益
 
@@ -341,6 +384,24 @@ async function safeLoadSdk() {
 1. **画因果图再写结论。** 图里必须能看到 blocker 前移、消失、缩短或移到 FMP 后。
 1. **接受失败。** 资源移动但 FMP 变差，就回滚。
 1. **本地 gate 和 preview 收益分开写。** 本地 C02 是防回归，不是线上收益。
+
+如果把这个项目拿去做技术面试，我会这样讲：
+
+```text
+我没有把它当成单点性能优化。
+我先把用户路径拆成 first load、hot switch、background pressure，
+再为每条路径定义独立指标和 gate。
+
+然后我用 profiling 找 blocker，用架构设计决定资源归属，
+把当前首屏资源前移，把非当前路径后移，
+把热切换依赖的 runtime 放进有限 hot pool，
+再用 foreground scheduler 让后台任务给当前 tab 让路。
+
+最后，每个收益都必须经过同口径 strict profile 或 stress gate；
+不通过就回滚，不把漂亮瀑布图当结果。
+```
+
+这段话比背一串 commit 更重要。面试官真正要判断的是：你是不是能把一个复杂系统拆成可度量、可验证、可回滚的工程问题。
 
 最终，Tab System 的性能收益不是靠单点技巧，而是靠三套机制同时成立：
 
