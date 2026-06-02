@@ -11,9 +11,9 @@ i18n_key: Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-P
 ---
 ## Background And Goals
 
-This was not a "make one slow page faster" project. It was a performance systems problem across the Workspace shell, several subapps, tab runtimes, SDKs, and background work.
+After the tab system was introduced, Workspace no longer had only one foreground page. Users can keep multiple workstreams, subapps, and objects open, while the host may keep more routes, runtimes, iframes, SDKs, and background tasks alive. Performance moved from a single-page FMP problem into a resource-ownership problem across the Workspace shell, multiple subapps, and multiple retained runtimes.
 
-After the tab system was introduced, Workspace no longer had only one foreground page. Users can keep multiple workstreams, subapps, and objects open, while the host may keep more routes, runtimes, iframes, SDKs, and background tasks alive. Performance is therefore no longer one question of "is this page slow?" It is three separate user paths.
+Users only care whether the focused tab becomes visible, usable, and stable. Behind that tab, hidden runtimes, prewarm jobs, subapp SDKs, iframes, analytics, and monitoring tasks may still be alive. A cleaner waterfall is not enough. Three user paths have to be protected separately.
 
 ![workspace tab system demo](/img/workspace-v2-tab-system/workspace-tab-system-demo.png)
 
@@ -41,27 +41,6 @@ Optimization principle:
 
 *Figure P1: Performance optimization map. The map separates first-screen critical path, hot tab switch, and background pressure, and also lists false wins that were rejected.*
 
-## What A Technical Reviewer Should Look For
-
-If I were reviewing this project in an interview, I would not stop at "FMP improved." The numbers matter, but the engineering judgment behind them matters more.
-
-This project is useful evidence for six things:
-
-| Reviewer Question | Evidence In This Article |
-| --- | --- |
-| How large was the problem? | It was not a single page. It involved the Workspace shell, multiple subapps, tab runtimes, SDKs, and background tasks. |
-| Were the metrics well-defined? | FMP, hot switch, post-visible blocking, and background pressure are measured separately. Different gates are not merged into one fake total. |
-| Was there architecture work? | Opened tabs, hot runtimes, view cache, and foreground scheduler are separate layers. The focused tab owns foreground resources. |
-| Were trade-offs explicit? | We rejected unlimited keep-alive, blind preload, and "fewer resources" as a proxy for faster users. |
-| Was the work verified? | Strict preview profiling, local stress gates, E2E correctness gates, failed experiment records, and reverts. |
-| Is the approach reusable? | The result is a resource-ownership and scheduling model, not just a list of patches. |
-
-A serious performance project should answer three questions:
-
-1. **Why was it slow?** Which resources, APIs, long tasks, or runtime behaviors blocked the user path.
-1. **Why did the change help?** Did the blocker move earlier, disappear, shrink, or move after first screen / tab switch.
-1. **Why did it not break something else?** Refresh, sharing, tab state, overlay ownership, SDK open intents, background tasks, and multi-window sync must still work.
-
 ## Product-Scale Baseline And Result Shape
 
 The product-level target was roughly `1s` P90 for the Workspace shell and `2.5s` P90 for subapps running on Workspace. The early baseline missed that target across the main modules. Some paths were far beyond the budget.
@@ -77,6 +56,8 @@ The table below is a weekly field-report view. It shows scale and trend. It is n
 | Field Management | `4054.56ms` | `3613ms` | `2500ms` | `-10.9%` |
 
 This table is not a claim that every problem was solved. That is the point. Some modules reached or approached the target; others still needed bottleneck work. The strict profiles below are responsible only for the specific changes they measure, and the article keeps that boundary explicit.
+
+That is also why the rest of this article is organized by engineering problem instead of commit history: problem scale, metric definition, resource ownership, rejected alternatives, and the proof used to accept each change.
 
 ## Results
 
@@ -378,31 +359,13 @@ These changes prevent future SDK work from becoming a tab-switch jank source. Th
 | Small component memo / local cache experiments | Looked like they would reduce render | Local p95 got worse or strict benefit was missing; not kept. |
 | Old tab switch duration only | Could produce numbers in tens of milliseconds | Missed input queue and post-visible blocking; metric itself was not trustworthy. |
 
-## Engineering Review Lens
+## Reusable Method
 
 1. **Split by path first.** FMP, tab switch, and background pressure are different problems and need different measurements.
 1. **Assign resource ownership.** Current first-screen resources move earlier; non-current first-screen work moves later; future resources can only run through idle prewarm.
 1. **Draw causality before writing the conclusion.** The chart must show the blocker moving, disappearing, shrinking, or moving after FMP.
 1. **Accept failures.** If a resource moves but FMP gets worse, revert it.
 1. **Keep local gates and preview wins separate.** C02 is a regression gate, not an online/preview win.
-
-If I had to explain this project in an interview, I would use this version:
-
-```text
-I did not treat this as a one-off performance patch.
-I split the user paths into first load, hot switch, and background pressure,
-then gave each path its own metric and gate.
-
-I used profiling to find blockers, architecture to assign resource ownership,
-moved current first-screen work earlier, moved non-current work later,
-kept likely switch targets in a bounded hot pool,
-and made background work yield to the focused tab through a foreground scheduler.
-
-Every accepted win had to pass the same-metric strict profile or a stress gate.
-If it made the user metric worse, it was reverted, even when the waterfall looked cleaner.
-```
-
-That explanation matters more than a commit list. A reviewer is trying to see whether you can turn a messy product system into measurable, testable, reversible engineering work.
 
 The tab system performance gains do not come from one trick. They come from three mechanisms working together:
 
