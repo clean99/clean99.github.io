@@ -34,6 +34,12 @@ No strict measurement, no performance claim.
 
 Agent 可以写代码，但代码只是闭环中的一步。这个闭环要负责 profiling、waterfall 诊断、本地验证、部署、严格对比和文档记录。
 
+这里还有一个容易被低估的点：性能 Skill 不是孤立脚本，它依赖更底层的 full-cycle 研发 Skill。
+
+性能优化真正麻烦的部分通常不在“想到一个优化点”，而在后半段：本地门禁要过，patch 要提交，pipeline 要证明构建的是目标 commit，泳道要证明运行时版本正确，profile 要在同一路由、同一限速和同一登录态下重跑。如果这些步骤靠人盯着，Agent 再聪明也只是写 patch；如果这些步骤进入 Skill contract，Agent 才能持续跑 round。
+
+换句话说，性能 loop 是一个 [Ralph Loop](https://ralphloop.sh/) 风格的长期迭代，但它的退出条件不是“Agent 觉得好了”，而是外部 harness 和部署证据同时通过。
+
 ## 先修 Harness，再谈优化
 
 最有价值的第一条 ledger 记录很难看：生产路由没有为被测子应用发出有效 final FMP report。

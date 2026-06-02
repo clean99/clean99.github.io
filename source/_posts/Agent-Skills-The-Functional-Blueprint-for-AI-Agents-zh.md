@@ -54,6 +54,33 @@ your-skill-name/
 
 ![The Workflow Vision: Skill Chaining](/img/agent-skills/skill-chaining.png)
 
+## 从抽象到落地：Skill 可以接管完整研发周期
+
+我后来做过一个更复杂的 Skill：把一个前端研发任务从 TD 到泳道验收串成闭环。
+
+它不是“让 AI 多写点代码”，而是让 Agent 按固定工程状态机推进：
+
+```text
+理解任务 -> 查 PRD / 设计 / 代码 -> 实现 -> 本地验证
+-> commit / pipeline / 部署 -> 泳道运行时证明 -> 失败诊断
+-> 修复或 blocker report -> ledger 记录
+```
+
+这类 Skill 的难点不在 prompt 写得多，而在状态设计：
+
+| 状态 | 必须记录什么 |
+| --- | --- |
+| Task frame | 用户可见行为、影响路由、权威需求、验收环境 |
+| Patch scope | 本轮改什么、不改什么、如何避免架构漂移 |
+| Local gates | 单测、lint、build、必要的 E2E |
+| Delivery proof | branch、commit、pipeline、部署版本、目标泳道 |
+| Runtime proof | 页面版本、运行时环境、业务 API、可见 UI |
+| Failure verdict | 前端 bug、后端阻塞、部署问题、认证问题、测量问题 |
+
+社区里常说的 [Ralph Loop](https://ralphloop.sh/) 解决的是“Agent 失败后继续迭代”的问题。但如果没有这些状态和外部验证，它只会变成更持久的随机游走。完整研发周期 Skill 的价值，是把 loop 约束在真实工程制度里：测试不过不能提交，部署版本不匹配不能宣称完成，后端阻塞要输出可交给 owner 的证据，而不是让 Agent 自己脑补成功。
+
+所以它表面上看像一个“大 Skill”，本质上仍然符合单一职责：**它负责研发闭环的控制面，不负责替每个子任务发明新流程。** 文档读取、设计解析、代码搜索、部署诊断、性能 profiling 都可以继续拆成独立 Skill，由这个控制面按状态调用。
+
 ## Skill vs MCP
 
 ![Defining the Boundaries: Skill vs MCP](/img/agent-skills/skill-vs-mcp.png)
