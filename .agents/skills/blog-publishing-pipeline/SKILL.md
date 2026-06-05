@@ -19,6 +19,13 @@ Use this skill for blog work in this Hexo repository. The goal is to turn source
 
 ## Frontmatter
 
+## Title Style
+
+- Prefer direct, searchable titles that name the technical topic and mechanism.
+- Avoid AI-smelling emotional titles such as "我才意识到", "原来", "竟然", "早就不只是", "一文搞懂", "彻底搞懂", or titles that dramatize an ordinary learning note.
+- For daily learning notes, use plain titles like `JavaScript 的运行机制：从源码到 JIT 优化` instead of over-selling the author's realization.
+- Keep curiosity in the argument, not in clickbait phrasing.
+
 English:
 
 ```yaml

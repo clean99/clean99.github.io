@@ -1,5 +1,5 @@
 ---
-title: 我重学 JS 才意识到：它早就不只是解释执行了
+title: JavaScript 的运行机制：从源码到 JIT 优化
 date: 2026-06-05 10:18:06
 tags: [JavaScript, Frontend, Software Engineering]
 lang: zh
