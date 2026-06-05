@@ -82,6 +82,7 @@ permalink: zh/YYYY/MM/DD/Full-English-Title/
    - Use Mermaid for architecture/flow diagrams when static diagrams are enough.
    - Use image files only when the post benefits from real visual evidence or generated illustrations.
    - For developer-facing architecture, runtime, cache, ownership, performance, compiler, or debugging-flow illustrations, use the `handdrawn-technical-illustrator` skill first. It defines the preferred hand-drawn whiteboard style, prompt shape, review checklist, and caption convention for this blog.
+   - During review, replace repeated arrow-heavy `txt` blocks with one concise visual when the blocks are explaining a mechanism rather than showing executable code. Keep small code samples; move visual flow into the image and caption.
    - For articles based on internal or domain-specific products, add an early audience-orientation visual before deep architecture, metrics, or implementation sections.
    - That visual should answer what the product or workflow looks like, who uses it, what action the user takes, where the technical mechanism appears, and why the later metrics matter.
    - When a real product screenshot or UI reference is available, base the visual on its information architecture and interaction cues, then generalize labels and data for a public audience.
