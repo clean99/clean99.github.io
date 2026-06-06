@@ -19,7 +19,7 @@
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
   <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
-  <meta name="description" content="背景和目标Tab system 引入后，工作台不再只有一个前台页面。用户可以同时打开多个 workstream、子应用和对象页，系统背后也会同时存在更多 route、runtime、iframe、SDK 和后台任务。性能问题因此不再是“某个页面慢”，而是三条用户路径分别要守住。  图 0：一个通用工">
+  <meta name="description" content="一次跨 Workspace shell 和多个子应用的性能系统设计：分离首屏、热切换和后台压力，用严格 profiling、E2E gate 和失败回滚证明收益。">
   
   <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
   
@@ -45,14 +45,14 @@
   <meta property="og:title" content="Workspace V2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路 | Koh Hom — Software, AI, and Inner Practice" />
   <meta property="og:locale" content="zh_CN" />
   <meta property="og:locale:alternate" content="en_US" />
-  <meta property="og:description" content="背景和目标Tab system 引入后，工作台不再只有一个前台页面。用户可以同时打开多个 workstream、子应用和对象页，系统背后也会同时存在更多 route、runtime、iframe、SDK 和后台任务。性能问题因此不再是“某个页面慢”，而是三条用户路径分别要守住。  图 0：一个通用工">
+  <meta property="og:description" content="一次跨 Workspace shell 和多个子应用的性能系统设计：分离首屏、热切换和后台压力，用严格 profiling、E2E gate 和失败回滚证明收益。">
   <meta property="og:url" content="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@Clean993">
   <meta name="twitter:creator" content="@Clean993">
   <meta name="twitter:title" content="Workspace V2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路 | Koh Hom — Software, AI, and Inner Practice">
-  <meta name="twitter:description" content="背景和目标Tab system 引入后，工作台不再只有一个前台页面。用户可以同时打开多个 workstream、子应用和对象页，系统背后也会同时存在更多 route、runtime、iframe、SDK 和后台任务。性能问题因此不再是“某个页面慢”，而是三条用户路径分别要守住。  图 0：一个通用工">
+  <meta name="twitter:description" content="一次跨 Workspace shell 和多个子应用的性能系统设计：分离首屏、热切换和后台压力，用严格 profiling、E2E gate 和失败回滚证明收益。">
   <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
 
@@ -160,7 +160,7 @@
   <!-- JSON-LD Structured Data
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Workspace V2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路","datePublished":"2026-05-18T08:31:00.000Z","dateModified":"2026-05-18T08:31:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/","mainEntityOfPage":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/","inLanguage":"zh-CN","description":"背景和目标Tab system 引入后，工作台不再只有一个前台页面。用户可以同时打开多个 workstream、子应用和对象页，系统背后也会同时存在更多 route、runtime、iframe、SDK 和后台任务。性能问题因此不再是“某个页面慢”，而是三条用户路径分别要守住。 图 0：一个通用工作台里的 tab system 演示。性能问题之所以变复杂，是因为多个工作对象可以同时保持打开，但只有","keywords":["Frontend","Software Engineering","Web Performance","React"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Workspace V2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路","datePublished":"2026-05-18T08:31:00.000Z","dateModified":"2026-05-18T08:31:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/","mainEntityOfPage":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/","inLanguage":"zh-CN","description":"背景和目标Tab system 引入后，工作台不再只有一个前台页面。用户可以同时打开多个 workstream、子应用和对象页，系统背后也会同时存在更多 route、runtime、iframe、SDK 和后台任务。性能问题因此从单页 FMP，变成了跨 Workspace shell、多个子应用和多个常驻 runtime 的资源归属问题。 用户只关心当前 tab 是否足够快、是否能立刻操作。但系统","keywords":["Frontend","Software Engineering","Web Performance","React"]}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Workspace V2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路","item":"https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/"}]}</script>
   
 
@@ -265,7 +265,8 @@
       <meta itemprop="dateModified" content="2026-05-18T08:31:00.000Z">
     </header>
     <div itemprop="articleBody">
-      <h2 id="背景和目标"><a href="#背景和目标" class="headerlink" title="背景和目标"></a>背景和目标</h2><p>Tab system 引入后，工作台不再只有一个前台页面。用户可以同时打开多个 workstream、子应用和对象页，系统背后也会同时存在更多 route、runtime、iframe、SDK 和后台任务。性能问题因此不再是“某个页面慢”，而是三条用户路径分别要守住。</p>
+      <h2 id="背景和目标"><a href="#背景和目标" class="headerlink" title="背景和目标"></a>背景和目标</h2><p>Tab system 引入后，工作台不再只有一个前台页面。用户可以同时打开多个 workstream、子应用和对象页，系统背后也会同时存在更多 route、runtime、iframe、SDK 和后台任务。性能问题因此从单页 FMP，变成了跨 Workspace shell、多个子应用和多个常驻 runtime 的资源归属问题。</p>
+<p>用户只关心当前 tab 是否足够快、是否能立刻操作。但系统背后，hidden tab、预热任务、子应用 SDK、iframe runtime 和监控&#x2F;埋点都可能同时活着。优化不能只盯着某条瀑布图变短，而是三条用户路径分别要守住。</p>
 <p><img src="/img/workspace-v2-tab-system/workspace-tab-system-demo.png" alt="workspace tab system demo"></p>
 <p>图 0：一个通用工作台里的 tab system 演示。性能问题之所以变复杂，是因为多个工作对象可以同时保持打开，但只有当前 tab 应该可交互并占用前台资源。</p>
 <table>
@@ -323,6 +324,56 @@
 </blockquote>
 <p><img src="/img/workspace-v2-tab-system-performance/performance-map.png" alt="performance map"></p>
 <p>图 P1：Performance optimization map。它把优化分成首屏关键路径、热切换、后台压力三类，也列出几个被拒绝的伪收益。</p>
+<h2 id="项目规模和结果口径"><a href="#项目规模和结果口径" class="headerlink" title="项目规模和结果口径"></a>项目规模和结果口径</h2><p>线上周报口径里，目标是：Workspace shell P90 接近 <code>1s</code>，子应用 on Workspace P90 接近 <code>2.5s</code>。早期基线里，所有主要模块都没达标，Scheduling 和 Report Center 这类路径尤其明显。</p>
+<p>下面这张表只用于说明项目规模和趋势。它是周报 P90 口径，不等同于后文每个 round 的 strict preview profile。</p>
+<table>
+<thead>
+<tr>
+<th>Module</th>
+<th align="right">Early weekly FMP</th>
+<th align="right">Later weekly FMP</th>
+<th align="right">Target</th>
+<th align="right">Trend</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Workspace shell</td>
+<td align="right"><code>2049ms</code></td>
+<td align="right"><code>1718ms</code></td>
+<td align="right"><code>1000ms</code></td>
+<td align="right"><code>-16.2%</code></td>
+</tr>
+<tr>
+<td>Report Center</td>
+<td align="right"><code>6996.95ms</code></td>
+<td align="right"><code>2741ms</code></td>
+<td align="right"><code>2500ms</code></td>
+<td align="right"><code>-60.8%</code></td>
+</tr>
+<tr>
+<td>Scheduling</td>
+<td align="right"><code>8313ms</code></td>
+<td align="right"><code>2342ms</code></td>
+<td align="right"><code>2500ms</code></td>
+<td align="right"><code>-71.8%</code></td>
+</tr>
+<tr>
+<td>Omni Workbench</td>
+<td align="right"><code>3186.9ms</code></td>
+<td align="right"><code>2485ms</code></td>
+<td align="right"><code>2500ms</code></td>
+<td align="right"><code>-22.0%</code></td>
+</tr>
+<tr>
+<td>Field Management</td>
+<td align="right"><code>4054.56ms</code></td>
+<td align="right"><code>3613ms</code></td>
+<td align="right"><code>2500ms</code></td>
+<td align="right"><code>-10.9%</code></td>
+</tr>
+</tbody></table>
+<p>这个表的意义不是“所有问题都解决了”。恰恰相反，它说明这件事不是靠一个技巧收尾：有些模块已经接近或达到目标，有些还需要继续拆瓶颈。后文的 strict profile 只对具体改动负责，不拿周报趋势冒充单轮收益。</p>
+<p>所以后面的结构不按 commit 写，而按工程问题写：问题规模是什么，指标怎么定义，资源归属怎么设计，哪些方案被拒绝，以及每个收益如何被 strict profile、stress gate 或 E2E correctness gate 证明。</p>
 <h2 id="结论和收益"><a href="#结论和收益" class="headerlink" title="结论和收益"></a>结论和收益</h2><table>
 <thead>
 <tr>
@@ -836,7 +887,7 @@
 <td>漏掉 input queue 和 post-visible blocking，指标本身不可信</td>
 </tr>
 </tbody></table>
-<h2 id="Engineering-Review-Lens：可复用方法"><a href="#Engineering-Review-Lens：可复用方法" class="headerlink" title="Engineering Review Lens：可复用方法"></a>Engineering Review Lens：可复用方法</h2><ol>
+<h2 id="可复用方法"><a href="#可复用方法" class="headerlink" title="可复用方法"></a>可复用方法</h2><ol>
 <li><strong>先分路径。</strong> FMP、tab switch、background pressure 是三类问题，不能用同一把尺子。</li>
 <li><strong>再定资源归属。</strong> 当前首屏需要的资源前移；不属于当前首屏的资源延后；未来可能需要的资源只能 idle prewarm。</li>
 <li><strong>画因果图再写结论。</strong> 图里必须能看到 blocker 前移、消失、缩短或移到 FMP 后。</li>
