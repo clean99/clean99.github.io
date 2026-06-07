@@ -7,9 +7,9 @@ i18n_key: Modern-JavaScript-Is-Not-Just-Interpreted
 permalink: zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/
 ---
 
-今天重学 JavaScript 时，我问了一个看起来很基础的问题：JS 现在是不是大部分都是编译后运行的，包括浏览器宿主？
+今天重学 JavaScript 时，我卡在一个看起来很基础的问题上：我们说 JS “运行”时，它到底已经被编译到了哪一步？
 
-这个问题有意思的地方不在答案是“是”还是“不是”，而在于它逼我把“编译”这两个字拆开。前端工程里说编译，可能是在说 TypeScript、Babel、SWC、esbuild；JS 引擎里说编译，说的是 parser、bytecode、JIT、optimized machine code。它们不是一回事。
+真正有用的不是回答“是”或“不是”，而是把“编译”这两个字拆开。前端工程里说编译，通常是在说 TypeScript、Babel、SWC、esbuild；JS 引擎里说编译，说的是 parser、bytecode、JIT、optimized machine code。同一个词，站的位置不同，意思就变了。
 
 ![Modern JavaScript execution pipeline](/img/js-jit-runtime/javascript-execution-pipeline.png)
 
@@ -364,7 +364,7 @@ users.map(user => user.name);
 
 ## 重新看“JS 是解释型语言”
 
-这次重学最大的收获，不是背下 Ignition 和 TurboFan 的名字。
+这次重学的重点，不是背下 Ignition 和 TurboFan 的名字。
 
 真正有价值的是换了一个问法：
 
@@ -373,18 +373,12 @@ users.map(user => user.name);
 - 它基于这些信息做了什么假设？
 - 我的代码会不会破坏这个假设？
 
-这比简单说“JS 是解释型语言”或者“JS 是编译型语言”更有用。
+这比简单争“JS 是解释型语言”还是“编译型语言”更有用。
 
 如果只为了面试，可以记这个版本：
 
 > 现代 JavaScript 不是传统意义上的逐行解释执行。在 V8 里，它通常会经历源码、AST、Bytecode、类型反馈和 JIT 优化机器码。Bytecode 负责快速启动和通用执行；TurboFan 负责把热点代码按运行时反馈编译成更快的机器码；当类型假设失败时，引擎会 deopt 回到更通用的路径。
 
-如果为了写更好的前端代码，我觉得还可以再往前走一步：
+如果是为了写更好的前端代码，我更在意背后的习惯：运行时什么时候只能走通用路径？它跑了一会儿之后学到了什么？我的代码会不会让这些假设失效？
 
-不要只记结论。多问一层“为什么引擎要这样设计”。
-
-很多高级前端知识最后都会回到这个模式：先用通用路径跑起来，再用运行时信息优化热路径，发现假设错了就回退。React、浏览器渲染、JS 引擎、服务端性能优化，其实都有类似的味道。
-
-我今天只是从一个很朴素的问题开始：JS 现在是不是编译后运行？
-
-结果顺着它挖下去，挖到了编译器、运行时反馈和优化假设。这个过程比答案本身更值钱。
+我一开始只是想问：JS 现在算不算编译后运行？最后挖到的是 parser、bytecode、类型反馈、优化机器码和 deopt。这个过程比标签本身更有用。

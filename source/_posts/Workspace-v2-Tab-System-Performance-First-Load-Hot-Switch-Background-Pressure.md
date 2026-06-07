@@ -1,17 +1,17 @@
 ---
-title: "Workspace v2 Tab System Performance: First Load, Hot Switch, And Background Pressure"
+title: "Workspace v2 tab system performance: first load, hot switch, and background pressure"
 date: 2026-05-18 16:31:00
 tags: [Frontend, Web Performance, Software Engineering, React]
 area: engineering
-summary: "A performance model for workspace tabs that separates first load, hot switch, background pressure, and regression gates."
+summary: "A performance write-up about separating first load, hot tab switch, background pressure, and the gates that kept false wins out."
 featured: true
 audience: [public, interviewers]
 lang: en
 i18n_key: Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure
 ---
-## Background And Goals
+## Background and goals
 
-After the tab system was introduced, Workspace no longer had only one foreground page. Users can keep multiple workstreams, subapps, and objects open, while the host may keep more routes, runtimes, iframes, SDKs, and background tasks alive. Performance moved from a single-page FMP problem into a resource-ownership problem across the Workspace shell, multiple subapps, and multiple retained runtimes.
+After the tab system landed, Workspace no longer had one foreground page. Users can keep multiple workstreams, subapps, and objects open. The host may keep more routes, runtimes, iframes, SDKs, and background tasks alive too. Performance moved from a single-page FMP problem into a resource ownership problem across the shell, subapps, and retained runtimes.
 
 Users only care whether the focused tab becomes visible, usable, and stable. Behind that tab, hidden runtimes, prewarm jobs, subapp SDKs, iframes, analytics, and monitoring tasks may still be alive. A cleaner waterfall is not enough. Three user paths have to be protected separately.
 
@@ -41,7 +41,7 @@ Optimization principle:
 
 *Figure P1: Performance optimization map. The map separates first-screen critical path, hot tab switch, and background pressure, and also lists false wins that were rejected.*
 
-## Product-Scale Baseline And Result Shape
+## Product-scale baseline and result shape
 
 The product-level target was roughly `1s` P90 for the Workspace shell and `2.5s` P90 for subapps running on Workspace. The early baseline missed that target across the main modules. Some paths were far beyond the budget.
 
@@ -77,7 +77,7 @@ Two guardrails:
 1. Strict preview FMP, strict tab switch, and local C02 gate are not combined into one total number.
 1. Moving resources is not a win by itself. We only keep a change when the user metric improves and the diagram explains why.
 
-## Measurement Contract
+## Measurement contract
 
 Strict FMP comparisons used the same setup:
 
@@ -102,7 +102,7 @@ Tab switch uses v3 metrics instead of only "how long after click until the frame
 
 The most important measurement repair was separating visible from interactive. Old metrics could report tens of milliseconds while strict probe still found hundreds or thousands of milliseconds of post-visible long task. After this repair, only changes that reduce post-visible blocking or final FMP are accepted.
 
-## Measurement & Gates: Harness And E2E Coverage
+## Measurement and gates
 
 These wins did not come from one manual run. We split validation into three harnesses, each answering one question.
 
@@ -125,7 +125,7 @@ E2E cases protect correctness while performance changes move work around. Mock-o
 | Subapp open intents | Subapp open requests, legacy navigation, dedupe, invalid payload, origin reject, and bus-v2 behavior | SDK bridge latency, merge, or refactor cannot lose, duplicate, or escalate subapp intent. |
 | `T-LFC-C01` | Focus switch emits `TAB_BLURRED` before `TAB_FOCUSED` | Background tabs must actually enter background; otherwise polling, WebSocket, and prewarm continue stealing CPU. |
 
-## What Changed: Optimization Map
+## What changed
 
 This table is not a commit list. It is an index for the rest of the article. Each row follows the same chain: problem, blocker/cause, solution, evidence, and guardrail.
 
@@ -347,9 +347,9 @@ async function safeLoadSdk() {
 | Tea | Flush queue in slices and yield to foreground. | Local C02: visual `31.5ms -> 29.5ms`, about `-6.3%`. |
 | Slardar / visit / storage health / AIS | after first screen, idle, foreground-aware. | Guardrail; not claimed as preview-environment main win. |
 
-These changes prevent future SDK work from becoming a tab-switch jank source. They are the stability base, not inflated FMP wins.
+These changes keep future SDK work from becoming a tab-switch jank source. They are stability work, not FMP wins dressed up as something bigger.
 
-## Rejected Optimizations
+## Rejected optimizations
 
 | Experiment | Why It Looked Reasonable | Why It Was Rejected |
 | --- | --- | --- |
@@ -359,7 +359,7 @@ These changes prevent future SDK work from becoming a tab-switch jank source. Th
 | Small component memo / local cache experiments | Looked like they would reduce render | Local p95 got worse or strict benefit was missing; not kept. |
 | Old tab switch duration only | Could produce numbers in tens of milliseconds | Missed input queue and post-visible blocking; metric itself was not trustworthy. |
 
-## Reusable Method
+## Reusable method
 
 1. **Split by path first.** FMP, tab switch, and background pressure are different problems and need different measurements.
 1. **Assign resource ownership.** Current first-screen resources move earlier; non-current first-screen work moves later; future resources can only run through idle prewarm.
@@ -367,10 +367,10 @@ These changes prevent future SDK work from becoming a tab-switch jank source. Th
 1. **Accept failures.** If a resource moves but FMP gets worse, revert it.
 1. **Keep local gates and preview wins separate.** C02 is a regression gate, not an online/preview win.
 
-The tab system performance gains do not come from one trick. They come from three mechanisms working together:
+The wins did not come from one clever trick. Three boring rules did most of the work:
 
 - the first-screen critical path keeps only current-route required work;
 - hot switching uses bounded runtime cache plus idle prewarm;
 - background work yields to the foreground scheduler.
 
-This mechanism matters more than any single optimization. Workspace will keep adding more subapps, SDKs, and runtimes. Without path classification and resource arbitration, more tabs would make the system progressively less predictable.
+That matters more than any single patch. Workspace will keep adding subapps, SDKs, and runtimes. Without path classification and resource arbitration, every new tab feature would make performance harder to predict.

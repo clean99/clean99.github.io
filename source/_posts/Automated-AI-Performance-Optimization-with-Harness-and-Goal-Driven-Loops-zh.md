@@ -1,5 +1,5 @@
 ---
-title: "全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计"
+title: "用 harness 让 AI 做性能优化：goal-driven loop 和 ledger"
 date: 2026-05-16 12:30:31
 tags: [AI, Software Engineering, Web Performance, Frontend]
 lang: zh
@@ -7,7 +7,7 @@ i18n_key: Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loo
 permalink: zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/
 ---
 
-> **TL;DR**: 我做了一个性能优化 skill，让 AI Agent 执行真正的优化闭环，而不是只给出“可以试试懒加载”这类建议。核心是可度量的 harness、goal-driven loop，以及记录每个 baseline、修改点、严格对比和失败 round 的 ledger。在一次 Workspace 优化中，严格 profile 看到 Workstream `5089ms -> 2519ms`、Report Center `10021ms -> 6762ms` 这样的结果；但最重要的第一轮并不是提速，而是修复 FMP 测量契约。
+我做了一个性能优化 skill，把 AI Agent 从“可以试试懒加载”这类建议，拉进 harness、目标和 ledger 组成的循环里一轮轮跑。在一次 Workspace 优化里，strict profile 看到 Workstream `5089ms -> 2519ms`、Report Center `10021ms -> 6762ms`。但最重要的第一轮不是提速，而是修 FMP 测量契约。没有这一步，后面的数字都不值得信。
 
 ## 真正的问题
 
@@ -270,6 +270,6 @@ Ledger 不是日记，它是这个 loop 的控制面。
 6. 把 measurement repair、regression、correctness fix 都当成一等结果。
 7. Ledger 记录证据，不记录流水账。
 
-技术细节会随产品变化，但这个 loop 不应该变。
+技术细节会随产品变化，但这个 loop 值得保留。
 
-真正的结果不是 AI 某一次写出聪明优化，而是 AI 可以运行一个可度量的工程过程：观察、选择、修改、部署、对比、记录，然后继续。
+我在意的结果不是 AI 某一次写出了聪明 patch，而是它能按证据跑完整工程过程：观察、选择、修改、部署、对比、记录，然后继续。

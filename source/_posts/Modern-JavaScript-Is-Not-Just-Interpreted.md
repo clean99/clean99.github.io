@@ -1,14 +1,14 @@
 ---
-title: "How JavaScript Runs: From Source Code to JIT Optimization"
+title: "How JavaScript runs: from source code to JIT optimization"
 date: 2026-06-05 10:18:06
 tags: [JavaScript, Frontend, Software Engineering]
 lang: en
 i18n_key: Modern-JavaScript-Is-Not-Just-Interpreted
 ---
 
-While relearning JavaScript, I started with a simple question: is JavaScript mostly compiled before it runs now, including in the browser host?
+While relearning JavaScript, I got stuck on a basic-sounding question: when we say JavaScript "runs," how much of it has already been compiled?
 
-The interesting part is not whether the answer is yes or no. The interesting part is that the word "compiled" hides two very different layers. In frontend engineering, compilation usually means TypeScript, Babel, SWC, or esbuild. Inside a JavaScript engine, it means parsing, bytecode, JIT, and optimized machine code. Those are not the same thing.
+The yes/no answer was less interesting than the ambiguity in the word "compiled." In frontend engineering, compilation usually means TypeScript, Babel, SWC, or esbuild. Inside a JavaScript engine, it means parsing, bytecode, JIT, and optimized machine code. Same word, different layer.
 
 ![Modern JavaScript execution pipeline](/img/js-jit-runtime/javascript-execution-pipeline.png)
 
@@ -63,7 +63,7 @@ But modern Chrome, Safari, Firefox, and Node are not that simple. Node uses V8 t
 
 ## Does the browser host get compiled too?
 
-This is where the wording matters.
+The wording matters here.
 
 The JavaScript engine compiles your JavaScript code. Browser-host APIs such as DOM, timers, networking, and storage are mostly native browser capabilities implemented in languages such as C++, Rust, or Objective-C, then exposed to JavaScript through bindings.
 
@@ -187,7 +187,7 @@ While digging into Hidden Class, I had another question: is the offset like an a
 
 That direction is right, but the model needs limits.
 
-V8 objects are not just simple C arrays. Their properties are not guaranteed to all sit in one continuous memory block. V8 has JSObject, Properties, Elements, fast properties, and dictionary mode. The real implementation is more complex than "object base address plus offset."
+V8 objects are more complicated than C arrays. Their properties are not guaranteed to all sit in one continuous memory block. V8 has JSObject, Properties, Elements, fast properties, and dictionary mode. The real implementation is more complex than "object base address plus offset."
 
 But as a mental model, Hidden Class plus slot or offset is close to C/C++ struct access:
 
@@ -363,25 +363,21 @@ That is the intuition behind monomorphic, polymorphic, and megamorphic.
 
 ## A better question than "is JavaScript interpreted?"
 
-The useful takeaway from this relearning session was not memorizing the names Ignition and TurboFan.
+The point of this note is not to memorize the names Ignition and TurboFan.
 
-The useful part was changing the question:
+The better question became:
 
 - What information does the engine not know at startup?
 - What does it learn after running the code?
 - What assumptions does it make from that feedback?
 - Does my code preserve or break those assumptions?
 
-That is more useful than arguing whether JavaScript is interpreted or compiled.
+That question is more useful than arguing whether JavaScript is interpreted or compiled.
 
 For interviews, this version is enough:
 
 > Modern JavaScript is not simply line-by-line source interpretation. In V8, it usually goes through source code, AST, bytecode, type feedback, and JIT-optimized machine code. Bytecode gives fast startup and generic execution. TurboFan compiles hot code into faster machine code using runtime feedback. When type assumptions fail, the engine deopts back to a more generic path.
 
-For writing better frontend code, the next step is to ask why the engine is designed this way.
+For writing better frontend code, I care more about the habit behind it: where does the runtime start generic, what does it learn, and what kind of code makes those assumptions collapse?
 
-Many advanced frontend topics eventually follow the same pattern: start with a generic path, use runtime information to optimize hot paths, and fall back when assumptions fail. You see versions of this in JavaScript engines, browser rendering, React, and server-side performance work.
-
-I started with a plain question: does JavaScript run after compilation now?
-
-Following that question led to compilers, runtime feedback, and optimization assumptions. That path was more useful than the label itself.
+I started with a plain question about whether JavaScript is compiled now. The answer was less interesting than the path it opened: parser, bytecode, runtime feedback, optimized code, and deopt. That is usually where the better understanding starts.

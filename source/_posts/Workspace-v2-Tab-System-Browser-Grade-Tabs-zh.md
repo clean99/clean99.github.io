@@ -7,11 +7,11 @@ i18n_key: Workspace-v2-Tab-System-Browser-Grade-Tabs
 permalink: zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/
 ---
 
-TL;DR：Workspace v2 需要在单页工作空间里做出接近浏览器的 tab 体验：多个业务对象同时保持打开，刷新和分享链接仍然能回到正确页面，hidden runtime 不能抢当前 tab 的 URL、弹层、事件和前台 CPU。它不是一排 tab UI，而是一套围绕 intent、URL、持久化 tab 状态、runtime cache、sandbox 隔离和渲染 frame 的 ownership 设计。
+Workspace v2 要做的不是多画一排 tab。用户会同时打开多个业务对象，刷新和分享链接还要回到正确页面；后台 runtime 不能偷偷改 URL、弹层、事件或前台 CPU。最后真正要解决的是 ownership：intent、URL、tab 状态、runtime cache、sandbox 副作用和渲染 frame 分别归谁管。
 
 ## 背景和目标
 
-Workspace v2 要把原来偏“单页面、单上下文”的工作台，改成可以同时承载多个工作流、多个子应用视图、多个工单对象的工作空间。对用户来说，这个体验更接近浏览器：我打开了几个工作流，切来切去状态还在；我刷新页面或者把链接发给别人，应该还能回到正确的业务页面；我在一个子应用里打开弹窗，不能盖到另一个 tab 上。
+Workspace v2 把原来偏“单页面、单上下文”的工作台，改成可以同时承载多个工作流、子应用视图和工单对象的工作空间。用户的预期其实很直接：我打开几个工作流，切回来状态还在；我刷新页面或者把链接发给别人，还能回到正确业务页；我在一个子应用里打开弹窗，不能盖到另一个 tab 上。
 
 ![workspace tab system demo](/img/workspace-v2-tab-system/workspace-tab-system-demo.png)
 
@@ -832,4 +832,4 @@ function commitFocusedTab(nextTabId) {
 | Interface | 让各子应用直接理解 tab 最省宿主代码，但耦合扩散 | 子应用只发 intent，宿主统一决策 |
 | Observability | 只看旧 duration 数字简单，但会漏 post-visible 卡顿 | FMP、switch v3、long task、scope drop 分线观测 |
 
-最终，这个系统的价值不是“页面上多了一排 tab”。真正的技术点是：在单页工作台里同时运行多个业务 runtime 时，宿主必须明确谁拥有 URL、谁拥有 DOM、谁拥有 overlay、谁能接收事件、谁能占用前台资源。把这些所有权定义清楚，tab system 才能像浏览器，而不是像一堆互相干扰的隐藏页面。
+最后有价值的不是那排 tab，而是所有权模型。在一个单页工作台里同时保留多个业务 runtime 时，宿主必须说清楚：谁能写 URL，谁拥有 DOM 和 overlay，谁能接收事件，谁能占前台资源。规则清楚以后，tab system 才像浏览器；规则不清楚，它就是一堆互相踩脚的隐藏页面。
