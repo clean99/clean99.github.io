@@ -19,7 +19,7 @@
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
   <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
-  <meta name="description" content="A performance model for workspace tabs that separates first load, hot switch, background pressure, and regression gates.">
+  <meta name="description" content="A performance write-up about separating first load, hot tab switch, background pressure, and the gates that kept false wins out.">
   
   <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
   
@@ -45,14 +45,14 @@
   <meta property="og:title" content="Workspace V2 Tab System Performance: First Load, Hot Switch, and Background Pressure | Koh Hom — Software, AI, and Inner Practice" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:locale:alternate" content="zh_CN" />
-  <meta property="og:description" content="A performance model for workspace tabs that separates first load, hot switch, background pressure, and regression gates.">
+  <meta property="og:description" content="A performance write-up about separating first load, hot tab switch, background pressure, and the gates that kept false wins out.">
   <meta property="og:url" content="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@Clean993">
   <meta name="twitter:creator" content="@Clean993">
   <meta name="twitter:title" content="Workspace V2 Tab System Performance: First Load, Hot Switch, and Background Pressure | Koh Hom — Software, AI, and Inner Practice">
-  <meta name="twitter:description" content="A performance model for workspace tabs that separates first load, hot switch, background pressure, and regression gates.">
+  <meta name="twitter:description" content="A performance write-up about separating first load, hot tab switch, background pressure, and the gates that kept false wins out.">
   <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/" />
 
@@ -160,7 +160,7 @@
   <!-- JSON-LD Structured Data
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Workspace V2 Tab System Performance: First Load, Hot Switch, and Background Pressure","datePublished":"2026-05-18T08:31:00.000Z","dateModified":"2026-05-18T08:31:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/","mainEntityOfPage":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/","inLanguage":"en","description":"Background And GoalsAfter the tab system was introduced, Workspace no longer had only one foreground page. Users can keep multiple workstreams, subapps, and objects open, while the host may keep more ","keywords":["Frontend","Software Engineering","Web Performance","React"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Workspace V2 Tab System Performance: First Load, Hot Switch, and Background Pressure","datePublished":"2026-05-18T08:31:00.000Z","dateModified":"2026-05-18T08:31:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/","mainEntityOfPage":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/","inLanguage":"en","description":"Background and goalsAfter the tab system landed, Workspace no longer had one foreground page. Users can keep multiple workstreams, subapps, and objects open. The host may keep more routes, runtimes, i","keywords":["Frontend","Software Engineering","Web Performance","React"]}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Workspace V2 Tab System Performance: First Load, Hot Switch, and Background Pressure","item":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/"}]}</script>
   
 
@@ -265,7 +265,7 @@
       <meta itemprop="dateModified" content="2026-05-18T08:31:00.000Z">
     </header>
     <div itemprop="articleBody">
-      <h2 id="Background-And-Goals"><a href="#Background-And-Goals" class="headerlink" title="Background And Goals"></a>Background And Goals</h2><p>After the tab system was introduced, Workspace no longer had only one foreground page. Users can keep multiple workstreams, subapps, and objects open, while the host may keep more routes, runtimes, iframes, SDKs, and background tasks alive. Performance moved from a single-page FMP problem into a resource-ownership problem across the Workspace shell, multiple subapps, and multiple retained runtimes.</p>
+      <h2 id="Background-and-goals"><a href="#Background-and-goals" class="headerlink" title="Background and goals"></a>Background and goals</h2><p>After the tab system landed, Workspace no longer had one foreground page. Users can keep multiple workstreams, subapps, and objects open. The host may keep more routes, runtimes, iframes, SDKs, and background tasks alive too. Performance moved from a single-page FMP problem into a resource ownership problem across the shell, subapps, and retained runtimes.</p>
 <p>Users only care whether the focused tab becomes visible, usable, and stable. Behind that tab, hidden runtimes, prewarm jobs, subapp SDKs, iframes, analytics, and monitoring tasks may still be alive. A cleaner waterfall is not enough. Three user paths have to be protected separately.</p>
 <p><img src="/img/workspace-v2-tab-system/workspace-tab-system-demo.png" alt="workspace tab system demo"></p>
 <p><em>Figure 0: A generic workbench using browser-like tabs. The performance problem starts because multiple work items can stay open, while only the focused tab should stay interactive and own foreground resources.</em></p>
@@ -324,7 +324,7 @@
 </blockquote>
 <p><img src="/img/workspace-v2-tab-system-performance/performance-map.png" alt="performance map"></p>
 <p><em>Figure P1: Performance optimization map. The map separates first-screen critical path, hot tab switch, and background pressure, and also lists false wins that were rejected.</em></p>
-<h2 id="Product-Scale-Baseline-And-Result-Shape"><a href="#Product-Scale-Baseline-And-Result-Shape" class="headerlink" title="Product-Scale Baseline And Result Shape"></a>Product-Scale Baseline And Result Shape</h2><p>The product-level target was roughly <code>1s</code> P90 for the Workspace shell and <code>2.5s</code> P90 for subapps running on Workspace. The early baseline missed that target across the main modules. Some paths were far beyond the budget.</p>
+<h2 id="Product-scale-baseline-and-result-shape"><a href="#Product-scale-baseline-and-result-shape" class="headerlink" title="Product-scale baseline and result shape"></a>Product-scale baseline and result shape</h2><p>The product-level target was roughly <code>1s</code> P90 for the Workspace shell and <code>2.5s</code> P90 for subapps running on Workspace. The early baseline missed that target across the main modules. Some paths were far beyond the budget.</p>
 <p>The table below is a weekly field-report view. It shows scale and trend. It is not the same measurement as the strict preview profiles used later for individual changes.</p>
 <table>
 <thead>
@@ -455,7 +455,7 @@
 <li>Strict preview FMP, strict tab switch, and local C02 gate are not combined into one total number.</li>
 <li>Moving resources is not a win by itself. We only keep a change when the user metric improves and the diagram explains why.</li>
 </ol>
-<h2 id="Measurement-Contract"><a href="#Measurement-Contract" class="headerlink" title="Measurement Contract"></a>Measurement Contract</h2><p>Strict FMP comparisons used the same setup:</p>
+<h2 id="Measurement-contract"><a href="#Measurement-contract" class="headerlink" title="Measurement contract"></a>Measurement contract</h2><p>Strict FMP comparisons used the same setup:</p>
 <ul>
 <li>authenticated preview environment;</li>
 <li>target preview-lane headers;</li>
@@ -499,7 +499,7 @@
 </tr>
 </tbody></table>
 <p>The most important measurement repair was separating visible from interactive. Old metrics could report tens of milliseconds while strict probe still found hundreds or thousands of milliseconds of post-visible long task. After this repair, only changes that reduce post-visible blocking or final FMP are accepted.</p>
-<h2 id="Measurement-amp-Gates-Harness-And-E2E-Coverage"><a href="#Measurement-amp-Gates-Harness-And-E2E-Coverage" class="headerlink" title="Measurement &amp; Gates: Harness And E2E Coverage"></a>Measurement &amp; Gates: Harness And E2E Coverage</h2><p>These wins did not come from one manual run. We split validation into three harnesses, each answering one question.</p>
+<h2 id="Measurement-and-gates"><a href="#Measurement-and-gates" class="headerlink" title="Measurement and gates"></a>Measurement and gates</h2><p>These wins did not come from one manual run. We split validation into three harnesses, each answering one question.</p>
 <table>
 <thead>
 <tr>
@@ -578,7 +578,7 @@
 <td>Background tabs must actually enter background; otherwise polling, WebSocket, and prewarm continue stealing CPU.</td>
 </tr>
 </tbody></table>
-<h2 id="What-Changed-Optimization-Map"><a href="#What-Changed-Optimization-Map" class="headerlink" title="What Changed: Optimization Map"></a>What Changed: Optimization Map</h2><p>This table is not a commit list. It is an index for the rest of the article. Each row follows the same chain: problem, blocker&#x2F;cause, solution, evidence, and guardrail.</p>
+<h2 id="What-changed"><a href="#What-changed" class="headerlink" title="What changed"></a>What changed</h2><p>This table is not a commit list. It is an index for the rest of the article. Each row follows the same chain: problem, blocker&#x2F;cause, solution, evidence, and guardrail.</p>
 <table>
 <thead>
 <tr>
@@ -852,8 +852,8 @@
 <td>Guardrail; not claimed as preview-environment main win.</td>
 </tr>
 </tbody></table>
-<p>These changes prevent future SDK work from becoming a tab-switch jank source. They are the stability base, not inflated FMP wins.</p>
-<h2 id="Rejected-Optimizations"><a href="#Rejected-Optimizations" class="headerlink" title="Rejected Optimizations"></a>Rejected Optimizations</h2><table>
+<p>These changes keep future SDK work from becoming a tab-switch jank source. They are stability work, not FMP wins dressed up as something bigger.</p>
+<h2 id="Rejected-optimizations"><a href="#Rejected-optimizations" class="headerlink" title="Rejected optimizations"></a>Rejected optimizations</h2><table>
 <thead>
 <tr>
 <th>Experiment</th>
@@ -887,20 +887,20 @@
 <td>Missed input queue and post-visible blocking; metric itself was not trustworthy.</td>
 </tr>
 </tbody></table>
-<h2 id="Reusable-Method"><a href="#Reusable-Method" class="headerlink" title="Reusable Method"></a>Reusable Method</h2><ol>
+<h2 id="Reusable-method"><a href="#Reusable-method" class="headerlink" title="Reusable method"></a>Reusable method</h2><ol>
 <li><strong>Split by path first.</strong> FMP, tab switch, and background pressure are different problems and need different measurements.</li>
 <li><strong>Assign resource ownership.</strong> Current first-screen resources move earlier; non-current first-screen work moves later; future resources can only run through idle prewarm.</li>
 <li><strong>Draw causality before writing the conclusion.</strong> The chart must show the blocker moving, disappearing, shrinking, or moving after FMP.</li>
 <li><strong>Accept failures.</strong> If a resource moves but FMP gets worse, revert it.</li>
 <li><strong>Keep local gates and preview wins separate.</strong> C02 is a regression gate, not an online&#x2F;preview win.</li>
 </ol>
-<p>The tab system performance gains do not come from one trick. They come from three mechanisms working together:</p>
+<p>The wins did not come from one clever trick. Three boring rules did most of the work:</p>
 <ul>
 <li>the first-screen critical path keeps only current-route required work;</li>
 <li>hot switching uses bounded runtime cache plus idle prewarm;</li>
 <li>background work yields to the foreground scheduler.</li>
 </ul>
-<p>This mechanism matters more than any single optimization. Workspace will keep adding more subapps, SDKs, and runtimes. Without path classification and resource arbitration, more tabs would make the system progressively less predictable.</p>
+<p>That matters more than any single patch. Workspace will keep adding subapps, SDKs, and runtimes. Without path classification and resource arbitration, every new tab feature would make performance harder to predict.</p>
 
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>

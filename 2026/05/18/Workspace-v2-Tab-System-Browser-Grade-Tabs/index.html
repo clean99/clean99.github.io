@@ -11,7 +11,7 @@
   <meta charset="utf-8">
 
   
-  <title>Workspace V2 Tab System: Building Browser Tabs Inside Workspace | Koh Hom — Software, AI, and Inner Practice</title>
+  <title>Workspace V2 Tab System: Browser Tabs Inside a Workspace | Koh Hom — Software, AI, and Inner Practice</title>
   
   <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
@@ -19,7 +19,7 @@
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
   <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
-  <meta name="description" content="A browser-grade tab architecture for a workspace product: URL ownership, persistent tab state, runtime cache, sandbox isolation, and foreground control.">
+  <meta name="description" content="How we made workspace tabs keep state, survive refresh, share real URLs, and stop hidden runtimes from leaking side effects.">
   
   <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
   
@@ -40,17 +40,17 @@
   <meta property="article:tag" content="React" />
   
   
-  <meta property="og:title" content="Workspace V2 Tab System: Building Browser Tabs Inside Workspace | Koh Hom — Software, AI, and Inner Practice" />
+  <meta property="og:title" content="Workspace V2 Tab System: Browser Tabs Inside a Workspace | Koh Hom — Software, AI, and Inner Practice" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:locale:alternate" content="zh_CN" />
-  <meta property="og:description" content="A browser-grade tab architecture for a workspace product: URL ownership, persistent tab state, runtime cache, sandbox isolation, and foreground control.">
+  <meta property="og:description" content="How we made workspace tabs keep state, survive refresh, share real URLs, and stop hidden runtimes from leaking side effects.">
   <meta property="og:url" content="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@Clean993">
   <meta name="twitter:creator" content="@Clean993">
-  <meta name="twitter:title" content="Workspace V2 Tab System: Building Browser Tabs Inside Workspace | Koh Hom — Software, AI, and Inner Practice">
-  <meta name="twitter:description" content="A browser-grade tab architecture for a workspace product: URL ownership, persistent tab state, runtime cache, sandbox isolation, and foreground control.">
+  <meta name="twitter:title" content="Workspace V2 Tab System: Browser Tabs Inside a Workspace | Koh Hom — Software, AI, and Inner Practice">
+  <meta name="twitter:description" content="How we made workspace tabs keep state, survive refresh, share real URLs, and stop hidden runtimes from leaking side effects.">
   <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" />
 
@@ -158,8 +158,8 @@
   <!-- JSON-LD Structured Data
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Workspace V2 Tab System: Building Browser Tabs Inside Workspace","datePublished":"2026-05-18T08:30:00.000Z","dateModified":"2026-05-18T08:30:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","mainEntityOfPage":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","inLanguage":"en","description":"TL;DR: Workspace v2 needs browser-like tabs inside a single workbench: multiple business objects stay open, refresh and shared links still work, and hidden runtimes cannot steal URL, overlays, events,","keywords":["Frontend","Software Engineering","React"]}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Workspace V2 Tab System: Building Browser Tabs Inside Workspace","item":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/"}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Workspace V2 Tab System: Browser Tabs Inside a Workspace","datePublished":"2026-05-18T08:30:00.000Z","dateModified":"2026-05-18T08:30:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","mainEntityOfPage":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/","inLanguage":"en","description":"Workspace v2 needed tabs that behave more like browser tabs than a UI row. Users keep several business objects open, refresh and shared links still work, and hidden runtimes do not get to steal the UR","keywords":["Frontend","Software Engineering","React"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Workspace V2 Tab System: Browser Tabs Inside a Workspace","item":"https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/"}]}</script>
   
 
   <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
@@ -250,7 +250,7 @@
         <div class="trans">
             <article itemscope itemtype="https://schema.org/BlogPosting">
     <header>
-      <h2 itemprop="headline">Workspace V2 Tab System: Building Browser Tabs Inside Workspace</h2>
+      <h2 itemprop="headline">Workspace V2 Tab System: Browser Tabs Inside a Workspace</h2>
       
       <p style="margin-bottom: 0.5rem;">
         <a href="/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
@@ -263,10 +263,10 @@
       <meta itemprop="dateModified" content="2026-05-18T08:30:00.000Z">
     </header>
     <div itemprop="articleBody">
-      <p>TL;DR: Workspace v2 needs browser-like tabs inside a single workbench: multiple business objects stay open, refresh and shared links still work, and hidden runtimes cannot steal URL, overlays, events, or foreground CPU. The design is not just a tab bar; it is a set of ownership boundaries around intent, URL, persistent tab state, runtime cache, sandbox isolation, and rendered frames.</p>
+      <p>Workspace v2 needed tabs that behave more like browser tabs than a UI row. Users keep several business objects open, refresh and shared links still work, and hidden runtimes do not get to steal the URL, overlays, events, or foreground CPU. Most of the work was ownership: who owns intent, URL, tab state, runtime cache, sandbox effects, and the rendered frame.</p>
 <p><img src="/img/workspace-v2-tab-system/workspace-tab-system-demo.png" alt="workspace tab system demo"></p>
 <p><em>Figure 0: A generic workbench using browser-like tabs. Users keep several work items open, switch back without reload, and only the focused tab owns URL, overlays, events, and foreground CPU. generated by gpt-image-2.</em></p>
-<h2 id="Background-And-Goals"><a href="#Background-And-Goals" class="headerlink" title="Background And Goals"></a>Background And Goals</h2><p>Workspace v2 changes the workbench from a single-page, single-context product into a workspace that can hold multiple workstreams, sub-application views, and ticket objects at the same time. From the user’s perspective, <strong>the expected experience is close to a browser</strong>:</p>
+<h2 id="Background-and-goals"><a href="#Background-and-goals" class="headerlink" title="Background and goals"></a>Background and goals</h2><p>Workspace v2 changed the workbench from one page with one active context into a place where several workstreams, subapp views, and ticket objects can stay open at the same time. The user expectation is simple and unforgiving:</p>
 <ol>
 <li>several tasks stay open,</li>
 <li>switching back keeps state,</li>
@@ -358,7 +358,7 @@
 <li><strong>Should two entries reuse the same tab?</strong> For example, the same workstream should reuse one tab, while its internal view is preserved as URL&#x2F;subPath state.</li>
 <li><strong>Which tab owns runtime side effects now?</strong> Only the focused tab can write the browser URL, show overlays, receive foreground events, and consume foreground CPU.</li>
 </ol>
-<h2 id="Architecture-Layers"><a href="#Architecture-Layers" class="headerlink" title="Architecture Layers"></a>Architecture Layers</h2><p><img src="/img/workspace-v2-tab-system/architecture-layers.png" alt="Figure A2"></p>
+<h2 id="Architecture-layers"><a href="#Architecture-layers" class="headerlink" title="Architecture layers"></a>Architecture layers</h2><p><img src="/img/workspace-v2-tab-system/architecture-layers.png" alt="Figure A2"></p>
 <p><em>Figure A2: Final layered architecture. Isolation and Observability are intentionally separate: Isolation prevents hidden runtimes from changing the current tab; Observability proves where latency, blocked writes, or regressions happen. generated by gpt-image-2.</em></p>
 <table>
 <thead>
@@ -871,7 +871,7 @@
 <p>Switching becomes an ownership update:</p>
 <figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">commitFocusedTab</span>(<span class="params">nextTabId</span>) &#123;</span><br><span class="line">  <span class="comment">// 1. URL owner for Seto runtimes.</span></span><br><span class="line">  <span class="comment">// This records which tab is currently allowed to mirror sandbox history</span></span><br><span class="line">  <span class="comment">// writes into the real browser address bar.</span></span><br><span class="line">  <span class="title function_">setFocusedSetoRuntimeTab</span>(nextTabId);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 2. Overlay owner.</span></span><br><span class="line">  <span class="comment">// Each tab-owned overlay root carries data-workspace-overlay-tab-id.</span></span><br><span class="line">  <span class="comment">// This shows only the overlay root for the focused tab and hides overlays</span></span><br><span class="line">  <span class="comment">// that still exist in hidden warm-pool tabs.</span></span><br><span class="line">  <span class="title function_">setFocusedWorkspaceOverlayTab</span>(nextTabId);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 3. Runtime owner.</span></span><br><span class="line">  <span class="comment">// Promote the focused tab into the warm pool. If it is already hot, refresh</span></span><br><span class="line">  <span class="comment">// its LRU position; if it is cold, create a HotTabFrame for it.</span></span><br><span class="line">  warmPool.<span class="title function_">promote</span>(nextTabId, currentLocation, runtimeKind);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 4. Lifecycle owner.</span></span><br><span class="line">  <span class="comment">// Emit TAB_BLURRED for the previous tab and TAB_FOCUSED for the next tab.</span></span><br><span class="line">  <span class="comment">// The payload carries tabId, so subapps and SDK listeners can ignore events</span></span><br><span class="line">  <span class="comment">// that do not belong to their own tab.</span></span><br><span class="line">  <span class="title function_">publishTabLifecycleTransition</span>(prevTabId, nextTabId);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 5. Metric owner.</span></span><br><span class="line">  <span class="comment">// Once the focused HotTabFrame is actually visible on the next animation</span></span><br><span class="line">  <span class="comment">// frame, mark tab-switch-visible. This separates “shell selected a tab”</span></span><br><span class="line">  <span class="comment">// from “the target tab is visible to the user”.</span></span><br><span class="line">  <span class="title function_">notifyTabSwitchFrameVisible</span>(nextTabId);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="Key-Tradeoffs"><a href="#Key-Tradeoffs" class="headerlink" title="Key Tradeoffs"></a>Key Tradeoffs</h2><table>
+<h2 id="Key-tradeoffs"><a href="#Key-tradeoffs" class="headerlink" title="Key tradeoffs"></a>Key tradeoffs</h2><table>
 <thead>
 <tr>
 <th>Tradeoff</th>
@@ -905,7 +905,7 @@
 <td>Split first load, hot switch, long task, scope drop, and stress gates.</td>
 </tr>
 </tbody></table>
-<p>The value of the system is not that a page has a tab row. The important part is ownership: which runtime may write the URL, which tab owns DOM and overlays, which listeners receive foreground events, and which work may consume foreground resources. Once those ownership boundaries are explicit, the workspace behaves like browser tabs instead of a pile of hidden pages fighting each other.</p>
+<p>The tab row is the easy part. The harder part is the ownership model: which runtime may write the URL, which tab owns DOM and overlays, which listeners receive foreground events, and which work may use foreground CPU. Once those rules are explicit, the workspace starts behaving like tabs instead of hidden pages stepping on each other.</p>
 
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>

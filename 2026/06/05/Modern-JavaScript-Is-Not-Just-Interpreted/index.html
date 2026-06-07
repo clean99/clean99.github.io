@@ -19,7 +19,7 @@
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/" />
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/" />
   <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/" />
-  <meta name="description" content="While relearning JavaScript, I started with a simple question: is JavaScript mostly compiled before it runs now, including in the browser host? The in">
+  <meta name="description" content="While relearning JavaScript, I got stuck on a basic-sounding question: when we say JavaScript “runs,” how much of it has already been compiled? The ye">
   
   <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
   
@@ -43,14 +43,14 @@
   <meta property="og:title" content="How JavaScript Runs: From Source Code to JIT Optimization | Koh Hom — Software, AI, and Inner Practice" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:locale:alternate" content="zh_CN" />
-  <meta property="og:description" content="While relearning JavaScript, I started with a simple question: is JavaScript mostly compiled before it runs now, including in the browser host? The in">
+  <meta property="og:description" content="While relearning JavaScript, I got stuck on a basic-sounding question: when we say JavaScript “runs,” how much of it has already been compiled? The ye">
   <meta property="og:url" content="https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@Clean993">
   <meta name="twitter:creator" content="@Clean993">
   <meta name="twitter:title" content="How JavaScript Runs: From Source Code to JIT Optimization | Koh Hom — Software, AI, and Inner Practice">
-  <meta name="twitter:description" content="While relearning JavaScript, I started with a simple question: is JavaScript mostly compiled before it runs now, including in the browser host? The in">
+  <meta name="twitter:description" content="While relearning JavaScript, I got stuck on a basic-sounding question: when we say JavaScript “runs,” how much of it has already been compiled? The ye">
   <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/" />
 
@@ -158,7 +158,7 @@
   <!-- JSON-LD Structured Data
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"How JavaScript Runs: From Source Code to JIT Optimization","datePublished":"2026-06-05T02:18:06.000Z","dateModified":"2026-06-05T02:18:06.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/","mainEntityOfPage":"https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/","inLanguage":"en","description":"While relearning JavaScript, I started with a simple question: is JavaScript mostly compiled before it runs now, including in the browser host? The interesting part is not whether the answer is yes or","keywords":["Frontend","Software Engineering","JavaScript"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"How JavaScript Runs: From Source Code to JIT Optimization","datePublished":"2026-06-05T02:18:06.000Z","dateModified":"2026-06-05T02:18:06.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/","mainEntityOfPage":"https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/","inLanguage":"en","description":"While relearning JavaScript, I got stuck on a basic-sounding question: when we say JavaScript “runs,” how much of it has already been compiled? The yes&#x2F;no answer was less interesting than the amb","keywords":["Frontend","Software Engineering","JavaScript"]}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"How JavaScript Runs: From Source Code to JIT Optimization","item":"https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/"}]}</script>
   
 
@@ -263,8 +263,8 @@
       <meta itemprop="dateModified" content="2026-06-05T02:18:06.000Z">
     </header>
     <div itemprop="articleBody">
-      <p>While relearning JavaScript, I started with a simple question: is JavaScript mostly compiled before it runs now, including in the browser host?</p>
-<p>The interesting part is not whether the answer is yes or no. The interesting part is that the word “compiled” hides two very different layers. In frontend engineering, compilation usually means TypeScript, Babel, SWC, or esbuild. Inside a JavaScript engine, it means parsing, bytecode, JIT, and optimized machine code. Those are not the same thing.</p>
+      <p>While relearning JavaScript, I got stuck on a basic-sounding question: when we say JavaScript “runs,” how much of it has already been compiled?</p>
+<p>The yes&#x2F;no answer was less interesting than the ambiguity in the word “compiled.” In frontend engineering, compilation usually means TypeScript, Babel, SWC, or esbuild. Inside a JavaScript engine, it means parsing, bytecode, JIT, and optimized machine code. Same word, different layer.</p>
 <p><img src="/img/js-jit-runtime/javascript-execution-pipeline.png" alt="Modern JavaScript execution pipeline"></p>
 <p>Figure: Modern JavaScript execution in V8. Source code becomes AST and bytecode first; runtime type feedback lets TurboFan compile hot paths into optimized machine code. generated by gpt-image-2.</p>
 <h2 id="Build-time-compilation-is-not-what-the-browser-cares-about"><a href="#Build-time-compilation-is-not-what-the-browser-cares-about" class="headerlink" title="Build-time compilation is not what the browser cares about"></a>Build-time compilation is not what the browser cares about</h2><p>The compilation frontend developers usually touch happens at build time.</p>
@@ -302,7 +302,7 @@
 <p>So a better mental model is not simply “JavaScript is interpreted.” Modern JavaScript is a dynamic language running on an interpreter plus a JIT compiler.</p>
 <p>The old description was historically reasonable. Early browsers were much closer to source interpretation.</p>
 <p>But modern Chrome, Safari, Firefox, and Node are not that simple. Node uses V8 too, so <code>node server.js</code> also goes through parsing, bytecode, and JIT optimization.</p>
-<h2 id="Does-the-browser-host-get-compiled-too"><a href="#Does-the-browser-host-get-compiled-too" class="headerlink" title="Does the browser host get compiled too?"></a>Does the browser host get compiled too?</h2><p>This is where the wording matters.</p>
+<h2 id="Does-the-browser-host-get-compiled-too"><a href="#Does-the-browser-host-get-compiled-too" class="headerlink" title="Does the browser host get compiled too?"></a>Does the browser host get compiled too?</h2><p>The wording matters here.</p>
 <p>The JavaScript engine compiles your JavaScript code. Browser-host APIs such as DOM, timers, networking, and storage are mostly native browser capabilities implemented in languages such as C++, Rust, or Objective-C, then exposed to JavaScript through bindings.</p>
 <p>So your JavaScript is handled by the JS engine. APIs such as <code>document</code>, <code>fetch</code>, and <code>setTimeout</code> are host capabilities surfaced to JavaScript.</p>
 <p>When you write:</p>
@@ -353,7 +353,7 @@
 <p>The engine is not fragile. Your code is just invalidating assumptions it worked hard to build.</p>
 <h2 id="Offset-is-a-useful-model-but-V8-objects-are-not-simple-arrays"><a href="#Offset-is-a-useful-model-but-V8-objects-are-not-simple-arrays" class="headerlink" title="Offset is a useful model, but V8 objects are not simple arrays"></a>Offset is a useful model, but V8 objects are not simple arrays</h2><p>While digging into Hidden Class, I had another question: is the offset like an array index, where the engine has continuous memory and reads through pointer plus offset?</p>
 <p>That direction is right, but the model needs limits.</p>
-<p>V8 objects are not just simple C arrays. Their properties are not guaranteed to all sit in one continuous memory block. V8 has JSObject, Properties, Elements, fast properties, and dictionary mode. The real implementation is more complex than “object base address plus offset.”</p>
+<p>V8 objects are more complicated than C arrays. Their properties are not guaranteed to all sit in one continuous memory block. V8 has JSObject, Properties, Elements, fast properties, and dictionary mode. The real implementation is more complex than “object base address plus offset.”</p>
 <p>But as a mental model, Hidden Class plus slot or offset is close to C&#x2F;C++ struct access:</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">User</span> &#123;</span><br><span class="line">  String* name; <span class="comment">// offset 0</span></span><br><span class="line">  <span class="type">int</span> age;      <span class="comment">// offset 8</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
@@ -430,23 +430,21 @@
 <p>The first time, you ask where the bathroom is. The second time, you remember. The third time, you walk there directly.</p>
 <p>But if you visit a different friend’s house every day, you cannot rely on the same memory.</p>
 <p>That is the intuition behind monomorphic, polymorphic, and megamorphic.</p>
-<h2 id="A-better-question-than-“is-JavaScript-interpreted-”"><a href="#A-better-question-than-“is-JavaScript-interpreted-”" class="headerlink" title="A better question than “is JavaScript interpreted?”"></a>A better question than “is JavaScript interpreted?”</h2><p>The useful takeaway from this relearning session was not memorizing the names Ignition and TurboFan.</p>
-<p>The useful part was changing the question:</p>
+<h2 id="A-better-question-than-“is-JavaScript-interpreted-”"><a href="#A-better-question-than-“is-JavaScript-interpreted-”" class="headerlink" title="A better question than “is JavaScript interpreted?”"></a>A better question than “is JavaScript interpreted?”</h2><p>The point of this note is not to memorize the names Ignition and TurboFan.</p>
+<p>The better question became:</p>
 <ul>
 <li>What information does the engine not know at startup?</li>
 <li>What does it learn after running the code?</li>
 <li>What assumptions does it make from that feedback?</li>
 <li>Does my code preserve or break those assumptions?</li>
 </ul>
-<p>That is more useful than arguing whether JavaScript is interpreted or compiled.</p>
+<p>That question is more useful than arguing whether JavaScript is interpreted or compiled.</p>
 <p>For interviews, this version is enough:</p>
 <blockquote>
 <p>Modern JavaScript is not simply line-by-line source interpretation. In V8, it usually goes through source code, AST, bytecode, type feedback, and JIT-optimized machine code. Bytecode gives fast startup and generic execution. TurboFan compiles hot code into faster machine code using runtime feedback. When type assumptions fail, the engine deopts back to a more generic path.</p>
 </blockquote>
-<p>For writing better frontend code, the next step is to ask why the engine is designed this way.</p>
-<p>Many advanced frontend topics eventually follow the same pattern: start with a generic path, use runtime information to optimize hot paths, and fall back when assumptions fail. You see versions of this in JavaScript engines, browser rendering, React, and server-side performance work.</p>
-<p>I started with a plain question: does JavaScript run after compilation now?</p>
-<p>Following that question led to compilers, runtime feedback, and optimization assumptions. That path was more useful than the label itself.</p>
+<p>For writing better frontend code, I care more about the habit behind it: where does the runtime start generic, what does it learn, and what kind of code makes those assumptions collapse?</p>
+<p>I started with a plain question about whether JavaScript is compiled now. The answer was less interesting than the path it opened: parser, bytecode, runtime feedback, optimized code, and deopt. That is usually where the better understanding starts.</p>
 
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>

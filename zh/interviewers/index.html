@@ -267,7 +267,7 @@
     <a href="/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/">Workspace V2 Tab System：把浏览器标签页带进工作空间</a>
   </h3>
   
-    <p class="post-card__summary">TL;DR：Workspace v2 需要在单页工作空间里做出接近浏览器的 tab 体验：多个业务对象同时保持打开，刷新和分享链接仍然能回到正确页面，hidden runtime 不能抢当前 tab 的 URL、弹层、事件和前台 CPU。它不是一排 tab UI，而是一套围绕 intent、URL、持久化 tab 状态、runtime...</p>
+    <p class="post-card__summary">Workspace v2 要做的不是多画一排 tab。用户会同时打开多个业务对象，刷新和分享链接还要回到正确页面；后台 runtime 不能偷偷改 URL、弹层、事件或前台 CPU。最后真正要解决的是 ownership：intent、URL、tab 状态、runtime cache、sandbox 副作用和渲染 frame 分别归谁管。...</p>
   
   
     <div class="tag-list" aria-label="Tags">
@@ -296,7 +296,7 @@
     <a href="/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/">Workspace V2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路</a>
   </h3>
   
-    <p class="post-card__summary">一次跨 Workspace shell 和多个子应用的性能系统设计：分离首屏、热切换和后台压力，用严格 profiling、E2E gate 和失败回滚证明收益。</p>
+    <p class="post-card__summary">一次 Workspace tab 性能复盘：把首屏、热切换、后台压力拆开测，用 profiling、E2E gate 和回滚记录挡住假收益。</p>
   
   
     <div class="tag-list" aria-label="Tags">
@@ -324,10 +324,10 @@
     
   </div>
   <h3 class="post-card__title">
-    <a href="/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/">全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计</a>
+    <a href="/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/">用 Harness 让 AI 做性能优化：Goal-Driven Loop 和 Ledger</a>
   </h3>
   
-    <p class="post-card__summary">TL;DR: 我做了一个性能优化 skill，让 AI Agent 执行真正的优化闭环，而不是只给出“可以试试懒加载”这类建议。核心是可度量的 harness、goal-driven loop，以及记录每个 baseline、修改点、严格对比和失败 round 的 ledger。在一次 Workspace 优化中，严格 profile 看到...</p>
+    <p class="post-card__summary">我做了一个性能优化 skill，把 AI Agent 从“可以试试懒加载”这类建议，拉进 harness、目标和 ledger 组成的循环里一轮轮跑。在一次 Workspace 优化里，strict profile 看到 Workstream 5089ms -&gt; 2519ms、Report Center 10021ms -&gt...</p>
   
   
     <div class="tag-list" aria-label="Tags">
@@ -446,8 +446,8 @@
     <div class="project-list">
       
         <article class="project-card">
-          <h3><a href="/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/">全自动 AI 性能优化：Harness、Goal-Driven Loop 与 Skill 设计</a></h3>
-          <p>TL;DR: 我做了一个性能优化 skill，让 AI Agent 执行真正的优化闭环，而不是只给出“可以试试懒加载”这类建议。核心是可度量的 harness、goal-driven loop，以及记录每个 baseline、修改点、严格对比和失败 round 的 ledger。在一次...</p>
+          <h3><a href="/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/">用 Harness 让 AI 做性能优化：Goal-Driven Loop 和 Ledger</a></h3>
+          <p>我做了一个性能优化 skill，把 AI Agent 从“可以试试懒加载”这类建议，拉进 harness、目标和 ledger 组成的循环里一轮轮跑。在一次 Workspace 优化里，strict profile 看到 Workstream 5089ms -&gt; 2519ms、Report...</p>
           <div class="tag-list">
             
               <span>前端</span>

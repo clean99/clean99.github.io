@@ -19,7 +19,7 @@
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/" />
   <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/" />
-  <meta name="description" content="今天重学 JavaScript 时，我问了一个看起来很基础的问题：JS 现在是不是大部分都是编译后运行的，包括浏览器宿主？ 这个问题有意思的地方不在答案是“是”还是“不是”，而在于它逼我把“编译”这两个字拆开。前端工程里说编译，可能是在说 TypeScript、Babel、SWC、esbuild；J">
+  <meta name="description" content="今天重学 JavaScript 时，我卡在一个看起来很基础的问题上：我们说 JS “运行”时，它到底已经被编译到了哪一步？ 真正有用的不是回答“是”或“不是”，而是把“编译”这两个字拆开。前端工程里说编译，通常是在说 TypeScript、Babel、SWC、esbuild；JS 引擎里说编译，说的">
   
   <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
   
@@ -43,14 +43,14 @@
   <meta property="og:title" content="JavaScript 的运行机制：从源码到 JIT 优化 | Koh Hom — Software, AI, and Inner Practice" />
   <meta property="og:locale" content="zh_CN" />
   <meta property="og:locale:alternate" content="en_US" />
-  <meta property="og:description" content="今天重学 JavaScript 时，我问了一个看起来很基础的问题：JS 现在是不是大部分都是编译后运行的，包括浏览器宿主？ 这个问题有意思的地方不在答案是“是”还是“不是”，而在于它逼我把“编译”这两个字拆开。前端工程里说编译，可能是在说 TypeScript、Babel、SWC、esbuild；J">
+  <meta property="og:description" content="今天重学 JavaScript 时，我卡在一个看起来很基础的问题上：我们说 JS “运行”时，它到底已经被编译到了哪一步？ 真正有用的不是回答“是”或“不是”，而是把“编译”这两个字拆开。前端工程里说编译，通常是在说 TypeScript、Babel、SWC、esbuild；JS 引擎里说编译，说的">
   <meta property="og:url" content="https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@Clean993">
   <meta name="twitter:creator" content="@Clean993">
   <meta name="twitter:title" content="JavaScript 的运行机制：从源码到 JIT 优化 | Koh Hom — Software, AI, and Inner Practice">
-  <meta name="twitter:description" content="今天重学 JavaScript 时，我问了一个看起来很基础的问题：JS 现在是不是大部分都是编译后运行的，包括浏览器宿主？ 这个问题有意思的地方不在答案是“是”还是“不是”，而在于它逼我把“编译”这两个字拆开。前端工程里说编译，可能是在说 TypeScript、Babel、SWC、esbuild；J">
+  <meta name="twitter:description" content="今天重学 JavaScript 时，我卡在一个看起来很基础的问题上：我们说 JS “运行”时，它到底已经被编译到了哪一步？ 真正有用的不是回答“是”或“不是”，而是把“编译”这两个字拆开。前端工程里说编译，通常是在说 TypeScript、Babel、SWC、esbuild；JS 引擎里说编译，说的">
   <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/" />
 
@@ -158,7 +158,7 @@
   <!-- JSON-LD Structured Data
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"JavaScript 的运行机制：从源码到 JIT 优化","datePublished":"2026-06-05T02:18:06.000Z","dateModified":"2026-06-05T02:18:06.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/","mainEntityOfPage":"https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/","inLanguage":"zh-CN","description":"今天重学 JavaScript 时，我问了一个看起来很基础的问题：JS 现在是不是大部分都是编译后运行的，包括浏览器宿主？ 这个问题有意思的地方不在答案是“是”还是“不是”，而在于它逼我把“编译”这两个字拆开。前端工程里说编译，可能是在说 TypeScript、Babel、SWC、esbuild；JS 引擎里说编译，说的是 parser、bytecode、JIT、optimized machine","keywords":["Frontend","Software Engineering","JavaScript"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"JavaScript 的运行机制：从源码到 JIT 优化","datePublished":"2026-06-05T02:18:06.000Z","dateModified":"2026-06-05T02:18:06.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/","mainEntityOfPage":"https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/","inLanguage":"zh-CN","description":"今天重学 JavaScript 时，我卡在一个看起来很基础的问题上：我们说 JS “运行”时，它到底已经被编译到了哪一步？ 真正有用的不是回答“是”或“不是”，而是把“编译”这两个字拆开。前端工程里说编译，通常是在说 TypeScript、Babel、SWC、esbuild；JS 引擎里说编译，说的是 parser、bytecode、JIT、optimized machine code。同一个词，","keywords":["Frontend","Software Engineering","JavaScript"]}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"JavaScript 的运行机制：从源码到 JIT 优化","item":"https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/"}]}</script>
   
 
@@ -263,8 +263,8 @@
       <meta itemprop="dateModified" content="2026-06-05T02:18:06.000Z">
     </header>
     <div itemprop="articleBody">
-      <p>今天重学 JavaScript 时，我问了一个看起来很基础的问题：JS 现在是不是大部分都是编译后运行的，包括浏览器宿主？</p>
-<p>这个问题有意思的地方不在答案是“是”还是“不是”，而在于它逼我把“编译”这两个字拆开。前端工程里说编译，可能是在说 TypeScript、Babel、SWC、esbuild；JS 引擎里说编译，说的是 parser、bytecode、JIT、optimized machine code。它们不是一回事。</p>
+      <p>今天重学 JavaScript 时，我卡在一个看起来很基础的问题上：我们说 JS “运行”时，它到底已经被编译到了哪一步？</p>
+<p>真正有用的不是回答“是”或“不是”，而是把“编译”这两个字拆开。前端工程里说编译，通常是在说 TypeScript、Babel、SWC、esbuild；JS 引擎里说编译，说的是 parser、bytecode、JIT、optimized machine code。同一个词，站的位置不同，意思就变了。</p>
 <p><img src="/img/js-jit-runtime/javascript-execution-pipeline.png" alt="Modern JavaScript execution pipeline"></p>
 <p>图：现代 JavaScript 在 V8 里的大致执行路径。源码先变成 AST 和 bytecode，运行时收集类型反馈，热点代码再由 TurboFan 编译成优化机器码。generated by gpt-image-2.</p>
 <h2 id="前端平时说的编译，浏览器其实不关心"><a href="#前端平时说的编译，浏览器其实不关心" class="headerlink" title="前端平时说的编译，浏览器其实不关心"></a>前端平时说的编译，浏览器其实不关心</h2><p>我们最熟的编译发生在 build time。</p>
@@ -430,7 +430,7 @@
 <p>第一次去，要问在哪。第二次去，记住了。第三次去，直接走过去。</p>
 <p>但如果你每天去的都是不同朋友家，就永远别想闭着眼找到。</p>
 <p>这就是 monomorphic、polymorphic、megamorphic 背后的直觉。</p>
-<h2 id="重新看“JS-是解释型语言”"><a href="#重新看“JS-是解释型语言”" class="headerlink" title="重新看“JS 是解释型语言”"></a>重新看“JS 是解释型语言”</h2><p>这次重学最大的收获，不是背下 Ignition 和 TurboFan 的名字。</p>
+<h2 id="重新看“JS-是解释型语言”"><a href="#重新看“JS-是解释型语言”" class="headerlink" title="重新看“JS 是解释型语言”"></a>重新看“JS 是解释型语言”</h2><p>这次重学的重点，不是背下 Ignition 和 TurboFan 的名字。</p>
 <p>真正有价值的是换了一个问法：</p>
 <ul>
 <li>引擎在什么时候不知道信息？</li>
@@ -438,16 +438,13 @@
 <li>它基于这些信息做了什么假设？</li>
 <li>我的代码会不会破坏这个假设？</li>
 </ul>
-<p>这比简单说“JS 是解释型语言”或者“JS 是编译型语言”更有用。</p>
+<p>这比简单争“JS 是解释型语言”还是“编译型语言”更有用。</p>
 <p>如果只为了面试，可以记这个版本：</p>
 <blockquote>
 <p>现代 JavaScript 不是传统意义上的逐行解释执行。在 V8 里，它通常会经历源码、AST、Bytecode、类型反馈和 JIT 优化机器码。Bytecode 负责快速启动和通用执行；TurboFan 负责把热点代码按运行时反馈编译成更快的机器码；当类型假设失败时，引擎会 deopt 回到更通用的路径。</p>
 </blockquote>
-<p>如果为了写更好的前端代码，我觉得还可以再往前走一步：</p>
-<p>不要只记结论。多问一层“为什么引擎要这样设计”。</p>
-<p>很多高级前端知识最后都会回到这个模式：先用通用路径跑起来，再用运行时信息优化热路径，发现假设错了就回退。React、浏览器渲染、JS 引擎、服务端性能优化，其实都有类似的味道。</p>
-<p>我今天只是从一个很朴素的问题开始：JS 现在是不是编译后运行？</p>
-<p>结果顺着它挖下去，挖到了编译器、运行时反馈和优化假设。这个过程比答案本身更值钱。</p>
+<p>如果是为了写更好的前端代码，我更在意背后的习惯：运行时什么时候只能走通用路径？它跑了一会儿之后学到了什么？我的代码会不会让这些假设失效？</p>
+<p>我一开始只是想问：JS 现在算不算编译后运行？最后挖到的是 parser、bytecode、类型反馈、优化机器码和 deopt。这个过程比标签本身更有用。</p>
 
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
