@@ -1,6 +1,6 @@
 ---
 name: blog-publishing-pipeline
-description: Create, optimize, review, and publish bilingual Hexo blog posts in this repository. Use when the user asks to write a blog post, process raw article notes, convert source material into a reader-facing article, optimize an existing post, create Chinese/English paired posts, add images, or publish a post to the Hexo blog.
+description: Create, optimize, review, humanize, and publish bilingual Hexo blog posts in this repository. Use when the user asks to write a blog post, process raw article notes, convert source material into a reader-facing article, optimize an existing post, create Chinese/English paired posts, add images, or publish a post to the Hexo blog. Always pair this workflow with the humanizer skill for English drafts and humanizer-zh for Chinese drafts before publishing.
 ---
 
 # Blog Publishing Pipeline
@@ -25,6 +25,24 @@ Use this skill for blog work in this Hexo repository. The goal is to turn source
 - Avoid AI-smelling emotional titles such as "我才意识到", "原来", "竟然", "早就不只是", "一文搞懂", "彻底搞懂", or titles that dramatize an ordinary learning note.
 - For daily learning notes, use plain titles like `JavaScript 的运行机制：从源码到 JIT 优化` instead of over-selling the author's realization.
 - Keep curiosity in the argument, not in clickbait phrasing.
+
+## Human Voice Contract
+
+Every blog draft must go through the relevant humanizer pass before it is considered publishable:
+
+- Use `humanizer` for English posts.
+- Use `humanizer-zh` for Chinese posts.
+- Use both for bilingual posts, after translation and again during final review if the draft changed materially.
+
+The humanizer pass is not a light synonym rewrite. It should remove AI-smelling structure and restore a human technical voice:
+
+- Prefer direct titles over realization/clickbait titles.
+- Replace TL;DR boxes with a normal opening paragraph unless the user explicitly asks for a TL;DR.
+- Remove negative parallelisms such as "not just X, but Y" / "不只是 X，而是 Y" when a direct sentence works.
+- Delete inflated significance words, generic conclusions, filler transitions, and forced three-part summaries.
+- Keep first-person when the article is a learning note or field report; keep it sparse for architecture docs.
+- Preserve proof, numbers, code, tables, and technical claims. Humanizing must not weaken evidence.
+- After editing, ask: "What still makes this sound AI-written?" Fix those remaining tells before publishing.
 
 English:
 
@@ -70,7 +88,7 @@ permalink: zh/YYYY/MM/DD/Full-English-Title/
    - Convert source-material provenance into reader-facing substance: mechanism, evidence, failure modes, and reusable steps.
    - Avoid titles and first-screen copy that say "public version", "sanitized", or "internal version"; readers care about the problem and the takeaway.
 4. Write the source-language post first:
-   - Start with a 2-4 sentence `TL;DR`.
+   - Start with a direct 2-4 sentence opening that states the problem, question, or result.
    - Use a clear intro, technical body, and conclusion.
    - Prefer concrete tables and diagrams over long narrative.
    - Explain terms naturally when they matter, without turning the post into a glossary.
@@ -78,6 +96,7 @@ permalink: zh/YYYY/MM/DD/Full-English-Title/
    - Translate naturally, not word-for-word.
    - Keep headings, image references, tables, and code blocks aligned.
    - Keep technical terms consistent across both versions.
+   - Run `humanizer` on the English version and `humanizer-zh` on the Chinese version. Translation alone is not enough.
 6. Add visuals:
    - Use Mermaid for architecture/flow diagrams when static diagrams are enough.
    - Use image files only when the post benefits from real visual evidence or generated illustrations.
@@ -95,6 +114,8 @@ permalink: zh/YYYY/MM/DD/Full-English-Title/
    - Valid YAML frontmatter.
    - No broken markdown tables or code fences.
    - No private tokens, cookies, raw log IDs, or unrelated internal details.
+   - The relevant humanizer pass has been applied after the last material prose change.
+   - Titles, summaries, first paragraphs, headings, and conclusions do not read like AI-generated copy.
    - The first viewport should explain the reader value, not the drafting or cleanup process.
    - If the article depends on business context unfamiliar to public readers, the first viewport includes a product or scenario visual, not only architecture or metric diagrams.
    - If adapting a skill/workflow, the article should teach the workflow's control loop and proof rules before showing long code blocks.
