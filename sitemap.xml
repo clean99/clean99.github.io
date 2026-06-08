@@ -11,6 +11,24 @@
   </url>
   
   <url>
+    <loc>https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/</loc>
+    
+    <lastmod>2026-06-08</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/</loc>
+    
+    <lastmod>2026-06-08</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/</loc>
     
     <lastmod>2026-06-05</lastmod>
@@ -47,7 +65,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/projects/</loc>
+    <loc>https://clean99.github.io/writing/</loc>
     
     <lastmod>2026-05-19</lastmod>
     
@@ -56,7 +74,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/writing/</loc>
+    <loc>https://clean99.github.io/projects/</loc>
     
     <lastmod>2026-05-19</lastmod>
     
@@ -173,7 +191,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
+    <loc>https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
     
     <lastmod>2026-03-18</lastmod>
     
@@ -182,7 +200,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
+    <loc>https://clean99.github.io/zh/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
     
     <lastmod>2026-03-18</lastmod>
     
@@ -299,15 +317,6 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://clean99.github.io/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/</loc>
     
     <lastmod>2024-04-10</lastmod>
@@ -317,7 +326,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2024/04/10/Web-Performance-Optimization/</loc>
+    <loc>https://clean99.github.io/zh/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/</loc>
     
     <lastmod>2024-04-10</lastmod>
     
@@ -327,6 +336,15 @@
   
   <url>
     <loc>https://clean99.github.io/zh/2024/04/10/Web-Performance-Optimization/</loc>
+    
+    <lastmod>2024-04-10</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/2024/04/10/Web-Performance-Optimization/</loc>
     
     <lastmod>2024-04-10</lastmod>
     
@@ -461,7 +479,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/</loc>
+    <loc>https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/</loc>
     
     <lastmod>2022-08-18</lastmod>
     
@@ -470,7 +488,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/</loc>
+    <loc>https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/</loc>
     
     <lastmod>2022-08-18</lastmod>
     
@@ -569,7 +587,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
+    <loc>https://clean99.github.io/zh/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
     
     <lastmod>2022-04-24</lastmod>
     
@@ -578,7 +596,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
+    <loc>https://clean99.github.io/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
     
     <lastmod>2022-04-24</lastmod>
     
@@ -814,14 +832,14 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/tags/React/</loc>
+    <loc>https://clean99.github.io/tags/JavaScript/</loc>
     <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
-    <loc>https://clean99.github.io/tags/JavaScript/</loc>
+    <loc>https://clean99.github.io/tags/React/</loc>
     <lastmod>2026-06-08</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

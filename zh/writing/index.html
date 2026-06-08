@@ -273,6 +273,35 @@
             
 <article class="post-card">
   <div class="post-card__meta">
+    <time datetime="2026-06-08T07:48:00.000Z">Jun 8, 2026</time>
+    <span class="pill">工程</span>
+    
+      <span>2 分钟阅读</span>
+    
+  </div>
+  <h3 class="post-card__title">
+    <a href="/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/">JavaScript GC 机制：分代、宿主和常见泄漏</a>
+  </h3>
+  
+    <p class="post-card__summary">今天继续补 JavaScript 运行机制时，我发现 GC 很容易被说成一句空话：对象不用了，引擎会自动回收。 这句话没错，但太粗。真正有用的理解是：GC 回收的是从 roots 不可达的对象；新生代和老生代用的策略不同；同一套 JS 引擎放进浏览器和 Node，最容易出问题的地方也不一样。 图：以 V8 为例，GC 从...</p>
+  
+  
+    <div class="tag-list" aria-label="Tags">
+      
+        <span>前端</span>
+      
+        <span>软件工程</span>
+      
+        <span>JavaScript</span>
+      
+    </div>
+  
+</article>
+
+          
+            
+<article class="post-card">
+  <div class="post-card__meta">
     <time datetime="2026-06-05T02:18:06.000Z">Jun 5, 2026</time>
     <span class="pill">工程</span>
     
@@ -404,35 +433,6 @@
   </h3>
   
     <p class="post-card__summary">优化 React 应用的性能，主要有两个方向： 渲染（Rendering）：渲染过程是 React 应用中开销最大的部分之一（包含 Diff 计算）。 计算（Calculation）：受限于浏览器的有限资源，浏览器并不适合执行重计算任务。 渲染React.memo当一个组件重新渲染时，无论父组件传给子组件的 props...</p>
-  
-  
-    <div class="tag-list" aria-label="Tags">
-      
-        <span>前端</span>
-      
-        <span>软件工程</span>
-      
-        <span>React</span>
-      
-    </div>
-  
-</article>
-
-          
-            
-<article class="post-card">
-  <div class="post-card__meta">
-    <time datetime="2024-04-10T10:51:00.000Z">Apr 10, 2024</time>
-    <span class="pill">工程</span>
-    
-      <span>12 分钟阅读</span>
-    
-  </div>
-  <h3 class="post-card__title">
-    <a href="/zh/2024/04/10/React-Server-Component-Internals/">React 服务器组件内部原理（源码解析）</a>
-  </h3>
-  
-    <p class="post-card__summary">什么是 React 服务器组件（RSC）？React 服务器组件是 React 的一项新特性，它允许服务端与客户端（浏览器）协同渲染 React 应用。简而言之，它将部分渲染工作移交给服务端，以提升整体性能。 React 元素树的典型构建流程为了更好地理解为什么需要将渲染工作移到服务端，让我们先看看客户端渲染是如何构建 React 元素树（JSX）的：...</p>
   
   
     <div class="tag-list" aria-label="Tags">
@@ -760,6 +760,12 @@
       <h2 id="all-posts-title">全部文章</h2>
     </div>
     <div class="archive-list">
+      
+        <div class="archive-list__item">
+          <time datetime="2026-06-08T07:48:00.000Z">Jun 8, 2026</time>
+          <span class="pill">工程</span>
+          <a href="/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/">JavaScript GC 机制：分代、宿主和常见泄漏</a>
+        </div>
       
         <div class="archive-list__item">
           <time datetime="2026-06-05T02:18:06.000Z">Jun 5, 2026</time>
