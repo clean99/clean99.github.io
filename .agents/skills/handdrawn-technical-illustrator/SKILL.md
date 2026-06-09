@@ -139,6 +139,25 @@ Style constraints:
 - 16:9 aspect ratio
 ```
 
+## Reviewing Existing AI Images
+
+When asked to clean up old blog images, audit the image's job before regenerating it.
+
+Replace images when:
+
+- The image is a mechanism or architecture explanation and uses a generic slide/PPT template style.
+- The image is a broken generated SVG, garbled typography, or an unreadable AI artifact.
+- The image explains a product workflow but does not orient a public reader to the product shape.
+- The image contains dense labels that make the article harder to scan than the prose.
+
+Keep images when:
+
+- The image is evidence, such as a before/after waterfall, trace, benchmark chart, or real measurement output.
+- The image is a screenshot used as source evidence rather than a conceptual illustration.
+- Exact UI fidelity matters more than an approachable sketch.
+
+For mixed articles, use hand-drawn diagrams for mental models and keep measurement charts as evidence. Do not turn proof artifacts into decorative illustrations.
+
 ## Caption Pattern
 
 Use captions like:
