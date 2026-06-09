@@ -16,14 +16,20 @@
     failed: '加载失败',
     files: '配置文件',
     skills: 'Skills',
-    redacted: '已脱敏',
+    redacted: '脱敏内容',
     indexed: '已索引',
     noResults: '没有匹配的公开条目。',
-    redactedBadge: '已脱敏',
+    redactedBadge: '脱敏内容',
     publicBadge: '公开摘要',
     bytes: '字节',
     policy: '脱敏策略',
-    source: '来源'
+    source: '来源',
+    category: '类别',
+    path: '路径',
+    size: '大小',
+    open: '查看内容',
+    content: '内容预览',
+    close: '关闭'
   } : {
     loading: 'Loading',
     ready: 'Synced',
@@ -31,14 +37,20 @@
     failed: 'Load failed',
     files: 'Config files',
     skills: 'Skills',
-    redacted: 'Redacted',
+    redacted: 'Sanitized',
     indexed: 'Indexed',
     noResults: 'No public entries match this filter.',
-    redactedBadge: 'Redacted',
+    redactedBadge: 'Sanitized',
     publicBadge: 'Public summary',
     bytes: 'bytes',
     policy: 'Redaction policy',
-    source: 'Source'
+    source: 'Source',
+    category: 'Category',
+    path: 'Path',
+    size: 'Size',
+    open: 'View content',
+    content: 'Content preview',
+    close: 'Close'
   };
 
   var statusEl = document.getElementById('aiCatalogStatus');
@@ -48,6 +60,7 @@
   var itemsEl = document.getElementById('aiCatalogItems');
   var searchEl = document.getElementById('aiCatalogSearch');
   var filterButtons = Array.prototype.slice.call(root.querySelectorAll('[data-filter]'));
+  var detailDialog = createDetailDialog();
 
   function setText(el, value) {
     if (el) el.textContent = value;
@@ -82,9 +95,96 @@
       item.description,
       item.category,
       item.source,
-      item.path
+      item.path,
+      item.content
     ].join(' ').toLowerCase();
     return haystack.indexOf(state.query) >= 0;
+  }
+
+  function createDetailDialog() {
+    var dialog = document.createElement('dialog');
+    dialog.className = 'ai-lab__dialog';
+
+    var panel = document.createElement('div');
+    panel.className = 'ai-lab__dialog-panel';
+
+    var head = document.createElement('div');
+    head.className = 'ai-lab__dialog-head';
+
+    var titleWrap = document.createElement('div');
+    var kind = document.createElement('span');
+    kind.className = 'ai-lab__kind';
+    var title = document.createElement('h2');
+    title.id = 'aiCatalogDetailTitle';
+    titleWrap.append(kind, title);
+
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'ai-lab__dialog-close';
+    close.textContent = copy.close;
+    close.addEventListener('click', function() {
+      closeDetailDialog();
+    });
+
+    head.append(titleWrap, close);
+
+    var meta = document.createElement('dl');
+    meta.className = 'ai-lab__dialog-meta';
+
+    var contentLabel = document.createElement('strong');
+    contentLabel.className = 'ai-lab__dialog-label';
+    contentLabel.textContent = copy.content;
+
+    var pre = document.createElement('pre');
+    pre.className = 'ai-lab__dialog-content';
+
+    panel.append(head, meta, contentLabel, pre);
+    dialog.appendChild(panel);
+    dialog.setAttribute('aria-labelledby', title.id);
+    root.appendChild(dialog);
+
+    return {
+      node: dialog,
+      kind: kind,
+      title: title,
+      meta: meta,
+      pre: pre,
+      close: close
+    };
+  }
+
+  function closeDetailDialog() {
+    if (typeof detailDialog.node.close === 'function' && detailDialog.node.open) {
+      detailDialog.node.close();
+      return;
+    }
+    detailDialog.node.removeAttribute('open');
+  }
+
+  function openDetailDialog(item) {
+    detailDialog.kind.textContent = item.kind === 'skill' ? copy.skills : copy.files;
+    detailDialog.title.textContent = item.name;
+    detailDialog.meta.replaceChildren.apply(detailDialog.meta, [
+      [copy.category, item.category],
+      [copy.source, item.source],
+      [copy.path, item.path],
+      [copy.size, formatSize(item.size)]
+    ].map(function(pair) {
+      var group = document.createElement('div');
+      var dt = document.createElement('dt');
+      dt.textContent = pair[0];
+      var dd = document.createElement('dd');
+      dd.textContent = pair[1];
+      group.append(dt, dd);
+      return group;
+    }));
+    detailDialog.pre.textContent = item.content || item.description || '';
+    if (typeof detailDialog.node.showModal === 'function') {
+      detailDialog.node.showModal();
+    } else {
+      detailDialog.node.setAttribute('open', '');
+    }
+    detailDialog.close.focus();
   }
 
   function filteredItems() {
@@ -134,6 +234,14 @@
     var article = document.createElement('article');
     article.className = 'ai-lab__item';
 
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'ai-lab__item-button';
+    button.setAttribute('aria-label', copy.open + ': ' + item.name);
+    button.addEventListener('click', function() {
+      openDetailDialog(item);
+    });
+
     var top = document.createElement('div');
     top.className = 'ai-lab__item-top';
 
@@ -157,10 +265,10 @@
     var meta = document.createElement('dl');
     meta.className = 'ai-lab__item-meta';
     [
-      ['Category', item.category],
+      [copy.category, item.category],
       [copy.source, item.source],
-      ['Path', item.path],
-      ['Size', formatSize(item.size)]
+      [copy.path, item.path],
+      [copy.size, formatSize(item.size)]
     ].forEach(function(pair) {
       var group = document.createElement('div');
       var dt = document.createElement('dt');
@@ -171,7 +279,12 @@
       meta.appendChild(group);
     });
 
-    article.append(top, description, meta);
+    var cta = document.createElement('span');
+    cta.className = 'ai-lab__item-cta';
+    cta.textContent = copy.open;
+
+    button.append(top, description, meta, cta);
+    article.appendChild(button);
     return article;
   }
 
@@ -231,6 +344,10 @@
       });
       renderItems();
     });
+  });
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') closeDetailDialog();
   });
 
   loadCatalog();

@@ -33,9 +33,9 @@
   <meta property="article:modified_time" content="2026-06-08T07:48:00.000Z" />
   <meta property="article:author" content="Koh Hom" />
   
-  <meta property="article:tag" content="Frontend" />
-  
   <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="Frontend" />
   
   <meta property="article:tag" content="JavaScript" />
   
@@ -159,7 +159,7 @@
   <!-- JSON-LD Structured Data
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"JavaScript GC 机制：分代、宿主和常见泄漏","datePublished":"2026-06-08T07:48:00.000Z","dateModified":"2026-06-08T07:48:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/","mainEntityOfPage":"https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/","inLanguage":"zh-CN","description":"今天继续补 JavaScript 运行机制时，我发现 GC 很容易被说成一句空话：对象不用了，引擎会自动回收。 这句话没错，但太粗。真正有用的理解是：GC 回收的是从 roots 不可达的对象；新生代和老生代用的策略不同；同一套 JS 引擎放进浏览器和 Node，最容易出问题的地方也不一样。 图：以 V8 为例，GC 从 stack、global、closure 等 roots 出发追踪可达对象。","keywords":["Frontend","Software Engineering","JavaScript"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"JavaScript GC 机制：分代、宿主和常见泄漏","datePublished":"2026-06-08T07:48:00.000Z","dateModified":"2026-06-08T07:48:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/","mainEntityOfPage":"https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/","inLanguage":"zh-CN","description":"今天继续补 JavaScript 运行机制时，我发现 GC 很容易被说成一句空话：对象不用了，引擎会自动回收。 这句话没错，但太粗。真正有用的理解是：GC 回收的是从 roots 不可达的对象；新生代和老生代用的策略不同；同一套 JS 引擎放进浏览器和 Node，最容易出问题的地方也不一样。 图：以 V8 为例，GC 从 stack、global、closure 等 roots 出发追踪可达对象。","keywords":["Software Engineering","Frontend","JavaScript"]}</script>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"JavaScript GC 机制：分代、宿主和常见泄漏","item":"https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/"}]}</script>
   
 

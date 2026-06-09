@@ -63,35 +63,6 @@ body.darkmode .ai-lab {
   line-height: 1.7;
 }
 
-.ai-lab__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.ai-lab__button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.8rem;
-  min-height: 4rem;
-  padding: 0.7rem 1.2rem;
-  border: 1px solid var(--lab-ink);
-  border-radius: 4px;
-  background: var(--lab-ink);
-  color: var(--lab-paper);
-  font-family: "Inter", "Helvetica Neue", sans-serif;
-  font-size: 1.34rem;
-  text-decoration: none;
-}
-
-.ai-lab__button:hover,
-.ai-lab__button:focus {
-  background: var(--lab-orange);
-  border-color: var(--lab-orange);
-  color: #fffefa;
-}
-
 .ai-lab__schematic {
   display: grid;
   align-content: start;
@@ -323,10 +294,37 @@ body.darkmode .ai-lab__node {
 }
 
 .ai-lab__item {
+  min-height: 24rem;
+  overflow: hidden;
+}
+
+.ai-lab .ai-lab__item-button {
   display: grid;
   gap: 1.1rem;
+  align-content: start;
+  width: 100%;
   min-height: 24rem;
+  margin: 0;
   padding: 1.2rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.ai-lab .ai-lab__item-button:hover,
+.ai-lab .ai-lab__item-button:focus {
+  background: rgba(23, 106, 138, 0.07);
+  outline: none;
+}
+
+.ai-lab .ai-lab__item-button:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--lab-blue);
 }
 
 .ai-lab__item-top {
@@ -397,6 +395,98 @@ body.darkmode .ai-lab__node {
   font-size: 1.1rem;
 }
 
+.ai-lab__item-cta {
+  align-self: end;
+  color: var(--lab-blue);
+  font-family: "Inter", "Helvetica Neue", sans-serif;
+  font-size: 1.08rem;
+  text-transform: uppercase;
+}
+
+.ai-lab__dialog {
+  width: min(920px, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  max-height: min(82vh, 820px);
+  padding: 0;
+  border: 1px solid var(--lab-line);
+  border-radius: 8px;
+  background: var(--lab-panel);
+  color: var(--lab-ink);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+}
+
+.ai-lab__dialog::backdrop {
+  background: rgba(23, 23, 21, 0.52);
+}
+
+.ai-lab__dialog-panel {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  max-height: min(82vh, 820px);
+}
+
+.ai-lab__dialog-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.3rem 1.3rem 1rem;
+  border-bottom: 1px solid var(--lab-line);
+}
+
+.ai-lab__dialog h2 {
+  margin: 0.2rem 0 0;
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 2.4rem;
+  line-height: 1.1;
+}
+
+.ai-lab .ai-lab__dialog-close {
+  flex: 0 0 auto;
+  height: 3.2rem;
+  margin: 0;
+  padding: 0 1rem;
+  border: 1px solid var(--lab-line);
+  border-radius: 6px;
+  background: var(--lab-panel);
+  color: var(--lab-ink);
+  font-family: "Inter", "Helvetica Neue", sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0;
+}
+
+.ai-lab__dialog-meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 0;
+  padding: 1rem 1.3rem;
+  border-bottom: 1px solid var(--lab-line);
+}
+
+.ai-lab__dialog-meta div {
+  min-width: 0;
+}
+
+.ai-lab__dialog-label {
+  padding: 0.9rem 1.3rem 0.5rem;
+  color: var(--lab-blue);
+  font-family: "Inter", "Helvetica Neue", sans-serif;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+}
+
+.ai-lab__dialog-content {
+  min-height: 18rem;
+  margin: 0;
+  padding: 0 1.3rem 1.3rem;
+  overflow: auto;
+  color: var(--lab-ink);
+  font-family: Menlo, Consolas, monospace;
+  font-size: 1.08rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
 .ai-lab__empty {
   grid-column: 1 / -1;
   margin: 0;
@@ -413,7 +503,8 @@ body.darkmode .ai-lab__node {
   .ai-lab__statement,
   .ai-lab__controls,
   .ai-lab__catalog,
-  .ai-lab__policy {
+  .ai-lab__policy,
+  .ai-lab__dialog-meta {
     grid-template-columns: 1fr;
   }
 

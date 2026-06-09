@@ -19,7 +19,7 @@
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/ai-coding-lab/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/ai-coding-lab/" />
   <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/ai-coding-lab/" />
-  <meta name="description" content="自动生成、已脱敏的 AI 编程 skills 与配置公开目录。">
+  <meta name="description" content="我创建的 AI coding skills 与关键 agent 配置，自动生成、实时同步并脱敏展示。">
   
   <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
   
@@ -33,14 +33,14 @@
   <meta property="og:title" content="AI Coding Skills | Koh Hom — Software, AI, and Inner Practice" />
   <meta property="og:locale" content="zh_CN" />
   <meta property="og:locale:alternate" content="en_US" />
-  <meta property="og:description" content="自动生成、已脱敏的 AI 编程 skills 与配置公开目录。">
+  <meta property="og:description" content="我创建的 AI coding skills 与关键 agent 配置，自动生成、实时同步并脱敏展示。">
   <meta property="og:url" content="https://clean99.github.io/zh/ai-coding-lab/" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@Clean993">
   <meta name="twitter:creator" content="@Clean993">
   <meta name="twitter:title" content="AI Coding Skills | Koh Hom — Software, AI, and Inner Practice">
-  <meta name="twitter:description" content="自动生成、已脱敏的 AI 编程 skills 与配置公开目录。">
+  <meta name="twitter:description" content="我创建的 AI coding skills 与关键 agent 配置，自动生成、实时同步并脱敏展示。">
   <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/ai-coding-lab/" />
 
@@ -260,30 +260,24 @@
     <div class="ai-lab__hero-copy">
       <p class="eyebrow">公开 Agent 工作台</p>
       <h1>AI Coding Skills</h1>
-      <p>这是我公开展示的 AI 编程配置与技能目录。它来自 setup 仓库的自动生成结果，只发布摘要和脱敏后的结构信息。</p>
-      <div class="ai-lab__actions">
-        <a class="ai-lab__button" href="https://github.com/clean99/codex-setup" target="_blank" rel="noreferrer">
-          <span aria-hidden="true">↗</span>
-          <span>打开仓库</span>
-        </a>
-      </div>
+      <p>我创建的 AI coding skills 会从私有 setup 仓库实时生成并同步到这里。页面只展示自建 skills 和关键 agent 配置的脱敏公开内容。</p>
     </div>
 
     <div class="ai-lab__schematic" aria-label="更新流水线">
       
         <div class="ai-lab__node">
           <span>01</span>
-          <strong>拉取 setup 仓库</strong>
+          <strong>监听 setup 更新</strong>
         </div>
       
         <div class="ai-lab__node">
           <span>02</span>
-          <strong>提取 skills 与配置摘要</strong>
+          <strong>筛选自建 skills 与 agent 配置</strong>
         </div>
       
         <div class="ai-lab__node">
           <span>03</span>
-          <strong>统一脱敏并扫描</strong>
+          <strong>生成脱敏内容预览</strong>
         </div>
       
         <div class="ai-lab__node">
@@ -297,7 +291,7 @@
   <section class="ai-lab__statement">
     <div>
       <p class="eyebrow">作者声明</p>
-      <p>这些配置和技能是我的日常工作流样本。页面不会发布原始提示词、密钥、内部平台细节或个人路径；内部信息会在生成阶段被替换为公开安全描述。</p>
+      <p>这些 skills 和配置是我的日常 AI 编程工作流样本。页面不会发布密钥、内部平台细节、个人路径或私有仓库入口；可点击内容已在生成阶段脱敏。</p>
     </div>
     <dl class="ai-lab__meta">
       <div>
@@ -319,14 +313,14 @@
 
   <section class="ai-lab__controls" aria-label="筛选目录">
     <label class="ai-lab__search">
-      <span>搜索 skills、类别或路径</span>
+      <span>搜索 skills、配置、类别或内容</span>
       <input id="aiCatalogSearch" type="search" autocomplete="off" />
     </label>
     <div class="ai-lab__filters" role="group" aria-label="筛选目录">
       <button type="button" class="is-active" data-filter="all">全部</button>
       <button type="button" data-filter="skill">Skills</button>
       <button type="button" data-filter="file">配置文件</button>
-      <button type="button" data-filter="redacted">已脱敏</button>
+      <button type="button" data-filter="redacted">脱敏内容</button>
     </div>
   </section>
 
