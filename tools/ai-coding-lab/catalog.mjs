@@ -4,17 +4,15 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 const DEFAULT_SOURCE_DIR = '/Users/bytedance/Documents/codex-setup';
-const SKILL_PATH_MARKERS = [
-  'home/.codex/skills',
-  'home/.agents/skills'
-];
+const PUBLIC_SKILL_ROOT = 'home/.codex/skills/';
+const MAX_PUBLIC_CONTENT_LENGTH = 12000;
 
 const PUBLIC_FILE_RULES = [
   {
-    path: 'README.md',
-    type: 'repository',
-    title: 'Portable setup README',
-    summary: 'A public overview of what the portable agent setup includes and excludes.'
+    path: 'AGENTS.md',
+    type: 'agent policy',
+    title: 'Setup repository agent rules',
+    summary: 'Repository-level rules for keeping the portable agent setup reproducible.'
   },
   {
     path: 'home/.codex/AGENTS.md',
@@ -23,10 +21,10 @@ const PUBLIC_FILE_RULES = [
     summary: 'Long-running behavior, engineering standards, and verification expectations.'
   },
   {
-    path: 'home/.codex/CLAUDE.md',
+    path: 'home/.codex/projects/personal_blog/AGENTS.md',
     type: 'agent policy',
-    title: 'Companion agent instructions',
-    summary: 'Shared operating rules for another local coding assistant.'
+    title: 'Blog project memory',
+    summary: 'Project-specific operating notes that help the agent work on this blog consistently.'
   },
   {
     path: 'home/.codex/config.toml',
@@ -35,21 +33,16 @@ const PUBLIC_FILE_RULES = [
     summary: 'Model, shell, and tool configuration with secrets removed before publication.'
   },
   {
-    path: 'home/.codex/hooks.json',
-    type: 'automation',
-    title: 'Hook registry',
-    summary: 'Local event hooks that connect agent work to automation and observability.'
-  },
-  {
-    path: 'home/.agents/.skill-lock.json',
-    type: 'inventory',
-    title: 'Skill lockfile',
-    summary: 'Pinned skill inventory for reproducible setup on another machine.'
+    path: 'home/.codex/prompts/claude-code.md',
+    type: 'prompt',
+    title: 'Delegation prompt',
+    summary: 'A reusable prompt that routes bounded work to a companion coding assistant.'
   }
 ];
 
 const INTERNAL_TERMS = [
   'bytedance',
+  'byted',
   'bytedcli',
   'bytecloud',
   'byteintl',
@@ -101,12 +94,15 @@ const SECRET_RE = /\b(api[_-]?key|token|secret|password|credential|private[_-]?k
 const SECRET_TEST_RE = /\b(api[_-]?key|token|secret|password|credential|private[_-]?key)\b\s*[:=]\s*("[^"\n]*"|'[^'\n]*'|[^\s,\]}]+)/i;
 const EMAIL_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
 const EMAIL_TEST_RE = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i;
-const HOME_PATH_RE = /(?:\/Users\/[^\s"'`),]+|__HOME__)(?:\/[^\s"'`),]*)?/g;
+const USER_HOME_RE = /\/Users\/[^/\s"'`),]+/g;
+const HOME_PLACEHOLDER_RE = /__HOME__/g;
 const INTERNAL_COMPOUND_RE = /\b(?:US[-_]?TTP\d*|ppe[_-]?workspace[_-]?annexc|om[-_]?workspace)\b/gi;
 const INTERNAL_COMPOUND_TEST_RE = /\b(?:US[-_]?TTP\d*|ppe[_-]?workspace[_-]?annexc|om[-_]?workspace)\b/i;
-const INTERNAL_URL_RE = /https?:\/\/[^\s"'<>)]*(?:corp|internal|bytedance|bytecloud|feishu|lark|slardar|tika|goofy|argos|meego)[^\s"'<>)]*/gi;
-const INTERNAL_URL_TEST_RE = /https?:\/\/[^\s"'<>)]*(?:corp|internal|bytedance|bytecloud|feishu|lark|slardar|tika|goofy|argos|meego)[^\s"'<>)]*/i;
-const LONG_SECRETISH_RE = /\b[A-Za-z0-9_\/+=.-]{40,}\b/g;
+const INTERNAL_URL_RE = /https?:\/\/[^\s"'<>)]*(?:corp|internal|bytedance|byted|bytecloud|feishu|lark|slardar|tika|goofy|argos|meego|bnpm)[^\s"'<>)]*/gi;
+const INTERNAL_URL_TEST_RE = /https?:\/\/[^\s"'<>)]*(?:corp|internal|bytedance|byted|bytecloud|feishu|lark|slardar|tika|goofy|argos|meego|bnpm)[^\s"'<>)]*/i;
+const LONG_SECRETISH_RE = /\b[A-Za-z0-9_+=.-]{40,}\b/g;
+const LONG_SECRETISH_TEST_RE = /\b[A-Za-z0-9_+=.-]{40,}\b/;
+const HOME_PATH_TEST_RE = /\/Users\/[^/\s"'`),]+|__HOME__/;
 
 function readText(filePath) {
   return fs.readFileSync(filePath, 'utf8');
@@ -153,19 +149,45 @@ function titleFromSlug(slug) {
 }
 
 export function sanitizeText(value) {
+  return redactPrivateMaterial(value)
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export function sanitizeContent(value, maxLength = MAX_PUBLIC_CONTENT_LENGTH) {
+  const sanitized = redactPrivateMaterial(value)
+    .replace(/\r\n/g, '\n')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{4,}/g, '\n\n\n')
+    .trim();
+  if (sanitized.length <= maxLength) return sanitized;
+  return `${sanitized.slice(0, maxLength).replace(/\s+\S*$/, '')}\n\n[Public preview truncated.]`;
+}
+
+function redactPrivateMaterial(value) {
   return String(value || '')
     .replace(INTERNAL_COMPOUND_RE, '[internal]')
     .replace(INTERNAL_URL_RE, '[internal URL]')
     .replace(SECRET_RE, '[redacted credential]')
     .replace(EMAIL_RE, '[email redacted]')
-    .replace(HOME_PATH_RE, '~')
+    .replace(USER_HOME_RE, '~')
+    .replace(HOME_PLACEHOLDER_RE, '~')
     .replace(INTERNAL_RE, '[internal]')
     .replace(LONG_SECRETISH_RE, function(match) {
       if (/^[a-f0-9]{40}$/i.test(match)) return match;
       return '[redacted value]';
-    })
-    .replace(/\s+/g, ' ')
-    .trim();
+    });
+}
+
+function hasPrivateMaterial(value) {
+  const text = String(value || '');
+  return INTERNAL_COMPOUND_TEST_RE.test(text)
+    || INTERNAL_URL_TEST_RE.test(text)
+    || SECRET_TEST_RE.test(text)
+    || EMAIL_TEST_RE.test(text)
+    || HOME_PATH_TEST_RE.test(text)
+    || INTERNAL_TEST_RE.test(text)
+    || LONG_SECRETISH_TEST_RE.test(text);
 }
 
 export function sanitizePublicPath(value) {
@@ -229,11 +251,7 @@ function detectCategory(text) {
 
 function safeSkillName(rawName, slug) {
   const raw = rawName || titleFromSlug(slug);
-  const sanitized = sanitizeText(raw);
-  if (!sanitized || sanitized.includes('[internal]')) {
-    return `Redacted Internal Skill ${sha(slug, 6)}`;
-  }
-  return sanitized;
+  return sanitizeText(raw) || titleFromSlug(slug);
 }
 
 function sourceLabel(relative) {
@@ -253,7 +271,8 @@ function buildSkillItem(sourceDir, filePath) {
   const rawDescription = parsed.data.description || firstUsefulText(parsed.body);
   const combined = `${rawName} ${rawDescription} ${parsed.body.slice(0, 400)}`;
   const category = sanitizeText(detectCategory(combined));
-  const redacted = INTERNAL_SEGMENT_RE.test(slug) || sanitizeText(rawName).includes('[internal]') || sanitizeText(rawDescription).includes('[internal]');
+  const publicContent = sanitizeContent(content);
+  const redacted = hasPrivateMaterial(content);
 
   return {
     id: `skill-${sourceLabel(relative).toLowerCase()}-${sha(relative)}`,
@@ -262,16 +281,30 @@ function buildSkillItem(sourceDir, filePath) {
     description: firstSentence(rawDescription || 'Reusable agent workflow skill.'),
     category,
     source: sourceLabel(relative),
-    path: redacted ? `home/.../skills/redacted-${sha(slug, 6)}/SKILL.md` : sanitizePublicPath(relative),
+    path: sanitizePublicPath(relative),
     redacted,
-    size: Buffer.byteLength(content, 'utf8')
+    size: Buffer.byteLength(content, 'utf8'),
+    content: publicContent
   };
+}
+
+function isPublicSkillFile(sourceDir, filePath) {
+  const relative = relativePath(sourceDir, filePath);
+  if (!relative.startsWith(PUBLIC_SKILL_ROOT)) return false;
+  const segments = relative.split('/');
+  if (segments.length !== 5 || segments[4] !== 'SKILL.md') return false;
+  const content = readText(filePath);
+  const parsed = parseFrontmatter(content);
+  const slug = skillSlug(relative);
+  const publicIdentity = `${slug} ${parsed.data.name || ''} ${parsed.data.description || ''} ${firstUsefulText(parsed.body).slice(0, 600)}`;
+  return !hasPrivateMaterial(publicIdentity);
 }
 
 function fileSummary(sourceDir, rule) {
   const fullPath = path.join(sourceDir, rule.path);
   if (!exists(fullPath)) return null;
   const content = readText(fullPath);
+  const publicContent = sanitizeContent(content);
   return {
     id: `file-${sha(rule.path)}`,
     kind: 'file',
@@ -280,8 +313,9 @@ function fileSummary(sourceDir, rule) {
     category: rule.type,
     source: 'Setup',
     path: sanitizePublicPath(rule.path),
-    redacted: /config|hook|policy/i.test(rule.type),
-    size: Buffer.byteLength(content, 'utf8')
+    redacted: hasPrivateMaterial(content),
+    size: Buffer.byteLength(content, 'utf8'),
+    content: publicContent
   };
 }
 
@@ -299,13 +333,12 @@ function gitValue(sourceDir, args) {
 function sourceInfo(sourceDir) {
   const commit = gitValue(sourceDir, ['rev-parse', 'HEAD']);
   const branch = gitValue(sourceDir, ['rev-parse', '--abbrev-ref', 'HEAD']);
-  const remote = gitValue(sourceDir, ['config', '--get', 'remote.origin.url']);
   return {
-    repository: 'clean99/codex-setup',
-    url: 'https://github.com/clean99/codex-setup',
+    repository: 'Private setup repository',
+    url: '',
     branch: branch || 'main',
     commit: commit || 'unknown',
-    remote: remote ? sanitizeText(remote.replace(/^git@github.com:/, 'https://github.com/').replace(/\.git$/, '')) : 'https://github.com/clean99/codex-setup'
+    remote: 'private'
   };
 }
 
@@ -319,7 +352,7 @@ export function buildCatalog(options = {}) {
   const skillFiles = available
     ? walkFiles(sourceDir)
       .filter((filePath) => filePath.endsWith('/SKILL.md') || filePath.endsWith('\\SKILL.md'))
-      .filter((filePath) => SKILL_PATH_MARKERS.some((marker) => relativePath(sourceDir, filePath).includes(marker)))
+      .filter((filePath) => isPublicSkillFile(sourceDir, filePath))
       .sort((a, b) => relativePath(sourceDir, a).localeCompare(relativePath(sourceDir, b)))
     : [];
   const skills = skillFiles.map((filePath) => buildSkillItem(sourceDir, filePath));
@@ -334,18 +367,20 @@ export function buildCatalog(options = {}) {
     generatedAt,
     status: available ? 'ready' : 'source-missing',
     source: available ? sourceInfo(sourceDir) : {
-      repository: 'clean99/codex-setup',
-      url: 'https://github.com/clean99/codex-setup',
+      repository: 'Private setup repository',
+      url: '',
       branch: 'main',
       commit: 'unavailable',
-      remote: 'https://github.com/clean99/codex-setup'
+      remote: 'private'
     },
     redaction: {
       publishedRawMarkdown: false,
+      publishedSanitizedContent: true,
       policy: [
-        'Company and internal platform names are replaced.',
+        'Only self-authored public skills and behavior-shaping agent config files are published.',
+        'Private company and internal platform names are replaced.',
         'Credentials, emails, home paths, and internal URLs are removed.',
-        'Generated data is scanned before publication.'
+        'Each item includes a sanitized content preview and is scanned before publication.'
       ],
       redactedCount
     },

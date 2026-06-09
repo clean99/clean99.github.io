@@ -3,41 +3,37 @@ var currentLang = page_lang();
 var copy = currentLang === 'zh' ? {
   eyebrow: '公开 Agent 工作台',
   title: 'AI Coding Skills',
-  intro: '这是我公开展示的 AI 编程配置与技能目录。它来自 setup 仓库的自动生成结果，只发布摘要和脱敏后的结构信息。',
+  intro: '我创建的 AI coding skills 会从私有 setup 仓库实时生成并同步到这里。页面只展示自建 skills 和关键 agent 配置的脱敏公开内容。',
   statementTitle: '作者声明',
-  statement: '这些配置和技能是我的日常工作流样本。页面不会发布原始提示词、密钥、内部平台细节或个人路径；内部信息会在生成阶段被替换为公开安全描述。',
-  source: '来源仓库',
+  statement: '这些 skills 和配置是我的日常 AI 编程工作流样本。页面不会发布密钥、内部平台细节、个人路径或私有仓库入口；可点击内容已在生成阶段脱敏。',
   pipeline: '更新流水线',
-  pipelineSteps: ['拉取 setup 仓库', '提取 skills 与配置摘要', '统一脱敏并扫描', '发布静态 catalog'],
+  pipelineSteps: ['监听 setup 更新', '筛选自建 skills 与 agent 配置', '生成脱敏内容预览', '发布静态 catalog'],
   controlsLabel: '筛选目录',
-  search: '搜索 skills、类别或路径',
+  search: '搜索 skills、配置、类别或内容',
   all: '全部',
   skills: 'Skills',
   files: '配置文件',
-  redacted: '已脱敏',
+  redacted: '脱敏内容',
   status: '同步状态',
   generated: '生成时间',
-  commit: '源提交',
-  repo: '打开仓库'
+  commit: '源提交'
 } : {
   eyebrow: 'Public Agent Workbench',
   title: 'AI Coding Skills',
-  intro: 'A public, automatically generated view of my AI coding setup. It is sourced from the setup repository, but only sanitized summaries and structure are published here.',
+  intro: 'A live catalog of the AI coding skills I created, generated from my private setup repository. It publishes only self-authored skills and key agent configuration in sanitized form.',
   statementTitle: 'Author Statement',
-  statement: 'These configurations and skills are part of my day-to-day engineering workflow. The page does not publish raw prompts, credentials, internal platform details, or personal paths; private material is replaced during generation.',
-  source: 'Source Repository',
+  statement: 'These skills and configuration files are part of my day-to-day AI coding workflow. This page does not publish credentials, internal platform details, personal paths, or private repository entry points; clickable content is sanitized during generation.',
   pipeline: 'Update Pipeline',
-  pipelineSteps: ['Fetch setup repository', 'Extract skill and config summaries', 'Redact and scan', 'Publish static catalog'],
+  pipelineSteps: ['Watch setup updates', 'Select authored skills and agent config', 'Generate sanitized previews', 'Publish static catalog'],
   controlsLabel: 'Filter catalog',
-  search: 'Search skills, categories, or paths',
+  search: 'Search skills, config, categories, or content',
   all: 'All',
   skills: 'Skills',
   files: 'Config files',
-  redacted: 'Redacted',
+  redacted: 'Sanitized',
   status: 'Sync status',
   generated: 'Generated',
-  commit: 'Source commit',
-  repo: 'Open repo'
+  commit: 'Source commit'
 };
 %>
 
@@ -51,12 +47,6 @@ var copy = currentLang === 'zh' ? {
       <p class="eyebrow"><%- copy.eyebrow %></p>
       <h1><%- copy.title %></h1>
       <p><%- copy.intro %></p>
-      <div class="ai-lab__actions">
-        <a class="ai-lab__button" href="https://github.com/clean99/codex-setup" target="_blank" rel="noreferrer">
-          <span aria-hidden="true">↗</span>
-          <span><%- copy.repo %></span>
-        </a>
-      </div>
     </div>
 
     <div class="ai-lab__schematic" aria-label="<%- copy.pipeline %>">
