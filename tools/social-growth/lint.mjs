@@ -5,6 +5,7 @@ import path from 'node:path';
 
 const targets = [
   ...(await filesIn('tools/social-growth', '.mjs')),
+  ...(await filesIn('tools/ai-coding-lab', '.mjs')),
   ...(await filesIn('test', '.mjs')),
 ];
 
@@ -23,8 +24,14 @@ console.log(`Checked ${targets.length} JavaScript files.`);
 
 async function filesIn(dir, extension) {
   const entries = await readdir(dir, { withFileTypes: true });
-  return entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith(extension))
-    .map((entry) => path.join(dir, entry.name))
-    .sort();
+  const results = [];
+  for (const entry of entries) {
+    const entryPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...await filesIn(entryPath, extension));
+    } else if (entry.isFile() && entry.name.endsWith(extension)) {
+      results.push(entryPath);
+    }
+  }
+  return results.sort();
 }

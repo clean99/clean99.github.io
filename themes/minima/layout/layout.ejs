@@ -111,6 +111,12 @@
   <% if (theme.usercss) { %>
   <%- css(theme.usercss) %>
   <% } %>
+  <%
+  var pageStyles = page.styles ? (Array.isArray(page.styles) ? page.styles : [page.styles]) : [];
+  pageStyles.forEach(function(style) {
+  %>
+  <link rel="stylesheet" href="<%- url_for(style) %>">
+  <% }) %>
 
   <!-- Favicon
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -228,6 +234,12 @@
     nanobar.go(76);
     nanobar.go(100);
   </script>
+  <%
+  var pageScripts = page.scripts ? (Array.isArray(page.scripts) ? page.scripts : [page.scripts]) : [];
+  pageScripts.forEach(function(script) {
+  %>
+  <script src="<%- url_for(script) %>" defer></script>
+  <% }) %>
 
 </body>
 

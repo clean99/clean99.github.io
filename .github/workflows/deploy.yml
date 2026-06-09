@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      HAS_CODEX_SETUP_TOKEN: ${{ secrets.CODEX_SETUP_TOKEN != '' }}
 
     steps:
       - name: Checkout dev branch
@@ -26,8 +28,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Checkout setup source
+        if: env.HAS_CODEX_SETUP_TOKEN == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: clean99/codex-setup
+          ref: main
+          path: .cache/codex-setup
+          token: ${{ secrets.CODEX_SETUP_TOKEN }}
+
+      - name: Refresh public catalog
+        if: env.HAS_CODEX_SETUP_TOKEN == 'true'
+        run: npm run ai-coding-lab:build
+        env:
+          CODEX_SETUP_DIR: .cache/codex-setup
+
       - name: Generate static files
-        run: npx hexo generate
+        run: npm run clean && npx hexo generate
 
       - name: Deploy to master branch
         uses: peaceiris/actions-gh-pages@v4

@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "hexo generate",
+    "ai-coding-lab:build": "node tools/ai-coding-lab/build-catalog.mjs",
+    "build": "npm run ai-coding-lab:build && hexo clean && hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
     "lint": "node tools/social-growth/lint.mjs",
@@ -65,7 +66,7 @@
     "social:x-profile-diagnostics": "node tools/social-growth/cli.mjs x-profile-diagnostics",
     "social:x-tech-brief": "node tools/social-growth/cli.mjs x-tech-brief",
     "social:x-prep": "node tools/social-growth/cli.mjs x-prep",
-    "test": "node --test test/social-growth.test.mjs"
+    "test": "node --test test/*.test.mjs"
   },
   "hexo": {
     "version": "6.3.0"

@@ -1,0 +1,109 @@
+<%
+var currentLang = page_lang();
+var copy = currentLang === 'zh' ? {
+  eyebrow: '公开 Agent 工作台',
+  title: 'AI Coding Skills',
+  intro: '这是我公开展示的 AI 编程配置与技能目录。它来自 setup 仓库的自动生成结果，只发布摘要和脱敏后的结构信息。',
+  statementTitle: '作者声明',
+  statement: '这些配置和技能是我的日常工作流样本。页面不会发布原始提示词、密钥、内部平台细节或个人路径；内部信息会在生成阶段被替换为公开安全描述。',
+  source: '来源仓库',
+  pipeline: '更新流水线',
+  pipelineSteps: ['拉取 setup 仓库', '提取 skills 与配置摘要', '统一脱敏并扫描', '发布静态 catalog'],
+  controlsLabel: '筛选目录',
+  search: '搜索 skills、类别或路径',
+  all: '全部',
+  skills: 'Skills',
+  files: '配置文件',
+  redacted: '已脱敏',
+  status: '同步状态',
+  generated: '生成时间',
+  commit: '源提交',
+  repo: '打开仓库'
+} : {
+  eyebrow: 'Public Agent Workbench',
+  title: 'AI Coding Skills',
+  intro: 'A public, automatically generated view of my AI coding setup. It is sourced from the setup repository, but only sanitized summaries and structure are published here.',
+  statementTitle: 'Author Statement',
+  statement: 'These configurations and skills are part of my day-to-day engineering workflow. The page does not publish raw prompts, credentials, internal platform details, or personal paths; private material is replaced during generation.',
+  source: 'Source Repository',
+  pipeline: 'Update Pipeline',
+  pipelineSteps: ['Fetch setup repository', 'Extract skill and config summaries', 'Redact and scan', 'Publish static catalog'],
+  controlsLabel: 'Filter catalog',
+  search: 'Search skills, categories, or paths',
+  all: 'All',
+  skills: 'Skills',
+  files: 'Config files',
+  redacted: 'Redacted',
+  status: 'Sync status',
+  generated: 'Generated',
+  commit: 'Source commit',
+  repo: 'Open repo'
+};
+%>
+
+<article
+  class="ai-lab"
+  data-catalog-url="<%- url_for('/ai-coding-lab/catalog.json') %>"
+  data-lang="<%- currentLang %>"
+>
+  <header class="ai-lab__hero">
+    <div class="ai-lab__hero-copy">
+      <p class="eyebrow"><%- copy.eyebrow %></p>
+      <h1><%- copy.title %></h1>
+      <p><%- copy.intro %></p>
+      <div class="ai-lab__actions">
+        <a class="ai-lab__button" href="https://github.com/clean99/codex-setup" target="_blank" rel="noreferrer">
+          <span aria-hidden="true">↗</span>
+          <span><%- copy.repo %></span>
+        </a>
+      </div>
+    </div>
+
+    <div class="ai-lab__schematic" aria-label="<%- copy.pipeline %>">
+      <% copy.pipelineSteps.forEach(function(step, index) { %>
+        <div class="ai-lab__node">
+          <span><%- String(index + 1).padStart(2, '0') %></span>
+          <strong><%- step %></strong>
+        </div>
+      <% }) %>
+    </div>
+  </header>
+
+  <section class="ai-lab__statement">
+    <div>
+      <p class="eyebrow"><%- copy.statementTitle %></p>
+      <p><%- copy.statement %></p>
+    </div>
+    <dl class="ai-lab__meta">
+      <div>
+        <dt><%- copy.status %></dt>
+        <dd id="aiCatalogStatus">Loading</dd>
+      </div>
+      <div>
+        <dt><%- copy.generated %></dt>
+        <dd id="aiCatalogGenerated">-</dd>
+      </div>
+      <div>
+        <dt><%- copy.commit %></dt>
+        <dd id="aiCatalogCommit">-</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="ai-lab__stats" id="aiCatalogStats" aria-live="polite"></section>
+
+  <section class="ai-lab__controls" aria-label="<%- copy.controlsLabel %>">
+    <label class="ai-lab__search">
+      <span><%- copy.search %></span>
+      <input id="aiCatalogSearch" type="search" autocomplete="off" />
+    </label>
+    <div class="ai-lab__filters" role="group" aria-label="<%- copy.controlsLabel %>">
+      <button type="button" class="is-active" data-filter="all"><%- copy.all %></button>
+      <button type="button" data-filter="skill"><%- copy.skills %></button>
+      <button type="button" data-filter="file"><%- copy.files %></button>
+      <button type="button" data-filter="redacted"><%- copy.redacted %></button>
+    </div>
+  </section>
+
+  <section class="ai-lab__catalog" id="aiCatalogItems" aria-live="polite"></section>
+</article>

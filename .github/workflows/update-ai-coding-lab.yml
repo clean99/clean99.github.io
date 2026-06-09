@@ -1,0 +1,68 @@
+name: Update AI Skills Catalog
+
+on:
+  workflow_dispatch:
+  repository_dispatch:
+    types:
+      - setup-updated
+  schedule:
+    - cron: '17 * * * *'
+
+concurrency:
+  group: ai-skills-catalog
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      HAS_CODEX_SETUP_TOKEN: ${{ secrets.CODEX_SETUP_TOKEN != '' }}
+
+    steps:
+      - name: Checkout blog source
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Checkout setup source
+        if: env.HAS_CODEX_SETUP_TOKEN == 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: clean99/codex-setup
+          ref: main
+          path: .cache/codex-setup
+          token: ${{ secrets.CODEX_SETUP_TOKEN }}
+
+      - name: Skip without setup token
+        if: env.HAS_CODEX_SETUP_TOKEN != 'true'
+        run: echo "CODEX_SETUP_TOKEN is not configured; keeping the committed catalog."
+
+      - name: Build public catalog
+        if: env.HAS_CODEX_SETUP_TOKEN == 'true'
+        run: npm run ai-coding-lab:build
+        env:
+          CODEX_SETUP_DIR: .cache/codex-setup
+
+      - name: Commit catalog changes
+        if: env.HAS_CODEX_SETUP_TOKEN == 'true'
+        run: |
+          if git diff --quiet -- source/ai-coding-lab/catalog.json; then
+            echo "Catalog unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add source/ai-coding-lab/catalog.json
+          git commit -m "Update AI skills catalog"
+          git push origin dev
