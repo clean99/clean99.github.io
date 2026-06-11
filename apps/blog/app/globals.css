@@ -1,0 +1,24 @@
+:root {
+  color-scheme: light dark;
+  --site-bg: #f6f7f8;
+  --site-text: #15171a;
+  --site-muted: #626a73;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--site-bg);
+  color: var(--site-text);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial,
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+a {
+  color: inherit;
+}

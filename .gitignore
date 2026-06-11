@@ -4,6 +4,13 @@ db.json
 *.log
 node_modules/
 public/
+dist/
+.next/
+apps/blog/out/
+apps/docs/storybook-static/
+coverage/
+playwright-report/
+test-results/
 .deploy*/
 _multiconfig.yml
 tmp
@@ -36,7 +43,9 @@ data/social-growth/metrics-cycle.md
 data/social-growth/packages/
 data/social-growth/post-texts/
 data/social-growth/profile-audit.md
+data/social-growth/profile-action-handoff.md
 data/social-growth/profile-update.md
+data/social-growth/publish-session.md
 data/social-growth/public-action-handoff.md
 data/social-growth/public-action-checklist.md
 data/social-growth/manual-publish-kit.md

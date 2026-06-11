@@ -1,0 +1,9 @@
+@import "./tokens.css";
+
+.lg-surface-scaffold {
+  color: var(--lg-text);
+  background: var(--lg-surface);
+  border: 1px solid var(--lg-glass-border);
+  border-radius: var(--lg-radius-lg);
+  box-shadow: var(--lg-glass-shadow);
+}

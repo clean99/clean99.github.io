@@ -1,0 +1,9 @@
+node_modules
+public
+dist
+.next
+apps/docs/storybook-static
+coverage
+playwright-report
+test-results
+pnpm-lock.yaml

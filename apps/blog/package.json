@@ -1,0 +1,27 @@
+{
+  "name": "blog",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter @clean99/liquid-glass build && next build",
+    "clean": "rm -rf .next out coverage",
+    "dev": "next dev",
+    "lint": "eslint app lib scripts tests next.config.mjs vitest.config.ts",
+    "test:components": "vitest run --passWithNoTests",
+    "test:content": "tsx scripts/validate-content.ts",
+    "test:routes": "tsx scripts/validate-routes.ts",
+    "test:unit": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clean99/liquid-glass": "workspace:*",
+    "next": "16.2.9",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3"
+  }
+}

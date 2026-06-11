@@ -1,0 +1,30 @@
+{
+  "name": "docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter @clean99/liquid-glass build && storybook build --quiet",
+    "clean": "rm -rf storybook-static coverage",
+    "dev": "storybook dev -p 6006",
+    "lint": "eslint .storybook stories vitest.config.ts",
+    "test:components": "vitest run --passWithNoTests",
+    "test:storybook": "pnpm --filter @clean99/liquid-glass build && storybook build --quiet --output-dir storybook-static-test && rm -rf storybook-static-test",
+    "test:unit": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clean99/liquid-glass": "workspace:*",
+    "@storybook/addon-a11y": "10.4.3",
+    "@storybook/addon-docs": "10.4.3",
+    "@storybook/nextjs-vite": "10.4.3",
+    "next": "16.2.9",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "storybook": "10.4.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3"
+  }
+}

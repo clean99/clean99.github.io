@@ -1,0 +1,42 @@
+{
+  "name": "@clean99/liquid-glass",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Refractive Liquid Glass components for React, built on @hashintel/refractive with accessible fallbacks.",
+  "type": "module",
+  "sideEffects": ["**/*.css"],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./styles.css": "./dist/styles.css",
+    "./tokens.css": "./dist/tokens.css"
+  },
+  "files": ["dist", "README.md", "LICENSE", "ATTRIBUTIONS.md"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean && node scripts/copy-css.mjs",
+    "clean": "rm -rf dist coverage",
+    "lint": "eslint src tests scripts",
+    "test": "vitest run",
+    "test:components": "vitest run --passWithNoTests",
+    "test:package": "pnpm build && node tests/package-exports.mjs",
+    "test:unit": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@hashintel/refractive": "0.0.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3"
+  }
+}
