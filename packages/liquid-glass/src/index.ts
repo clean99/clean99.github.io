@@ -13,6 +13,7 @@ export { LiquidSearchBox } from "./components/LiquidSearchBox";
 export { LiquidSegmentedControl } from "./components/LiquidSegmentedControl";
 export { LiquidSlider } from "./components/LiquidSlider";
 export { LiquidSurface } from "./components/LiquidSurface";
+export { LiquidTabs } from "./components/LiquidTabs";
 export { LiquidSwitch } from "./components/LiquidSwitch";
 export { LiquidToggle } from "./components/LiquidToggle";
 export { LiquidToolbar } from "./components/LiquidToolbar";
@@ -58,6 +59,11 @@ export type {
   LiquidSegmentedControlProps
 } from "./components/LiquidSegmentedControl";
 export type { LiquidSurfaceProps } from "./components/LiquidSurface";
+export type {
+  LiquidTabsItem,
+  LiquidTabsProps,
+  LiquidTabsSurfaceProps
+} from "./components/LiquidTabs";
 export type { LiquidSliderProps } from "./components/LiquidSlider";
 export type { LiquidSwitchProps } from "./components/LiquidSwitch";
 export type { LiquidToggleProps } from "./components/LiquidToggle";

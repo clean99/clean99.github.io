@@ -14,6 +14,7 @@ import {
   LiquidSegmentedControl,
   LiquidSlider,
   LiquidSurface,
+  LiquidTabs,
   LiquidSwitch,
   LiquidToggle,
   LiquidToolbar,
@@ -160,6 +161,62 @@ describe("Liquid components", () => {
     fireEvent.keyDown(screen.getByRole("radio", { name: "Light" }), { key: "ArrowRight" });
 
     expect(onValueChange).toHaveBeenCalledWith("dark");
+  });
+
+  it("renders accessible tabs and switches panels automatically with arrow keys", () => {
+    render(
+      <LiquidTabs
+        aria-label="Content sections"
+        items={[
+          { label: "Overview", value: "overview", content: "Overview panel" },
+          { label: "API", value: "api", content: "API panel" },
+          { label: "Disabled", value: "disabled", content: "Disabled panel", disabled: true }
+        ]}
+      />
+    );
+
+    const overviewTab = screen.getByRole("tab", { name: "Overview" });
+    expect(screen.getByRole("tablist", { name: "Content sections" })).toHaveAttribute(
+      "aria-orientation",
+      "horizontal"
+    );
+    expect(overviewTab).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tabpanel", { name: "Overview" })).toHaveTextContent(
+      "Overview panel"
+    );
+
+    fireEvent.keyDown(overviewTab, { key: "ArrowRight" });
+
+    expect(screen.getByRole("tab", { name: "API" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tabpanel", { name: "API" })).toHaveTextContent("API panel");
+    expect(screen.getByRole("tab", { name: "Disabled" })).toBeDisabled();
+  });
+
+  it("supports controlled manual tabs without changing value on focus movement", () => {
+    const onValueChange = vi.fn();
+    render(
+      <LiquidTabs
+        activationMode="manual"
+        aria-label="Manual content sections"
+        items={[
+          { label: "Design", value: "design", content: "Design panel" },
+          { label: "Testing", value: "testing", content: "Testing panel" }
+        ]}
+        onValueChange={onValueChange}
+        value="design"
+      />
+    );
+
+    const designTab = screen.getByRole("tab", { name: "Design" });
+    fireEvent.keyDown(designTab, { key: "ArrowRight" });
+
+    expect(onValueChange).not.toHaveBeenCalled();
+
+    const testingTab = screen.getByRole("tab", { name: "Testing" });
+    fireEvent.keyDown(testingTab, { key: "Enter" });
+
+    expect(onValueChange).toHaveBeenCalledWith("testing");
+    expect(designTab).toHaveAttribute("aria-selected", "true");
   });
 
   it("forwards refs and passthrough props", () => {

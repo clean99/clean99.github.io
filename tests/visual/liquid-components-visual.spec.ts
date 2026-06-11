@@ -34,6 +34,18 @@ test.describe("liquid glass component visuals", () => {
     await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-nav-dark.png");
   });
 
+  test("component liquid tabs light", async ({ page }) => {
+    await page.setViewportSize({ width: 760, height: 340 });
+    await renderFixture(page, tabsFixture("light"));
+    await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-tabs-light.png");
+  });
+
+  test("component liquid tabs dark", async ({ page }) => {
+    await page.setViewportSize({ width: 760, height: 340 });
+    await renderFixture(page, tabsFixture("dark"));
+    await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-tabs-dark.png");
+  });
+
   test("component liquid button light", async ({ page }) => {
     await page.setViewportSize({ width: 520, height: 260 });
     await renderFixture(page, buttonFixture("light"));
@@ -145,6 +157,26 @@ function navFixture(theme: "light" | "dark") {
         </span>
       </div>
     </nav>`
+  );
+}
+
+function tabsFixture(theme: "light" | "dark") {
+  return frame(
+    theme,
+    `<section class="lg-tabs" data-orientation="horizontal" style="max-width:620px;">
+      <div role="tablist" aria-label="Writing filters" aria-orientation="horizontal" class="lg-surface lg-surface--panel lg-surface--fallback lg-surface--subtle lg-surface--fallback-material lg-tabs__list" data-liquid-mode="fallback">
+        <span class="lg-surface__content">
+          <button id="visual-tabs-tab-0" aria-controls="visual-tabs-panel-0" aria-selected="true" class="lg-tabs__tab" role="tab" type="button">Performance</button>
+          <button id="visual-tabs-tab-1" aria-controls="visual-tabs-panel-1" aria-selected="false" class="lg-tabs__tab" role="tab" type="button" tabindex="-1">Reliability</button>
+          <button id="visual-tabs-tab-2" aria-controls="visual-tabs-panel-2" aria-selected="false" class="lg-tabs__tab" role="tab" type="button" tabindex="-1">Agents</button>
+          <button id="visual-tabs-tab-3" aria-controls="visual-tabs-panel-3" aria-selected="false" class="lg-tabs__tab" role="tab" type="button" tabindex="-1">Learning</button>
+        </span>
+      </div>
+      <div id="visual-tabs-panel-0" aria-labelledby="visual-tabs-tab-0" class="lg-tabs__panel" role="tabpanel" tabindex="0">
+        <h2 style="margin:0 0 8px;font-size:28px;line-height:1.1;">Performance notes</h2>
+        <p style="max-width:520px;margin:0;color:var(--lg-text-muted);line-height:1.55;">A single continuous glass plate keeps the tabs readable while the surface carries the material.</p>
+      </div>
+    </section>`
   );
 }
 

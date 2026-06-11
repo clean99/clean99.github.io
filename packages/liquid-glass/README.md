@@ -104,6 +104,7 @@ Implemented components:
 - `LiquidToggle`
 - `LiquidNav`
 - `LiquidSegmentedControl`
+- `LiquidTabs`
 - `LiquidToolbar`
 - `LiquidLink`
 
@@ -151,6 +152,7 @@ The package supports system color scheme and explicit theme scopes:
 - `LiquidToggle` uses `aria-pressed`.
 - `LiquidNav` and `LiquidToolbar` require accessible labels.
 - `LiquidSegmentedControl` uses `radiogroup` / `radio`.
+- `LiquidTabs` uses `tablist` / `tab` / `tabpanel`, roving tab index, Home/End, and arrow-key navigation.
 - Disabled controls suppress interaction and expose disabled state.
 - Focus-visible styles are part of the CSS contract.
 - Reduced transparency resolves to solid mode.
