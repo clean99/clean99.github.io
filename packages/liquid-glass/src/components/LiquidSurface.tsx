@@ -23,6 +23,7 @@ import type {
   RefractiveOptions
 } from "../types";
 import { useStableId } from "../hooks/use-stable-id";
+import { resolveRefractiveOptions } from "../utils/refraction";
 import { resolveLiquidMode } from "../utils/support";
 import { surfaceClassNames } from "../utils/variants";
 
@@ -50,33 +51,6 @@ const radiusMap: Record<Exclude<LiquidRadius, number>, number> = {
   pill: 999
 };
 
-const intensityOptions: Record<LiquidIntensity, Omit<RefractiveOptions, "radius">> = {
-  subtle: {
-    blur: 0,
-    glassThickness: 48,
-    bezelWidth: 6,
-    refractiveIndex: 1.32,
-    specularOpacity: 0.12,
-    specularAngle: 0.85
-  },
-  medium: {
-    blur: 0,
-    glassThickness: 68,
-    bezelWidth: 10,
-    refractiveIndex: 1.42,
-    specularOpacity: 0.18,
-    specularAngle: 0.85
-  },
-  strong: {
-    blur: 1,
-    glassThickness: 88,
-    bezelWidth: 14,
-    refractiveIndex: 1.5,
-    specularOpacity: 0.26,
-    specularAngle: 0.85
-  }
-};
-
 export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(function LiquidSurface(
   {
     as: Component = "div",
@@ -99,47 +73,65 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
   },
   ref
 ) {
-  const context = useLiquidContext();
+  const {
+    capabilities,
+    defaultMode,
+    disableOnMobile,
+    enhancedSurfaceCount,
+    forcedMode,
+    maxEnhancedSurfaces,
+    releaseEnhancedSurface,
+    reserveEnhancedSurface,
+    respectReducedMotion,
+    respectReducedTransparency
+  } = useLiquidContext();
   const surfaceId = useStableId("lg-surface");
   const [hasEnhancedSlot, setHasEnhancedSlot] = useState(false);
   const radiusPx = resolveRadius(radius);
   // TODO: implement Slot-compatible asChild semantics once the dependency boundary is decided.
 
-  const preliminaryMode = resolveLiquidMode({
+  const requestedResolvedMode = resolveLiquidMode({
     requestedMode: mode,
-    defaultMode: context.defaultMode,
-    forcedMode: context.forcedMode,
-    capabilities: context.capabilities,
-    disableOnMobile: context.disableOnMobile,
-    enhancedSurfaceCount: context.enhancedSurfaceCount,
-    maxEnhancedSurfaces: context.maxEnhancedSurfaces,
-    respectReducedMotion: context.respectReducedMotion,
-    respectReducedTransparency: context.respectReducedTransparency
+    defaultMode,
+    forcedMode,
+    capabilities,
+    disableOnMobile,
+    enhancedSurfaceCount: 0,
+    maxEnhancedSurfaces,
+    respectReducedMotion,
+    respectReducedTransparency
   });
+  const wantsEnhanced = requestedResolvedMode === "enhanced";
 
   useEffect(() => {
-    if (preliminaryMode !== "enhanced") {
-      setHasEnhancedSlot(false);
-      context.releaseEnhancedSurface(surfaceId);
+    return () => {
+      releaseEnhancedSurface(surfaceId);
+    };
+  }, [releaseEnhancedSurface, surfaceId]);
+
+  useEffect(() => {
+    if (!wantsEnhanced) {
+      releaseEnhancedSurface(surfaceId);
+      setHasEnhancedSlot((current) => (current ? false : current));
       return;
     }
 
-    const reserved = context.reserveEnhancedSurface(surfaceId);
-    setHasEnhancedSlot(reserved);
-
-    return () => {
-      if (reserved) {
-        context.releaseEnhancedSurface(surfaceId);
-      }
-    };
-  }, [context, preliminaryMode, surfaceId]);
+    const reserved = reserveEnhancedSurface(surfaceId);
+    setHasEnhancedSlot((current) => (current === reserved ? current : reserved));
+  }, [
+    enhancedSurfaceCount,
+    releaseEnhancedSurface,
+    reserveEnhancedSurface,
+    surfaceId,
+    wantsEnhanced
+  ]);
 
   const resolvedMode =
-    preliminaryMode === "enhanced" && hasEnhancedSlot
+    requestedResolvedMode === "enhanced" && hasEnhancedSlot
       ? "enhanced"
-      : preliminaryMode === "enhanced"
+      : requestedResolvedMode === "enhanced"
         ? "fallback"
-        : preliminaryMode;
+        : requestedResolvedMode;
   const Engine =
     resolvedMode === "enhanced" ? RefractiveEngine : resolvedMode === "solid" ? SolidEngine : FallbackEngine;
   const surfaceClassName = surfaceClassNames({
@@ -152,11 +144,7 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
     mode: resolvedMode
   });
   const refractiveOptions = useMemo<RefractiveOptions>(
-    () => ({
-      ...intensityOptions[intensity],
-      ...refraction,
-      radius: refraction?.radius ?? radiusPx
-    }),
+    () => resolveRefractiveOptions({ intensity, radius: radiusPx, refraction }),
     [intensity, radiusPx, refraction]
   );
   const componentName = typeof Component === "string" ? Component : "";
@@ -186,7 +174,7 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
       data-liquid-kind={kind}
       data-liquid-mode={resolvedMode}
       data-liquid-reduced-motion={
-        context.capabilities.prefersReducedMotion && context.respectReducedMotion ? "" : undefined
+        capabilities.prefersReducedMotion && respectReducedMotion ? "" : undefined
       }
       disabled={supportsDisabled && disabled ? true : undefined}
       onClick={handleClick}

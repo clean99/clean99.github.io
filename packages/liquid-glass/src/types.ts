@@ -15,6 +15,7 @@ export type RefractiveOptions = {
   refractiveIndex?: number;
   specularOpacity?: number;
   specularAngle?: number;
+  bezelHeightFn?: (x: number) => number;
 };
 
 export type LiquidProviderProps = {

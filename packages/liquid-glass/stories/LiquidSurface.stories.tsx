@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { LiquidSurface } from "../src";
+import { LiquidProvider, LiquidSurface } from "../src";
 import { longChineseText, longEnglishText, mixedText, StoryFrame } from "./story-fixtures";
 
 const meta = {
@@ -10,6 +10,304 @@ const meta = {
 
 export default meta;
 type Story = StoryObj;
+
+function KubeCloneStyles() {
+  return (
+    <style>
+      {`
+        .kube-clone-lens {
+          background: transparent !important;
+          border: 0 !important;
+        }
+
+        .kube-clone-search {
+          border: 0 !important;
+        }
+
+        .kube-clone-lens::before,
+        .kube-clone-lens::after,
+        .kube-clone-search::before,
+        .kube-clone-search::after {
+          display: none !important;
+        }
+
+        .kube-clone-lens > .lg-surface__content {
+          display: none !important;
+        }
+      `}
+    </style>
+  );
+}
+
+export const KubeAlignedEnhanced: Story = {
+  render: () => (
+    <LiquidProvider defaultMode="enhanced" disableOnMobile={false} maxEnhancedSurfaces={8}>
+      <KubeCloneStyles />
+      <div
+        data-lg-theme="light"
+        style={{
+          position: "relative",
+          minHeight: 640,
+          overflow: "hidden",
+          padding: "72px 0",
+          color: "#131316",
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(244,245,243,0.9)), repeating-linear-gradient(60deg, rgba(255,255,255,0.75) 0 3px, transparent 3px 18px), repeating-linear-gradient(120deg, rgba(255,255,255,0.55) 0 3px, transparent 3px 18px)",
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
+        }}
+      >
+        <div
+          style={{
+            width: 706,
+            margin: "0 auto",
+            display: "grid",
+            gap: 24
+          }}
+        >
+          <div
+            style={{
+              position: "relative",
+              overflow: "hidden",
+              width: 706,
+              height: 460,
+              background: "#fff",
+              border: "1px solid rgba(0, 0, 0, 0.1)",
+              borderRadius: 10
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                display: "grid",
+                gridTemplateColumns: "1fr 46%",
+                gap: 40,
+                padding: 40
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  minWidth: 0
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 12,
+                    color: "#dc2626"
+                  }}
+                >
+                  <div
+                    aria-hidden="true"
+                    style={{
+                      width: 30,
+                      height: 1,
+                      background: "currentColor",
+                      opacity: 0.55
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 500,
+                      letterSpacing: "0.25em",
+                      textTransform: "uppercase"
+                    }}
+                  >
+                    Optics Study
+                  </span>
+                </div>
+                <h2
+                  style={{
+                    margin: "16px 0 0",
+                    color: "#000",
+                    fontSize: 54,
+                    fontWeight: 800,
+                    letterSpacing: "-0.03em",
+                    lineHeight: 0.95
+                  }}
+                >
+                  Liquid Glass
+                  <span style={{ color: "rgba(0,0,0,0.4)" }}>—</span>
+                  Precision Lens
+                </h2>
+                <div
+                  style={{
+                    marginTop: 18,
+                    color: "rgba(0,0,0,0.7)",
+                    display: "grid",
+                    gap: 12,
+                    fontSize: 16,
+                    lineHeight: 1.55
+                  }}
+                >
+                  <p style={{ margin: 0 }}>Drag the capsule to bend the page.</p>
+                  <p style={{ margin: 0 }}>
+                    The rounded bezel pushes pixels along the edge and leaves the content layer
+                    crisp.
+                  </p>
+                  <p style={{ margin: 0, color: "rgba(0,0,0,0.6)" }}>
+                    Strong edges make the bend snap.
+                  </p>
+                </div>
+              </div>
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "relative",
+                  overflow: "hidden",
+                  borderRadius: 7,
+                  boxShadow: "0 0 0 1px rgba(0,0,0,0.1)"
+                }}
+              >
+                <img
+                  alt=""
+                  src="https://images.unsplash.com/photo-1579380656108-f98e4df8ea62?q=80&w=800&auto=format&fit=crop"
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover"
+                  }}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    right: 12,
+                    bottom: 6,
+                    color: "rgba(117, 107, 154, 0.72)",
+                    fontSize: 9,
+                    letterSpacing: "0.15em",
+                    textTransform: "uppercase"
+                  }}
+                >
+                  Photo: Stephanie LeBlanc / Unsplash
+                </span>
+              </div>
+            </div>
+            <LiquidSurface
+              aria-hidden="true"
+              className="kube-clone-lens"
+              intensity="strong"
+              kind="pill"
+              radius="pill"
+              refraction={{
+                blur: 0,
+                glassThickness: 120,
+                bezelWidth: 18,
+                refractiveIndex: 1.5,
+                radius: 75,
+                specularOpacity: 0.5,
+                specularAngle: 0.8
+              }}
+              style={{
+                position: "absolute",
+                top: 34,
+                left: 20,
+                width: 210,
+                height: 120,
+                padding: 0,
+                background: "transparent",
+                borderRadius: 75,
+                boxShadow:
+                  "0 4px 9px rgba(0, 0, 0, 0.16), inset 0 2px 24px rgba(0, 0, 0, 0.2), inset 0 -2px 24px rgba(255, 255, 255, 0.2)",
+                zIndex: 5
+              }}
+            >
+              {null}
+            </LiquidSurface>
+          </div>
+        </div>
+      </div>
+    </LiquidProvider>
+  )
+};
+
+export const KubeSearchboxEnhanced: Story = {
+  render: () => (
+    <LiquidProvider defaultMode="enhanced" disableOnMobile={false} maxEnhancedSurfaces={8}>
+      <KubeCloneStyles />
+      <div
+        data-lg-theme="light"
+        style={{
+          position: "relative",
+          minHeight: 460,
+          overflow: "hidden",
+          padding: "72px 0",
+          color: "#131316",
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(244,245,243,0.9)), repeating-linear-gradient(60deg, rgba(255,255,255,0.75) 0 3px, transparent 3px 18px), repeating-linear-gradient(120deg, rgba(255,255,255,0.55) 0 3px, transparent 3px 18px)",
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
+        }}
+      >
+        <div
+          style={{
+            position: "relative",
+            width: 706,
+            height: 312,
+            margin: "0 auto",
+            overflow: "hidden",
+            border: "1px solid rgba(0, 0, 0, 0.1)",
+            borderRadius: 10,
+            background:
+              "linear-gradient(90deg, rgba(15,23,42,0.09) 0 1px, transparent 1px 32px), linear-gradient(180deg, rgba(15,23,42,0.09) 0 1px, transparent 1px 32px), linear-gradient(135deg, #f8fafc, #e7eeef)",
+            backgroundSize: "32px 32px, 32px 32px, auto"
+          }}
+        >
+          <LiquidSurface
+            className="kube-clone-search"
+            intensity="medium"
+            kind="pill"
+            radius="pill"
+            refraction={{
+              blur: 1,
+              glassThickness: 84,
+              bezelWidth: 12,
+              refractiveIndex: 1.42,
+              radius: 28,
+              specularOpacity: 0.2
+            }}
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              width: 336,
+              height: 45,
+              padding: "0 20px",
+              color: "rgba(0,0,0,0.7)",
+              background: "rgba(255,255,255,0.05)",
+              borderRadius: 28,
+              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.16)",
+              transform: "translate(-50%, -50%)"
+            }}
+          >
+            <span
+              aria-hidden="true"
+              style={{
+                display: "inline-block",
+                width: 13,
+                height: 13,
+                border: "1.7px solid currentColor",
+                borderRadius: 999,
+                boxShadow: "7px 7px 0 -5.5px currentColor",
+                opacity: 0.72,
+                transform: "rotate(-12deg)"
+              }}
+            />
+            <span style={{ color: "rgba(0,0,0,0.42)", fontSize: 15 }}>Search</span>
+          </LiquidSurface>
+        </div>
+      </div>
+    </LiquidProvider>
+  )
+};
 
 export const LightFallback: Story = {
   render: () => (

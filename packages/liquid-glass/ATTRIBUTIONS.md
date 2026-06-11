@@ -9,3 +9,14 @@
   - Repository: https://github.com/hashintel/hash/tree/main/libs/@hashintel/refractive
 
 The visual direction is informed by Chris Feijoo's public Liquid Glass research and the HASH Refractive documentation. This repository does not copy third-party source code.
+
+- Kube Liquid Glass article and component behavior reference
+  - Article: https://kube.io/blog/liquid-glass-css-svg/
+  - Author: Chris Feijoo
+  - Used as a visual and behavioral reference for the Storybook kube-aligned demos.
+  - The demos recreate component behavior and styling parameters, not the article source code.
+
+- Storybook demo image
+  - Source: https://images.unsplash.com/photo-1579380656108-f98e4df8ea62
+  - Credit shown in the story: Stephanie LeBlanc / Unsplash.
+  - Loaded as a remote demo image; the image file is not copied into this package.

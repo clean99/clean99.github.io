@@ -181,6 +181,33 @@ describe("Liquid components", () => {
       )
     );
   });
+
+  it("caps enhanced surfaces without triggering recursive provider updates", async () => {
+    installChromiumMocks();
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    render(
+      <LiquidProvider defaultMode="enhanced" maxEnhancedSurfaces={2}>
+        <LiquidSurface>One</LiquidSurface>
+        <LiquidSurface>Two</LiquidSurface>
+        <LiquidSurface>Three</LiquidSurface>
+      </LiquidProvider>
+    );
+
+    await waitFor(() => {
+      const modes = ["One", "Two", "Three"].map((label) =>
+        screen.getByText(label).closest(".lg-surface")?.getAttribute("data-liquid-mode")
+      );
+
+      expect(modes.filter((surfaceMode) => surfaceMode === "enhanced")).toHaveLength(2);
+      expect(modes.filter((surfaceMode) => surfaceMode === "fallback")).toHaveLength(1);
+    });
+    expect(
+      consoleError.mock.calls.some(([message]) =>
+        String(message).includes("Maximum update depth exceeded")
+      )
+    ).toBe(false);
+  });
 });
 
 function installChromiumMocks() {

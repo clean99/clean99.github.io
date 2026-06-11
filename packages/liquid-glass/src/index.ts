@@ -20,6 +20,11 @@ export { useStableId } from "./hooks/use-stable-id";
 export { LiquidProvider } from "./providers/LiquidProvider";
 export { cn } from "./utils/cn";
 export {
+  defaultRefractionByIntensity,
+  resolveRefractiveOptions,
+  resolveRefractionRadius
+} from "./utils/refraction";
+export {
   getBrowserCapabilities,
   isProbablyLowPowerMobile,
   readStoredLiquidMode,

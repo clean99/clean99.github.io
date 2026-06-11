@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   getBrowserCapabilities,
   readStoredLiquidMode,
+  resolveRefractiveOptions,
+  resolveRefractionRadius,
   resolveLiquidMode,
   shouldUseEnhancedLiquidGlass,
   type BrowserCapabilityEnvironment
@@ -99,5 +101,25 @@ describe("resolveLiquidMode", () => {
     } as Storage;
 
     expect(readStoredLiquidMode(storage)).toBe("fallback");
+  });
+});
+
+describe("refraction option resolution", () => {
+  it("keeps visual pill radius from becoming an unsafe filter radius", () => {
+    expect(resolveRefractionRadius(999)).toBe(96);
+    expect(resolveRefractionRadius(18)).toBe(18);
+  });
+
+  it("lets explicit refraction options override intensity defaults", () => {
+    expect(
+      resolveRefractiveOptions({
+        intensity: "strong",
+        radius: 999,
+        refraction: { glassThickness: 128, radius: 144 }
+      })
+    ).toMatchObject({
+      glassThickness: 128,
+      radius: 96
+    });
   });
 });
