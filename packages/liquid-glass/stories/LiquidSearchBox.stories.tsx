@@ -34,10 +34,11 @@ export const KubeReference: Story = {
             height: 312,
             overflow: "hidden",
             border: "1px solid rgba(0, 0, 0, 0.1)",
-            borderRadius: 10,
+            borderRadius: 9.75,
             background:
-              "linear-gradient(90deg, rgba(15,23,42,0.09) 0 1px, transparent 1px 32px), linear-gradient(180deg, rgba(15,23,42,0.09) 0 1px, transparent 1px 32px), linear-gradient(135deg, #f8fafc, #e7eeef)",
-            backgroundSize: "32px 32px, 32px 32px, auto"
+              "linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), radial-gradient(120% 100% at 10% 0%, #f8fafc, #e7eeef)",
+            backgroundPosition: "12px 12px, 12px 12px, 0 0",
+            backgroundSize: "24px 24px, 24px 24px, 100% 100%"
           }}
         >
           <LiquidSearchBox

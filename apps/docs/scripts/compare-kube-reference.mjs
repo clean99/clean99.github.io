@@ -17,25 +17,26 @@ const references = [
     name: "magnifying-glass",
     storyId: "liquid-glass-liquidlens--kube-reference",
     targetId: "magnifying-glass",
-    maxDiffRatio: 0.58
+    compareRegion: { x: 14, y: 26, width: 216, height: 128 },
+    maxDiffRatio: 0.33
   },
   {
     name: "searchbox",
     storyId: "liquid-glass-liquidsearchbox--kube-reference",
     targetId: "searchbox",
-    maxDiffRatio: 0.17
+    maxDiffRatio: 0.03
   },
   {
     name: "switch",
     storyId: "liquid-glass-liquidswitch--kube-reference",
     targetId: "switch",
-    maxDiffRatio: 0.17
+    maxDiffRatio: 0.03
   },
   {
     name: "slider",
     storyId: "liquid-glass-liquidslider--kube-reference",
     targetId: "slider",
-    maxDiffRatio: 0.17
+    maxDiffRatio: 0.03
   }
 ];
 
@@ -92,7 +93,12 @@ try {
     const candidatePath = path.join(artifactDir, `${reference.name}-candidate.png`);
     await candidateElement.screenshot({ path: candidatePath });
 
-    const diff = await compareImagesInBrowser(browser, targetPath, candidatePath);
+    const diff = await compareImagesInBrowser(
+      browser,
+      targetPath,
+      candidatePath,
+      reference.compareRegion
+    );
     results.push({
       ...reference,
       ...diff,
@@ -112,6 +118,8 @@ console.table(
     width: result.width,
     height: result.height,
     diffRatio: result.diffRatio.toFixed(4),
+    meanDelta: result.meanDelta.toFixed(2),
+    rmsDelta: result.rmsDelta.toFixed(2),
     maxDiffRatio: result.maxDiffRatio
   }))
 );
@@ -158,46 +166,67 @@ async function findTargetDemo(page, id) {
   return handle.asElement();
 }
 
-async function compareImagesInBrowser(browser, targetPath, candidatePath) {
+async function compareImagesInBrowser(browser, targetPath, candidatePath, compareRegion) {
   const [target, candidate] = await Promise.all([
     fs.readFile(targetPath),
     fs.readFile(candidatePath)
   ]);
   const page = await browser.newPage();
   const result = await page.evaluate(
-    async ({ targetBase64, candidateBase64 }) => {
+    async ({ targetBase64, candidateBase64, region }) => {
       const targetImage = await loadImage(targetBase64);
       const candidateImage = await loadImage(candidateBase64);
-      const width = Math.min(targetImage.width, candidateImage.width);
-      const height = Math.min(targetImage.height, candidateImage.height);
+      const source = region ?? {
+        x: 0,
+        y: 0,
+        width: Math.min(targetImage.width, candidateImage.width),
+        height: Math.min(targetImage.height, candidateImage.height)
+      };
+      const width = Math.min(
+        source.width,
+        targetImage.width - source.x,
+        candidateImage.width - source.x
+      );
+      const height = Math.min(
+        source.height,
+        targetImage.height - source.y,
+        candidateImage.height - source.y
+      );
       const canvas = new OffscreenCanvas(width, height);
       const context = canvas.getContext("2d", { willReadFrequently: true });
       if (!context) {
         throw new Error("Missing canvas context");
       }
 
-      context.drawImage(targetImage, 0, 0, width, height);
+      context.drawImage(targetImage, source.x, source.y, width, height, 0, 0, width, height);
       const targetPixels = context.getImageData(0, 0, width, height).data;
       context.clearRect(0, 0, width, height);
-      context.drawImage(candidateImage, 0, 0, width, height);
+      context.drawImage(candidateImage, source.x, source.y, width, height, 0, 0, width, height);
       const candidatePixels = context.getImageData(0, 0, width, height).data;
       let different = 0;
+      let totalDelta = 0;
+      let totalSquaredDelta = 0;
       const threshold = 24;
 
       for (let index = 0; index < targetPixels.length; index += 4) {
         const delta =
           Math.abs(targetPixels[index] - candidatePixels[index]) +
-          Math.abs(targetPixels[index + 1] - candidatePixels[index + 1]) +
-          Math.abs(targetPixels[index + 2] - candidatePixels[index + 2]) +
-          Math.abs(targetPixels[index + 3] - candidatePixels[index + 3]);
+            Math.abs(targetPixels[index + 1] - candidatePixels[index + 1]) +
+            Math.abs(targetPixels[index + 2] - candidatePixels[index + 2]) +
+            Math.abs(targetPixels[index + 3] - candidatePixels[index + 3]);
+        totalDelta += delta;
+        totalSquaredDelta += delta * delta;
         if (delta > threshold) {
           different += 1;
         }
       }
 
+      const pixelCount = width * height;
       return {
-        diffRatio: different / (width * height),
+        diffRatio: different / pixelCount,
         height,
+        meanDelta: totalDelta / pixelCount,
+        rmsDelta: Math.sqrt(totalSquaredDelta / pixelCount),
         width
       };
 
@@ -208,6 +237,7 @@ async function compareImagesInBrowser(browser, targetPath, candidatePath) {
     },
     {
       candidateBase64: candidate.toString("base64"),
+      region: compareRegion,
       targetBase64: target.toString("base64")
     }
   );

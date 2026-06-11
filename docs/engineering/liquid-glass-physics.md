@@ -94,6 +94,19 @@ The gate should fail on:
 - Unexpected crosshatch material texture.
 - Layout geometry drift beyond the documented component target.
 
+Current `pnpm --filter docs test:kube-reference` thresholds:
+
+| Target | Compared Region | Current Threshold |
+| --- | --- | --- |
+| `magnifying-glass` | Lens optical crop, excluding article image and paragraphs | `0.33` |
+| `searchbox` | Full component demo frame | `0.03` |
+| `switch` | Full component demo frame | `0.03` |
+| `slider` | Full component demo frame | `0.03` |
+
+The lens uses a crop because the reference demo contains article-specific prose and a third-party photo. Those are not component-library acceptance criteria. The crop keeps the test focused on the optical shell, high-contrast text bend, edge highlight, and displacement behavior.
+
+The searchbox, switch, and slider compare the full demo frame because their reference areas contain only deterministic fixture content and the component itself. Matching the reference `24px` grid and radial background reduced their pixel diff from roughly `15%` to roughly `1.4-1.7%`.
+
 ## Lessons From the Failed Iterations
 
 The ugly versions failed for mundane reasons:
