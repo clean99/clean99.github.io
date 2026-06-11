@@ -103,6 +103,7 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
   const surfaceId = useStableId("lg-surface");
   const [hasEnhancedSlot, setHasEnhancedSlot] = useState(false);
   const radiusPx = resolveRadius(radius);
+  // TODO: implement Slot-compatible asChild semantics once the dependency boundary is decided.
 
   const preliminaryMode = resolveLiquidMode({
     requestedMode: mode,

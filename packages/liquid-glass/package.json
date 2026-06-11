@@ -4,7 +4,9 @@
   "private": true,
   "description": "Refractive Liquid Glass components for React, built on @hashintel/refractive with accessible fallbacks.",
   "type": "module",
-  "sideEffects": ["**/*.css"],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,11 +19,17 @@
     "./styles.css": "./dist/styles.css",
     "./tokens.css": "./dist/tokens.css"
   },
-  "files": ["dist", "README.md", "LICENSE", "ATTRIBUTIONS.md"],
+  "files": [
+    "dist",
+    "examples",
+    "README.md",
+    "LICENSE",
+    "ATTRIBUTIONS.md"
+  ],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --clean && node scripts/copy-css.mjs",
     "clean": "rm -rf dist coverage",
-    "lint": "eslint src tests scripts",
+    "lint": "eslint src tests stories scripts",
     "test": "vitest run",
     "test:components": "vitest run --passWithNoTests",
     "test:package": "pnpm build && node tests/package-exports.mjs",
@@ -36,6 +44,7 @@
     "@hashintel/refractive": "0.0.4"
   },
   "devDependencies": {
+    "@storybook/nextjs-vite": "^10.4.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3"
   }

@@ -4,10 +4,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   LiquidButton,
   LiquidCard,
+  LiquidIconButton,
+  LiquidLink,
+  LiquidNav,
   LiquidPill,
   LiquidProvider,
+  LiquidSegmentedControl,
   LiquidSurface,
   LiquidToggle,
+  LiquidToolbar,
   liquidModeStorageKey
 } from "../src";
 
@@ -60,6 +65,65 @@ describe("Liquid components", () => {
     fireEvent.click(toggle);
 
     expect(toggle).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("renders an icon button with an accessible name", () => {
+    render(<LiquidIconButton aria-label="Toggle theme">T</LiquidIconButton>);
+
+    expect(screen.getByRole("button", { name: "Toggle theme" })).toHaveClass("lg-icon-button");
+  });
+
+  it("renders LiquidLink as an anchor", () => {
+    render(<LiquidLink href="/writing/">Writing</LiquidLink>);
+
+    expect(screen.getByRole("link", { name: "Writing" })).toHaveAttribute("href", "/writing/");
+  });
+
+  it("renders nav and toolbar with required labels", () => {
+    render(
+      <>
+        <LiquidNav aria-label="Primary navigation">
+          <LiquidLink href="/">Home</LiquidLink>
+        </LiquidNav>
+        <LiquidToolbar aria-label="Article tools">
+          <LiquidButton>Copy</LiquidButton>
+        </LiquidToolbar>
+      </>
+    );
+
+    expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
+    expect(screen.getByRole("toolbar", { name: "Article tools" })).toBeInTheDocument();
+  });
+
+  it("supports segmented control keyboard changes", () => {
+    const onValueChange = vi.fn();
+    render(
+      <LiquidSegmentedControl
+        aria-label="Theme mode"
+        items={[
+          { label: "Light", value: "light" },
+          { label: "Dark", value: "dark" },
+          { label: "System", value: "system" }
+        ]}
+        onValueChange={onValueChange}
+        value="light"
+      />
+    );
+
+    fireEvent.keyDown(screen.getByRole("radio", { name: "Light" }), { key: "ArrowRight" });
+
+    expect(onValueChange).toHaveBeenCalledWith("dark");
+  });
+
+  it("forwards refs and passthrough props", () => {
+    const ref = { current: null as HTMLElement | null };
+    render(
+      <LiquidButton data-testid="ref-button" ref={ref}>
+        Ref button
+      </LiquidButton>
+    );
+
+    expect(ref.current).toBe(screen.getByTestId("ref-button"));
   });
 
   it("keeps pill text in a readable content layer", () => {

@@ -65,6 +65,63 @@
   white-space: normal;
 }
 
+.lg-nav,
+.lg-toolbar,
+.lg-segmented-control {
+  max-width: 100%;
+}
+
+.lg-nav__surface > .lg-surface__content,
+.lg-toolbar > .lg-surface__content,
+.lg-segmented-control > .lg-surface__content {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.lg-nav__surface > .lg-surface__content {
+  gap: 0.3rem;
+}
+
+.lg-toolbar > .lg-surface__content {
+  gap: 0.35rem;
+}
+
+.lg-icon-button {
+  width: 2.5rem;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+}
+
+.lg-icon-button > .lg-surface__content {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.lg-segmented-control {
+  --lg-surface-padding-x: 0.25rem;
+  --lg-surface-padding-y: 0.25rem;
+}
+
+.lg-segmented-control > .lg-surface__content {
+  gap: 0.2rem;
+}
+
+.lg-segmented-control__item {
+  min-height: 2rem;
+  padding: 0.42rem 0.72rem;
+  box-shadow: none;
+}
+
+.lg-segmented-control__item[aria-checked="true"] {
+  color: white;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 45%),
+    var(--lg-accent);
+  border-color: color-mix(in srgb, var(--lg-accent), white 18%);
+}
+
 .lg-surface--fallback,
 .lg-surface--enhanced {
   -webkit-backdrop-filter: blur(var(--lg-surface-blur)) saturate(var(--lg-surface-saturation));
