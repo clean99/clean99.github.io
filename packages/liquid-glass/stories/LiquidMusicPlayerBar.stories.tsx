@@ -14,6 +14,7 @@ export const KubeReference: Story = {
   render: () => (
     <LiquidProvider defaultMode="enhanced" disableOnMobile={false} maxEnhancedSurfaces={6}>
       <div
+        data-lg-reference-frame="music-player"
         data-lg-theme="light"
         style={{
           position: "relative",

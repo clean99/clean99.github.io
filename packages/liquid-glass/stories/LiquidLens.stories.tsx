@@ -20,13 +20,15 @@ export const KubeReference: Story = {
           minHeight: 360,
           padding: 40,
           background:
-            "linear-gradient(135deg, #fff, #f5f6f4), repeating-linear-gradient(60deg, rgba(255,255,255,0.82) 0 3px, transparent 3px 18px)",
+            "linear-gradient(90deg, rgba(15,23,42,0.055) 0 1px, transparent 1px 48px), linear-gradient(180deg, rgba(15,23,42,0.045) 0 1px, transparent 1px 48px), linear-gradient(135deg, #fff, #f5f6f4)",
+          backgroundSize: "48px 48px, 48px 48px, auto",
           color: "#000",
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
         }}
       >
         <div
+          data-lg-reference-frame="magnifying-glass"
           style={{
             position: "relative",
             width: 706,

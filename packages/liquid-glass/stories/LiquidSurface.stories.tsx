@@ -23,7 +23,8 @@ export const KubeAlignedEnhanced: Story = {
           padding: "72px 0",
           color: "#131316",
           background:
-            "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(244,245,243,0.9)), repeating-linear-gradient(60deg, rgba(255,255,255,0.75) 0 3px, transparent 3px 18px), repeating-linear-gradient(120deg, rgba(255,255,255,0.55) 0 3px, transparent 3px 18px)",
+            "linear-gradient(90deg, rgba(15,23,42,0.05) 0 1px, transparent 1px 48px), linear-gradient(180deg, rgba(15,23,42,0.04) 0 1px, transparent 1px 48px), linear-gradient(135deg, rgba(255,255,255,0.96), rgba(244,245,243,0.94))",
+          backgroundSize: "48px 48px, 48px 48px, auto",
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
         }}
@@ -212,7 +213,8 @@ export const KubeSearchboxEnhanced: Story = {
           padding: "72px 0",
           color: "#131316",
           background:
-            "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(244,245,243,0.9)), repeating-linear-gradient(60deg, rgba(255,255,255,0.75) 0 3px, transparent 3px 18px), repeating-linear-gradient(120deg, rgba(255,255,255,0.55) 0 3px, transparent 3px 18px)",
+            "linear-gradient(90deg, rgba(15,23,42,0.05) 0 1px, transparent 1px 48px), linear-gradient(180deg, rgba(15,23,42,0.04) 0 1px, transparent 1px 48px), linear-gradient(135deg, rgba(255,255,255,0.96), rgba(244,245,243,0.94))",
+          backgroundSize: "48px 48px, 48px 48px, auto",
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
         }}

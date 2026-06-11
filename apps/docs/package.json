@@ -10,6 +10,7 @@
     "lint": "eslint .storybook stories scripts vitest.config.ts",
     "test:components": "vitest run --passWithNoTests",
     "test:storybook": "pnpm --filter @clean99/liquid-glass build && storybook build --quiet --output-dir storybook-static-test && node scripts/verify-enhanced-storybook.mjs && rm -rf storybook-static-test",
+    "test:kube-reference": "pnpm --filter @clean99/liquid-glass build && storybook build --quiet --output-dir storybook-static-test && node scripts/compare-kube-reference.mjs; status=$?; rm -rf storybook-static-test; exit $status",
     "test:unit": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },

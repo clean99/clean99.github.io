@@ -8,13 +8,15 @@ const sceneBackground = {
   dark: [
     "radial-gradient(circle at 18% 18%, rgba(10, 132, 255, 0.22), transparent 28%)",
     "radial-gradient(circle at 82% 30%, rgba(48, 209, 88, 0.12), transparent 34%)",
-    "repeating-linear-gradient(60deg, rgba(255,255,255,0.055) 0 2px, transparent 2px 22px)",
+    "linear-gradient(90deg, rgba(255,255,255,0.07) 0 1px, transparent 1px 72px)",
+    "linear-gradient(180deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 72px)",
     "linear-gradient(135deg, #08111d, #101923 52%, #0d1517)"
   ].join(", "),
   light: [
-    "radial-gradient(circle at 18% 18%, rgba(10, 132, 255, 0.12), transparent 28%)",
-    "radial-gradient(circle at 82% 30%, rgba(48, 209, 88, 0.1), transparent 34%)",
-    "repeating-linear-gradient(60deg, rgba(15,23,42,0.045) 0 2px, transparent 2px 22px)",
+    "radial-gradient(circle at 18% 18%, rgba(10, 132, 255, 0.1), transparent 30%)",
+    "radial-gradient(circle at 82% 30%, rgba(48, 209, 88, 0.08), transparent 34%)",
+    "linear-gradient(90deg, rgba(15,23,42,0.055) 0 1px, transparent 1px 72px)",
+    "linear-gradient(180deg, rgba(15,23,42,0.045) 0 1px, transparent 1px 72px)",
     "linear-gradient(135deg, #fbfcfd, #eef4f4 52%, #f7f8f6)"
   ].join(", ")
 };
@@ -45,7 +47,7 @@ export function StoryFrame({
           padding: 32,
           color: "var(--lg-text)",
           background: sceneBackground[theme],
-          backgroundSize: "auto, auto, 44px 44px, auto",
+          backgroundSize: "auto, auto, 72px 72px, 72px 72px, auto",
           fontFamily: fontStack
         }}
       >
@@ -112,7 +114,9 @@ export function StoryFrame({
             </div>
           </>
         ) : null}
-        <div style={{ position: "relative", zIndex: 1, maxWidth: width }}>{children}</div>
+        <div style={{ position: "relative", zIndex: 1, maxWidth: width, margin: "0 auto" }}>
+          {children}
+        </div>
       </div>
     </LiquidProvider>
   );

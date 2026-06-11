@@ -20,12 +20,14 @@ export const KubeReference: Story = {
           minHeight: 360,
           padding: 40,
           background:
-            "linear-gradient(135deg, #fff, #f5f6f4), repeating-linear-gradient(60deg, rgba(255,255,255,0.82) 0 3px, transparent 3px 18px)",
+            "linear-gradient(90deg, rgba(15,23,42,0.055) 0 1px, transparent 1px 48px), linear-gradient(180deg, rgba(15,23,42,0.045) 0 1px, transparent 1px 48px), linear-gradient(135deg, #fff, #f5f6f4)",
+          backgroundSize: "48px 48px, 48px 48px, auto",
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
         }}
       >
         <div
+          data-lg-reference-frame="searchbox"
           style={{
             position: "relative",
             width: 706,
@@ -49,6 +51,22 @@ export const KubeReference: Story = {
               }
             }}
           />
+          <label
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: 12,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              color: "#111",
+              fontSize: 10,
+              transform: "translateX(-50%)"
+            }}
+          >
+            <input style={{ width: 12, height: 12, margin: 0 }} type="checkbox" /> Use image
+            background
+          </label>
         </div>
       </div>
     </LiquidProvider>
