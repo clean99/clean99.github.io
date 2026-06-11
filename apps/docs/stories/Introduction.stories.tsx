@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
   LiquidButton,
-  LiquidCard,
+  LiquidLens,
   LiquidNav,
   LiquidProvider,
   liquidPackageName
@@ -14,7 +14,7 @@ const meta = {
     a11y: { test: "error" }
   },
   render: () => (
-    <LiquidProvider defaultMode="enhanced" disableOnMobile={false} maxEnhancedSurfaces={3}>
+    <LiquidProvider defaultMode="enhanced" disableOnMobile={false} maxEnhancedSurfaces={8}>
       <main
         data-lg-theme="dark"
         style={{
@@ -51,14 +51,14 @@ const meta = {
           REFRACTION FIELD · LIQUID GLASS · KOH HOM ·
         </div>
         <div style={{ position: "relative", zIndex: 1, display: "grid", gap: 54 }}>
-          <LiquidNav aria-label="Component library navigation" intensity="medium">
-            <span style={{ padding: "0 0.75rem", color: "var(--lg-text-muted)" }}>
+          <LiquidNav aria-label="Component library navigation" intensity="strong">
+            <span style={{ padding: "0 0.75rem", color: "rgba(255,255,255,0.68)", textShadow: "0 1px 3px rgba(0,0,0,0.62)" }}>
               Chrome enhanced
             </span>
-            <LiquidButton>Surface</LiquidButton>
-            <LiquidButton>Button</LiquidButton>
-            <LiquidButton>Nav</LiquidButton>
-            <LiquidButton>Toggle</LiquidButton>
+            <LiquidButton aria-current="page" mode="off">Surface</LiquidButton>
+            <LiquidButton mode="off">Button</LiquidButton>
+            <LiquidButton mode="off">Nav</LiquidButton>
+            <LiquidButton mode="off">Toggle</LiquidButton>
           </LiquidNav>
           <section
             style={{
@@ -85,18 +85,85 @@ const meta = {
                 <LiquidButton intensity="medium" mode="fallback">Explore AI Lab</LiquidButton>
               </div>
             </div>
-            <LiquidCard intensity="strong">
-              <article style={{ display: "grid", gap: 14 }}>
-                <strong style={{ color: "var(--lg-accent-2)", textTransform: "uppercase" }}>
+            <div
+              aria-label="Liquid Glass physical acceptance sample"
+              role="img"
+              style={{
+                position: "relative",
+                minHeight: 420,
+                overflow: "hidden",
+                border: "1px solid rgba(255,255,255,0.14)",
+                borderRadius: 14,
+                background: [
+                  "linear-gradient(90deg, rgba(255,255,255,0.18) 0 1px, transparent 1px 44px)",
+                  "linear-gradient(180deg, rgba(255,255,255,0.14) 0 1px, transparent 1px 44px)",
+                  "linear-gradient(135deg, rgba(10,132,255,0.18), rgba(48,209,88,0.16))",
+                  "linear-gradient(135deg, #0b1724, #111b22)"
+                ].join(", "),
+                backgroundSize: "44px 44px, 44px 44px, auto, auto"
+              }}
+            >
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  left: -24,
+                  top: 86,
+                  color: "rgba(255,255,255,0.2)",
+                  fontSize: 58,
+                  fontWeight: 900,
+                  letterSpacing: "0.02em",
+                  transform: "rotate(-7deg)",
+                  whiteSpace: "nowrap"
+                }}
+              >
+                REFRACTION FIELD · LIQUID GLASS
+              </div>
+              <span
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  left: -18,
+                  right: 32,
+                  top: 234,
+                  height: 16,
+                  borderRadius: 999,
+                  background: "linear-gradient(90deg, #65b8ff, #56d6a8)",
+                  transform: "rotate(-7deg)"
+                }}
+              />
+              <LiquidLens
+                refraction={{
+                  blur: 0,
+                  glassThickness: 120,
+                  bezelWidth: 18,
+                  refractiveIndex: 1.5,
+                  specularOpacity: 0.5
+                }}
+                style={{ position: "absolute", left: 36, top: 60, zIndex: 2 }}
+              />
+              <article
+                style={{
+                  position: "absolute",
+                  right: 30,
+                  bottom: 30,
+                  width: 292,
+                  color: "rgba(255,255,255,0.92)",
+                  textShadow: "0 1px 3px rgba(0,0,0,0.58)"
+                }}
+              >
+                <strong style={{ color: "#32d96b", textTransform: "uppercase" }}>
                   Acceptance sample
                 </strong>
-                <h2 style={{ margin: 0, fontSize: "1.8rem" }}>You should see bent grid lines.</h2>
-                <p style={{ margin: 0, color: "var(--lg-text-muted)", lineHeight: 1.6 }}>
-                  If this looks like a white translucent rectangle, the component is failing the
-                  Liquid Glass target.
+                <h2 style={{ margin: "14px 0 12px", fontSize: "1.8rem", lineHeight: 1.1 }}>
+                  Edges bend the field. Text stays crisp.
+                </h2>
+                <p style={{ margin: 0, color: "rgba(255,255,255,0.68)", lineHeight: 1.55 }}>
+                  The glass layer displaces the background only. Foreground copy remains outside
+                  the filter.
                 </p>
               </article>
-            </LiquidCard>
+            </div>
           </section>
         </div>
       </main>

@@ -13,9 +13,11 @@ type Story = StoryObj;
 
 export const BlogNavigationLight: Story = {
   render: () => (
-    <StoryFrame mode="fallback">
+    <StoryFrame mode="enhanced" theme="light" field={false}>
       <LiquidNav aria-label="Primary navigation">
-        <LiquidLink href="/">Home</LiquidLink>
+        <LiquidLink aria-current="page" href="/">
+          Home
+        </LiquidLink>
         <LiquidLink href="/writing/">Writing</LiquidLink>
         <LiquidLink href="/projects/">Projects</LiquidLink>
         <LiquidLink href="/ai-coding-lab/">AI Lab</LiquidLink>
@@ -29,9 +31,11 @@ export const BlogNavigationLight: Story = {
 
 export const BlogNavigationDark: Story = {
   render: () => (
-    <StoryFrame mode="fallback" theme="dark">
+    <StoryFrame mode="enhanced" theme="dark" field={false}>
       <LiquidNav aria-label="Primary navigation">
-        <LiquidLink href="/">Home</LiquidLink>
+        <LiquidLink aria-current="page" href="/">
+          Home
+        </LiquidLink>
         <LiquidLink href="/writing/">Writing</LiquidLink>
         <LiquidLink href="/projects/">Projects</LiquidLink>
         <LiquidLink href="/ai-coding-lab/">AI Lab</LiquidLink>
@@ -47,6 +51,21 @@ export const SmallViewport: Story = {
         <LiquidLink href="/">Home</LiquidLink>
         <LiquidLink href="/writing/">Writing</LiquidLink>
         <LiquidLink href="/projects/">Projects</LiquidLink>
+      </LiquidNav>
+    </StoryFrame>
+  )
+};
+
+export const AppleLikeTabs: Story = {
+  render: () => (
+    <StoryFrame mode="enhanced" theme="light" width={520} height={260} field={false}>
+      <LiquidNav aria-label="Section tabs">
+        <LiquidLink aria-current="page" href="/">
+          Home
+        </LiquidLink>
+        <LiquidLink href="/writing/">Writing</LiquidLink>
+        <LiquidLink href="/projects/">Projects</LiquidLink>
+        <LiquidLink href="/ai-coding-lab/">AI Lab</LiquidLink>
       </LiquidNav>
     </StoryFrame>
   )

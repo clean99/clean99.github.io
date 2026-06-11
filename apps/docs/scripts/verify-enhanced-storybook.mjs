@@ -21,6 +21,29 @@ const stories = [
     height: 45,
     radius: "28px",
     backgroundColor: "rgba(255, 255, 255, 0.05)"
+  },
+  {
+    id: "liquid-glass-liquidswitch--kube-reference",
+    selector: ".lg-switch__thumb",
+    width: 95,
+    height: 60,
+    radius: "46px",
+    backgroundColor: "rgb(255, 255, 255)"
+  },
+  {
+    id: "liquid-glass-liquidslider--kube-reference",
+    selector: ".lg-slider__thumb",
+    width: 54,
+    height: 36,
+    radius: "30px",
+    backgroundColor: "rgb(255, 255, 255)"
+  },
+  {
+    id: "liquid-glass-liquidmusicplayerbar--kube-reference",
+    selector: ".lg-music-player__surface",
+    width: 640,
+    height: 63,
+    radius: "34px"
   }
 ];
 

@@ -12,9 +12,12 @@ import {
   LiquidSearchBox,
   LiquidProvider,
   LiquidSegmentedControl,
+  LiquidSlider,
   LiquidSurface,
+  LiquidSwitch,
   LiquidToggle,
   LiquidToolbar,
+  LiquidMusicPlayerBar,
   liquidModeStorageKey
 } from "../src";
 
@@ -89,11 +92,38 @@ describe("Liquid components", () => {
   });
 
   it("renders LiquidSearchBox as a native search input", () => {
-    render(<LiquidSearchBox aria-label="Search writing" />);
+    const { container } = render(<LiquidSearchBox aria-label="Search writing" />);
 
     expect(screen.getByRole("searchbox", { name: "Search writing" })).toHaveClass(
       "lg-searchbox__input"
     );
+    expect(container.querySelector("svg.lg-searchbox__magnifier")).toBeInTheDocument();
+  });
+
+  it("renders LiquidSwitch with switch semantics and toggles checked state", () => {
+    render(<LiquidSwitch aria-label="Use image background" defaultChecked={false} />);
+
+    const control = screen.getByRole("switch", { name: "Use image background" });
+    expect(control).toHaveAttribute("aria-checked", "false");
+
+    fireEvent.click(control);
+
+    expect(control).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("renders LiquidSlider as a native range input", () => {
+    render(<LiquidSlider aria-label="Refraction level" defaultValue={10} />);
+
+    const slider = screen.getByRole("slider", { name: "Refraction level" });
+    expect(slider).toHaveAttribute("type", "range");
+    expect(slider).toHaveValue("10");
+  });
+
+  it("renders LiquidMusicPlayerBar content outside the displacement layer", () => {
+    render(<LiquidMusicPlayerBar artist="Artist" title="Track" />);
+
+    expect(screen.getByText("Track")).toHaveClass("lg-music-player__title");
+    expect(screen.getByText("Artist")).toHaveClass("lg-music-player__artist");
   });
 
   it("renders nav and toolbar with required labels", () => {

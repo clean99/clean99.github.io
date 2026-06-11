@@ -96,6 +96,9 @@ Implemented components:
 - `LiquidIconButton`
 - `LiquidLens`
 - `LiquidSearchBox`
+- `LiquidSwitch`
+- `LiquidSlider`
+- `LiquidMusicPlayerBar`
 - `LiquidCard`
 - `LiquidPill`
 - `LiquidToggle`
@@ -110,6 +113,9 @@ Kube-aligned primitives:
 
 - `LiquidLens` is a decorative capsule lens tuned for transparent refraction over high-contrast content. It defaults to a 210x120 lens, 75px filter radius, transparent fill, and light inset shadows.
 - `LiquidSearchBox` is a native `<input type="search">` wrapped in a refractive pill surface. It follows the kube searchbox dimensions and keeps the editable text outside the displacement layer.
+- `LiquidSwitch` keeps the track as a semantic switch and applies refraction only to the thumb, matching the kube demo's physical model.
+- `LiquidSlider` keeps the range input native and applies refraction only to the draggable thumb.
+- `LiquidMusicPlayerBar` provides a refractive player plate with foreground metadata and controls outside the displacement layer.
 
 ## Design Tokens
 

@@ -1,6 +1,24 @@
 import type { ReactNode } from "react";
 import { LiquidProvider, type LiquidMode } from "../src";
 
+const fontStack =
+  '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif';
+
+const sceneBackground = {
+  dark: [
+    "radial-gradient(circle at 18% 18%, rgba(10, 132, 255, 0.22), transparent 28%)",
+    "radial-gradient(circle at 82% 30%, rgba(48, 209, 88, 0.12), transparent 34%)",
+    "repeating-linear-gradient(60deg, rgba(255,255,255,0.055) 0 2px, transparent 2px 22px)",
+    "linear-gradient(135deg, #08111d, #101923 52%, #0d1517)"
+  ].join(", "),
+  light: [
+    "radial-gradient(circle at 18% 18%, rgba(10, 132, 255, 0.12), transparent 28%)",
+    "radial-gradient(circle at 82% 30%, rgba(48, 209, 88, 0.1), transparent 34%)",
+    "repeating-linear-gradient(60deg, rgba(15,23,42,0.045) 0 2px, transparent 2px 22px)",
+    "linear-gradient(135deg, #fbfcfd, #eef4f4 52%, #f7f8f6)"
+  ].join(", ")
+};
+
 export function StoryFrame({
   children,
   mode = "enhanced",
@@ -26,25 +44,9 @@ export function StoryFrame({
           overflow: "hidden",
           padding: 32,
           color: "var(--lg-text)",
-          background:
-            theme === "dark"
-              ? [
-                  "radial-gradient(circle at 18% 16%, rgba(10, 132, 255, 0.34), transparent 27%)",
-                  "radial-gradient(circle at 82% 18%, rgba(48, 209, 88, 0.22), transparent 30%)",
-                  "linear-gradient(90deg, rgba(255,255,255,0.18) 0 1px, transparent 1px 64px)",
-                  "linear-gradient(180deg, rgba(255,255,255,0.14) 0 1px, transparent 1px 64px)",
-                  "linear-gradient(135deg, #08111d, #14202c)"
-                ].join(", ")
-              : [
-                  "radial-gradient(circle at 18% 16%, rgba(10, 132, 255, 0.22), transparent 27%)",
-                  "radial-gradient(circle at 82% 18%, rgba(48, 209, 88, 0.18), transparent 30%)",
-                  "linear-gradient(90deg, rgba(12,20,30,0.18) 0 1px, transparent 1px 64px)",
-                  "linear-gradient(180deg, rgba(12,20,30,0.14) 0 1px, transparent 1px 64px)",
-                  "linear-gradient(135deg, #f4f8fb, #dbe8ef)"
-                ].join(", "),
-          backgroundSize: "auto, auto, 64px 64px, 64px 64px, auto",
-          fontFamily:
-            '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
+          background: sceneBackground[theme],
+          backgroundSize: "auto, auto, 44px 44px, auto",
+          fontFamily: fontStack
         }}
       >
         {field ? (
@@ -53,67 +55,61 @@ export function StoryFrame({
               aria-hidden="true"
               style={{
                 position: "absolute",
-                top: 88,
-                left: -28,
-                right: -28,
-                display: "grid",
-                gap: 14,
-                transform: "rotate(-7deg)",
-                opacity: theme === "dark" ? 0.82 : 0.74
+                left: -80,
+                right: -80,
+                top: height * 0.42,
+                height: 96,
+                opacity: theme === "dark" ? 0.48 : 0.32,
+                transform: "rotate(-5deg)"
               }}
             >
-              {["REFRACTION FIELD", "KOH HOM FRONTEND SYSTEMS", "AI AGENTS PERFORMANCE"].map(
-                (label, index) => (
-                  <div
-                    key={label}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 16,
-                      color:
-                        theme === "dark" ? "rgba(255,255,255,0.58)" : "rgba(8,18,30,0.56)",
-                      fontSize: 18,
-                      fontWeight: 800,
-                      lineHeight: 1,
-                      whiteSpace: "nowrap"
-                    }}
-                  >
-                    <span>{label}</span>
-                    <span
-                      style={{
-                        flex: 1,
-                        height: index === 1 ? 18 : 12,
-                        minWidth: 220,
-                        borderRadius: 999,
-                        background:
-                          index === 1
-                            ? "linear-gradient(90deg, #ffffff 0 13%, transparent 13% 19%, #63b8ff 19% 38%, transparent 38% 44%, #56e2a7 44% 72%, transparent 72% 78%, #ffffff 78% 100%)"
-                            : "linear-gradient(90deg, #63b8ff, #56e2a7, #ffffff)"
-                      }}
-                    />
-                  </div>
-                )
-              )}
+              <span
+                style={{
+                  position: "absolute",
+                  left: "12%",
+                  right: "28%",
+                  top: 14,
+                  height: 14,
+                  borderRadius: 999,
+                  background:
+                    theme === "dark"
+                      ? "linear-gradient(90deg, rgba(105,189,255,0.72), rgba(83,215,163,0.72))"
+                      : "linear-gradient(90deg, rgba(10,132,255,0.34), rgba(48,209,88,0.34))"
+                }}
+              />
+              <span
+                style={{
+                  position: "absolute",
+                  left: "32%",
+                  right: "10%",
+                  top: 58,
+                  height: 18,
+                  borderRadius: 999,
+                  background:
+                    theme === "dark"
+                      ? "linear-gradient(90deg, rgba(255,255,255,0.52), rgba(99,184,255,0.68))"
+                      : "linear-gradient(90deg, rgba(15,23,42,0.16), rgba(10,132,255,0.28))"
+                }}
+              />
             </div>
             <div
               aria-hidden="true"
               style={{
                 position: "absolute",
-                right: 42,
+                left: 28,
                 bottom: 28,
-                width: 220,
-                height: 220,
-                border:
-                  theme === "dark"
-                    ? "2px solid rgba(255,255,255,0.22)"
-                    : "2px solid rgba(8,18,30,0.2)",
-                borderRadius: 999,
-                boxShadow:
-                  theme === "dark"
-                    ? "0 0 0 42px rgba(255,255,255,0.045), inset 0 0 0 34px rgba(99,184,255,0.11)"
-                    : "0 0 0 42px rgba(8,18,30,0.045), inset 0 0 0 34px rgba(10,132,255,0.1)"
+                color: theme === "dark" ? "rgba(255,255,255,0.18)" : "rgba(15,23,42,0.16)",
+                fontSize: 18,
+                fontWeight: 800,
+                letterSpacing: "0.02em",
+                lineHeight: 1,
+                opacity: 0.8,
+                transform: "rotate(-7deg)",
+                whiteSpace: "nowrap"
               }}
-            />
+            >
+              REFRACTION FIELD
+            </div>
           </>
         ) : null}
         <div style={{ position: "relative", zIndex: 1, maxWidth: width }}>{children}</div>
