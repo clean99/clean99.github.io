@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { LiquidProvider, LiquidSurface } from "../src";
+import { LiquidLens, LiquidProvider, LiquidSearchBox, LiquidSurface } from "../src";
 import { longChineseText, longEnglishText, mixedText, StoryFrame } from "./story-fixtures";
 
 const meta = {
@@ -11,38 +11,9 @@ const meta = {
 export default meta;
 type Story = StoryObj;
 
-function KubeCloneStyles() {
-  return (
-    <style>
-      {`
-        .kube-clone-lens {
-          background: transparent !important;
-          border: 0 !important;
-        }
-
-        .kube-clone-search {
-          border: 0 !important;
-        }
-
-        .kube-clone-lens::before,
-        .kube-clone-lens::after,
-        .kube-clone-search::before,
-        .kube-clone-search::after {
-          display: none !important;
-        }
-
-        .kube-clone-lens > .lg-surface__content {
-          display: none !important;
-        }
-      `}
-    </style>
-  );
-}
-
 export const KubeAlignedEnhanced: Story = {
   render: () => (
     <LiquidProvider defaultMode="enhanced" disableOnMobile={false} maxEnhancedSurfaces={8}>
-      <KubeCloneStyles />
       <div
         data-lg-theme="light"
         style={{
@@ -197,12 +168,8 @@ export const KubeAlignedEnhanced: Story = {
                 </span>
               </div>
             </div>
-            <LiquidSurface
+            <LiquidLens
               aria-hidden="true"
-              className="kube-clone-lens"
-              intensity="strong"
-              kind="pill"
-              radius="pill"
               refraction={{
                 blur: 0,
                 glassThickness: 120,
@@ -225,9 +192,7 @@ export const KubeAlignedEnhanced: Story = {
                   "0 4px 9px rgba(0, 0, 0, 0.16), inset 0 2px 24px rgba(0, 0, 0, 0.2), inset 0 -2px 24px rgba(255, 255, 255, 0.2)",
                 zIndex: 5
               }}
-            >
-              {null}
-            </LiquidSurface>
+            />
           </div>
         </div>
       </div>
@@ -238,7 +203,6 @@ export const KubeAlignedEnhanced: Story = {
 export const KubeSearchboxEnhanced: Story = {
   render: () => (
     <LiquidProvider defaultMode="enhanced" disableOnMobile={false} maxEnhancedSurfaces={8}>
-      <KubeCloneStyles />
       <div
         data-lg-theme="light"
         style={{
@@ -267,48 +231,32 @@ export const KubeSearchboxEnhanced: Story = {
             backgroundSize: "32px 32px, 32px 32px, auto"
           }}
         >
-          <LiquidSurface
-            className="kube-clone-search"
-            intensity="medium"
-            kind="pill"
-            radius="pill"
-            refraction={{
-              blur: 1,
-              glassThickness: 84,
-              bezelWidth: 12,
-              refractiveIndex: 1.42,
-              radius: 28,
-              specularOpacity: 0.2
+          <LiquidSearchBox
+            aria-label="Search"
+            surfaceProps={{
+              refraction: {
+                blur: 1,
+                glassThickness: 84,
+                bezelWidth: 12,
+                refractiveIndex: 1.42,
+                radius: 28,
+                specularOpacity: 0.2
+              },
+              style: {
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                width: 336,
+                height: 45,
+                padding: "0 20px",
+                color: "rgba(0,0,0,0.7)",
+                background: "rgba(255,255,255,0.05)",
+                borderRadius: 28,
+                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.16)",
+                transform: "translate(-50%, -50%)"
+              }
             }}
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              width: 336,
-              height: 45,
-              padding: "0 20px",
-              color: "rgba(0,0,0,0.7)",
-              background: "rgba(255,255,255,0.05)",
-              borderRadius: 28,
-              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.16)",
-              transform: "translate(-50%, -50%)"
-            }}
-          >
-            <span
-              aria-hidden="true"
-              style={{
-                display: "inline-block",
-                width: 13,
-                height: 13,
-                border: "1.7px solid currentColor",
-                borderRadius: 999,
-                boxShadow: "7px 7px 0 -5.5px currentColor",
-                opacity: 0.72,
-                transform: "rotate(-12deg)"
-              }}
-            />
-            <span style={{ color: "rgba(0,0,0,0.42)", fontSize: 15 }}>Search</span>
-          </LiquidSurface>
+          />
         </div>
       </div>
     </LiquidProvider>

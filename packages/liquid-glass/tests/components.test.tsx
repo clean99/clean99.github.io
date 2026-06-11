@@ -5,9 +5,11 @@ import {
   LiquidButton,
   LiquidCard,
   LiquidIconButton,
+  LiquidLens,
   LiquidLink,
   LiquidNav,
   LiquidPill,
+  LiquidSearchBox,
   LiquidProvider,
   LiquidSegmentedControl,
   LiquidSurface,
@@ -77,6 +79,21 @@ describe("Liquid components", () => {
     render(<LiquidLink href="/writing/">Writing</LiquidLink>);
 
     expect(screen.getByRole("link", { name: "Writing" })).toHaveAttribute("href", "/writing/");
+  });
+
+  it("renders LiquidLens as a decorative refractive surface by default", () => {
+    render(<LiquidLens data-testid="lens" />);
+
+    expect(screen.getByTestId("lens")).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByTestId("lens")).toHaveClass("lg-lens");
+  });
+
+  it("renders LiquidSearchBox as a native search input", () => {
+    render(<LiquidSearchBox aria-label="Search writing" />);
+
+    expect(screen.getByRole("searchbox", { name: "Search writing" })).toHaveClass(
+      "lg-searchbox__input"
+    );
   });
 
   it("renders nav and toolbar with required labels", () => {

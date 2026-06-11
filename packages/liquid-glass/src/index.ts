@@ -4,9 +4,11 @@ export { FallbackGlassSurface } from "./components/FallbackGlassSurface";
 export { LiquidButton } from "./components/LiquidButton";
 export { LiquidCard } from "./components/LiquidCard";
 export { LiquidIconButton } from "./components/LiquidIconButton";
+export { LiquidLens } from "./components/LiquidLens";
 export { LiquidLink } from "./components/LiquidLink";
 export { LiquidNav } from "./components/LiquidNav";
 export { LiquidPill } from "./components/LiquidPill";
+export { LiquidSearchBox } from "./components/LiquidSearchBox";
 export { LiquidSegmentedControl } from "./components/LiquidSegmentedControl";
 export { LiquidSurface } from "./components/LiquidSurface";
 export { LiquidToggle } from "./components/LiquidToggle";
@@ -42,9 +44,11 @@ export const liquidPackageName = "@clean99/liquid-glass";
 export type { LiquidButtonProps } from "./components/LiquidButton";
 export type { LiquidCardProps } from "./components/LiquidCard";
 export type { LiquidIconButtonProps } from "./components/LiquidIconButton";
+export type { LiquidLensProps } from "./components/LiquidLens";
 export type { LiquidLinkProps } from "./components/LiquidLink";
 export type { LiquidNavProps } from "./components/LiquidNav";
 export type { LiquidPillProps } from "./components/LiquidPill";
+export type { LiquidSearchBoxProps } from "./components/LiquidSearchBox";
 export type {
   LiquidSegmentedControlItem,
   LiquidSegmentedControlProps
