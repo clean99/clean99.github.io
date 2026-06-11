@@ -285,6 +285,14 @@
   opacity: 0.34;
 }
 
+.lg-surface.lg-lens {
+  background: transparent;
+}
+
+.lg-surface.lg-searchbox {
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .lg-surface--fallback::after,
 .lg-surface--solid::after,
 .lg-surface--off::after {

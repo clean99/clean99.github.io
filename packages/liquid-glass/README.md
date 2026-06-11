@@ -15,7 +15,7 @@ The package is private inside this monorepo until publication is intentionally h
 ## Quick Start
 
 ```tsx
-import { LiquidButton, LiquidCard, LiquidProvider } from "@clean99/liquid-glass";
+import { LiquidButton, LiquidCard, LiquidLens, LiquidProvider } from "@clean99/liquid-glass";
 import "@clean99/liquid-glass/styles.css";
 
 export function Example() {
@@ -24,6 +24,7 @@ export function Example() {
       <LiquidCard>
         <h2>Frontend Systems</h2>
         <p>Reliable UI architecture with a readable fallback material.</p>
+        <LiquidLens />
         <LiquidButton>Read Writing</LiquidButton>
       </LiquidCard>
     </LiquidProvider>
@@ -93,6 +94,8 @@ Implemented components:
 - `FallbackGlassSurface`
 - `LiquidButton`
 - `LiquidIconButton`
+- `LiquidLens`
+- `LiquidSearchBox`
 - `LiquidCard`
 - `LiquidPill`
 - `LiquidToggle`
@@ -102,6 +105,11 @@ Implemented components:
 - `LiquidLink`
 
 `LiquidSurface` is the only component abstraction that selects the render engine. All higher-level components compose it instead of importing `@hashintel/refractive` directly.
+
+Kube-aligned primitives:
+
+- `LiquidLens` is a decorative capsule lens tuned for transparent refraction over high-contrast content. It defaults to a 210x120 lens, 75px filter radius, transparent fill, and light inset shadows.
+- `LiquidSearchBox` is a native `<input type="search">` wrapped in a refractive pill surface. It follows the kube searchbox dimensions and keeps the editable text outside the displacement layer.
 
 ## Design Tokens
 

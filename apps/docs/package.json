@@ -7,9 +7,9 @@
     "build": "pnpm --filter @clean99/liquid-glass build && storybook build --quiet",
     "clean": "rm -rf storybook-static coverage",
     "dev": "storybook dev -p 6006",
-    "lint": "eslint .storybook stories vitest.config.ts",
+    "lint": "eslint .storybook stories scripts vitest.config.ts",
     "test:components": "vitest run --passWithNoTests",
-    "test:storybook": "pnpm --filter @clean99/liquid-glass build && storybook build --quiet --output-dir storybook-static-test && rm -rf storybook-static-test",
+    "test:storybook": "pnpm --filter @clean99/liquid-glass build && storybook build --quiet --output-dir storybook-static-test && node scripts/verify-enhanced-storybook.mjs && rm -rf storybook-static-test",
     "test:unit": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },
