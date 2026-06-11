@@ -94,6 +94,12 @@ Implemented components:
 - `FallbackGlassSurface`
 - `LiquidButton`
 - `LiquidIconButton`
+- `LiquidField`
+- `LiquidLabel`
+- `LiquidInput`
+- `LiquidTextarea`
+- `LiquidFieldDescription`
+- `LiquidFieldError`
 - `LiquidLens`
 - `LiquidSearchBox`
 - `LiquidSwitch`
@@ -149,6 +155,7 @@ The package supports system color scheme and explicit theme scopes:
 ## Accessibility
 
 - Interactive components use native buttons or anchors by default.
+- Field controls use native `input`, `textarea`, `label`, and alert semantics.
 - `LiquidToggle` uses `aria-pressed`.
 - `LiquidNav` and `LiquidToolbar` require accessible labels.
 - `LiquidSegmentedControl` uses `radiogroup` / `radio`.

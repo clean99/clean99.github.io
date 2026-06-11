@@ -3,6 +3,14 @@
 export { FallbackGlassSurface } from "./components/FallbackGlassSurface";
 export { LiquidButton } from "./components/LiquidButton";
 export { LiquidCard } from "./components/LiquidCard";
+export {
+  LiquidField,
+  LiquidFieldDescription,
+  LiquidFieldError,
+  LiquidInput,
+  LiquidLabel,
+  LiquidTextarea
+} from "./components/LiquidField";
 export { LiquidIconButton } from "./components/LiquidIconButton";
 export { LiquidLens } from "./components/LiquidLens";
 export { LiquidLink } from "./components/LiquidLink";
@@ -47,6 +55,15 @@ export const liquidPackageName = "@clean99/liquid-glass";
 
 export type { LiquidButtonProps } from "./components/LiquidButton";
 export type { LiquidCardProps } from "./components/LiquidCard";
+export type {
+  LiquidFieldDescriptionProps,
+  LiquidFieldErrorProps,
+  LiquidFieldProps,
+  LiquidInputProps,
+  LiquidInputSurfaceProps,
+  LiquidLabelProps,
+  LiquidTextareaProps
+} from "./components/LiquidField";
 export type { LiquidIconButtonProps } from "./components/LiquidIconButton";
 export type { LiquidLensProps } from "./components/LiquidLens";
 export type { LiquidLinkProps } from "./components/LiquidLink";

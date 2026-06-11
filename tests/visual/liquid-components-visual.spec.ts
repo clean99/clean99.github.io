@@ -46,6 +46,18 @@ test.describe("liquid glass component visuals", () => {
     await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-tabs-dark.png");
   });
 
+  test("component liquid field light", async ({ page }) => {
+    await page.setViewportSize({ width: 640, height: 340 });
+    await renderFixture(page, fieldFixture("light"));
+    await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-field-light.png");
+  });
+
+  test("component liquid field dark", async ({ page }) => {
+    await page.setViewportSize({ width: 640, height: 340 });
+    await renderFixture(page, fieldFixture("dark"));
+    await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-field-dark.png");
+  });
+
   test("component liquid button light", async ({ page }) => {
     await page.setViewportSize({ width: 520, height: 260 });
     await renderFixture(page, buttonFixture("light"));
@@ -176,6 +188,22 @@ function tabsFixture(theme: "light" | "dark") {
         <h2 style="margin:0 0 8px;font-size:28px;line-height:1.1;">Performance notes</h2>
         <p style="max-width:520px;margin:0;color:var(--lg-text-muted);line-height:1.55;">A single continuous glass plate keeps the tabs readable while the surface carries the material.</p>
       </div>
+    </section>`
+  );
+}
+
+function fieldFixture(theme: "light" | "dark") {
+  return frame(
+    theme,
+    `<section class="lg-field" style="max-width:500px;">
+      <label class="lg-field__label" for="visual-field-title">Article title</label>
+      <div class="lg-surface lg-surface--panel lg-surface--fallback lg-surface--subtle lg-surface--fallback-material lg-field-control lg-input-surface" data-liquid-mode="fallback">
+        <span class="lg-surface__content">
+          <span aria-hidden="true" class="lg-field-control__adornment">#</span>
+          <input class="lg-input" id="visual-field-title" placeholder="Liquid Glass in React" />
+        </span>
+      </div>
+      <p class="lg-field__description">Native text stays readable above the material.</p>
     </section>`
   );
 }

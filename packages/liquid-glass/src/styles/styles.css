@@ -223,6 +223,126 @@
   color: color-mix(in srgb, var(--lg-text), transparent 58%);
 }
 
+.lg-field {
+  display: grid;
+  width: 100%;
+  max-width: 100%;
+  gap: 0.42rem;
+}
+
+.lg-field[data-disabled] {
+  opacity: 0.58;
+}
+
+.lg-field__label {
+  color: color-mix(in srgb, var(--lg-text), transparent 8%);
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.lg-field__description,
+.lg-field__error {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.42;
+}
+
+.lg-field__description {
+  color: var(--lg-text-muted);
+}
+
+.lg-field__error {
+  color: color-mix(in srgb, #ff453a, var(--lg-text) 12%);
+}
+
+.lg-field-control {
+  width: 100%;
+  min-height: 2.85rem;
+  padding: 0 0.9rem;
+  justify-content: flex-start;
+}
+
+.lg-field-control > .lg-surface__content {
+  width: 100%;
+  gap: 0.55rem;
+  justify-content: flex-start;
+}
+
+.lg-field-control:focus-within {
+  border-color: color-mix(in srgb, var(--lg-accent), var(--lg-glass-border) 45%);
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--lg-accent), transparent 82%),
+    inset 0 1px 0 var(--lg-glass-edge),
+    var(--lg-surface-shadow);
+}
+
+.lg-field-control[data-invalid] {
+  border-color: color-mix(in srgb, #ff453a, var(--lg-glass-border) 28%);
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, #ff453a, transparent 86%),
+    inset 0 1px 0 var(--lg-glass-edge),
+    var(--lg-surface-shadow);
+}
+
+.lg-field-control[data-disabled] {
+  cursor: not-allowed;
+}
+
+.lg-field-control__adornment {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--lg-text), transparent 34%);
+  font-size: 0.88rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.lg-input,
+.lg-textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  color: color-mix(in srgb, var(--lg-text), transparent 10%);
+  background: transparent;
+  border: 0;
+  font: inherit;
+  outline: none;
+}
+
+.lg-input {
+  height: 2.3rem;
+  line-height: 1;
+}
+
+.lg-input::placeholder,
+.lg-textarea::placeholder {
+  color: color-mix(in srgb, var(--lg-text), transparent 58%);
+}
+
+.lg-input:disabled,
+.lg-textarea:disabled {
+  cursor: not-allowed;
+}
+
+.lg-textarea-surface {
+  min-height: 7rem;
+  padding: 0.8rem 0.9rem;
+  align-items: stretch;
+}
+
+.lg-textarea-surface > .lg-surface__content {
+  align-items: stretch;
+}
+
+.lg-textarea {
+  min-height: 5.35rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
 .lg-segmented-control {
   --lg-surface-padding-x: 0.35rem;
   --lg-surface-padding-y: 0.35rem;

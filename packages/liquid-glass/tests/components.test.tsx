@@ -4,9 +4,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   LiquidButton,
   LiquidCard,
+  LiquidField,
+  LiquidFieldDescription,
+  LiquidFieldError,
   LiquidIconButton,
+  LiquidInput,
   LiquidLens,
   LiquidLink,
+  LiquidLabel,
   LiquidNav,
   LiquidPill,
   LiquidSearchBox,
@@ -16,6 +21,7 @@ import {
   LiquidSurface,
   LiquidTabs,
   LiquidSwitch,
+  LiquidTextarea,
   LiquidToggle,
   LiquidToolbar,
   LiquidMusicPlayerBar,
@@ -99,6 +105,62 @@ describe("Liquid components", () => {
       "lg-searchbox__input"
     );
     expect(container.querySelector("svg.lg-searchbox__magnifier")).toBeInTheDocument();
+  });
+
+  it("renders a labeled liquid input with helper text and adornments", () => {
+    const ref = { current: null as HTMLInputElement | null };
+    render(
+      <LiquidField>
+        <LiquidLabel htmlFor="email">Email</LiquidLabel>
+        <LiquidInput
+          aria-describedby="email-description"
+          endAdornment=".dev"
+          id="email"
+          placeholder="koh"
+          ref={ref}
+          startAdornment="@"
+        />
+        <LiquidFieldDescription id="email-description">
+          Used for project updates.
+        </LiquidFieldDescription>
+      </LiquidField>
+    );
+
+    const input = screen.getByLabelText("Email");
+    expect(input).toHaveAttribute("placeholder", "koh");
+    expect(input).toHaveAttribute("aria-describedby", "email-description");
+    expect(input.closest(".lg-surface")).toHaveClass("lg-input-surface");
+    expect(ref.current).toBe(input);
+  });
+
+  it("exposes liquid input invalid and disabled states", () => {
+    render(
+      <LiquidField disabled invalid>
+        <LiquidLabel htmlFor="slug">Slug</LiquidLabel>
+        <LiquidInput disabled id="slug" invalid value="duplicate" readOnly />
+        <LiquidFieldError id="slug-error">Slug is already used.</LiquidFieldError>
+      </LiquidField>
+    );
+
+    const input = screen.getByLabelText("Slug");
+    expect(input).toBeDisabled();
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input.closest(".lg-field-control")).toHaveAttribute("data-invalid");
+    expect(screen.getByRole("alert")).toHaveTextContent("Slug is already used.");
+  });
+
+  it("renders liquid textarea as a native textarea", () => {
+    render(
+      <LiquidField>
+        <LiquidLabel htmlFor="message">Message</LiquidLabel>
+        <LiquidTextarea id="message" placeholder="Long form note" />
+      </LiquidField>
+    );
+
+    const textarea = screen.getByLabelText("Message");
+    expect(textarea.tagName).toBe("TEXTAREA");
+    expect(textarea).toHaveClass("lg-textarea");
+    expect(textarea.closest(".lg-surface")).toHaveClass("lg-textarea-surface");
   });
 
   it("renders LiquidSwitch with switch semantics and toggles checked state", () => {
