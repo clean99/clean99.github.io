@@ -1,9 +1,210 @@
 @import "./tokens.css";
 
+.lg-surface,
+.lg-surface *,
+.lg-surface *::before,
+.lg-surface *::after {
+  box-sizing: border-box;
+}
+
+.lg-surface {
+  --lg-surface-radius: var(--lg-radius-lg);
+  --lg-surface-fill: var(--lg-glass-fill);
+  --lg-surface-shadow: var(--lg-glass-shadow);
+  --lg-surface-blur: 18px;
+  --lg-surface-saturation: 1.55;
+  --lg-surface-padding-y: 0.62rem;
+  --lg-surface-padding-x: 0.9rem;
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  color: var(--lg-text);
+  background:
+    linear-gradient(145deg, var(--lg-glass-highlight), rgba(255, 255, 255, 0) 36%),
+    var(--lg-surface-fill);
+  border: 1px solid var(--lg-glass-border);
+  border-radius: var(--lg-surface-radius);
+  box-shadow:
+    inset 0 1px 0 var(--lg-glass-edge),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    var(--lg-surface-shadow);
+  font: inherit;
+  line-height: 1.2;
+  text-decoration: none;
+  transition:
+    background-color 180ms var(--lg-ease-apple),
+    border-color 180ms var(--lg-ease-apple),
+    box-shadow 180ms var(--lg-ease-apple),
+    color 180ms var(--lg-ease-apple),
+    transform 180ms var(--lg-ease-apple);
+}
+
+.lg-surface::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0));
+  content: "";
+  opacity: 0.68;
+  pointer-events: none;
+}
+
+.lg-surface__content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  gap: 0.45rem;
+  color: inherit;
+  white-space: normal;
+}
+
+.lg-surface--fallback,
+.lg-surface--enhanced {
+  -webkit-backdrop-filter: blur(var(--lg-surface-blur)) saturate(var(--lg-surface-saturation));
+  backdrop-filter: blur(var(--lg-surface-blur)) saturate(var(--lg-surface-saturation));
+}
+
+.lg-surface--solid,
+.lg-surface--off,
+.lg-surface--fallback-solid {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: var(--lg-surface-strong);
+}
+
+.lg-surface--fallback-gradient {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.3)),
+    var(--lg-surface);
+}
+
+.lg-surface--subtle {
+  --lg-surface-blur: 14px;
+  --lg-surface-fill: var(--lg-glass-fill);
+}
+
+.lg-surface--medium {
+  --lg-surface-blur: 20px;
+  --lg-surface-fill: var(--lg-glass-fill-strong);
+}
+
+.lg-surface--strong {
+  --lg-surface-blur: 26px;
+  --lg-surface-fill: var(--lg-surface-strong);
+}
+
+.lg-surface--button,
+.lg-surface--toggle {
+  min-height: 2.5rem;
+  padding: var(--lg-surface-padding-y) var(--lg-surface-padding-x);
+  cursor: default;
+  user-select: none;
+}
+
+.lg-surface--button.lg-surface--interactive,
+.lg-surface--toggle.lg-surface--interactive {
+  cursor: pointer;
+}
+
+.lg-surface--card,
+.lg-surface--panel {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  width: 100%;
+  padding: 1rem;
+}
+
+.lg-surface--nav {
+  min-height: 3rem;
+  padding: 0.45rem 0.62rem;
+}
+
+.lg-surface--pill {
+  min-height: 1.9rem;
+  padding: 0.32rem 0.64rem;
+  font-size: 0.875rem;
+}
+
+.lg-surface--interactive:not(.lg-surface--disabled):hover {
+  border-color: color-mix(in srgb, var(--lg-accent), var(--lg-glass-border) 55%);
+  transform: translateY(-1px);
+}
+
+.lg-surface--interactive:not(.lg-surface--disabled):active {
+  transform: translateY(0);
+}
+
+.lg-surface:focus {
+  outline: none;
+}
+
+.lg-surface:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--lg-accent), white 12%);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 5px color-mix(in srgb, var(--lg-accent), transparent 78%),
+    inset 0 1px 0 var(--lg-glass-edge),
+    var(--lg-surface-shadow);
+}
+
+.lg-surface--disabled,
+.lg-surface:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.lg-surface--toggle[data-state="on"] {
+  color: white;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 42%),
+    color-mix(in srgb, var(--lg-accent), black 4%);
+  border-color: color-mix(in srgb, var(--lg-accent), white 14%);
+}
+
+.lg-surface[data-liquid-reduced-motion] {
+  transition: none;
+}
+
 .lg-surface-scaffold {
   color: var(--lg-text);
   background: var(--lg-surface);
   border: 1px solid var(--lg-glass-border);
   border-radius: var(--lg-radius-lg);
   box-shadow: var(--lg-glass-shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lg-surface {
+    transition: none;
+  }
+
+  .lg-surface--interactive:not(.lg-surface--disabled):hover,
+  .lg-surface--interactive:not(.lg-surface--disabled):active {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .lg-surface {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: var(--lg-surface-strong);
+  }
+}
+
+@media (prefers-contrast: more) {
+  .lg-surface {
+    --lg-surface-fill: var(--lg-surface-strong);
+    border-color: var(--lg-text);
+    box-shadow: none;
+  }
 }
