@@ -79,18 +79,20 @@ export const KubeAlignedEnhanced: Story = {
             <div
               style={{
                 position: "absolute",
-                inset: 0,
-                display: "grid",
-                gridTemplateColumns: "1fr 46%",
-                gap: 40,
-                padding: 40
+                inset: 0
               }}
             >
               <div
                 style={{
+                  position: "absolute",
+                  top: 33,
+                  left: 33,
+                  width: 354,
+                  height: 393,
                   display: "flex",
                   flexDirection: "column",
-                  justifyContent: "center",
+                  justifyContent: "flex-start",
+                  paddingTop: 12,
                   minWidth: 0
                 }}
               >
@@ -159,7 +161,11 @@ export const KubeAlignedEnhanced: Story = {
               <div
                 aria-hidden="true"
                 style={{
-                  position: "relative",
+                  position: "absolute",
+                  top: 33,
+                  left: 419,
+                  width: 294,
+                  height: 393,
                   overflow: "hidden",
                   borderRadius: 7,
                   boxShadow: "0 0 0 1px rgba(0,0,0,0.1)"
