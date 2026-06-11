@@ -33,6 +33,7 @@
     "test": "vitest run",
     "test:components": "vitest run --passWithNoTests",
     "test:package": "pnpm build && node tests/package-exports.mjs",
+    "test:physics": "vitest run tests/refraction-physics.test.ts",
     "test:unit": "vitest run",
     "typecheck": "tsc --noEmit"
   },

@@ -1,0 +1,103 @@
+import fs from "node:fs";
+import path from "node:path";
+import { describe, expect, it } from "vitest";
+import {
+  defaultRefractionByIntensity,
+  resolveRefractiveOptions,
+  resolveRefractionRadius,
+  type LiquidIntensity,
+  type RefractiveOptions
+} from "../src";
+
+const styles = fs.readFileSync(path.resolve("src/styles/styles.css"), "utf8");
+const storyFixture = fs.readFileSync(path.resolve("stories/story-fixtures.tsx"), "utf8");
+const surfaceSource = fs.readFileSync(path.resolve("src/components/LiquidSurface.tsx"), "utf8");
+
+const intensities: LiquidIntensity[] = ["subtle", "medium", "strong"];
+type DefaultRefractiveOptions = Omit<RefractiveOptions, "radius">;
+
+describe("Liquid Glass physics contract", () => {
+  it("keeps default optical parameters in a plausible glass range", () => {
+    for (const intensity of intensities) {
+      const options = defaultRefractionByIntensity[intensity];
+
+      expect(options.blur).toBeGreaterThanOrEqual(0);
+      expect(options.blur).toBeLessThanOrEqual(1);
+      expect(options.glassThickness).toBeGreaterThan(0);
+      expect(options.glassThickness).toBeLessThanOrEqual(128);
+      expect(options.bezelWidth).toBeGreaterThan(0);
+      expect(options.bezelWidth).toBeLessThanOrEqual(24);
+      expect(options.refractiveIndex).toBeGreaterThanOrEqual(1.3);
+      expect(options.refractiveIndex).toBeLessThanOrEqual(1.6);
+      expect(options.specularOpacity).toBeGreaterThanOrEqual(0);
+      expect(options.specularOpacity).toBeLessThanOrEqual(0.6);
+      expect(options.specularAngle).toBeGreaterThanOrEqual(0);
+      expect(options.specularAngle).toBeLessThanOrEqual(Math.PI / 2);
+    }
+  });
+
+  it("makes optical intensity monotonic without increasing blur into frosted glass", () => {
+    const values = intensities.map((intensity) => defaultRefractionByIntensity[intensity]);
+
+    expect(isMonotonic(values, "glassThickness")).toBe(true);
+    expect(isMonotonic(values, "bezelWidth")).toBe(true);
+    expect(isMonotonic(values, "refractiveIndex")).toBe(true);
+    expect(isMonotonic(values, "specularOpacity")).toBe(true);
+
+    const blurDelta =
+      (defaultRefractionByIntensity.strong.blur ?? 0) -
+      (defaultRefractionByIntensity.subtle.blur ?? 0);
+    expect(blurDelta).toBeLessThanOrEqual(0.35);
+  });
+
+  it("clamps filter radius to the bounded SVG displacement range", () => {
+    expect(resolveRefractionRadius(-20)).toBe(1);
+    expect(resolveRefractionRadius(18)).toBe(18);
+    expect(resolveRefractionRadius(999)).toBe(96);
+    expect(
+      resolveRefractiveOptions({
+        intensity: "strong",
+        radius: 999,
+        refraction: { radius: 144 }
+      }).radius
+    ).toBe(96);
+  });
+
+  it("keeps foreground content outside the displacement/filter layer", () => {
+    const contentRules = collectCssRuleBodies(styles, ".lg-surface__content").join("\n");
+
+    expect(surfaceSource).toContain('<span className="lg-surface__content">{children}</span>');
+    expect(contentRules).not.toMatch(/(?:^|;)\s*-?webkit-filter\s*:/);
+    expect(contentRules).not.toMatch(/(?:^|;)\s*filter\s*:/);
+    expect(contentRules).not.toMatch(/(?:^|;)\s*-?webkit-backdrop-filter\s*:/);
+    expect(contentRules).not.toMatch(/(?:^|;)\s*backdrop-filter\s*:/);
+  });
+
+  it("does not fake refraction by adding generated crosshatch material texture", () => {
+    expect(styles).not.toContain("repeating-linear-gradient");
+    expect(storyFixture).not.toContain("repeating-linear-gradient");
+  });
+
+  it("keeps nav and toolbar item filters disabled so the plate owns refraction", () => {
+    expect(styles).toContain(".lg-nav .lg-surface--button");
+    expect(styles).toContain(".lg-nav .lg-surface--toggle");
+    expect(styles).toContain("-webkit-backdrop-filter: none !important");
+    expect(styles).toContain("backdrop-filter: none !important");
+  });
+});
+
+function isMonotonic(options: DefaultRefractiveOptions[], key: keyof DefaultRefractiveOptions) {
+  return options.every((option, index) => {
+    if (index === 0) {
+      return true;
+    }
+
+    return Number(option[key] ?? 0) >= Number(options[index - 1]?.[key] ?? 0);
+  });
+}
+
+function collectCssRuleBodies(css: string, selector: string) {
+  const escapedSelector = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const matcher = new RegExp(`${escapedSelector}[^{}]*\\{([^}]*)\\}`, "g");
+  return Array.from(css.matchAll(matcher), (match) => match[1] ?? "");
+}

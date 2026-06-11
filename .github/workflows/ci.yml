@@ -27,6 +27,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test:unit
       - run: pnpm test:components
+      - run: pnpm test:physics
       - run: pnpm test:storybook
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:a11y

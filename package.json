@@ -79,13 +79,14 @@
     "test:content": "pnpm --filter blog test:content",
     "test:e2e": "pnpm exec playwright test tests/e2e --config=playwright.config.ts",
     "test:package": "pnpm --filter @clean99/liquid-glass test:package",
+    "test:physics": "pnpm --filter @clean99/liquid-glass test:physics",
     "test:routes": "pnpm --filter blog test:routes",
     "test:storybook": "pnpm --filter docs test:storybook",
     "test:unit": "pnpm run legacy:test && pnpm --filter @clean99/liquid-glass test:unit && pnpm --filter blog test:unit && pnpm --filter docs test:unit",
     "test:visual": "pnpm exec playwright test tests/visual --config=playwright.config.ts",
     "test:visual:update": "pnpm exec playwright test tests/visual --config=playwright.config.ts --update-snapshots",
     "typecheck": "pnpm --filter @clean99/liquid-glass typecheck && pnpm --filter blog typecheck && pnpm --filter docs typecheck",
-    "ci": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:components && pnpm test:storybook && pnpm test:a11y && pnpm test:e2e && pnpm test:routes && pnpm test:content && pnpm build && pnpm test:package"
+    "ci": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:components && pnpm test:physics && pnpm test:storybook && pnpm test:a11y && pnpm test:e2e && pnpm test:routes && pnpm test:content && pnpm build && pnpm test:package"
   },
   "hexo": {
     "version": "6.3.0"

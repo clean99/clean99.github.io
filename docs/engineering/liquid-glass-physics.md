@@ -29,6 +29,26 @@ Enhanced components must satisfy these checks in Chromium:
 - Large text containers do not use strong refraction.
 - Nav/tab foreground items do not each instantiate expensive filters. The plate refracts; labels stay clear.
 
+The package now has a dedicated physics contract test:
+
+```bash
+pnpm --filter @clean99/liquid-glass test:physics
+```
+
+That test guards the non-negotiable invariants:
+
+- Default refraction settings stay in a plausible optical range:
+  - `refractiveIndex` stays between `1.3` and `1.6`.
+  - `blur` stays at or below `1px`, because this is a lens, not frosted glass.
+  - `glassThickness`, `bezelWidth`, and `specularOpacity` increase monotonically from `subtle` to `strong`.
+  - `specularOpacity` stays at or below `0.6`, so highlights do not become painted plastic.
+- SVG filter radius is clamped to the bounded displacement range.
+- `.lg-surface__content` never gets `filter` or `backdrop-filter`.
+- Component CSS and shared Storybook fixtures do not use `repeating-linear-gradient` to fake a material texture.
+- Nav and toolbar item filters stay disabled; only the shared plate owns refraction.
+
+This is intentionally a unit-level gate. Visual tests prove that pixels look right; the physics test proves that future CSS/API changes do not violate the rendering model before we even open a browser.
+
 Fallback components must satisfy these checks in Safari-like and Firefox-like modes:
 
 - No SVG backdrop filter is required.
@@ -73,3 +93,14 @@ The gate should fail on:
 - Foreground text inside the displacement layer.
 - Unexpected crosshatch material texture.
 - Layout geometry drift beyond the documented component target.
+
+## Lessons From the Failed Iterations
+
+The ugly versions failed for mundane reasons:
+
+- The nav looked like plastic because every tab created its own mini glass object. The fix was to make the nav plate refractive and make child items clear foreground controls.
+- The search icon looked wrong because it was treated as generic text/icon content. The fix was a fixed-size SVG with line caps and foreground-only rendering.
+- The diagonal/crossed texture was not a refraction artifact. It came from using repeating diagonal fixture backgrounds. Real refraction bends existing pixels; it does not invent a woven pattern.
+- Text shadow is context-dependent. Dark, high-variance backgrounds can use white text with a short dark shadow. Light glass should usually use dark text with little or no shadow.
+
+The rule of thumb: if a component still looks interesting after the background is replaced with a plain grid, the glass is probably doing the work. If it only works on a busy pattern, the fixture is carrying the design.
