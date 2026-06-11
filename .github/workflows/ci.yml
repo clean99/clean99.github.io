@@ -30,6 +30,7 @@ jobs:
       - run: pnpm test:physics
       - run: pnpm test:storybook
       - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:kube-reference
       - run: pnpm test:a11y
       - run: pnpm test:e2e
       - run: pnpm test:routes

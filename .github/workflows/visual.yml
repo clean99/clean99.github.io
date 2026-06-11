@@ -23,6 +23,7 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build
       - run: pnpm test:visual
+      - run: pnpm test:kube-reference
 
       - uses: actions/upload-artifact@v4
         if: always()
