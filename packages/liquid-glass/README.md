@@ -94,6 +94,12 @@ Implemented components:
 - `FallbackGlassSurface`
 - `LiquidButton`
 - `LiquidIconButton`
+- `LiquidDialog`
+- `LiquidDialogTrigger`
+- `LiquidDialogContent`
+- `LiquidDialogTitle`
+- `LiquidDialogDescription`
+- `LiquidDialogClose`
 - `LiquidField`
 - `LiquidLabel`
 - `LiquidInput`
@@ -155,6 +161,7 @@ The package supports system color scheme and explicit theme scopes:
 ## Accessibility
 
 - Interactive components use native buttons or anchors by default.
+- Dialog uses the native `<dialog>` element, `showModal()` when available, labelled content, and native cancel/close events.
 - Field controls use native `input`, `textarea`, `label`, and alert semantics.
 - `LiquidToggle` uses `aria-pressed`.
 - `LiquidNav` and `LiquidToolbar` require accessible labels.

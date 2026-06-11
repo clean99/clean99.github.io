@@ -58,6 +58,18 @@ test.describe("liquid glass component visuals", () => {
     await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-field-dark.png");
   });
 
+  test("component liquid dialog light", async ({ page }) => {
+    await page.setViewportSize({ width: 720, height: 420 });
+    await renderFixture(page, dialogFixture("light"));
+    await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-dialog-light.png");
+  });
+
+  test("component liquid dialog dark", async ({ page }) => {
+    await page.setViewportSize({ width: 720, height: 420 });
+    await renderFixture(page, dialogFixture("dark"));
+    await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-dialog-dark.png");
+  });
+
   test("component liquid button light", async ({ page }) => {
     await page.setViewportSize({ width: 520, height: 260 });
     await renderFixture(page, buttonFixture("light"));
@@ -205,6 +217,25 @@ function fieldFixture(theme: "light" | "dark") {
       </div>
       <p class="lg-field__description">Native text stays readable above the material.</p>
     </section>`
+  );
+}
+
+function dialogFixture(theme: "light" | "dark") {
+  return frame(
+    theme,
+    `<dialog open aria-labelledby="visual-dialog-title" aria-describedby="visual-dialog-description" aria-modal="true" class="lg-surface lg-surface--panel lg-surface--fallback lg-surface--medium lg-surface--fallback-material lg-dialog" data-liquid-mode="fallback" style="position:relative;inset:auto;">
+      <span class="lg-surface__content">
+        <div class="lg-dialog__header">
+          <h2 class="lg-dialog__title" id="visual-dialog-title">Share article</h2>
+          <p class="lg-dialog__description" id="visual-dialog-description">Copy a stable link without distorting the foreground content.</p>
+        </div>
+        <p style="margin:0;color:var(--lg-text-muted);line-height:1.55;">The dialog surface carries the glass. Text and actions stay sharp.</p>
+        <div class="lg-dialog__footer">
+          <button class="lg-surface lg-surface--button lg-surface--solid lg-surface--subtle lg-surface--interactive lg-surface--fallback-material"><span class="lg-surface__content">Cancel</span></button>
+          <button class="lg-surface lg-surface--button lg-surface--fallback lg-surface--medium lg-surface--interactive lg-surface--fallback-material"><span class="lg-surface__content">Copy link</span></button>
+        </div>
+      </span>
+    </dialog>`
   );
 }
 

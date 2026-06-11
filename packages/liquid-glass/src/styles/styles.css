@@ -479,6 +479,70 @@
   border-radius: var(--lg-radius-md);
 }
 
+.lg-dialog {
+  width: min(34rem, calc(100vw - 2rem));
+  max-height: min(82vh, calc(100vh - 2rem));
+  margin: auto;
+  padding: 0;
+  overflow: visible;
+  color: var(--lg-text);
+  border: 0;
+}
+
+.lg-dialog[open] {
+  display: flex;
+}
+
+.lg-dialog::backdrop {
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 255, 255, 0.16), transparent 28%),
+    rgba(8, 11, 18, 0.52);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  backdrop-filter: blur(18px) saturate(1.25);
+}
+
+.lg-dialog.lg-surface--panel {
+  padding: 0;
+}
+
+.lg-dialog > .lg-surface__content {
+  display: grid;
+  width: 100%;
+  max-height: inherit;
+  gap: 1rem;
+  justify-items: stretch;
+  overflow: auto;
+  padding: 1.15rem;
+}
+
+.lg-dialog__header {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.lg-dialog__title {
+  margin: 0;
+  color: color-mix(in srgb, var(--lg-text), transparent 4%);
+  font-size: 1.1rem;
+  font-weight: 720;
+  letter-spacing: 0;
+  line-height: 1.18;
+}
+
+.lg-dialog__description {
+  margin: 0;
+  color: var(--lg-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.lg-dialog__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
 .lg-surface--fallback,
 .lg-surface--enhanced {
   -webkit-backdrop-filter: blur(var(--lg-surface-blur)) saturate(var(--lg-surface-saturation));

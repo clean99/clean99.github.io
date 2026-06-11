@@ -4,6 +4,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   LiquidButton,
   LiquidCard,
+  LiquidDialog,
+  LiquidDialogClose,
+  LiquidDialogContent,
+  LiquidDialogDescription,
+  LiquidDialogFooter,
+  LiquidDialogHeader,
+  LiquidDialogTitle,
+  LiquidDialogTrigger,
   LiquidField,
   LiquidFieldDescription,
   LiquidFieldError,
@@ -161,6 +169,55 @@ describe("Liquid components", () => {
     expect(textarea.tagName).toBe("TEXTAREA");
     expect(textarea).toHaveClass("lg-textarea");
     expect(textarea.closest(".lg-surface")).toHaveClass("lg-textarea-surface");
+  });
+
+  it("opens and closes an accessible liquid dialog", async () => {
+    const onOpenChange = vi.fn();
+    render(
+      <LiquidDialog onOpenChange={onOpenChange}>
+        <LiquidDialogTrigger>Share</LiquidDialogTrigger>
+        <LiquidDialogContent mode="fallback">
+          <LiquidDialogHeader>
+            <LiquidDialogTitle>Share article</LiquidDialogTitle>
+            <LiquidDialogDescription>Copy a stable link to this article.</LiquidDialogDescription>
+          </LiquidDialogHeader>
+          <LiquidDialogFooter>
+            <LiquidDialogClose>Done</LiquidDialogClose>
+          </LiquidDialogFooter>
+        </LiquidDialogContent>
+      </LiquidDialog>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Share" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Share article" });
+    expect(dialog).toHaveTextContent("Copy a stable link to this article.");
+    expect(screen.getByRole("button", { name: "Share" })).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "Done" }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it("asks controlled liquid dialogs to close on native cancel", async () => {
+    const onOpenChange = vi.fn();
+    render(
+      <LiquidDialog onOpenChange={onOpenChange} open>
+        <LiquidDialogContent mode="fallback">
+          <LiquidDialogTitle>Keyboard dismiss</LiquidDialogTitle>
+        </LiquidDialogContent>
+      </LiquidDialog>
+    );
+
+    const dialog = await screen.findByRole("dialog", { name: "Keyboard dismiss" });
+    fireEvent(dialog, new Event("cancel", { bubbles: false, cancelable: true }));
+
+    expect(onOpenChange).toHaveBeenCalledWith(false);
   });
 
   it("renders LiquidSwitch with switch semantics and toggles checked state", () => {
