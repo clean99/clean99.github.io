@@ -35,6 +35,7 @@ export const LiquidSearchBox = forwardRef<HTMLInputElement, LiquidSearchBoxProps
         className={cn("lg-searchbox", surfaceClassName)}
         intensity={intensity}
         kind="pill"
+        opticalBounds="layout"
         radius={radius}
         refraction={{ ...defaultSearchRefraction, ...refraction, radius: Number(radius) || 28 }}
         style={style}

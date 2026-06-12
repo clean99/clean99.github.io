@@ -61,7 +61,8 @@ try {
   });
   await verifyFocusMaterial("searchbox", {
     focusSelector: behaviorStories.searchbox.focusSelector,
-    minimumFocusedScale: 1.025,
+    minimumFocusGrowthRatio: 1.2,
+    minimumFocusedScale: 0.999,
     requireMaterialDeepening: true
   });
   await verifyFocusMaterial("field", {
@@ -93,7 +94,7 @@ async function verifyFocusMaterial(name, options) {
   } else {
     await keyboardFocusVisible(page, focusSelector);
   }
-  await page.waitForTimeout(120);
+  await page.waitForTimeout(240);
   const focused = await readState(locator);
 
   assertEqual(focused.outlineStyle, "none", `${name} focus outline style`);
@@ -105,17 +106,27 @@ async function verifyFocusMaterial(name, options) {
       `${name} focus material alpha`
     );
   }
-  assertGreaterOrEqual(
-    focused.scale,
-    options.minimumFocusedScale,
-    `${name} focus scale`
-  );
+  if (options.minimumFocusedScale !== undefined) {
+    assertGreaterOrEqual(
+      focused.scale,
+      options.minimumFocusedScale,
+      `${name} focus scale`
+    );
+  }
   assertGreaterThan(
     focused.shadowLayerCount,
     idle.shadowLayerCount,
     `${name} focus shadow layers`
   );
-  assertGreaterThan(focused.width, idle.width, `${name} focus visual width`);
+  if (options.minimumFocusGrowthRatio !== undefined) {
+    assertGreaterOrEqual(
+      focused.width / idle.width,
+      options.minimumFocusGrowthRatio,
+      `${name} focus visual width ratio`
+    );
+  } else {
+    assertGreaterThan(focused.width, idle.width, `${name} focus visual width`);
+  }
 
   if (options.requireTextShadow) {
     assertNotEqual(focused.textShadow, "none", `${name} focused foreground text shadow`);

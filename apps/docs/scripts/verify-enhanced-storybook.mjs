@@ -20,9 +20,9 @@ const stories = [
     selector: ".lg-searchbox",
     width: 336,
     height: 45,
-    radius: "22px",
+    radius: "28px",
     backgroundColor: "rgba(255, 255, 255, 0.05)",
-    opticalRadius: "22"
+    opticalRadius: "28"
   },
   {
     id: "liquid-glass-liquidnav--apple-like-tabs",

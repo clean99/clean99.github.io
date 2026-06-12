@@ -41,6 +41,7 @@ export type LiquidSurfaceProps = Omit<HTMLAttributes<HTMLElement>, "children"> &
   interactive?: boolean;
   kind?: LiquidSurfaceKind;
   mode?: LiquidMode;
+  opticalBounds?: "layout" | "visual";
   radius?: LiquidRadius;
   refraction?: Partial<RefractiveOptions>;
   type?: string;
@@ -67,6 +68,7 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
     kind = "panel",
     mode = "auto",
     onClick,
+    opticalBounds = "visual",
     radius = "lg",
     refraction,
     style,
@@ -162,9 +164,15 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
 
     const updateBounds = () => {
       const rect = node.getBoundingClientRect();
+      const view = node.ownerDocument.defaultView;
+      const transformScale = resolveTransformScale(
+        view?.getComputedStyle(node).transform ?? "none"
+      );
+      const measuredHeight = opticalBounds === "layout" ? rect.height / transformScale : rect.height;
+      const measuredWidth = opticalBounds === "layout" ? rect.width / transformScale : rect.width;
       const nextBounds = {
-        height: roundRectValue(rect.height),
-        width: roundRectValue(rect.width)
+        height: roundRectValue(measuredHeight),
+        width: roundRectValue(measuredWidth)
       };
 
       setSurfaceBounds((current) =>
@@ -186,7 +194,7 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
     return () => {
       observer.disconnect();
     };
-  }, [resolvedMode]);
+  }, [opticalBounds, resolvedMode]);
 
   useIsomorphicLayoutEffect(() => {
     assignRef(ref, surfaceRef.current);
@@ -268,4 +276,26 @@ function assignRef<T>(ref: ForwardedRef<T>, value: T | null) {
 
 function roundRectValue(value: number) {
   return Math.round(value * 100) / 100;
+}
+
+function resolveTransformScale(transform: string) {
+  if (transform === "none") {
+    return 1;
+  }
+
+  const matrix = transform.match(/^matrix\(([^)]+)\)$/);
+  if (matrix) {
+    const values = matrix[1]?.split(/,\s*/).map(Number) ?? [];
+    const scale = Math.sqrt((values[0] ?? 1) ** 2 + (values[1] ?? 0) ** 2);
+    return Number.isFinite(scale) && scale > 0 ? scale : 1;
+  }
+
+  const matrix3d = transform.match(/^matrix3d\(([^)]+)\)$/);
+  if (matrix3d) {
+    const values = matrix3d[1]?.split(/,\s*/).map(Number) ?? [];
+    const scale = Math.sqrt((values[0] ?? 1) ** 2 + (values[1] ?? 0) ** 2);
+    return Number.isFinite(scale) && scale > 0 ? scale : 1;
+  }
+
+  return 1;
 }

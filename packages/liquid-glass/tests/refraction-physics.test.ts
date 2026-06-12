@@ -106,6 +106,23 @@ describe("Liquid Glass physics contract", () => {
     expect(focusRules).toContain("--lg-control-focus-fill");
     expect(focusRules).toContain("scale(");
   });
+
+  it("models search focus as a frosted capsule growing from idle scale", () => {
+    const searchboxRule = collectCssRuleBodies(styles, ".lg-searchbox").join("\n");
+    const focusRule = collectCssRuleBodies(styles, ".lg-searchbox:focus-within").join("\n");
+    const reducedMotionRule = collectCssRuleBodies(
+      styles,
+      ".lg-searchbox[data-liquid-reduced-motion]"
+    ).join("\n");
+
+    expect(searchboxRule).toContain("width: 26.25rem");
+    expect(searchboxRule).toContain("max-width: 100%");
+    expect(searchboxRule).toContain("height: 3.5rem");
+    expect(searchboxRule).toContain("transform: scale(0.8)");
+    expect(focusRule).toContain("rgba(34, 35, 35, 0.44)");
+    expect(focusRule).toContain("transform: scale(1)");
+    expect(reducedMotionRule).toContain("transform: none");
+  });
 });
 
 function isMonotonic(options: DefaultRefractiveOptions[], key: keyof DefaultRefractiveOptions) {
