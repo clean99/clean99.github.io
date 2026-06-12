@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { LiquidProvider } from "@clean99/liquid-glass";
+import "@clean99/liquid-glass/styles.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,7 +23,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <LiquidProvider defaultMode="auto" maxEnhancedSurfaces={10}>
+          {children}
+        </LiquidProvider>
+      </body>
     </html>
   );
 }

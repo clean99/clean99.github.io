@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import type { Metadata } from "next";
+import { LiquidCard } from "@clean99/liquid-glass";
 import { PageShell } from "@/components/PageShell";
 import { getSourcePath } from "@/lib/paths";
 
@@ -39,11 +40,11 @@ export default function AiCodingLabPage() {
       </section>
       <div className="card-grid">
         {catalog.items.slice(0, 12).map((item) => (
-          <article className="simple-card" key={item.id}>
+          <LiquidCard as="article" className="simple-card" key={item.id} mode="fallback">
             <p className="eyebrow">{item.category ?? "Catalog"}</p>
             <h2>{item.name}</h2>
             <p>{item.description}</p>
-          </article>
+          </LiquidCard>
         ))}
       </div>
     </PageShell>
