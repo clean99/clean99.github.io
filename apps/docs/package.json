@@ -9,8 +9,8 @@
     "dev": "storybook dev -p 6006",
     "lint": "eslint .storybook stories scripts vitest.config.ts",
     "test:components": "vitest run --passWithNoTests",
-    "test:storybook": "pnpm --filter @clean99/liquid-glass build && storybook build --quiet --output-dir storybook-static-test && node scripts/verify-enhanced-storybook.mjs && node scripts/verify-liquid-behavior.mjs && rm -rf storybook-static-test",
-    "test:kube-reference": "pnpm --filter @clean99/liquid-glass build && storybook build --quiet --output-dir storybook-static-test && node scripts/compare-kube-reference.mjs; status=$?; rm -rf storybook-static-test; exit $status",
+    "test:storybook": "pnpm --filter @clean99/liquid-glass build && rm -rf storybook-static-behavior && storybook build --quiet --output-dir storybook-static-behavior && STORYBOOK_STATIC_DIR=storybook-static-behavior node scripts/verify-enhanced-storybook.mjs && STORYBOOK_STATIC_DIR=storybook-static-behavior node scripts/verify-liquid-behavior.mjs; status=$?; rm -rf storybook-static-behavior; exit $status",
+    "test:kube-reference": "pnpm --filter @clean99/liquid-glass build && rm -rf storybook-static-kube-reference && storybook build --quiet --output-dir storybook-static-kube-reference && STORYBOOK_STATIC_DIR=storybook-static-kube-reference node scripts/compare-kube-reference.mjs; status=$?; rm -rf storybook-static-kube-reference; exit $status",
     "test:unit": "vitest run --passWithNoTests",
     "typecheck": "tsc --noEmit"
   },

@@ -17,8 +17,9 @@ The visual direction is informed by Chris Feijoo's public Liquid Glass research 
 
 - `rdev/liquid-glass-react`
   - Repository: https://github.com/rdev/liquid-glass-react
+  - Inspected commit: `ac48eab18d1f7f444ae30002d240cae29c863a21`
   - License: MIT
-  - Used as an implementation reference during optical-model research. No source code has been copied into this package.
+  - Used as an implementation reference during optical-model and pointer-elasticity research. No source code has been copied into this package.
   - The demos recreate component behavior and styling parameters, not the article source code.
 
 - Storybook demo image

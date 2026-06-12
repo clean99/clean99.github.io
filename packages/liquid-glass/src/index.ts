@@ -44,6 +44,7 @@ export { usePrefersReducedTransparency } from "./hooks/use-prefers-reduced-trans
 export { useStableId } from "./hooks/use-stable-id";
 export { LiquidProvider } from "./providers/LiquidProvider";
 export { cn } from "./utils/cn";
+export { distanceFromRectEdge, resolveLiquidElasticResponse } from "./utils/elasticity";
 export {
   continuousPlateRefraction,
   defaultRefractionByIntensity,
@@ -126,4 +127,10 @@ export type {
   RefractiveOptions,
   ResolvedLiquidMode
 } from "./types";
+export type {
+  LiquidElasticOptions,
+  LiquidElasticPoint,
+  LiquidElasticRect,
+  LiquidElasticResponse
+} from "./utils/elasticity";
 export { isLiquidMode, liquidModeStorageKey, liquidModes } from "./types";

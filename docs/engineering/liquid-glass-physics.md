@@ -47,6 +47,7 @@ That test guards the non-negotiable invariants:
 - Component CSS and shared Storybook fixtures do not use `repeating-linear-gradient` to fake a material texture.
 - Nav and toolbar item filters stay disabled; only the shared plate owns refraction.
 - Focus is a material response. The focus rules must deepen the glass fill/shadow and scale the control, not add system-blue rings or high-contrast white/black outline rings.
+- Pointer elasticity is modeled as data first. `resolveLiquidElasticResponse()` must rest outside the activation zone, fade from the edge, respect reduced motion, and cap scale/translation before any component uses it.
 
 This is intentionally a unit-level gate. Visual tests prove that pixels look right; the physics test proves that future CSS/API changes do not violate the rendering model before we even open a browser.
 
@@ -109,6 +110,8 @@ The lens uses a crop because the reference demo contains article-specific prose 
 The searchbox, switch, and slider compare the full demo frame because their reference areas contain only deterministic fixture content and the component itself. Matching the reference `24px` grid and radial background reduced their pixel diff from roughly `15%` to roughly `1.4-1.7%`.
 
 The separate Storybook behavior gate lives in `apps/docs/scripts/verify-liquid-behavior.mjs`. It validates the Apple-like interaction contract from built Storybook iframes: focus scale, material deepening, no hard white/black/system-blue rings, increased shadow layers, hover material alpha, active scale relaxation, and reduced-motion suppression.
+
+The `rdev/liquid-glass-react` review lives in `docs/engineering/rdev-liquid-glass-react-review.md`. The adopted part is the edge-distance pointer elasticity idea, expressed as our own pure model in `packages/liquid-glass/src/utils/elasticity.ts`. The rejected parts are direct engine replacement, default runtime shader generation, and always-on pointer tracking.
 
 ## Lessons From the Failed Iterations
 

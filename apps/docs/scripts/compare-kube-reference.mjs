@@ -5,7 +5,7 @@ import { chromium } from "playwright";
 
 /* global OffscreenCanvas, createImageBitmap, document, getComputedStyle */
 
-const staticDir = path.resolve("storybook-static-test");
+const staticDir = path.resolve(process.env.STORYBOOK_STATIC_DIR ?? "storybook-static-test");
 const artifactDir = path.resolve("../../test-results/kube-reference");
 const targetUrl = "https://kube.io/blog/liquid-glass-css-svg/";
 const globalMaxDiffRatio = process.env.KUBE_MAX_DIFF_RATIO
