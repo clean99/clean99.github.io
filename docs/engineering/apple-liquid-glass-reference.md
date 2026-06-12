@@ -37,12 +37,13 @@ Our focus contract:
 
 - Keyboard focus remains visible.
 - Focused glass controls scale up slightly.
-- The edge rim gets brighter.
+- The material becomes thicker and more frosted: fill opacity, inner depth, and local shadow increase.
+- The edge stays subtle. Focus must not be a high-contrast white ring, black ring, or system-blue ring.
 - The shadow stack grows.
 - Text remains sharp and foreground-only.
-- Dark controls use near-white foreground text with a short dark shadow.
-- Light controls may keep dark text when contrast is better.
-- `prefers-reduced-motion: reduce` removes focus/hover scale while keeping a visible material rim.
+- Dark or photographic contexts use near-white foreground text with a short dark shadow.
+- Light controls may keep dark text when contrast is better, but the focused material itself still reads as glass.
+- `prefers-reduced-motion: reduce` removes focus/hover scale while keeping the material-deepening response.
 
 Hover contract:
 
@@ -72,9 +73,11 @@ pnpm test:visual
 `apps/docs/scripts/verify-liquid-behavior.mjs` checks interaction behavior from built Storybook iframes:
 
 - tabs focus scales to at least `1.04`
+- searchbox focus scales to at least `1.025`
 - field focus scales to at least `1.012`
 - button focus scales to at least `1.018`
-- focus outlines are not default blue rings
+- focus outlines are not default blue, hard white, or hard black rings
+- focus increases material alpha
 - focus increases the shadow layer count
 - focused tab text has a foreground text shadow
 - hover increases tab material alpha
@@ -90,6 +93,5 @@ The component library should express this through API and defaults:
 - `LiquidSurface` remains the only direct `@hashintel/refractive` integration point.
 - `LiquidNav`, `LiquidTabs`, `LiquidToolbar`, and `LiquidSegmentedControl` use continuous plate refraction.
 - Child items in dense controls render as foreground controls with disabled backdrop filters.
-- Focus styles use neutral rim/glow tokens, not `--lg-accent`.
+- Focus styles use material fill/depth changes and scale, not `--lg-accent` or hard outline rings.
 - Reduced motion keeps focus visible but removes scale transforms.
-

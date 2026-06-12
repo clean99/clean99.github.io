@@ -18,6 +18,11 @@ const behaviorStories = {
   tabs: {
     id: "liquid-glass-liquidtabs--focus-visible",
     selector: ".lg-tabs__tab"
+  },
+  searchbox: {
+    id: "liquid-glass-liquidsearchbox--focus-photo-reference",
+    focusSelector: ".lg-searchbox__input",
+    selector: ".lg-searchbox"
   }
 };
 
@@ -51,14 +56,22 @@ const browser = await chromium.launch({ headless: true });
 try {
   await verifyFocusMaterial("tabs", {
     minimumFocusedScale: 1.04,
+    requireMaterialDeepening: true,
     requireTextShadow: true
+  });
+  await verifyFocusMaterial("searchbox", {
+    focusSelector: behaviorStories.searchbox.focusSelector,
+    minimumFocusedScale: 1.025,
+    requireMaterialDeepening: true
   });
   await verifyFocusMaterial("field", {
     minimumFocusedScale: 1.012,
-    focusSelector: behaviorStories.field.focusSelector
+    focusSelector: behaviorStories.field.focusSelector,
+    requireMaterialDeepening: true
   });
   await verifyFocusMaterial("button", {
-    minimumFocusedScale: 1.018
+    minimumFocusedScale: 1.018,
+    requireMaterialDeepening: true
   });
   await verifyHoverAndActiveResponse();
   await verifyReducedMotionRemovesElasticFocus();
@@ -84,7 +97,14 @@ async function verifyFocusMaterial(name, options) {
   const focused = await readState(locator);
 
   assertEqual(focused.outlineStyle, "none", `${name} focus outline style`);
-  assertNoBluePlasticFocus(focused, `${name} focus`);
+  assertNoPlasticFocusChrome(focused, `${name} focus`);
+  if (options.requireMaterialDeepening) {
+    assertGreaterThan(
+      focused.backgroundAlpha,
+      idle.backgroundAlpha + 0.04,
+      `${name} focus material alpha`
+    );
+  }
   assertGreaterOrEqual(
     focused.scale,
     options.minimumFocusedScale,
@@ -185,8 +205,11 @@ async function readState(locator) {
 
     return {
       backgroundAlpha: alphaOf(style.backgroundColor),
+      borderAlpha: alphaOf(style.borderColor),
+      borderLuma: lumaOf(style.borderColor),
       borderColor: style.borderColor,
       boxShadow: style.boxShadow,
+      hardRingLayerCount: countCheapHardRingLayers(style.boxShadow),
       height: rect.height,
       outlineColor: style.outlineColor,
       outlineStyle: style.outlineStyle,
@@ -198,13 +221,77 @@ async function readState(locator) {
     };
 
     function alphaOf(color) {
-      const match = color.match(/rgba?\(([^)]+)\)/);
-      if (!match) {
-        return 1;
+      const parsed = parseColor(color);
+      return parsed.alpha;
+    }
+
+    function lumaOf(color) {
+      const parsed = parseColor(color);
+      return 0.2126 * parsed.red + 0.7152 * parsed.green + 0.0722 * parsed.blue;
+    }
+
+    function countCheapHardRingLayers(boxShadow) {
+      if (boxShadow === "none") {
+        return 0;
       }
 
-      const parts = match[1].split(/,\s*/);
-      return parts.length >= 4 ? Number(parts[3]) : 1;
+      return boxShadow.split(/,(?![^()]*\))/).filter((layer) => {
+        if (layer.includes("inset")) {
+          return false;
+        }
+
+        if (!/\b0px 0px 0px 1px\b/.test(layer)) {
+          return false;
+        }
+
+        const color = parseColor(layer);
+        const luma = 0.2126 * color.red + 0.7152 * color.green + 0.0722 * color.blue;
+        return color.alpha >= 0.3 && (luma <= 20 || luma >= 235);
+      }).length;
+    }
+
+    function parseColor(color) {
+      const srgb = color.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)/);
+      if (srgb) {
+        return {
+          alpha: srgb[4] === undefined ? 1 : parseCssNumber(srgb[4]),
+          blue: Number(srgb[3]) * 255,
+          green: Number(srgb[2]) * 255,
+          red: Number(srgb[1]) * 255
+        };
+      }
+
+      const oklab = color.match(/oklab\(\s*([-\d.]+%?)\s+[-\d.]+%?\s+[-\d.]+%?(?:\s*\/\s*([-\d.]+%?))?\)/);
+      if (oklab) {
+        const lightness = parseCssNumber(oklab[1] ?? "0") * 255;
+        return {
+          alpha: oklab[2] === undefined ? 1 : parseCssNumber(oklab[2]),
+          blue: lightness,
+          green: lightness,
+          red: lightness
+        };
+      }
+
+      const match = color.match(/rgba?\(([^)]+)\)/);
+      if (!match) {
+        return { alpha: 1, blue: 0, green: 0, red: 0 };
+      }
+
+      const parts = match[1]
+        .split(/[,\s/]+/)
+        .filter(Boolean)
+        .map(Number);
+
+      return {
+        alpha: parts.length >= 4 ? parts[3] : 1,
+        blue: parts[2] ?? 0,
+        green: parts[1] ?? 0,
+        red: parts[0] ?? 0
+      };
+    }
+
+    function parseCssNumber(value) {
+      return value.endsWith("%") ? Number(value.slice(0, -1)) / 100 : Number(value);
     }
 
     function matrixScale(transform) {
@@ -222,11 +309,21 @@ async function readState(locator) {
   });
 }
 
-function assertNoBluePlasticFocus(state, label) {
+function assertNoPlasticFocusChrome(state, label) {
   const focusText = [state.borderColor, state.boxShadow, state.outlineColor].join(" ");
 
   if (focusText.includes("10, 132, 255") || focusText.includes("0, 95, 204")) {
     throw new Error(`${label}: focus style still uses system-blue plastic ring`);
+  }
+
+  if (state.hardRingLayerCount > 0) {
+    throw new Error(`${label}: focus style still uses a hard white/black 1px ring`);
+  }
+
+  if (state.borderAlpha >= 0.34 && (state.borderLuma <= 20 || state.borderLuma >= 235)) {
+    throw new Error(
+      `${label}: focus border is still a high-contrast hard edge (${state.borderColor}, alpha=${state.borderAlpha}, luma=${state.borderLuma})`
+    );
   }
 }
 

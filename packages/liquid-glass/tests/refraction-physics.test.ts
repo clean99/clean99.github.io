@@ -91,16 +91,19 @@ describe("Liquid Glass physics contract", () => {
     expect(styles).toContain("backdrop-filter: none !important");
   });
 
-  it("uses material focus instead of system-blue plastic rings", () => {
+  it("uses material focus instead of system-blue or hard white rings", () => {
     const focusRules = [
       ...collectCssRuleBodies(styles, ".lg-surface:focus-visible"),
       ...collectCssRuleBodies(styles, ".lg-tabs__tab:focus-visible"),
+      ...collectCssRuleBodies(styles, ".lg-searchbox:focus-within"),
       ...collectCssRuleBodies(styles, ".lg-field-control:focus-within")
     ].join("\n");
 
     expect(focusRules).not.toContain("--lg-accent");
     expect(focusRules).not.toContain("#0a84ff");
-    expect(focusRules).toContain("--lg-control-focus-rim");
+    expect(focusRules).not.toContain("0 0 0 1px");
+    expect(focusRules).not.toContain("--lg-control-focus-rim");
+    expect(focusRules).toContain("--lg-control-focus-fill");
     expect(focusRules).toContain("scale(");
   });
 });

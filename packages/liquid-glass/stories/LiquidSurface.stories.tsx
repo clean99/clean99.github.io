@@ -233,32 +233,36 @@ export const KubeSearchboxEnhanced: Story = {
             backgroundSize: "32px 32px, 32px 32px, auto"
           }}
         >
-          <LiquidSearchBox
-            aria-label="Search"
-            surfaceProps={{
-              refraction: {
-                blur: 1,
-                glassThickness: 84,
-                bezelWidth: 12,
-                refractiveIndex: 1.42,
-                radius: 28,
-                specularOpacity: 0.2
-              },
-              style: {
-                position: "absolute",
-                left: "50%",
-                top: "50%",
-                width: 336,
-                height: 45,
-                padding: "0 20px",
-                color: "rgba(0,0,0,0.7)",
-                background: "rgba(255,255,255,0.05)",
-                borderRadius: 28,
-                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.16)",
-                transform: "translate(-50%, -50%)"
-              }
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)"
             }}
-          />
+          >
+            <LiquidSearchBox
+              aria-label="Search"
+              surfaceProps={{
+                refraction: {
+                  blur: 1,
+                  glassThickness: 84,
+                  bezelWidth: 12,
+                  refractiveIndex: 1.42,
+                  radius: 28,
+                  specularOpacity: 0.2
+                },
+                style: {
+                  width: 336,
+                  height: 45,
+                  padding: "0 20px",
+                  color: "rgba(0,0,0,0.7)",
+                  borderRadius: 28,
+                  boxShadow: "0 4px 16px rgba(0, 0, 0, 0.16)"
+                }
+              }}
+            />
+          </div>
         </div>
       </div>
     </LiquidProvider>

@@ -41,17 +41,16 @@ export const KubeReference: Story = {
             backgroundSize: "24px 24px, 24px 24px, 100% 100%"
           }}
         >
-          <LiquidSearchBox
-            aria-label="Search docs"
-            surfaceProps={{
-              style: {
-                position: "absolute",
-                left: "50%",
-                top: "50%",
-                transform: "translate(-50%, -50%)"
-              }
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)"
             }}
-          />
+          >
+            <LiquidSearchBox aria-label="Search docs" />
+          </div>
           <label
             style={{
               position: "absolute",
@@ -68,6 +67,50 @@ export const KubeReference: Story = {
             <input style={{ width: 12, height: 12, margin: 0 }} type="checkbox" /> Use image
             background
           </label>
+        </div>
+      </div>
+    </LiquidProvider>
+  )
+};
+
+export const FocusPhotoReference: Story = {
+  render: () => (
+    <LiquidProvider defaultMode="enhanced" disableOnMobile={false} maxEnhancedSurfaces={4}>
+      <div
+        data-lg-theme="light"
+        style={{
+          minHeight: 360,
+          padding: 40,
+          background:
+            "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(244,245,243,0.94))",
+          fontFamily:
+            '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
+        }}
+      >
+        <div
+          data-lg-reference-frame="searchbox-focus"
+          style={{
+            position: "relative",
+            width: 706,
+            height: 312,
+            overflow: "hidden",
+            borderRadius: 12,
+            background:
+              "radial-gradient(ellipse at 18% 24%, rgba(42, 220, 72, 0.95), transparent 16%), radial-gradient(ellipse at 35% 36%, rgba(9, 105, 29, 0.9), transparent 18%), radial-gradient(ellipse at 62% 28%, rgba(52, 238, 89, 0.88), transparent 17%), radial-gradient(ellipse at 78% 58%, rgba(15, 125, 35, 0.92), transparent 18%), radial-gradient(ellipse at 48% 72%, rgba(36, 205, 68, 0.82), transparent 15%), linear-gradient(135deg, #020802 0%, #05330c 34%, #020902 68%, #0a4213 100%)",
+            backgroundSize:
+              "210px 120px, 240px 150px, 220px 120px, 250px 150px, 230px 130px, 100% 100%"
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "50%",
+              transform: "translate(-50%, -50%)"
+            }}
+          >
+            <LiquidSearchBox aria-label="Search docs" />
+          </div>
         </div>
       </div>
     </LiquidProvider>

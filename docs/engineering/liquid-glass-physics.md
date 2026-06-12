@@ -46,7 +46,7 @@ That test guards the non-negotiable invariants:
 - `.lg-surface__content` never gets `filter` or `backdrop-filter`.
 - Component CSS and shared Storybook fixtures do not use `repeating-linear-gradient` to fake a material texture.
 - Nav and toolbar item filters stay disabled; only the shared plate owns refraction.
-- Focus is a material response. The focus rules must use neutral rim/glow tokens, not `--lg-accent` or system-blue rings.
+- Focus is a material response. The focus rules must deepen the glass fill/shadow and scale the control, not add system-blue rings or high-contrast white/black outline rings.
 
 This is intentionally a unit-level gate. Visual tests prove that pixels look right; the physics test proves that future CSS/API changes do not violate the rendering model before we even open a browser.
 
@@ -108,7 +108,7 @@ The lens uses a crop because the reference demo contains article-specific prose 
 
 The searchbox, switch, and slider compare the full demo frame because their reference areas contain only deterministic fixture content and the component itself. Matching the reference `24px` grid and radial background reduced their pixel diff from roughly `15%` to roughly `1.4-1.7%`.
 
-The separate Storybook behavior gate lives in `apps/docs/scripts/verify-liquid-behavior.mjs`. It validates the Apple-like interaction contract from built Storybook iframes: focus scale, neutral rim/glow, increased shadow layers, hover material alpha, active scale relaxation, and reduced-motion suppression.
+The separate Storybook behavior gate lives in `apps/docs/scripts/verify-liquid-behavior.mjs`. It validates the Apple-like interaction contract from built Storybook iframes: focus scale, material deepening, no hard white/black/system-blue rings, increased shadow layers, hover material alpha, active scale relaxation, and reduced-motion suppression.
 
 ## Lessons From the Failed Iterations
 
