@@ -7,6 +7,7 @@ public/
 dist/
 .next/
 apps/blog/out/
+apps/blog/public/
 apps/docs/storybook-static/
 coverage/
 playwright-report/

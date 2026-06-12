@@ -3,7 +3,7 @@ export const siteNavigation = [
   { href: "/writing/", label: "Writing" },
   { href: "/projects/", label: "Projects" },
   { href: "/ai-coding-lab/", label: "AI Lab" },
-  { href: "/About/", label: "About" }
+  { href: "/about/", label: "About" }
 ] as const;
 
 export const requiredStaticRoutes = [

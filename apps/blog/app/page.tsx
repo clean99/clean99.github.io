@@ -1,22 +1,38 @@
-import { siteNavigation } from "@/lib/site";
+import { PageShell } from "@/components/PageShell";
+import { PostList } from "@/components/PostList";
+import { getAllPosts, getFeaturedPosts } from "@/lib/posts";
 
 export default function HomePage() {
+  const latestPosts = getAllPosts().slice(0, 6);
+  const selectedWork = getFeaturedPosts()
+    .filter((post) => post.lang === "en")
+    .slice(0, 4);
+
   return (
-    <main style={{ margin: "0 auto", maxWidth: 920, padding: "64px 24px" }}>
-      <nav aria-label="Primary navigation" style={{ display: "flex", gap: 16 }}>
-        {siteNavigation.map((item) => (
-          <a href={item.href} key={item.href}>
-            {item.label}
-          </a>
-        ))}
-      </nav>
-      <p style={{ color: "var(--site-muted)", marginTop: 64 }}>
-        Software Engineer · Frontend Systems · AI Agents
-      </p>
-      <h1 style={{ fontSize: 64, letterSpacing: 0, lineHeight: 1, margin: "12px 0" }}>Koh Hom</h1>
-      <p style={{ color: "var(--site-muted)", fontSize: 20 }}>
-        Monorepo scaffold for the upcoming Liquid Glass rebuild.
-      </p>
-    </main>
+    <PageShell>
+      <section className="hero">
+        <p className="eyebrow">Software Engineer · Frontend Systems · AI Agents</p>
+        <h1>Koh Hom</h1>
+        <p className="lede">I build reliable frontend systems and AI-assisted workflows.</p>
+        <p>
+          Long-form notes on performance, architecture, agents, learning, and clear thinking.
+        </p>
+        <div className="actions">
+          <a href="/writing/">Read Writing</a>
+          <a href="/projects/">View Projects</a>
+          <a href="/ai-coding-lab/">Explore AI Lab</a>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>Selected Work</h2>
+        <PostList posts={selectedWork} />
+      </section>
+
+      <section className="section">
+        <h2>Latest Writing</h2>
+        <PostList posts={latestPosts} />
+      </section>
+    </PageShell>
   );
 }
