@@ -3,6 +3,7 @@
 import { forwardRef } from "react";
 import { LiquidSurface, type LiquidSurfaceProps } from "./LiquidSurface";
 import { cn } from "../utils/cn";
+import { referenceLensDisplacementRefraction } from "../utils/lens-pipeline";
 
 export type LiquidLensProps = Omit<
   LiquidSurfaceProps,
@@ -11,16 +12,6 @@ export type LiquidLensProps = Omit<
   children?: React.ReactNode;
   intensity?: LiquidSurfaceProps["intensity"];
   radius?: number;
-};
-
-const defaultLensRefraction = {
-  blur: 0,
-  glassThickness: 88,
-  bezelWidth: 18,
-  refractiveIndex: 1.5,
-  radius: 75,
-  specularOpacity: 0.5,
-  specularAngle: 0.8
 };
 
 export const LiquidLens = forwardRef<HTMLElement, LiquidLensProps>(function LiquidLens(
@@ -50,7 +41,7 @@ export const LiquidLens = forwardRef<HTMLElement, LiquidLensProps>(function Liqu
       mode={mode}
       radius={radius}
       ref={ref}
-      refraction={{ ...defaultLensRefraction, ...refraction, radius }}
+      refraction={{ ...referenceLensDisplacementRefraction, ...refraction, radius }}
       style={style}
     >
       {children}

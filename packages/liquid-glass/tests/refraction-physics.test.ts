@@ -2,8 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  estimateMaximumDisplacement,
   defaultRefractionByIntensity,
   resolveFilterMapGeometry,
+  resolveLensReferencePipeline,
   resolvePhysicalRefractionRadius,
   resolveRefractiveOptions,
   resolveRefractionRadius,
@@ -14,6 +16,7 @@ import {
 const styles = fs.readFileSync(path.resolve("src/styles/styles.css"), "utf8");
 const storyFixture = fs.readFileSync(path.resolve("stories/story-fixtures.tsx"), "utf8");
 const lensSource = fs.readFileSync(path.resolve("src/components/LiquidLens.tsx"), "utf8");
+const lensPipelineSource = fs.readFileSync(path.resolve("src/utils/lens-pipeline.ts"), "utf8");
 const surfaceSource = fs.readFileSync(path.resolve("src/components/LiquidSurface.tsx"), "utf8");
 
 const intensities: LiquidIntensity[] = ["subtle", "medium", "strong"];
@@ -92,10 +95,47 @@ describe("Liquid Glass physics contract", () => {
   });
 
   it("keeps the lens thickness aligned with the kube second-pass displacement scale", () => {
-    expect(lensSource).toContain("glassThickness: 88");
-    expect(lensSource).toContain("refractiveIndex: 1.5");
+    const pipeline = resolveLensReferencePipeline();
+
+    expect(pipeline.stages).toHaveLength(2);
+    expect(pipeline.stages[0]).toMatchObject({
+      bezelWidth: 0,
+      glassThickness: 21.5,
+      name: "magnification",
+      refractiveIndex: 1.5
+    });
+    expect(pipeline.stages[0]?.scale).toBeCloseTo(24, 1);
+    expect(pipeline.stages[1]).toMatchObject({
+      bezelWidth: 18,
+      glassThickness: 88,
+      name: "displacement",
+      refractiveIndex: 1.5
+    });
+    expect(pipeline.stages[1]?.scale).toBeCloseTo(98.24713343067756, 6);
+    expect(
+      estimateMaximumDisplacement({
+        bezelWidth: 18,
+        glassThickness: 88,
+        refractiveIndex: 1.5
+      })
+    ).toBeCloseTo(pipeline.stages[1]?.scale ?? 0, 6);
+    expect(lensPipelineSource).toContain("glassThickness: 88");
+    expect(lensPipelineSource).toContain("refractiveIndex: 1.5");
+    expect(lensSource).toContain("referenceLensDisplacementRefraction");
     expect(lensSource).not.toContain("defaultLensMagnificationRefraction");
     expect(lensSource).not.toContain('className="lg-lens__core"');
+  });
+
+  it("keeps optical displacement estimates finite for bad sample input", () => {
+    const displacement = estimateMaximumDisplacement({
+      bezelWidth: Number.NaN,
+      glassThickness: Number.NaN,
+      refractiveIndex: Number.NaN,
+      samples: Number.NaN
+    });
+
+    expect(displacement).toBeGreaterThanOrEqual(0);
+    expect(Number.isFinite(displacement)).toBe(true);
   });
 
   it("keeps lens filter-map slices from overlapping at the overscan radius", () => {

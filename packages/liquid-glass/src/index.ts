@@ -46,6 +46,20 @@ export { LiquidProvider } from "./providers/LiquidProvider";
 export { cn } from "./utils/cn";
 export { distanceFromRectEdge, resolveLiquidElasticResponse } from "./utils/elasticity";
 export {
+  referenceLensDisplacementRefraction,
+  referenceLensGeometry,
+  resolveLensReferencePipeline,
+  type LensPipeline,
+  type LensPipelineStage
+} from "./utils/lens-pipeline";
+export {
+  calculateDisplacementMagnitudes,
+  estimateMaximumDisplacement,
+  sampleOpticalSurface,
+  type DisplacementEstimateOptions,
+  type OpticalSurfaceProfile
+} from "./utils/optics";
+export {
   continuousPlateRefraction,
   defaultRefractionByIntensity,
   resolveFilterMapGeometry,

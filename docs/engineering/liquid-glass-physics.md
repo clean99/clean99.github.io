@@ -129,6 +129,8 @@ The first overscan implementation was still wrong. It passed `radius: 75` into `
 
 The current fix keeps the visible lens at `210 x 120` by rendering an authored `210 x 150` optical box and scaling it with `scaleY(0.8)`. `ResizeObserver` still gives `@hashintel/refractive` the 150px layout height, which lets a 75px radius map fit without overlapping slices. The physics test now captures this invariant with `resolveFilterMapGeometry`: `210 x 150 / radius 75` is valid, while `210 x 120 / radius 75` is flagged as overlapping.
 
+The next layer is now modeled as pure math in `src/utils/optics.ts` and `src/utils/lens-pipeline.ts`. `estimateMaximumDisplacement` samples the convex-squircle surface, applies the same orthogonal-ray Snell simplification described in the kube article, and returns the SVG `feDisplacementMap` scale. The reference lens pipeline has two stages: a `21.5px` thickness / `0px` bezel magnification pass that resolves to roughly `24px`, then the existing `88px` thickness / `18px` bezel displacement pass that resolves to `98.247133px`. This proves the next visual gap is a real two-pass filter-composition gap, not an arbitrary CSS tuning problem.
+
 ## Lessons From the Failed Iterations
 
 The ugly versions failed for mundane reasons:
