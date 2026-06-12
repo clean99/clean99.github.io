@@ -151,13 +151,15 @@
 
 .lg-lens {
   width: 13.125rem;
-  height: 7.5rem;
+  height: 9.375rem;
   padding: 0;
   background: transparent;
   box-shadow:
     0 4px 9px rgba(0, 0, 0, 0.16),
     inset 0 2px 24px rgba(0, 0, 0, 0.2),
     inset 0 -2px 24px rgba(255, 255, 255, 0.2);
+  transform: scaleY(0.8);
+  transform-origin: top center;
 }
 
 .lg-lens::before,

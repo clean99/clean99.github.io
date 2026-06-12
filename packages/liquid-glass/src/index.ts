@@ -48,6 +48,7 @@ export { distanceFromRectEdge, resolveLiquidElasticResponse } from "./utils/elas
 export {
   continuousPlateRefraction,
   defaultRefractionByIntensity,
+  resolveFilterMapGeometry,
   resolvePhysicalRefractionRadius,
   resolveRefractiveOptions,
   resolveRefractionRadius

@@ -62,6 +62,26 @@ export function resolvePhysicalRefractionRadius({
   return clamp(Math.floor(Math.min(radius, geometryLimit)), 1, 96);
 }
 
+export function resolveFilterMapGeometry({
+  bezelWidth = 0,
+  height,
+  radius,
+  width
+}: {
+  bezelWidth?: number;
+  height: number;
+  radius: number;
+  width: number;
+}) {
+  const cornerWidth = Math.max(resolveRefractionRadius(radius), Math.max(0, bezelWidth));
+  const hasOverlappingSlices = cornerWidth * 2 > Math.min(width, height);
+
+  return {
+    cornerWidth,
+    hasOverlappingSlices
+  };
+}
+
 export function resolveRefractiveOptions({
   allowOversizedRadius = false,
   bounds,

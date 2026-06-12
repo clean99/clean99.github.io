@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   defaultRefractionByIntensity,
+  resolveFilterMapGeometry,
   resolvePhysicalRefractionRadius,
   resolveRefractiveOptions,
   resolveRefractionRadius,
@@ -95,6 +96,30 @@ describe("Liquid Glass physics contract", () => {
     expect(lensSource).toContain("refractiveIndex: 1.5");
     expect(lensSource).not.toContain("defaultLensMagnificationRefraction");
     expect(lensSource).not.toContain('className="lg-lens__core"');
+  });
+
+  it("keeps lens filter-map slices from overlapping at the overscan radius", () => {
+    const lensRule = collectCssRuleBodies(styles, ".lg-lens").join("\n");
+
+    expect(lensRule).toContain("height: 9.375rem");
+    expect(lensRule).toContain("transform: scaleY(0.8)");
+    expect(lensRule).toContain("transform-origin: top center");
+    expect(
+      resolveFilterMapGeometry({
+        bezelWidth: 18,
+        height: 150,
+        radius: 75,
+        width: 210
+      }).hasOverlappingSlices
+    ).toBe(false);
+    expect(
+      resolveFilterMapGeometry({
+        bezelWidth: 18,
+        height: 120,
+        radius: 75,
+        width: 210
+      }).hasOverlappingSlices
+    ).toBe(true);
   });
 
   it("keeps foreground content outside the displacement/filter layer", () => {

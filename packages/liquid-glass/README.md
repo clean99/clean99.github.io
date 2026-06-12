@@ -125,7 +125,7 @@ Implemented components:
 
 Kube-aligned primitives:
 
-- `LiquidLens` is a decorative capsule lens tuned for transparent refraction over high-contrast content. It defaults to a 210x120 lens, 75px overscan filter radius, transparent fill, 88px optical thickness, and light inset shadows.
+- `LiquidLens` is a decorative capsule lens tuned for transparent refraction over high-contrast content. It renders a 210x150 optical box scaled to a 210x120 visible capsule, keeping the 75px filter radius physically valid for the refractive map. It uses transparent fill, 88px optical thickness, and light inset shadows.
 - `LiquidSearchBox` is a native `<input type="search">` wrapped in a refractive pill surface. It follows the kube searchbox dimensions and keeps the editable text outside the displacement layer.
 - `LiquidSwitch` keeps the track as a semantic switch and applies refraction only to the thumb, matching the kube demo's physical model.
 - `LiquidSlider` keeps the range input native and applies refraction only to the draggable thumb.

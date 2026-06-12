@@ -125,6 +125,10 @@ This is still not 1:1. The gate stays honest by accepting only measured improvem
 
 `LiquidSurface` keeps the default physical radius cap. `LiquidLens` is the exception because small optical lens components can use a larger displacement map than their visible height. The exception is explicit through `allowOversizedRefractionRadius`; it must not be enabled for ordinary cards, fields, nav items, article containers, or long text surfaces.
 
+The first overscan implementation was still wrong. It passed `radius: 75` into `@hashintel/refractive` while the measured lens box stayed `210 x 120`. The underlying engine builds rounded-rectangle filters from nine image slices where `cornerWidth = max(radius, bezelWidth)`. That made `cornerWidth * 2 = 150` exceed the 120px measured height, so the top and bottom slices overlapped. The visible result was an impossible internal rectangle/cross-line artifact: a real convex glass capsule can bend grid lines, but it should not invent hard seams inside the clear aperture.
+
+The current fix keeps the visible lens at `210 x 120` by rendering an authored `210 x 150` optical box and scaling it with `scaleY(0.8)`. `ResizeObserver` still gives `@hashintel/refractive` the 150px layout height, which lets a 75px radius map fit without overlapping slices. The physics test now captures this invariant with `resolveFilterMapGeometry`: `210 x 150 / radius 75` is valid, while `210 x 120 / radius 75` is flagged as overlapping.
+
 ## Lessons From the Failed Iterations
 
 The ugly versions failed for mundane reasons:
