@@ -12,6 +12,7 @@ import {
 
 const styles = fs.readFileSync(path.resolve("src/styles/styles.css"), "utf8");
 const storyFixture = fs.readFileSync(path.resolve("stories/story-fixtures.tsx"), "utf8");
+const lensSource = fs.readFileSync(path.resolve("src/components/LiquidLens.tsx"), "utf8");
 const surfaceSource = fs.readFileSync(path.resolve("src/components/LiquidSurface.tsx"), "utf8");
 
 const intensities: LiquidIntensity[] = ["subtle", "medium", "strong"];
@@ -67,6 +68,26 @@ describe("Liquid Glass physics contract", () => {
   it("does not allow optical radius to exceed the physical cap of a measured surface", () => {
     expect(resolvePhysicalRefractionRadius({ height: 54, radius: 999, width: 357 })).toBe(27);
     expect(resolvePhysicalRefractionRadius({ height: 84, radius: 96, width: 720 })).toBe(42);
+  });
+
+  it("allows explicit lens overscan without weakening the default physical cap", () => {
+    expect(
+      resolveRefractiveOptions({
+        bounds: { height: 120, width: 210 },
+        intensity: "strong",
+        radius: 75
+      }).radius
+    ).toBe(60);
+
+    expect(
+      resolveRefractiveOptions({
+        allowOversizedRadius: true,
+        bounds: { height: 120, width: 210 },
+        intensity: "strong",
+        radius: 75
+      }).radius
+    ).toBe(75);
+    expect(lensSource).toContain("allowOversizedRefractionRadius = true");
   });
 
   it("keeps foreground content outside the displacement/filter layer", () => {

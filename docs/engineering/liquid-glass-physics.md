@@ -113,9 +113,13 @@ The separate Storybook behavior gate lives in `apps/docs/scripts/verify-liquid-b
 
 The kube reference gate also writes `test-results/kube-reference/magnifying-glass-filter-contract.json`. That artifact records target and candidate geometry, computed `backdrop-filter`, SVG filter primitive counts, displacement scales, and filter image sources. It keeps the next 1:1 work honest: if the candidate differs because the target uses a two-pass displacement/specular filter and the local component uses a one-pass `@hashintel/refractive` filter, that is an engine-level gap, not a CSS-shadow tuning problem.
 
+The gate loads the public reference page with `domcontentloaded`, not `networkidle`. The comparison only needs the target demo sections; waiting for every network request on a public page made the test flaky and produced false failures unrelated to component pixels.
+
 The `rdev/liquid-glass-react` review lives in `docs/engineering/rdev-liquid-glass-react-review.md`. The adopted part is the edge-distance pointer elasticity idea, expressed as our own pure model in `packages/liquid-glass/src/utils/elasticity.ts`. The rejected parts are direct engine replacement, default runtime shader generation, and always-on pointer tracking.
 
-The magnifying-glass Kube fixture uses measured target geometry, not guessed layout: 706px by 460px frame, label at y=46, title at y=81, and lens at y=36. A failed iteration moved the lens upward by eye and regressed the crop diff from 0.3123 to 0.4807. The current fixture correction lowered the diff to 0.2897, so the gate was tightened from 0.33 to 0.30. This is still not 1:1; the remaining work is engine-level edge/refraction matching, not generic decoration.
+The magnifying-glass Kube fixture uses measured target geometry, not guessed layout: 706px by 460px frame, label at y=46, title at y=81, and lens at y=36. A failed iteration moved the lens upward by eye and regressed the crop diff from 0.3123 to 0.4807. The fixture correction lowered the diff to 0.2897, so the gate was tightened from 0.33 to 0.30. The lens then adopted an explicit overscan optical radius: a visible 210 by 120 capsule keeps the target 75px filter radius instead of clamping to 60px. That lowered the crop diff to 0.2854 and aligned the computed CSS radius with kube. This is still not 1:1; the remaining work is engine-level two-pass displacement/specular matching, not generic decoration.
+
+`LiquidSurface` keeps the default physical radius cap. `LiquidLens` is the exception because small optical lens components can use a larger displacement map than their visible height. The exception is explicit through `allowOversizedRefractionRadius`; it must not be enabled for ordinary cards, fields, nav items, article containers, or long text surfaces.
 
 ## Lessons From the Failed Iterations
 

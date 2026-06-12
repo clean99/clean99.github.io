@@ -25,6 +25,7 @@ const defaultLensRefraction = {
 
 export const LiquidLens = forwardRef<HTMLElement, LiquidLensProps>(function LiquidLens(
   {
+    allowOversizedRefractionRadius = true,
     children = null,
     className,
     intensity = "strong",
@@ -38,6 +39,7 @@ export const LiquidLens = forwardRef<HTMLElement, LiquidLensProps>(function Liqu
   return (
     <LiquidSurface
       {...props}
+      allowOversizedRefractionRadius={allowOversizedRefractionRadius}
       aria-hidden={props["aria-hidden"] ?? (children ? undefined : true)}
       className={cn("lg-lens", className)}
       intensity={intensity}

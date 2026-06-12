@@ -11,9 +11,9 @@ const stories = [
     selector: ".lg-lens",
     width: 210,
     height: 120,
-    radius: "60px",
+    radius: "75px",
     transparent: true,
-    opticalRadius: "60"
+    opticalRadius: "75"
   },
   {
     id: "liquid-glass-liquidsearchbox--kube-reference",

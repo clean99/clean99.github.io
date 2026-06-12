@@ -68,7 +68,7 @@ pnpm --filter docs test:kube-reference
 pnpm test:visual
 ```
 
-`apps/docs/scripts/verify-enhanced-storybook.mjs` checks that enhanced stories really use `backdrop-filter: url(...)`, have stable geometry, and keep the physical optical radius within the measured component bounds.
+`apps/docs/scripts/verify-enhanced-storybook.mjs` checks that enhanced stories really use `backdrop-filter: url(...)`, have stable geometry, and keep the physical optical radius within the measured component bounds except for explicit lens overscan cases.
 
 `apps/docs/scripts/verify-liquid-behavior.mjs` checks interaction behavior from built Storybook iframes:
 

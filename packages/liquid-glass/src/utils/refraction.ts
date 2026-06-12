@@ -63,11 +63,13 @@ export function resolvePhysicalRefractionRadius({
 }
 
 export function resolveRefractiveOptions({
+  allowOversizedRadius = false,
   bounds,
   intensity,
   radius,
   refraction
 }: {
+  allowOversizedRadius?: boolean;
   bounds?: { height: number; width: number };
   intensity: LiquidIntensity;
   radius: number;
@@ -78,8 +80,10 @@ export function resolveRefractiveOptions({
   return {
     ...defaultRefractionByIntensity[intensity],
     ...refraction,
-    radius: bounds
-      ? resolvePhysicalRefractionRadius({ ...bounds, radius: requestedRadius })
-      : resolveRefractionRadius(requestedRadius)
+    radius: allowOversizedRadius
+      ? resolveRefractionRadius(requestedRadius)
+      : bounds
+        ? resolvePhysicalRefractionRadius({ ...bounds, radius: requestedRadius })
+        : resolveRefractionRadius(requestedRadius)
   };
 }

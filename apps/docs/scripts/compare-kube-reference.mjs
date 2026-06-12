@@ -72,7 +72,8 @@ const results = [];
 
 try {
   const referencePage = await browser.newPage({ viewport: { width: 1100, height: 760 } });
-  await referencePage.goto(targetUrl, { waitUntil: "networkidle", timeout: 60_000 });
+  await referencePage.goto(targetUrl, { waitUntil: "domcontentloaded", timeout: 60_000 });
+  await referencePage.waitForLoadState("load", { timeout: 20_000 }).catch(() => undefined);
 
   for (const reference of references) {
     const targetElement = await findTargetDemo(referencePage, reference.targetId);

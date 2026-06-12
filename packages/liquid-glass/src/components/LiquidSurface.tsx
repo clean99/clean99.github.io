@@ -37,6 +37,7 @@ export type LiquidSurfaceProps = Omit<HTMLAttributes<HTMLElement>, "children"> &
   disabled?: boolean;
   fallback?: LiquidFallback;
   href?: string;
+  allowOversizedRefractionRadius?: boolean;
   intensity?: LiquidIntensity;
   interactive?: boolean;
   kind?: LiquidSurfaceKind;
@@ -59,6 +60,7 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
   {
     as: Component = "div",
     asChild = false,
+    allowOversizedRefractionRadius = false,
     children,
     className,
     disabled = false,
@@ -208,11 +210,12 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
     () =>
       resolveRefractiveOptions({
         bounds: resolvedMode === "enhanced" ? surfaceBounds : undefined,
+        allowOversizedRadius: allowOversizedRefractionRadius,
         intensity,
         radius: radiusPx,
         refraction
       }),
-    [intensity, radiusPx, refraction, resolvedMode, surfaceBounds]
+    [allowOversizedRefractionRadius, intensity, radiusPx, refraction, resolvedMode, surfaceBounds]
   );
   const componentName = typeof Component === "string" ? Component : "";
   const supportsDisabled = ["button", "input", "select", "textarea"].includes(componentName);
