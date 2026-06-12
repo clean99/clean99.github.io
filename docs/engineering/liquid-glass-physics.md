@@ -131,6 +131,8 @@ The current fix keeps the visible lens at `210 x 120` by rendering an authored `
 
 The next layer is now modeled as pure math in `src/utils/optics.ts` and `src/utils/lens-pipeline.ts`. `estimateMaximumDisplacement` samples the convex-squircle surface, applies the same orthogonal-ray Snell simplification described in the kube article, and returns the SVG `feDisplacementMap` scale. The reference lens pipeline has two stages: a `21.5px` thickness / `0px` bezel magnification pass that resolves to roughly `24px`, then the existing `88px` thickness / `18px` bezel displacement pass that resolves to `98.247133px`. This proves the next visual gap is a real two-pass filter-composition gap, not an arbitrary CSS tuning problem.
 
+`LensReferenceEngine` is an experimental implementation of that two-pass filter contract. It now matches the kube primitive shape: three `feImage` inputs, two `feDisplacementMap` passes, a saturation pass, specular compositing, and the same displacement scales. It is intentionally opt-in through `LiquidLens engine="reference"` because the generated map pixels still miss the kube visual gate (`0.3022` versus the current `0.30` threshold in the first trial). The stable `LiquidLens` default remains `@hashintel/refractive` until the generated vector field beats the gate.
+
 ## Lessons From the Failed Iterations
 
 The ugly versions failed for mundane reasons:

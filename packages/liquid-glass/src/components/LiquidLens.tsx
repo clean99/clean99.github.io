@@ -7,9 +7,10 @@ import { referenceLensDisplacementRefraction } from "../utils/lens-pipeline";
 
 export type LiquidLensProps = Omit<
   LiquidSurfaceProps,
-  "children" | "intensity" | "kind" | "radius"
+  "children" | "enhancedEngine" | "intensity" | "kind" | "radius"
 > & {
   children?: React.ReactNode;
+  engine?: "refractive" | "reference";
   intensity?: LiquidSurfaceProps["intensity"];
   radius?: number;
 };
@@ -19,6 +20,7 @@ export const LiquidLens = forwardRef<HTMLElement, LiquidLensProps>(function Liqu
     allowOversizedRefractionRadius = true,
     children = null,
     className,
+    engine = "refractive",
     fallback,
     intensity = "strong",
     mode,
@@ -35,6 +37,7 @@ export const LiquidLens = forwardRef<HTMLElement, LiquidLensProps>(function Liqu
       allowOversizedRefractionRadius={allowOversizedRefractionRadius}
       aria-hidden={props["aria-hidden"] ?? (children ? undefined : true)}
       className={cn("lg-lens", className)}
+      enhancedEngine={engine === "reference" ? "reference-lens" : "refractive"}
       fallback={fallback}
       intensity={intensity}
       kind="pill"

@@ -13,6 +13,7 @@ import {
   type MouseEvent
 } from "react";
 import { FallbackEngine } from "../engines/fallback-engine";
+import { LensReferenceEngine } from "../engines/lens-reference-engine";
 import { RefractiveEngine } from "../engines/refractive-engine";
 import { SolidEngine } from "../engines/solid-engine";
 import { useIsomorphicLayoutEffect } from "../hooks/use-isomorphic-layout-effect";
@@ -38,6 +39,7 @@ export type LiquidSurfaceProps = Omit<HTMLAttributes<HTMLElement>, "children"> &
   fallback?: LiquidFallback;
   href?: string;
   allowOversizedRefractionRadius?: boolean;
+  enhancedEngine?: "refractive" | "reference-lens";
   intensity?: LiquidIntensity;
   interactive?: boolean;
   kind?: LiquidSurfaceKind;
@@ -64,6 +66,7 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
     children,
     className,
     disabled = false,
+    enhancedEngine = "refractive",
     fallback = "material",
     intensity = "subtle",
     interactive = false,
@@ -145,7 +148,9 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
         : requestedResolvedMode;
   const Engine =
     resolvedMode === "enhanced"
-      ? RefractiveEngine
+      ? enhancedEngine === "reference-lens"
+        ? LensReferenceEngine
+        : RefractiveEngine
       : resolvedMode === "solid"
         ? SolidEngine
         : FallbackEngine;

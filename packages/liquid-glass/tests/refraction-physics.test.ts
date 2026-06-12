@@ -16,6 +16,10 @@ import {
 const styles = fs.readFileSync(path.resolve("src/styles/styles.css"), "utf8");
 const storyFixture = fs.readFileSync(path.resolve("stories/story-fixtures.tsx"), "utf8");
 const lensSource = fs.readFileSync(path.resolve("src/components/LiquidLens.tsx"), "utf8");
+const lensReferenceEngineSource = fs.readFileSync(
+  path.resolve("src/engines/lens-reference-engine.tsx"),
+  "utf8"
+);
 const lensPipelineSource = fs.readFileSync(path.resolve("src/utils/lens-pipeline.ts"), "utf8");
 const surfaceSource = fs.readFileSync(path.resolve("src/components/LiquidSurface.tsx"), "utf8");
 
@@ -122,8 +126,21 @@ describe("Liquid Glass physics contract", () => {
     expect(lensPipelineSource).toContain("glassThickness: 88");
     expect(lensPipelineSource).toContain("refractiveIndex: 1.5");
     expect(lensSource).toContain("referenceLensDisplacementRefraction");
+    expect(lensSource).toContain('engine = "refractive"');
+    expect(lensSource).toContain('engine === "reference" ? "reference-lens" : "refractive"');
     expect(lensSource).not.toContain("defaultLensMagnificationRefraction");
     expect(lensSource).not.toContain('className="lg-lens__core"');
+  });
+
+  it("keeps the reference lens engine as a real two-pass SVG filter", () => {
+    expect(lensReferenceEngineSource.match(/<feImage/g)).toHaveLength(3);
+    expect(lensReferenceEngineSource.match(/<feDisplacementMap/g)).toHaveLength(2);
+    expect(lensReferenceEngineSource).toContain('result="magnifying_displacement_map"');
+    expect(lensReferenceEngineSource).toContain('result="displacement_map"');
+    expect(lensReferenceEngineSource).toContain('result="specular_layer"');
+    expect(lensReferenceEngineSource).toContain('in="SourceGraphic"');
+    expect(lensReferenceEngineSource).toContain('in="blurred_source"');
+    expect(lensReferenceEngineSource).toContain('values="9"');
   });
 
   it("keeps optical displacement estimates finite for bad sample input", () => {

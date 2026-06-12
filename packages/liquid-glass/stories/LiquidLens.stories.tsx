@@ -110,6 +110,14 @@ export const DarkRefractionField: Story = {
   )
 };
 
+export const ExperimentalTwoPassReference: Story = {
+  render: () => (
+    <StoryFrame mode="enhanced" theme="light" width={520} height={300}>
+      <LiquidLens engine="reference" />
+    </StoryFrame>
+  )
+};
+
 export const FallbackMode: Story = {
   render: () => (
     <StoryFrame mode="fallback" theme="light" width={520} height={300}>
