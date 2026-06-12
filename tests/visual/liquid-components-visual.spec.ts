@@ -70,6 +70,18 @@ test.describe("liquid glass component visuals", () => {
     await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-dialog-dark.png");
   });
 
+  test("component liquid accordion light", async ({ page }) => {
+    await page.setViewportSize({ width: 720, height: 420 });
+    await renderFixture(page, accordionFixture("light"));
+    await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-accordion-light.png");
+  });
+
+  test("component liquid accordion dark", async ({ page }) => {
+    await page.setViewportSize({ width: 720, height: 420 });
+    await renderFixture(page, accordionFixture("dark"));
+    await expect(page.locator("#fixture")).toHaveScreenshot("component-liquid-accordion-dark.png");
+  });
+
   test("component liquid button light", async ({ page }) => {
     await page.setViewportSize({ width: 520, height: 260 });
     await renderFixture(page, buttonFixture("light"));
@@ -236,6 +248,53 @@ function dialogFixture(theme: "light" | "dark") {
         </div>
       </span>
     </dialog>`
+  );
+}
+
+function accordionFixture(theme: "light" | "dark") {
+  return frame(
+    theme,
+    `<section class="lg-accordion" style="max-width:560px;">
+      <section class="lg-surface lg-surface--panel lg-surface--fallback lg-surface--subtle lg-surface--fallback-material lg-accordion__item" data-liquid-mode="fallback" data-state="open">
+        <span class="lg-surface__content">
+          <h3 class="lg-accordion__heading">
+            <button id="visual-accordion-trigger-0" aria-controls="visual-accordion-panel-0" aria-expanded="true" class="lg-accordion__trigger" type="button">
+              <span class="lg-accordion__title">Foreground content stays sharp</span>
+              <span aria-hidden="true" class="lg-accordion__chevron">+</span>
+            </button>
+          </h3>
+          <div id="visual-accordion-panel-0" aria-labelledby="visual-accordion-trigger-0" class="lg-accordion__panel" role="region">
+            The surface carries the Liquid Glass material. Text remains a readable foreground layer.
+          </div>
+        </span>
+      </section>
+      <section class="lg-surface lg-surface--panel lg-surface--fallback lg-surface--subtle lg-surface--fallback-material lg-accordion__item" data-liquid-mode="fallback" data-state="closed">
+        <span class="lg-surface__content">
+          <h3 class="lg-accordion__heading">
+            <button id="visual-accordion-trigger-1" aria-controls="visual-accordion-panel-1" aria-expanded="false" class="lg-accordion__trigger" type="button">
+              <span class="lg-accordion__title">Chrome enhanced, fallback everywhere else</span>
+              <span aria-hidden="true" class="lg-accordion__chevron">+</span>
+            </button>
+          </h3>
+          <div id="visual-accordion-panel-1" aria-labelledby="visual-accordion-trigger-1" class="lg-accordion__panel" hidden role="region">
+            Hidden panel.
+          </div>
+        </span>
+      </section>
+      <section class="lg-surface lg-surface--panel lg-surface--fallback lg-surface--subtle lg-surface--fallback-material lg-accordion__item" data-liquid-mode="fallback" data-state="closed">
+        <span class="lg-surface__content">
+          <h3 class="lg-accordion__heading">
+            <button id="visual-accordion-trigger-2" aria-controls="visual-accordion-panel-2" aria-expanded="false" class="lg-accordion__trigger" type="button">
+              <span class="lg-accordion__title">Arrow keys, Home, End</span>
+              <span aria-hidden="true" class="lg-accordion__chevron">+</span>
+            </button>
+          </h3>
+          <div id="visual-accordion-panel-2" aria-labelledby="visual-accordion-trigger-2" class="lg-accordion__panel" hidden role="region">
+            Hidden panel.
+          </div>
+        </span>
+      </section>
+    </section>`
   );
 }
 

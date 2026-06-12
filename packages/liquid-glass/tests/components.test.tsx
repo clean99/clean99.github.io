@@ -1,7 +1,8 @@
 import "@testing-library/jest-dom/vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  LiquidAccordion,
   LiquidButton,
   LiquidCard,
   LiquidDialog,
@@ -42,6 +43,7 @@ describe("Liquid components", () => {
   });
 
   afterEach(() => {
+    cleanup();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -336,6 +338,87 @@ describe("Liquid components", () => {
 
     expect(onValueChange).toHaveBeenCalledWith("testing");
     expect(designTab).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("renders accessible accordion items and switches a single open panel", () => {
+    const onValueChange = vi.fn();
+    render(
+      <LiquidAccordion
+        defaultValue="performance"
+        items={[
+          { title: "Performance", value: "performance", content: "Performance panel" },
+          { title: "Reliability", value: "reliability", content: "Reliability panel" }
+        ]}
+        onValueChange={onValueChange}
+      />
+    );
+
+    const performanceTrigger = screen.getByRole("button", { name: "Performance" });
+    const reliabilityTrigger = screen.getByRole("button", { name: "Reliability" });
+    expect(performanceTrigger).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("region", { name: "Performance" })).toHaveTextContent(
+      "Performance panel"
+    );
+
+    fireEvent.click(reliabilityTrigger);
+
+    expect(onValueChange).toHaveBeenCalledWith("reliability");
+    expect(performanceTrigger).toHaveAttribute("aria-expanded", "false");
+    expect(reliabilityTrigger).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("region", { name: "Reliability" })).toHaveTextContent(
+      "Reliability panel"
+    );
+    expect(screen.queryByRole("region", { name: "Performance" })).not.toBeInTheDocument();
+  });
+
+  it("supports multiple accordion panels and arrow-key focus movement", () => {
+    const onValueChange = vi.fn();
+    render(
+      <LiquidAccordion
+        defaultValue={["performance"]}
+        items={[
+          { title: "Performance", value: "performance", content: "Performance panel" },
+          { title: "Reliability", value: "reliability", content: "Reliability panel" },
+          { title: "Disabled", value: "disabled", content: "Disabled panel", disabled: true }
+        ]}
+        onValueChange={onValueChange}
+        type="multiple"
+      />
+    );
+
+    const performanceTrigger = screen.getByRole("button", { name: "Performance" });
+    const reliabilityTrigger = screen.getByRole("button", { name: "Reliability" });
+    performanceTrigger.focus();
+
+    fireEvent.keyDown(performanceTrigger, { key: "ArrowDown" });
+    expect(reliabilityTrigger).toHaveFocus();
+
+    fireEvent.click(reliabilityTrigger);
+    expect(onValueChange).toHaveBeenCalledWith(["performance", "reliability"]);
+    expect(performanceTrigger).toHaveAttribute("aria-expanded", "true");
+    expect(reliabilityTrigger).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: "Disabled" })).toBeDisabled();
+  });
+
+  it("does not toggle disabled accordion items", () => {
+    const onValueChange = vi.fn();
+    render(
+      <LiquidAccordion
+        items={[
+          { title: "Ready", value: "ready", content: "Ready panel" },
+          { title: "Disabled", value: "disabled", content: "Disabled panel", disabled: true }
+        ]}
+        onValueChange={onValueChange}
+      />
+    );
+
+    const disabledTrigger = screen.getByRole("button", { name: "Disabled" });
+    expect(disabledTrigger).toBeDisabled();
+
+    fireEvent.click(disabledTrigger);
+
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(screen.queryByRole("region", { name: "Disabled" })).not.toBeInTheDocument();
   });
 
   it("forwards refs and passthrough props", () => {

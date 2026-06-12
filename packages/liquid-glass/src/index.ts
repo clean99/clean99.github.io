@@ -1,6 +1,7 @@
 "use client";
 
 export { FallbackGlassSurface } from "./components/FallbackGlassSurface";
+export { LiquidAccordion } from "./components/LiquidAccordion";
 export { LiquidButton } from "./components/LiquidButton";
 export { LiquidCard } from "./components/LiquidCard";
 export {
@@ -63,6 +64,13 @@ export { surfaceClassNames } from "./utils/variants";
 
 export const liquidPackageName = "@clean99/liquid-glass";
 
+export type {
+  LiquidAccordionItem,
+  LiquidAccordionProps,
+  LiquidAccordionSurfaceProps,
+  LiquidAccordionType,
+  LiquidAccordionValue
+} from "./components/LiquidAccordion";
 export type { LiquidButtonProps } from "./components/LiquidButton";
 export type { LiquidCardProps } from "./components/LiquidCard";
 export type {

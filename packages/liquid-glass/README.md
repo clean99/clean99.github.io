@@ -92,6 +92,7 @@ Implemented components:
 - `LiquidProvider`
 - `LiquidSurface`
 - `FallbackGlassSurface`
+- `LiquidAccordion`
 - `LiquidButton`
 - `LiquidIconButton`
 - `LiquidDialog`
@@ -167,6 +168,7 @@ The package supports system color scheme and explicit theme scopes:
 - `LiquidNav` and `LiquidToolbar` require accessible labels.
 - `LiquidSegmentedControl` uses `radiogroup` / `radio`.
 - `LiquidTabs` uses `tablist` / `tab` / `tabpanel`, roving tab index, Home/End, and arrow-key navigation.
+- `LiquidAccordion` uses native trigger buttons, `aria-expanded`, labelled region panels, and Arrow/Home/End focus movement.
 - Disabled controls suppress interaction and expose disabled state.
 - Focus-visible styles are part of the CSS contract.
 - Reduced transparency resolves to solid mode.
