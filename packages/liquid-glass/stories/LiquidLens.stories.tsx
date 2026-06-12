@@ -32,49 +32,57 @@ export const KubeReference: Story = {
           style={{
             position: "relative",
             width: 706,
-            height: 280,
+            height: 460,
+            boxSizing: "border-box",
             overflow: "hidden",
             background: "#fff",
             border: "1px solid rgba(0,0,0,0.1)",
-            borderRadius: 10
+            borderRadius: 12
           }}
         >
-          <div style={{ position: "absolute", top: 54, left: 34, width: 354 }}>
-            <p
+          <div style={{ position: "absolute", inset: 0 }}>
+            <div
               style={{
-                margin: 0,
+                position: "absolute",
+                top: 46,
+                left: 34,
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
                 color: "#dc2626",
-                fontSize: 11,
-                fontWeight: 500,
-                letterSpacing: "0.25em",
-                textTransform: "uppercase"
+                height: 22
               }}
             >
-              Optics Study
-            </p>
-            <h2
+              <span style={{ width: 40, height: 2, background: "currentColor" }} />
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: 500,
+                  letterSpacing: "0.25em",
+                  lineHeight: "22px",
+                  textTransform: "uppercase"
+                }}
+              >
+                Optics Study
+              </span>
+            </div>
+            <h3
               style={{
-                margin: "16px 0 0",
+                position: "absolute",
+                top: 81,
+                left: 34,
+                width: 354,
+                margin: 0,
                 fontSize: 54,
                 fontWeight: 800,
-                letterSpacing: "-0.03em",
+                letterSpacing: "-0.025em",
                 lineHeight: 0.95
               }}
             >
-              Liquid Glass<span style={{ color: "rgba(0,0,0,0.4)" }}>-</span>Precision Lens
-            </h2>
+              Liquid&nbsp;Glass<span style={{ color: "rgba(0,0,0,0.4)" }}>—</span>
+              Precision&nbsp;Lens
+            </h3>
           </div>
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              top: 108,
-              left: 34,
-              width: 336,
-              height: 7,
-              background: "rgba(0,0,0,0.42)"
-            }}
-          />
           <LiquidLens
             refraction={{
               blur: 0,
@@ -84,7 +92,7 @@ export const KubeReference: Story = {
               specularOpacity: 0.5,
               specularAngle: 0.8
             }}
-            style={{ position: "absolute", top: 34, left: 20, zIndex: 3 }}
+            style={{ position: "absolute", top: 36, left: 20, zIndex: 3 }}
           />
         </div>
       </div>

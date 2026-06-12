@@ -18,7 +18,7 @@ const references = [
     storyId: "liquid-glass-liquidlens--kube-reference",
     targetId: "magnifying-glass",
     compareRegion: { x: 14, y: 26, width: 216, height: 128 },
-    maxDiffRatio: 0.33
+    maxDiffRatio: 0.3
   },
   {
     name: "searchbox",

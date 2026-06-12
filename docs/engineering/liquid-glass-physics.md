@@ -113,6 +113,8 @@ The separate Storybook behavior gate lives in `apps/docs/scripts/verify-liquid-b
 
 The `rdev/liquid-glass-react` review lives in `docs/engineering/rdev-liquid-glass-react-review.md`. The adopted part is the edge-distance pointer elasticity idea, expressed as our own pure model in `packages/liquid-glass/src/utils/elasticity.ts`. The rejected parts are direct engine replacement, default runtime shader generation, and always-on pointer tracking.
 
+The magnifying-glass Kube fixture uses measured target geometry, not guessed layout: 706px by 460px frame, label at y=46, title at y=81, and lens at y=36. A failed iteration moved the lens upward by eye and regressed the crop diff from 0.3123 to 0.4807. The current fixture correction lowered the diff to 0.2897, so the gate was tightened from 0.33 to 0.30. This is still not 1:1; the remaining work is engine-level edge/refraction matching, not generic decoration.
+
 ## Lessons From the Failed Iterations
 
 The ugly versions failed for mundane reasons:
