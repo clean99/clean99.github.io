@@ -15,7 +15,7 @@ export type LiquidLensProps = Omit<
 
 const defaultLensRefraction = {
   blur: 0,
-  glassThickness: 120,
+  glassThickness: 88,
   bezelWidth: 18,
   refractiveIndex: 1.5,
   radius: 75,
@@ -28,7 +28,9 @@ export const LiquidLens = forwardRef<HTMLElement, LiquidLensProps>(function Liqu
     allowOversizedRefractionRadius = true,
     children = null,
     className,
+    fallback,
     intensity = "strong",
+    mode,
     radius = 75,
     refraction,
     style,
@@ -42,8 +44,10 @@ export const LiquidLens = forwardRef<HTMLElement, LiquidLensProps>(function Liqu
       allowOversizedRefractionRadius={allowOversizedRefractionRadius}
       aria-hidden={props["aria-hidden"] ?? (children ? undefined : true)}
       className={cn("lg-lens", className)}
+      fallback={fallback}
       intensity={intensity}
       kind="pill"
+      mode={mode}
       radius={radius}
       ref={ref}
       refraction={{ ...defaultLensRefraction, ...refraction, radius }}

@@ -90,6 +90,13 @@ describe("Liquid Glass physics contract", () => {
     expect(lensSource).toContain("allowOversizedRefractionRadius = true");
   });
 
+  it("keeps the lens thickness aligned with the kube second-pass displacement scale", () => {
+    expect(lensSource).toContain("glassThickness: 88");
+    expect(lensSource).toContain("refractiveIndex: 1.5");
+    expect(lensSource).not.toContain("defaultLensMagnificationRefraction");
+    expect(lensSource).not.toContain('className="lg-lens__core"');
+  });
+
   it("keeps foreground content outside the displacement/filter layer", () => {
     const contentRules = collectCssRuleBodies(styles, ".lg-surface__content").join("\n");
 
@@ -140,7 +147,9 @@ describe("Liquid Glass physics contract", () => {
     expect(searchboxRule).toContain("max-width: 100%");
     expect(searchboxRule).toContain("height: 3.5rem");
     expect(searchboxRule).toContain("transform: scale(0.8)");
-    expect(focusRule).toContain("rgba(34, 35, 35, 0.44)");
+    expect(searchboxRule).toContain("transition:");
+    expect(searchboxRule).toContain("transform 260ms");
+    expect(focusRule).toContain("rgba(33, 34, 34, 0.52)");
     expect(focusRule).toContain("transform: scale(1)");
     expect(reducedMotionRule).toContain("transform: none");
   });

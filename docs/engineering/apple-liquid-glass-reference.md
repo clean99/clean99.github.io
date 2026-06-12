@@ -37,6 +37,7 @@ Our focus contract:
 
 - Keyboard focus remains visible.
 - Focused glass controls scale up slightly.
+- The scale change is animated with an authored transform transition.
 - The material becomes thicker and more frosted: fill opacity, inner depth, and local shadow increase.
 - The edge stays subtle. Focus must not be a high-contrast white ring, black ring, or system-blue ring.
 - The shadow stack grows.
@@ -79,6 +80,7 @@ pnpm test:visual
 - focus outlines are not default blue, hard white, or hard black rings
 - focus increases material alpha
 - focus increases the shadow layer count
+- focus has a non-zero transform transition
 - focused tab text has a foreground text shadow
 - hover increases tab material alpha
 - active press relaxes scale relative to hover

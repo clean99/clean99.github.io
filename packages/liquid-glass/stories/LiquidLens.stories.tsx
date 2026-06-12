@@ -86,7 +86,7 @@ export const KubeReference: Story = {
           <LiquidLens
             refraction={{
               blur: 0,
-              glassThickness: 120,
+              glassThickness: 88,
               bezelWidth: 18,
               refractiveIndex: 1.5,
               specularOpacity: 0.5,

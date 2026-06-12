@@ -118,6 +118,16 @@ async function verifyFocusMaterial(name, options) {
     idle.shadowLayerCount,
     `${name} focus shadow layers`
   );
+  assertIncludes(
+    focused.transitionProperty,
+    "transform",
+    `${name} focus transition property`
+  );
+  assertGreaterThan(
+    focused.maxTransitionDurationMs,
+    0,
+    `${name} focus transition duration`
+  );
   if (options.minimumFocusGrowthRatio !== undefined) {
     assertGreaterOrEqual(
       focused.width / idle.width,
@@ -227,6 +237,8 @@ async function readState(locator) {
       scale,
       shadowLayerCount: style.boxShadow === "none" ? 0 : style.boxShadow.split(/,(?![^()]*\))/).length,
       textShadow: style.textShadow,
+      transitionProperty: style.transitionProperty,
+      maxTransitionDurationMs: maxTransitionDurationMs(style.transitionDuration),
       transform: style.transform,
       width: rect.width
     };
@@ -317,6 +329,21 @@ async function readState(locator) {
 
       return Math.sqrt(values[0] * values[0] + values[1] * values[1]);
     }
+
+    function maxTransitionDurationMs(durationList) {
+      return Math.max(
+        ...durationList.split(",").map((duration) => {
+          const value = duration.trim();
+          if (value.endsWith("ms")) {
+            return Number(value.slice(0, -2));
+          }
+          if (value.endsWith("s")) {
+            return Number(value.slice(0, -1)) * 1000;
+          }
+          return Number(value) || 0;
+        })
+      );
+    }
   });
 }
 
@@ -359,6 +386,12 @@ function assertGreaterThan(actual, expected, label) {
 function assertGreaterOrEqual(actual, expected, label) {
   if (!(actual >= expected)) {
     throw new Error(`${label}: expected ${actual} >= ${expected}`);
+  }
+}
+
+function assertIncludes(actual, expected, label) {
+  if (!String(actual).includes(expected)) {
+    throw new Error(`${label}: expected ${JSON.stringify(actual)} to include ${expected}`);
   }
 }
 

@@ -117,7 +117,11 @@ The gate loads the public reference page with `domcontentloaded`, not `networkid
 
 The `rdev/liquid-glass-react` review lives in `docs/engineering/rdev-liquid-glass-react-review.md`. The adopted part is the edge-distance pointer elasticity idea, expressed as our own pure model in `packages/liquid-glass/src/utils/elasticity.ts`. The rejected parts are direct engine replacement, default runtime shader generation, and always-on pointer tracking.
 
-The magnifying-glass Kube fixture uses measured target geometry, not guessed layout: 706px by 460px frame, label at y=46, title at y=81, and lens at y=36. A failed iteration moved the lens upward by eye and regressed the crop diff from 0.3123 to 0.4807. The fixture correction lowered the diff to 0.2897, so the gate was tightened from 0.33 to 0.30. The lens then adopted an explicit overscan optical radius: a visible 210 by 120 capsule keeps the target 75px filter radius instead of clamping to 60px. That lowered the crop diff to 0.2854 and aligned the computed CSS radius with kube. This is still not 1:1; the remaining work is engine-level two-pass displacement/specular matching, not generic decoration.
+The magnifying-glass Kube fixture uses measured target geometry, not guessed layout: 706px by 460px frame, label at y=46, title at y=81, and lens at y=36. A failed iteration moved the lens upward by eye and regressed the crop diff from 0.3123 to 0.4807. The fixture correction lowered the diff to 0.2897, so the gate was tightened from 0.33 to 0.30. The lens then adopted an explicit overscan optical radius: a visible 210 by 120 capsule keeps the target 75px filter radius instead of clamping to 60px. That lowered the crop diff to 0.2854 and aligned the computed CSS radius with kube.
+
+The next useful adjustment was optical thickness. With `@hashintel/refractive`, `glassThickness: 88`, `bezelWidth: 18`, and `refractiveIndex: 1.5` produce a displacement scale of roughly `98.247`, matching the kube target's stronger displacement pass. That lowered the lens crop diff to 0.2826. A tempting nested two-surface experiment tried to model kube's weaker first pass (`glassThickness: 21.5`, `bezelWidth: 0`) outside the stronger 88-thickness pass. It was rejected because the screenshot diff regressed to 0.3086. The lesson is simple: DOM-stacking two backdrop filters is not equivalent to kube's filter graph. The remaining gap is engine-level filter composition, not CSS decoration or extra wrapper elements.
+
+This is still not 1:1. The gate stays honest by accepting only measured improvement; more complex optical code must prove itself against the same pixel threshold before it lands.
 
 `LiquidSurface` keeps the default physical radius cap. `LiquidLens` is the exception because small optical lens components can use a larger displacement map than their visible height. The exception is explicit through `allowOversizedRefractionRadius`; it must not be enabled for ordinary cards, fields, nav items, article containers, or long text surfaces.
 
@@ -165,6 +169,7 @@ The kube searchbox focus behavior is geometric and material-based:
 - Idle visual size is produced by `transform: scale(0.8)`, yielding roughly `336 x 45`.
 - Focus returns the control to `scale(1)`, so the visual width grows by at least `1.2x`.
 - Focus material deepens into a darker frosted capsule. It must not use a hard white, black, or system-blue focus ring.
+- Focus has a real transform transition; the behavior gate asserts `transition-property` includes `transform` and that duration is non-zero.
 - Reduced motion removes the scale transition while preserving the material-deepening response.
 
 `LiquidSearchBox` passes `opticalBounds="layout"` into `LiquidSurface`. That keeps the refraction radius based on the authored `420 x 56` capsule instead of the transformed idle visual bounds. The default for other surfaces remains `opticalBounds="visual"` because most controls should use their measured visual geometry.

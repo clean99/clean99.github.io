@@ -125,7 +125,7 @@ Implemented components:
 
 Kube-aligned primitives:
 
-- `LiquidLens` is a decorative capsule lens tuned for transparent refraction over high-contrast content. It defaults to a 210x120 lens, 75px overscan filter radius, transparent fill, and light inset shadows.
+- `LiquidLens` is a decorative capsule lens tuned for transparent refraction over high-contrast content. It defaults to a 210x120 lens, 75px overscan filter radius, transparent fill, 88px optical thickness, and light inset shadows.
 - `LiquidSearchBox` is a native `<input type="search">` wrapped in a refractive pill surface. It follows the kube searchbox dimensions and keeps the editable text outside the displacement layer.
 - `LiquidSwitch` keeps the track as a semantic switch and applies refraction only to the thumb, matching the kube demo's physical model.
 - `LiquidSlider` keeps the range input native and applies refraction only to the draggable thumb.
@@ -170,7 +170,7 @@ The package supports system color scheme and explicit theme scopes:
 - `LiquidTabs` uses `tablist` / `tab` / `tabpanel`, roving tab index, Home/End, and arrow-key navigation.
 - `LiquidAccordion` uses native trigger buttons, `aria-expanded`, labelled region panels, and Arrow/Home/End focus movement.
 - Disabled controls suppress interaction and expose disabled state.
-- Focus-visible styles are part of the CSS contract.
+- Focus-visible styles are part of the CSS contract: focus deepens the material, scales with an authored transform transition, and avoids system-blue or hard white/black rings.
 - Reduced transparency resolves to solid mode.
 
 ## Performance
