@@ -1,9 +1,14 @@
+/* global document, getComputedStyle, requestAnimationFrame */
+
 import fs from "node:fs/promises";
 import http from "node:http";
 import path from "node:path";
 import { chromium } from "playwright";
 
 const staticDir = path.resolve(process.env.STORYBOOK_STATIC_DIR ?? "storybook-static-test");
+const behaviorArtifactDir = path.resolve("../../test-results/liquid-behavior");
+
+await fs.mkdir(behaviorArtifactDir, { recursive: true });
 
 const behaviorStories = {
   button: {
@@ -23,6 +28,10 @@ const behaviorStories = {
     id: "liquid-glass-liquidsearchbox--focus-photo-reference",
     focusSelector: ".lg-searchbox__input",
     selector: ".lg-searchbox"
+  },
+  draggableLens: {
+    id: "liquid-glass-liquidlens--draggable-precision-lens",
+    selector: "[data-lg-draggable-lens]"
   }
 };
 
@@ -75,6 +84,7 @@ try {
     requireMaterialDeepening: true
   });
   await verifyHoverAndActiveResponse();
+  await verifyDraggableLensPlayground();
   await verifyReducedMotionRemovesElasticFocus();
 } finally {
   await browser.close();
@@ -175,6 +185,192 @@ async function verifyHoverAndActiveResponse() {
   await page.close();
 }
 
+async function verifyDraggableLensPlayground() {
+  const page = await openStory(behaviorStories.draggableLens.id, {}, { width: 900, height: 680 });
+  const locator = page.locator(behaviorStories.draggableLens.selector).first();
+  const boardLocator = page.locator("[data-lg-lens-board]").first();
+  await boardLocator.waitFor({ state: "visible", timeout: 10_000 });
+  await locator.waitFor({ state: "visible", timeout: 10_000 });
+  await boardLocator.screenshot({
+    path: path.join(behaviorArtifactDir, "draggable-lens-board-idle.png")
+  });
+  await locator.screenshot({
+    path: path.join(behaviorArtifactDir, "draggable-lens-idle.png")
+  });
+  const idle = await readDraggableLensState(locator);
+  const box = await locator.boundingBox();
+
+  if (!box) {
+    throw new Error("draggable lens target is missing a bounding box");
+  }
+
+  await page.mouse.move(box.x + box.width * 0.42, box.y + box.height * 0.54);
+  const framesPromise = recordAnimationFrames(
+    page,
+    behaviorStories.draggableLens.selector,
+    1_400
+  );
+  await page.mouse.down();
+  await page.waitForTimeout(180);
+  await boardLocator.screenshot({
+    path: path.join(behaviorArtifactDir, "draggable-lens-board-pressed.png")
+  });
+  await locator.screenshot({
+    path: path.join(behaviorArtifactDir, "draggable-lens-pressed.png")
+  });
+  const pressed = await readDraggableLensState(locator);
+
+  assertEqual(pressed.dropletState, "pressed", "draggable lens pressed state");
+  assertGreaterThan(pressed.scaleX, 1.04, "draggable lens water-drop scaleX");
+  assertLessThanOrEqual(pressed.scaleY, 0.98, "draggable lens water-drop scaleY");
+  assertIncludes(pressed.dropletOriginX, "%", "draggable lens droplet origin x");
+  assertIncludes(pressed.dropletOriginY, "%", "draggable lens droplet origin y");
+
+  await page.mouse.move(box.x + box.width * 0.42 + 132, box.y + box.height * 0.54 + 76, {
+    steps: 8
+  });
+  await page.waitForTimeout(80);
+  await boardLocator.screenshot({
+    path: path.join(behaviorArtifactDir, "draggable-lens-board-dragged.png")
+  });
+  await locator.screenshot({
+    path: path.join(behaviorArtifactDir, "draggable-lens-dragged.png")
+  });
+  const dragged = await readDraggableLensState(locator);
+
+  assertEqual(dragged.draggingState, "true", "draggable lens dragging state");
+  assertGreaterThan(dragged.lensX, idle.lensX + 100, "draggable lens x movement");
+  assertGreaterThan(dragged.lensY, idle.lensY + 56, "draggable lens y movement");
+  assertGreaterThan(dragged.left, idle.left + 80, "draggable lens visual x movement");
+  assertGreaterThan(dragged.top, idle.top + 40, "draggable lens visual y movement");
+
+  await page.mouse.up();
+  await page.waitForTimeout(320);
+  await boardLocator.screenshot({
+    path: path.join(behaviorArtifactDir, "draggable-lens-board-released.png")
+  });
+  await locator.screenshot({
+    path: path.join(behaviorArtifactDir, "draggable-lens-released.png")
+  });
+  const frames = await framesPromise;
+  const frameSummary = summarizeDraggableLensFrames(frames);
+  await fs.writeFile(
+    path.join(behaviorArtifactDir, "draggable-lens-frames.json"),
+    `${JSON.stringify({ frames, summary: frameSummary }, null, 2)}\n`
+  );
+
+  assertGreaterOrEqual(frameSummary.frameCount, 12, "draggable lens animation frame count");
+  assertGreaterThan(frameSummary.pressedFrameCount, 2, "draggable lens real pressed frames");
+  assertGreaterThan(frameSummary.draggingFrameCount, 2, "draggable lens real dragging frames");
+  assertGreaterThan(frameSummary.releasedFrameCount, 2, "draggable lens real release frames");
+  assertGreaterThan(frameSummary.scaleXRange, 0.035, "draggable lens animated scaleX range");
+  assertGreaterThan(frameSummary.scaleYRange, 0.025, "draggable lens animated scaleY range");
+  assertGreaterThan(frameSummary.leftRange, 80, "draggable lens animated x travel");
+  assertGreaterThan(frameSummary.topRange, 40, "draggable lens animated y travel");
+  assertGreaterThan(frameSummary.transformVariantCount, 3, "draggable lens transform variants");
+  assertApproxEqual(frameSummary.finalScaleX, 1, 0.012, "draggable lens final frame scaleX");
+  assertApproxEqual(frameSummary.finalScaleY, 1, 0.012, "draggable lens final frame scaleY");
+
+  const released = await readDraggableLensState(locator);
+  assertEqual(released.dropletState, "idle", "draggable lens released state");
+  assertApproxEqual(released.scaleX, 1, 0.01, "draggable lens released scaleX");
+  assertApproxEqual(released.scaleY, 1, 0.01, "draggable lens released scaleY");
+
+  await page.close();
+}
+
+async function recordAnimationFrames(page, selector, durationMs) {
+  return page.evaluate(
+    ({ frameSelector, recordDurationMs }) =>
+      new Promise((resolve) => {
+        const startedAt = performance.now();
+        const frames = [];
+
+        const sample = () => {
+          const element = document.querySelector(frameSelector);
+          if (!element) {
+            resolve(frames);
+            return;
+          }
+
+          const rect = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          const scale = matrixScaleAxes(style.transform);
+          frames.push({
+            draggingState: element.getAttribute("data-liquid-dragging") ?? "false",
+            dropletState: element.getAttribute("data-liquid-droplet") ?? "idle",
+            left: round(rect.left),
+            scaleX: round(scale.scaleX),
+            scaleY: round(scale.scaleY),
+            time: round(performance.now() - startedAt),
+            top: round(rect.top),
+            transform: style.transform
+          });
+
+          if (performance.now() - startedAt >= recordDurationMs) {
+            resolve(frames);
+            return;
+          }
+
+          requestAnimationFrame(sample);
+        };
+
+        requestAnimationFrame(sample);
+
+        function matrixScaleAxes(transform) {
+          if (transform === "none") {
+            return { scaleX: 1, scaleY: 1 };
+          }
+
+          const matrix = transform.match(/matrix\(([^)]+)\)/)?.[1]?.split(/,\s*/).map(Number);
+          if (!matrix || matrix.length < 4) {
+            return { scaleX: 1, scaleY: 1 };
+          }
+
+          return {
+            scaleX: Math.sqrt(matrix[0] * matrix[0] + matrix[1] * matrix[1]),
+            scaleY: Math.sqrt(matrix[2] * matrix[2] + matrix[3] * matrix[3])
+          };
+        }
+
+        function round(value) {
+          return Math.round(value * 1000) / 1000;
+        }
+      }),
+    { frameSelector: selector, recordDurationMs: durationMs }
+  );
+}
+
+function summarizeDraggableLensFrames(frames) {
+  const scaleXs = frames.map((frame) => frame.scaleX);
+  const scaleYs = frames.map((frame) => frame.scaleY);
+  const lefts = frames.map((frame) => frame.left);
+  const tops = frames.map((frame) => frame.top);
+  const transforms = new Set(frames.map((frame) => frame.transform));
+
+  return {
+    draggingFrameCount: frames.filter((frame) => frame.draggingState === "true").length,
+    finalScaleX: frames.at(-1)?.scaleX ?? 1,
+    finalScaleY: frames.at(-1)?.scaleY ?? 1,
+    frameCount: frames.length,
+    leftRange: range(lefts),
+    pressedFrameCount: frames.filter((frame) => frame.dropletState === "pressed").length,
+    releasedFrameCount: frames.filter((frame) => frame.dropletState === "idle").length,
+    scaleXRange: range(scaleXs),
+    scaleYRange: range(scaleYs),
+    topRange: range(tops),
+    transformVariantCount: transforms.size
+  };
+}
+
+function range(values) {
+  if (values.length === 0) {
+    return 0;
+  }
+
+  return Math.max(...values) - Math.min(...values);
+}
+
 async function verifyReducedMotionRemovesElasticFocus() {
   const story = behaviorStories.tabs;
   const page = await openStory(story.id, { reducedMotion: "reduce" });
@@ -203,14 +399,58 @@ async function keyboardFocusVisible(page, selector) {
   throw new Error(`${selector}: unable to reach focus-visible through keyboard navigation`);
 }
 
-async function openStory(id, media = {}) {
-  const page = await browser.newPage({ viewport: { width: 900, height: 520 } });
+async function openStory(id, media = {}, viewport = { width: 900, height: 520 }) {
+  const page = await browser.newPage({ viewport });
   await page.emulateMedia(media);
   await page.goto(`http://127.0.0.1:${port}/iframe.html?id=${id}&viewMode=story`, {
     waitUntil: "networkidle",
     timeout: 20_000
   });
   return page;
+}
+
+async function readDraggableLensState(locator) {
+  return locator.evaluate((element) => {
+    const view = element.ownerDocument.defaultView;
+    if (!view) {
+      throw new Error("Missing document view");
+    }
+
+    const rect = element.getBoundingClientRect();
+    const style = view.getComputedStyle(element);
+    const scale = matrixScaleAxes(style.transform);
+
+    return {
+      draggingState: element.getAttribute("data-liquid-dragging"),
+      dropletState: element.getAttribute("data-liquid-droplet"),
+      dropletOriginX: style.getPropertyValue("--lg-demo-droplet-origin-x"),
+      dropletOriginY: style.getPropertyValue("--lg-demo-droplet-origin-y"),
+      lensX: Number(element.getAttribute("data-lens-x") ?? 0),
+      lensY: Number(element.getAttribute("data-lens-y") ?? 0),
+      left: rect.left,
+      scaleX: scale.scaleX,
+      scaleY: scale.scaleY,
+      top: rect.top,
+      transform: style.transform,
+      transformOrigin: style.transformOrigin
+    };
+
+    function matrixScaleAxes(transform) {
+      if (transform === "none") {
+        return { scaleX: 1, scaleY: 1 };
+      }
+
+      const matrix = transform.match(/matrix\(([^)]+)\)/)?.[1]?.split(/,\s*/).map(Number);
+      if (!matrix || matrix.length < 4) {
+        return { scaleX: 1, scaleY: 1 };
+      }
+
+      return {
+        scaleX: Math.sqrt(matrix[0] * matrix[0] + matrix[1] * matrix[1]),
+        scaleY: Math.sqrt(matrix[2] * matrix[2] + matrix[3] * matrix[3])
+      };
+    }
+  });
 }
 
 async function readState(locator) {

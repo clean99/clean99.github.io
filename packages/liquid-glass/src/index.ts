@@ -44,6 +44,11 @@ export { usePrefersReducedTransparency } from "./hooks/use-prefers-reduced-trans
 export { useStableId } from "./hooks/use-stable-id";
 export { LiquidProvider } from "./providers/LiquidProvider";
 export { cn } from "./utils/cn";
+export {
+  clampLensPosition,
+  resolveLensDragPosition,
+  resolveLensDropletResponse
+} from "./utils/draggable-lens";
 export { distanceFromRectEdge, resolveLiquidElasticResponse } from "./utils/elasticity";
 export {
   referenceLensDisplacementRefraction,
@@ -132,6 +137,15 @@ export type { LiquidSwitchProps } from "./components/LiquidSwitch";
 export type { LiquidToggleProps } from "./components/LiquidToggle";
 export type { LiquidToolbarProps } from "./components/LiquidToolbar";
 export type { BrowserCapabilities, BrowserCapabilityEnvironment } from "./utils/support";
+export type {
+  LiquidLensBounds,
+  LiquidLensDragState,
+  LiquidLensDropletOptions,
+  LiquidLensDropletResponse,
+  LiquidLensPoint,
+  LiquidLensRect,
+  LiquidLensSize
+} from "./utils/draggable-lens";
 export type {
   LiquidFallback,
   LiquidIntensity,

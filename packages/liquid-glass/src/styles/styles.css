@@ -1292,6 +1292,243 @@
   border-color: color-mix(in srgb, var(--lg-accent), white 14%);
 }
 
+.lg-precision-lens-demo {
+  min-height: 38rem;
+  padding: 2.5rem;
+  color: #05070a;
+  background: #f4f4f1;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+.lg-precision-lens-demo__card {
+  position: relative;
+  width: 44.125rem;
+  height: 28.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7),
+    0 18px 48px rgba(15, 23, 42, 0.08);
+}
+
+.lg-precision-lens-demo__copy {
+  position: absolute;
+  top: 3.85rem;
+  left: 2.1rem;
+  width: 21.9rem;
+  color: #111;
+}
+
+.lg-precision-lens-demo__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1.55rem;
+  color: #f01818;
+  font-size: 0.72rem;
+  font-weight: 620;
+  letter-spacing: 0.28em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.lg-precision-lens-demo__eyebrow span {
+  width: 2.5rem;
+  height: 0.125rem;
+  background: currentColor;
+}
+
+.lg-precision-lens-demo__copy h3 {
+  margin: 0 0 1.35rem;
+  color: #000;
+  font-size: 3.45rem;
+  font-weight: 820;
+  letter-spacing: 0;
+  line-height: 0.94;
+}
+
+.lg-precision-lens-demo__copy p {
+  margin: 0 0 1.2rem;
+  color: rgba(0, 0, 0, 0.68);
+  font-size: 1.32rem;
+  font-weight: 420;
+  letter-spacing: 0;
+  line-height: 1.43;
+}
+
+.lg-precision-lens-demo__photo {
+  position: absolute;
+  top: 3.95rem;
+  right: 2.18rem;
+  width: 17.92rem;
+  height: 24.63rem;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  border-radius: 0.55rem;
+  background:
+    radial-gradient(circle at 39% 23%, rgba(254, 237, 135, 0.92) 0 1.1rem, transparent 1.18rem),
+    radial-gradient(circle at 43% 34%, rgba(38, 155, 155, 0.9) 0 1.65rem, transparent 1.72rem),
+    radial-gradient(circle at 48% 47%, rgba(255, 184, 34, 0.9) 0 2.4rem, transparent 2.48rem),
+    linear-gradient(92deg, rgba(220, 250, 251, 0.94), rgba(240, 238, 235, 0.88) 26%, rgba(236, 87, 68, 0.82) 58%, rgba(111, 138, 122, 0.9));
+}
+
+.lg-precision-lens-demo__photo::before,
+.lg-precision-lens-demo__photo::after,
+.lg-precision-lens-demo__photo-stem,
+.lg-precision-lens-demo__photo-subject {
+  position: absolute;
+  content: "";
+}
+
+.lg-precision-lens-demo__photo::before {
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.34), transparent 22%, transparent 68%, rgba(0, 0, 0, 0.12)),
+    radial-gradient(circle at 46% 30%, rgba(255, 255, 255, 0.72), transparent 9rem);
+  mix-blend-mode: soft-light;
+}
+
+.lg-precision-lens-demo__photo::after {
+  right: 2.3rem;
+  bottom: -2.8rem;
+  width: 4.2rem;
+  height: 18rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff1a8, #ed382c 58%, #9b1624);
+  filter: blur(0.4px);
+  transform: rotate(4deg);
+}
+
+.lg-precision-lens-demo__photo-stem {
+  right: 4.55rem;
+  bottom: -2.25rem;
+  width: 1.2rem;
+  height: 22rem;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f8ed9d, #6e7a37 38%, #233317);
+  transform: rotate(-1deg);
+}
+
+.lg-precision-lens-demo__photo-subject {
+  right: 2.45rem;
+  top: 5.9rem;
+  width: 6.4rem;
+  height: 8.3rem;
+  border-radius: 54% 46% 48% 52% / 58% 44% 56% 42%;
+  background:
+    radial-gradient(circle at 70% 20%, #fff 0 0.36rem, #f3d12e 0.39rem 0.82rem, transparent 0.86rem),
+    linear-gradient(135deg, #2aabac, #f7b22d 48%, #0f6d64 49% 66%, #063c39);
+  box-shadow:
+    inset 0 0 1.2rem rgba(255, 255, 255, 0.34),
+    0 1.4rem 2.4rem rgba(0, 0, 0, 0.18);
+  transform: rotate(-18deg);
+}
+
+.lg-precision-lens-demo__credit {
+  position: absolute;
+  right: 2.2rem;
+  bottom: 1rem;
+  color: #6f6798;
+  font-size: 0.8rem;
+  font-weight: 560;
+  letter-spacing: 0.23em;
+  text-transform: uppercase;
+}
+
+.lg-precision-lens-demo__handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  width: 13.125rem;
+  height: 7.5rem;
+  border-radius: 999px;
+  cursor: grab;
+  touch-action: none;
+  transform:
+    translate3d(var(--lg-demo-lens-x, 0), var(--lg-demo-lens-y, 0), 0)
+    translate3d(var(--lg-demo-droplet-translate-x, 0), var(--lg-demo-droplet-translate-y, 0), 0)
+    scaleX(var(--lg-demo-droplet-scale-x, 1))
+    scaleY(var(--lg-demo-droplet-scale-y, 1));
+  transform-origin: var(--lg-demo-droplet-origin-x, 50%) var(--lg-demo-droplet-origin-y, 50%);
+  transition:
+    filter 180ms var(--lg-ease-apple),
+    transform 260ms var(--lg-ease-apple);
+  will-change: transform;
+}
+
+.lg-precision-lens-demo__handle:focus {
+  outline: none;
+}
+
+.lg-precision-lens-demo__handle:focus-visible {
+  filter:
+    drop-shadow(0 1rem 2.5rem rgba(0, 0, 0, 0.22))
+    drop-shadow(0 0 0.8rem rgba(255, 255, 255, 0.22));
+}
+
+.lg-precision-lens-demo__handle[data-liquid-dragging="true"] {
+  cursor: grabbing;
+  transition: filter 180ms var(--lg-ease-apple);
+}
+
+.lg-precision-lens-demo__handle::before,
+.lg-precision-lens-demo__handle::after {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  content: "";
+  opacity: 0;
+  transition:
+    opacity 180ms var(--lg-ease-apple),
+    transform 220ms var(--lg-ease-apple);
+}
+
+.lg-precision-lens-demo__handle::before {
+  inset: -0.2rem;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at var(--lg-demo-droplet-origin-x, 50%) var(--lg-demo-droplet-origin-y, 50%), rgba(255, 255, 255, 0.62), transparent 1.5rem),
+    radial-gradient(circle at calc(var(--lg-demo-droplet-origin-x, 50%) + 11%) calc(var(--lg-demo-droplet-origin-y, 50%) - 18%), rgba(255, 255, 255, 0.26), transparent 2.4rem);
+  mix-blend-mode: screen;
+  transform: scale(0.94);
+}
+
+.lg-precision-lens-demo__handle::after {
+  left: var(--lg-demo-droplet-origin-x, 50%);
+  top: var(--lg-demo-droplet-origin-y, 50%);
+  width: 4.7rem;
+  height: 2.7rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 36% 28%, rgba(255, 255, 255, 0.72), transparent 31%),
+    radial-gradient(ellipse at 52% 58%, rgba(255, 255, 255, 0.2), transparent 66%);
+  filter: blur(0.25px);
+  transform: translate(-50%, -50%) scale(0.45);
+}
+
+.lg-precision-lens-demo__handle[data-liquid-droplet="pressed"] {
+  filter:
+    drop-shadow(0 1.25rem 2.9rem rgba(0, 0, 0, 0.24))
+    drop-shadow(0 0 0.65rem rgba(255, 255, 255, 0.2));
+}
+
+.lg-precision-lens-demo__handle[data-liquid-droplet="pressed"]::before,
+.lg-precision-lens-demo__handle[data-liquid-droplet="pressed"]::after {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.lg-precision-lens-demo__handle[data-liquid-droplet="pressed"]::before {
+  transform: scale(1.02);
+}
+
+.lg-precision-lens-demo__handle .lg-lens {
+  pointer-events: none;
+}
+
 .lg-surface[data-liquid-reduced-motion] {
   transition: none;
 }
@@ -1314,6 +1551,7 @@
   }
 
   .lg-searchbox,
+  .lg-precision-lens-demo__handle,
   .lg-surface--interactive:not(.lg-surface--disabled):hover,
   .lg-surface--interactive:not(.lg-surface--disabled):active,
   .lg-surface--interactive:not(.lg-surface--disabled):focus-visible,
