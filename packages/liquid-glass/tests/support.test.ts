@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getBrowserCapabilities,
   readStoredLiquidMode,
+  resolvePhysicalRefractionRadius,
   resolveRefractiveOptions,
   resolveRefractionRadius,
   resolveLiquidMode,
@@ -110,6 +111,12 @@ describe("refraction option resolution", () => {
     expect(resolveRefractionRadius(18)).toBe(18);
   });
 
+  it("keeps optical radius inside the measured surface geometry", () => {
+    expect(resolvePhysicalRefractionRadius({ height: 54, radius: 999, width: 357 })).toBe(27);
+    expect(resolvePhysicalRefractionRadius({ height: 84, radius: 999, width: 720 })).toBe(42);
+    expect(resolvePhysicalRefractionRadius({ height: 45, radius: 28, width: 336 })).toBe(22);
+  });
+
   it("lets explicit refraction options override intensity defaults", () => {
     expect(
       resolveRefractiveOptions({
@@ -121,5 +128,15 @@ describe("refraction option resolution", () => {
       glassThickness: 128,
       radius: 96
     });
+  });
+
+  it("applies physical bounds when resolving measured refractive options", () => {
+    expect(
+      resolveRefractiveOptions({
+        bounds: { height: 54, width: 357 },
+        intensity: "subtle",
+        radius: 999
+      }).radius
+    ).toBe(27);
   });
 });

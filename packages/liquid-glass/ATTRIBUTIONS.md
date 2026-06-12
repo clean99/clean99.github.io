@@ -14,6 +14,11 @@ The visual direction is informed by Chris Feijoo's public Liquid Glass research 
   - Article: https://kube.io/blog/liquid-glass-css-svg/
   - Author: Chris Feijoo
   - Used as a visual and behavioral reference for the Storybook kube-aligned demos.
+
+- `rdev/liquid-glass-react`
+  - Repository: https://github.com/rdev/liquid-glass-react
+  - License: MIT
+  - Used as an implementation reference during optical-model research. No source code has been copied into this package.
   - The demos recreate component behavior and styling parameters, not the article source code.
 
 - Storybook demo image

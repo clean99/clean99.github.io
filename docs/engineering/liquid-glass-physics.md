@@ -46,6 +46,7 @@ That test guards the non-negotiable invariants:
 - `.lg-surface__content` never gets `filter` or `backdrop-filter`.
 - Component CSS and shared Storybook fixtures do not use `repeating-linear-gradient` to fake a material texture.
 - Nav and toolbar item filters stay disabled; only the shared plate owns refraction.
+- Focus is a material response. The focus rules must use neutral rim/glow tokens, not `--lg-accent` or system-blue rings.
 
 This is intentionally a unit-level gate. Visual tests prove that pixels look right; the physics test proves that future CSS/API changes do not violate the rendering model before we even open a browser.
 
@@ -107,6 +108,8 @@ The lens uses a crop because the reference demo contains article-specific prose 
 
 The searchbox, switch, and slider compare the full demo frame because their reference areas contain only deterministic fixture content and the component itself. Matching the reference `24px` grid and radial background reduced their pixel diff from roughly `15%` to roughly `1.4-1.7%`.
 
+The separate Storybook behavior gate lives in `apps/docs/scripts/verify-liquid-behavior.mjs`. It validates the Apple-like interaction contract from built Storybook iframes: focus scale, neutral rim/glow, increased shadow layers, hover material alpha, active scale relaxation, and reduced-motion suppression.
+
 ## Lessons From the Failed Iterations
 
 The ugly versions failed for mundane reasons:
@@ -117,3 +120,52 @@ The ugly versions failed for mundane reasons:
 - Text shadow is context-dependent. Dark, high-variance backgrounds can use white text with a short dark shadow. Light glass should usually use dark text with little or no shadow.
 
 The rule of thumb: if a component still looks interesting after the background is replaced with a plain grid, the glass is probably doing the work. If it only works on a busy pattern, the fixture is carrying the design.
+
+## 2026-06-12 Material Tuning Pass
+
+The nav and tabs needed a material fix, not another decorative layer.
+
+What changed:
+
+- `LiquidNav`, `LiquidToolbar`, and `LiquidTabs` now bias toward one continuous refractive plate. Child controls stay as clear foreground hit targets and do not allocate their own enhanced filters.
+- Dark enhanced controls use near-white foreground text with a short dark shadow. This matches the high-variance background use case without putting text inside the displacement layer.
+- Light enhanced controls keep dark text and lighter shadows. A universal white-text rule is wrong on light glass because it destroys contrast and makes the control look painted.
+- `LiquidSearchBox` now uses a smaller, fixed `20x20` SVG magnifier with round caps and non-scaling stroke. The previous icon read as a generic search glyph rather than a precise foreground SF-style symbol.
+- Shared Storybook fixtures moved diagonal/color bands below the control area. A lens can bend a line that passes underneath it, but a busy diagonal fixture crossing every pill makes the result look like crosshatch texture.
+
+Additional gate coverage:
+
+- `verify-enhanced-storybook.mjs` now checks `LiquidNav` and `LiquidTabs` in addition to the kube reference primitives.
+- The gate asserts that these surfaces are really enhanced, that `backdrop-filter` contains `url(...)`, and that their measured geometry stays stable.
+
+Manual Chromium checks from Storybook:
+
+| Story | Selector | Mode | Filter |
+| --- | --- | --- | --- |
+| `liquid-glass-liquidnav--apple-like-tabs` | `.lg-nav__surface` | `enhanced` | `url("#...")` |
+| `liquid-glass-liquidtabs--dense-blog-example` | `.lg-tabs__list` | `enhanced` | `url("#...")` |
+| `liquid-glass-liquidsearchbox--kube-reference` | `.lg-searchbox` | `enhanced` | `url("#...")` |
+
+## rdev/liquid-glass-react Audit
+
+The `rdev/liquid-glass-react` package is MIT licensed and is useful as a reference implementation, but it is not a drop-in replacement for this project.
+
+Useful ideas:
+
+- It treats displacement as an edge-heavy optical field, not a uniform frosted blur.
+- It separates the warped backdrop layer from sharp foreground content.
+- It models chromatic aberration by displacing RGB channels separately near the edge.
+- It exposes interaction elasticity as a first-class parameter.
+
+Reasons not to fork it directly now:
+
+- This project already selected `@hashintel/refractive` as the real refraction engine. Replacing it would invalidate the ADR and duplicate a hard browser-compatibility problem.
+- The package performs its own SVG filter and shader-map work inside the component. That is useful for a single effect, but it mixes engine concerns with the public React component API.
+- The implementation uses direct browser globals and a user-agent Firefox branch. Our design requires SSR/static-export safety and capability checks based on runtime features, not only UA strings.
+- Some displacement maps are embedded as large data URLs. That is fine for a focused effect package, but bad for a tree-shakable design-system package unless moved behind a dedicated optional engine export.
+
+Decision:
+
+- Keep `@hashintel/refractive` as the default engine.
+- Use the rdev package as a benchmark for future optional engine work: edge-only displacement, chromatic aberration tests, and elastic pointer response.
+- Do not copy source into this repository unless a later ADR explicitly changes the engine strategy and preserves MIT attribution.

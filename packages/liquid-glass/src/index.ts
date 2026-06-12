@@ -45,7 +45,9 @@ export { useStableId } from "./hooks/use-stable-id";
 export { LiquidProvider } from "./providers/LiquidProvider";
 export { cn } from "./utils/cn";
 export {
+  continuousPlateRefraction,
   defaultRefractionByIntensity,
+  resolvePhysicalRefractionRadius,
   resolveRefractiveOptions,
   resolveRefractionRadius
 } from "./utils/refraction";

@@ -3,6 +3,7 @@
 import { forwardRef, useMemo } from "react";
 import { LiquidSurface, type LiquidSurfaceProps } from "./LiquidSurface";
 import { LiquidButton } from "./LiquidButton";
+import { continuousPlateRefraction } from "../utils/refraction";
 
 export type LiquidSegmentedControlItem = {
   disabled?: boolean;
@@ -19,7 +20,7 @@ export type LiquidSegmentedControlProps = Omit<LiquidSurfaceProps, "as" | "child
 
 export const LiquidSegmentedControl = forwardRef<HTMLElement, LiquidSegmentedControlProps>(
   function LiquidSegmentedControl(
-    { items, onValueChange, value, className, radius = "pill", ...props },
+    { items, onValueChange, value, className, radius = "pill", refraction, ...props },
     ref
   ) {
     const enabledItems = useMemo(() => items.filter((item) => !item.disabled), [items]);
@@ -32,6 +33,7 @@ export const LiquidSegmentedControl = forwardRef<HTMLElement, LiquidSegmentedCon
         kind="panel"
         radius={radius}
         ref={ref}
+        refraction={{ ...continuousPlateRefraction, ...refraction }}
         role="radiogroup"
       >
         {items.map((item) => (

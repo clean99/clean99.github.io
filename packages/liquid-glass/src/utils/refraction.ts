@@ -31,22 +31,55 @@ export const defaultRefractionByIntensity: Record<
   }
 };
 
+export const continuousPlateRefraction: Partial<RefractiveOptions> = {
+  blur: 0.12,
+  glassThickness: 34,
+  bezelWidth: 3,
+  refractiveIndex: 1.38,
+  specularOpacity: 0.07,
+  specularAngle: 0.78
+};
+
 export function resolveRefractionRadius(radius: number): number {
   return clamp(radius, 1, 96);
 }
 
+export function resolvePhysicalRefractionRadius({
+  height,
+  radius,
+  width
+}: {
+  height: number;
+  radius: number;
+  width: number;
+}): number {
+  const geometryLimit = Math.min(width, height) / 2;
+
+  if (!Number.isFinite(geometryLimit) || geometryLimit <= 0) {
+    return resolveRefractionRadius(radius);
+  }
+
+  return clamp(Math.floor(Math.min(radius, geometryLimit)), 1, 96);
+}
+
 export function resolveRefractiveOptions({
+  bounds,
   intensity,
   radius,
   refraction
 }: {
+  bounds?: { height: number; width: number };
   intensity: LiquidIntensity;
   radius: number;
   refraction?: Partial<RefractiveOptions>;
 }): RefractiveOptions {
+  const requestedRadius = refraction?.radius ?? radius;
+
   return {
     ...defaultRefractionByIntensity[intensity],
     ...refraction,
-    radius: resolveRefractionRadius(refraction?.radius ?? radius)
+    radius: bounds
+      ? resolvePhysicalRefractionRadius({ ...bounds, radius: requestedRadius })
+      : resolveRefractionRadius(requestedRadius)
   };
 }

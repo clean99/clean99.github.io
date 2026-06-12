@@ -11,39 +11,62 @@ const stories = [
     selector: ".lg-lens",
     width: 210,
     height: 120,
-    radius: "75px",
-    transparent: true
+    radius: "60px",
+    transparent: true,
+    opticalRadius: "60"
   },
   {
     id: "liquid-glass-liquidsearchbox--kube-reference",
     selector: ".lg-searchbox",
     width: 336,
     height: 45,
-    radius: "28px",
-    backgroundColor: "rgba(255, 255, 255, 0.05)"
+    radius: "22px",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    opticalRadius: "22"
+  },
+  {
+    id: "liquid-glass-liquidnav--apple-like-tabs",
+    selector: ".lg-nav__surface",
+    width: 357,
+    height: 54,
+    radius: "26px",
+    backgroundColor: "rgba(255, 255, 255, 0.055)",
+    opticalRadius: "26"
+  },
+  {
+    id: "liquid-glass-liquidtabs--dense-blog-example",
+    selector: ".lg-tabs__list",
+    width: 720,
+    height: 84,
+    radius: "42px",
+    backgroundColor: "rgba(255, 255, 255, 0.055)",
+    opticalRadius: "42"
   },
   {
     id: "liquid-glass-liquidswitch--kube-reference",
     selector: ".lg-switch__thumb",
     width: 95,
     height: 60,
-    radius: "46px",
-    backgroundColor: "rgb(255, 255, 255)"
+    radius: "29px",
+    backgroundColor: "rgb(255, 255, 255)",
+    opticalRadius: "29"
   },
   {
     id: "liquid-glass-liquidslider--kube-reference",
     selector: ".lg-slider__thumb",
     width: 54,
     height: 36,
-    radius: "30px",
-    backgroundColor: "rgb(255, 255, 255)"
+    radius: "18px",
+    backgroundColor: "rgb(255, 255, 255)",
+    opticalRadius: "18"
   },
   {
     id: "liquid-glass-liquidmusicplayerbar--kube-reference",
     selector: ".lg-music-player__surface",
     width: 640,
     height: 63,
-    radius: "34px"
+    radius: "31px",
+    opticalRadius: "31"
   }
 ];
 
@@ -90,6 +113,7 @@ try {
     );
     const locator = page.locator(story.selector).first();
     await locator.waitFor({ state: "visible", timeout: 10_000 });
+    await page.waitForTimeout(50);
 
     const result = await locator.evaluate((element) => {
       const view = element.ownerDocument.defaultView;
@@ -106,6 +130,7 @@ try {
         filter: style.backdropFilter || style.webkitBackdropFilter,
         height: Math.round(rect.height),
         mode: element.getAttribute("data-liquid-mode"),
+        opticalRadius: element.getAttribute("data-liquid-optical-radius"),
         width: Math.round(rect.width)
       };
     });
@@ -115,6 +140,10 @@ try {
     assertEqual(result.width, story.width, `${story.id} width`);
     assertEqual(result.height, story.height, `${story.id} height`);
     assertEqual(result.borderRadius, story.radius, `${story.id} radius`);
+
+    if (story.opticalRadius) {
+      assertEqual(result.opticalRadius, story.opticalRadius, `${story.id} optical radius`);
+    }
 
     if (story.transparent) {
       assertEqual(result.backgroundColor, "rgba(0, 0, 0, 0)", `${story.id} background`);

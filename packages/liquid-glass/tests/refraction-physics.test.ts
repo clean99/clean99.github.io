@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   defaultRefractionByIntensity,
+  resolvePhysicalRefractionRadius,
   resolveRefractiveOptions,
   resolveRefractionRadius,
   type LiquidIntensity,
@@ -63,6 +64,11 @@ describe("Liquid Glass physics contract", () => {
     ).toBe(96);
   });
 
+  it("does not allow optical radius to exceed the physical cap of a measured surface", () => {
+    expect(resolvePhysicalRefractionRadius({ height: 54, radius: 999, width: 357 })).toBe(27);
+    expect(resolvePhysicalRefractionRadius({ height: 84, radius: 96, width: 720 })).toBe(42);
+  });
+
   it("keeps foreground content outside the displacement/filter layer", () => {
     const contentRules = collectCssRuleBodies(styles, ".lg-surface__content").join("\n");
 
@@ -83,6 +89,19 @@ describe("Liquid Glass physics contract", () => {
     expect(styles).toContain(".lg-nav .lg-surface--toggle");
     expect(styles).toContain("-webkit-backdrop-filter: none !important");
     expect(styles).toContain("backdrop-filter: none !important");
+  });
+
+  it("uses material focus instead of system-blue plastic rings", () => {
+    const focusRules = [
+      ...collectCssRuleBodies(styles, ".lg-surface:focus-visible"),
+      ...collectCssRuleBodies(styles, ".lg-tabs__tab:focus-visible"),
+      ...collectCssRuleBodies(styles, ".lg-field-control:focus-within")
+    ].join("\n");
+
+    expect(focusRules).not.toContain("--lg-accent");
+    expect(focusRules).not.toContain("#0a84ff");
+    expect(focusRules).toContain("--lg-control-focus-rim");
+    expect(focusRules).toContain("scale(");
   });
 });
 

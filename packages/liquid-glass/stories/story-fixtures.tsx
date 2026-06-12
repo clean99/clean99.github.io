@@ -8,15 +8,15 @@ const sceneBackground = {
   dark: [
     "radial-gradient(circle at 18% 18%, rgba(10, 132, 255, 0.22), transparent 28%)",
     "radial-gradient(circle at 82% 30%, rgba(48, 209, 88, 0.12), transparent 34%)",
-    "linear-gradient(90deg, rgba(255,255,255,0.07) 0 1px, transparent 1px 72px)",
-    "linear-gradient(180deg, rgba(255,255,255,0.06) 0 1px, transparent 1px 72px)",
+    "linear-gradient(90deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 72px)",
+    "linear-gradient(180deg, rgba(255,255,255,0.048) 0 1px, transparent 1px 72px)",
     "linear-gradient(135deg, #08111d, #101923 52%, #0d1517)"
   ].join(", "),
   light: [
     "radial-gradient(circle at 18% 18%, rgba(10, 132, 255, 0.1), transparent 30%)",
     "radial-gradient(circle at 82% 30%, rgba(48, 209, 88, 0.08), transparent 34%)",
-    "linear-gradient(90deg, rgba(15,23,42,0.055) 0 1px, transparent 1px 72px)",
-    "linear-gradient(180deg, rgba(15,23,42,0.045) 0 1px, transparent 1px 72px)",
+    "linear-gradient(90deg, rgba(15,23,42,0.045) 0 1px, transparent 1px 72px)",
+    "linear-gradient(180deg, rgba(15,23,42,0.038) 0 1px, transparent 1px 72px)",
     "linear-gradient(135deg, #fbfcfd, #eef4f4 52%, #f7f8f6)"
   ].join(", ")
 };
@@ -59,38 +59,38 @@ export function StoryFrame({
                 position: "absolute",
                 left: -80,
                 right: -80,
-                top: height * 0.42,
-                height: 96,
-                opacity: theme === "dark" ? 0.48 : 0.32,
-                transform: "rotate(-5deg)"
+                top: height * 0.62,
+                height: 104,
+                opacity: theme === "dark" ? 0.38 : 0.22,
+                transform: "rotate(-4deg)"
               }}
             >
               <span
                 style={{
                   position: "absolute",
-                  left: "12%",
-                  right: "28%",
+                  left: "16%",
+                  right: "18%",
                   top: 14,
-                  height: 14,
+                  height: 12,
                   borderRadius: 999,
                   background:
                     theme === "dark"
-                      ? "linear-gradient(90deg, rgba(105,189,255,0.72), rgba(83,215,163,0.72))"
-                      : "linear-gradient(90deg, rgba(10,132,255,0.34), rgba(48,209,88,0.34))"
+                      ? "linear-gradient(90deg, rgba(105,189,255,0.64), rgba(83,215,163,0.54))"
+                      : "linear-gradient(90deg, rgba(10,132,255,0.25), rgba(48,209,88,0.22))"
                 }}
               />
               <span
                 style={{
                   position: "absolute",
-                  left: "32%",
-                  right: "10%",
+                  left: "24%",
+                  right: "12%",
                   top: 58,
-                  height: 18,
+                  height: 14,
                   borderRadius: 999,
                   background:
                     theme === "dark"
-                      ? "linear-gradient(90deg, rgba(255,255,255,0.52), rgba(99,184,255,0.68))"
-                      : "linear-gradient(90deg, rgba(15,23,42,0.16), rgba(10,132,255,0.28))"
+                      ? "linear-gradient(90deg, rgba(255,255,255,0.42), rgba(99,184,255,0.52))"
+                      : "linear-gradient(90deg, rgba(15,23,42,0.12), rgba(10,132,255,0.2))"
                 }}
               />
             </div>

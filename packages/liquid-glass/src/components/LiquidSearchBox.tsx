@@ -41,9 +41,14 @@ export const LiquidSearchBox = forwardRef<HTMLInputElement, LiquidSearchBoxProps
       >
         <span aria-hidden="true" className="lg-searchbox__icon">
           {icon ?? (
-            <svg className="lg-searchbox__magnifier" fill="none" viewBox="0 0 22 22">
-              <circle cx="9.4" cy="9.4" r="5.8" />
-              <path d="M13.7 13.7L18.2 18.2" />
+            <svg
+              aria-hidden="true"
+              className="lg-searchbox__magnifier"
+              fill="none"
+              viewBox="0 0 20 20"
+            >
+              <circle cx="8.65" cy="8.65" r="5.15" />
+              <path d="m12.35 12.35 4.15 4.15" />
             </svg>
           )}
         </span>

@@ -12,6 +12,7 @@ import {
 import { LiquidSurface, type LiquidSurfaceProps } from "./LiquidSurface";
 import { useStableId } from "../hooks/use-stable-id";
 import { cn } from "../utils/cn";
+import { continuousPlateRefraction } from "../utils/refraction";
 
 export type LiquidTabsItem = {
   content: ReactNode;
@@ -79,6 +80,7 @@ export const LiquidTabs = forwardRef<HTMLDivElement, LiquidTabsProps>(function L
   const {
     className: surfaceClassName,
     radius = "pill",
+    refraction,
     ...resolvedSurfaceProps
   } = surfaceProps ?? {};
 
@@ -173,6 +175,7 @@ export const LiquidTabs = forwardRef<HTMLDivElement, LiquidTabsProps>(function L
         className={cn("lg-tabs__list", listClassName, surfaceClassName)}
         kind="panel"
         radius={radius}
+        refraction={{ ...continuousPlateRefraction, ...refraction }}
         role="tablist"
         aria-label={ariaLabel}
         aria-orientation={orientation}
