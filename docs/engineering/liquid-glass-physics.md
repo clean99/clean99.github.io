@@ -100,7 +100,7 @@ Current `pnpm --filter docs test:kube-reference` thresholds:
 
 | Target | Compared Region | Current Threshold |
 | --- | --- | --- |
-| `magnifying-glass` | Lens optical crop, excluding article image and paragraphs | `0.33` |
+| `magnifying-glass` | Lens optical crop, excluding article image and paragraphs | `0.30` |
 | `searchbox` | Full component demo frame | `0.03` |
 | `switch` | Full component demo frame | `0.03` |
 | `slider` | Full component demo frame | `0.03` |
@@ -110,6 +110,8 @@ The lens uses a crop because the reference demo contains article-specific prose 
 The searchbox, switch, and slider compare the full demo frame because their reference areas contain only deterministic fixture content and the component itself. Matching the reference `24px` grid and radial background reduced their pixel diff from roughly `15%` to roughly `1.4-1.7%`.
 
 The separate Storybook behavior gate lives in `apps/docs/scripts/verify-liquid-behavior.mjs`. It validates the Apple-like interaction contract from built Storybook iframes: focus scale, material deepening, no hard white/black/system-blue rings, increased shadow layers, hover material alpha, active scale relaxation, and reduced-motion suppression.
+
+The kube reference gate also writes `test-results/kube-reference/magnifying-glass-filter-contract.json`. That artifact records target and candidate geometry, computed `backdrop-filter`, SVG filter primitive counts, displacement scales, and filter image sources. It keeps the next 1:1 work honest: if the candidate differs because the target uses a two-pass displacement/specular filter and the local component uses a one-pass `@hashintel/refractive` filter, that is an engine-level gap, not a CSS-shadow tuning problem.
 
 The `rdev/liquid-glass-react` review lives in `docs/engineering/rdev-liquid-glass-react-review.md`. The adopted part is the edge-distance pointer elasticity idea, expressed as our own pure model in `packages/liquid-glass/src/utils/elasticity.ts`. The rejected parts are direct engine replacement, default runtime shader generation, and always-on pointer tracking.
 
@@ -150,6 +152,18 @@ Manual Chromium checks from Storybook:
 | `liquid-glass-liquidnav--apple-like-tabs` | `.lg-nav__surface` | `enhanced` | `url("#...")` |
 | `liquid-glass-liquidtabs--dense-blog-example` | `.lg-tabs__list` | `enhanced` | `url("#...")` |
 | `liquid-glass-liquidsearchbox--kube-reference` | `.lg-searchbox` | `enhanced` | `url("#...")` |
+
+## 2026-06-12 Search Focus Measurement
+
+The kube searchbox focus behavior is geometric and material-based:
+
+- The authored layout is `420 x 56`.
+- Idle visual size is produced by `transform: scale(0.8)`, yielding roughly `336 x 45`.
+- Focus returns the control to `scale(1)`, so the visual width grows by at least `1.2x`.
+- Focus material deepens into a darker frosted capsule. It must not use a hard white, black, or system-blue focus ring.
+- Reduced motion removes the scale transition while preserving the material-deepening response.
+
+`LiquidSearchBox` passes `opticalBounds="layout"` into `LiquidSurface`. That keeps the refraction radius based on the authored `420 x 56` capsule instead of the transformed idle visual bounds. The default for other surfaces remains `opticalBounds="visual"` because most controls should use their measured visual geometry.
 
 ## rdev/liquid-glass-react Audit
 

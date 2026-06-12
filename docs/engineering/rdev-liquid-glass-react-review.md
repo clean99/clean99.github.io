@@ -27,6 +27,13 @@ The implementation has three useful design ideas:
    - The surface stretches slightly on the dominant axis and translates toward the pointer.
    - The response fades out outside an activation zone.
 
+Additional implementation details worth tracking:
+
+- The SVG filter path separates backdrop, edge mask, displacement, component transfer, and blend stages instead of relying on plain `backdrop-filter: blur(...)`.
+- The filter can displace RGB channels with slightly different scales, which creates edge chromatic aberration without blurring the foreground content.
+- The shader utility is adapted from `shuding/liquid-glass`, so any future use of that direction needs separate attribution review.
+- Some maps are embedded as large base64 data URLs. They are a benchmark signal, not something to copy into this package.
+
 ## Rejected Parts
 
 These parts are intentionally not adopted directly:

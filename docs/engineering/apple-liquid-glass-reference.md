@@ -73,7 +73,7 @@ pnpm test:visual
 `apps/docs/scripts/verify-liquid-behavior.mjs` checks interaction behavior from built Storybook iframes:
 
 - tabs focus scales to at least `1.04`
-- searchbox focus scales to at least `1.025`
+- searchbox focus grows from its idle `0.8` scale to the authored `1` scale, so visual width grows by at least `1.2x`
 - field focus scales to at least `1.012`
 - button focus scales to at least `1.018`
 - focus outlines are not default blue, hard white, or hard black rings

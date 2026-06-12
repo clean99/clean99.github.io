@@ -93,6 +93,25 @@ try {
     const candidatePath = path.join(artifactDir, `${reference.name}-candidate.png`);
     await candidateElement.screenshot({ path: candidatePath });
 
+    if (reference.name === "magnifying-glass") {
+      const [targetContract, candidateContract] = await Promise.all([
+        readFilterContract(targetElement, "kube"),
+        readFilterContract(candidateElement, "local")
+      ]);
+      await fs.writeFile(
+        path.join(artifactDir, `${reference.name}-filter-contract.json`),
+        `${JSON.stringify(
+          {
+            summary: summarizeFilterContract(targetContract, candidateContract),
+            target: targetContract,
+            candidate: candidateContract
+          },
+          null,
+          2
+        )}\n`
+      );
+    }
+
     const diff = await compareImagesInBrowser(
       browser,
       targetPath,
@@ -164,6 +183,118 @@ async function findTargetDemo(page, id) {
   }, id);
 
   return handle.asElement();
+}
+
+async function readFilterContract(element, label) {
+  return element.evaluate((root, contractLabel) => {
+    const rootRect = toRect(root.getBoundingClientRect());
+    const surface = findFilterSurface(root);
+    const surfaceStyle = getComputedStyle(surface);
+    const backdropFilter = surfaceStyle.backdropFilter || surfaceStyle.webkitBackdropFilter;
+    const filterId = extractFilterId(backdropFilter);
+    const filter = filterId ? document.getElementById(filterId) : null;
+    const primitives = filter
+      ? Array.from(filter.querySelectorAll("*")).map((node) => ({
+          attributes: Object.fromEntries(
+            node.getAttributeNames().map((name) => [
+              name,
+              truncateAttribute(node.getAttribute(name) ?? "")
+            ])
+          ),
+          tag: node.tagName
+        }))
+      : [];
+
+    return {
+      label: contractLabel,
+      rootRect,
+      surfaceRect: toRect(surface.getBoundingClientRect()),
+      computed: {
+        backdropFilter,
+        backgroundColor: surfaceStyle.backgroundColor,
+        borderRadius: surfaceStyle.borderRadius,
+        boxShadow: surfaceStyle.boxShadow,
+        webkitBackdropFilter: surfaceStyle.webkitBackdropFilter
+      },
+      counts: countPrimitives(primitives),
+      displacementScales: primitives
+        .filter((primitive) => primitive.tag === "feDisplacementMap")
+        .map((primitive) => Number(primitive.attributes.scale ?? 0)),
+      filterId,
+      imageSources: primitives
+        .filter((primitive) => primitive.tag === "feImage")
+        .map((primitive) => ({
+          height: primitive.attributes.height,
+          href: primitive.attributes.href ?? primitive.attributes["xlink:href"],
+          result: primitive.attributes.result,
+          width: primitive.attributes.width
+        })),
+      primitives
+    };
+
+    function findFilterSurface(base) {
+      const candidates = [base, ...base.querySelectorAll("*")];
+      return (
+        candidates.find((candidate) => {
+          const style = getComputedStyle(candidate);
+          const value = style.backdropFilter || style.webkitBackdropFilter;
+          return value && value !== "none" && value.includes("url(");
+        }) ?? base
+      );
+    }
+
+    function countPrimitives(primitivesToCount) {
+      return primitivesToCount.reduce((counts, primitive) => {
+        counts[primitive.tag] = (counts[primitive.tag] ?? 0) + 1;
+        return counts;
+      }, {});
+    }
+
+    function extractFilterId(value) {
+      const match = value?.match(/url\((?:"|')?#?([^"')]+)(?:"|')?\)/);
+      return match?.[1] ?? null;
+    }
+
+    function toRect(rect) {
+      return {
+        height: round(rect.height),
+        width: round(rect.width),
+        x: round(rect.x),
+        y: round(rect.y)
+      };
+    }
+
+    function round(value) {
+      return Math.round(value * 100) / 100;
+    }
+
+    function truncateAttribute(value) {
+      if (value.startsWith("data:") && value.length > 96) {
+        return `${value.slice(0, 96)}...`;
+      }
+
+      if (value.length > 180) {
+        return `${value.slice(0, 180)}...`;
+      }
+
+      return value;
+    }
+  }, label);
+}
+
+function summarizeFilterContract(target, candidate) {
+  return {
+    candidateDisplacementMapCount: candidate.counts.feDisplacementMap ?? 0,
+    candidateDisplacementScales: candidate.displacementScales,
+    candidateFilterId: candidate.filterId,
+    candidateImageCount: candidate.counts.feImage ?? 0,
+    candidateLooksOnePass: (candidate.counts.feDisplacementMap ?? 0) === 1,
+    targetDisplacementMapCount: target.counts.feDisplacementMap ?? 0,
+    targetDisplacementScales: target.displacementScales,
+    targetFilterId: target.filterId,
+    targetImageCount: target.counts.feImage ?? 0,
+    targetLooksTwoPass: (target.counts.feDisplacementMap ?? 0) >= 2
+  };
 }
 
 async function compareImagesInBrowser(browser, targetPath, candidatePath, compareRegion) {
