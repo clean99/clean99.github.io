@@ -56,6 +56,7 @@ const packageRequiredFiles = [
   "liquid-glass.json",
   "registry/liquid-glass.json",
   "scripts/build-component-registry.mjs",
+  "scripts/check-release-readiness.mjs",
   "scripts/check-shadcn-parity.mjs",
   "scripts/verify-storybook-a11y.mjs",
   "schema/component-inventory.schema.json",
@@ -93,6 +94,7 @@ mustInclude("README.md", [
   "test:inventory",
   "test:registry",
   "test:shadcn-parity",
+  "test:release-readiness",
   "test:kube-reference",
   "test:kube-reference:strict",
   "test:a11y",
@@ -161,6 +163,7 @@ mustInclude("docs/testing.md", [
 mustInclude("CONTRIBUTING.md", ["pnpm verify", "pnpm test:docs", "pnpm test:inventory"]);
 mustInclude("docs/open-source-release.md", [
   "pnpm verify",
+  "pnpm test:release-readiness",
   "pnpm pack --dry-run",
   "pnpm test:a11y",
   "pnpm test:kube-reference:strict",
@@ -179,6 +182,7 @@ if (isStandaloneRepository) {
     "playwright install --with-deps chromium",
     "pnpm test:registry",
     "pnpm test:shadcn-parity",
+    "pnpm test:release-readiness",
     "pnpm test:e2e",
     "pnpm test:a11y"
   ]);
@@ -205,8 +209,18 @@ if (fs.existsSync(path.join(root, "package.json"))) {
   if (!packageJson.scripts?.["test:kube-reference:strict"]) {
     errors.push("package.json must include test:kube-reference:strict");
   }
+  if (!packageJson.scripts?.["test:release-readiness"]) {
+    errors.push("package.json must include test:release-readiness");
+  }
   if (!packageJson.scripts?.["test:kube-reference:strict"]?.includes("KUBE_STRICT_INTERACTIVE=1")) {
     errors.push("package.json test:kube-reference:strict must enable strict Kube interactions");
+  }
+  if (
+    !packageJson.scripts?.["test:release-readiness"]?.includes(
+      "scripts/check-release-readiness.mjs"
+    )
+  ) {
+    errors.push("package.json test:release-readiness must run the release readiness gate");
   }
   if (!packageJson.scripts?.["test:e2e"]?.includes("verify-liquid-behavior.mjs")) {
     errors.push("package.json test:e2e must run the real Storybook interaction gate");
@@ -243,6 +257,7 @@ for (const script of [
   "test:inventory",
   "test:registry",
   "test:shadcn-parity",
+  "test:release-readiness",
   "test:kube-reference",
   "test:kube-reference:strict",
   "test:storybook",

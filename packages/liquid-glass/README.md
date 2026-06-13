@@ -51,6 +51,7 @@ pnpm test:docs
 pnpm test:inventory
 pnpm test:registry
 pnpm test:shadcn-parity
+pnpm test:release-readiness
 pnpm test:unit
 pnpm test:e2e
 pnpm test:storybook
@@ -358,6 +359,7 @@ pnpm lint
 pnpm typecheck
 pnpm test:docs
 pnpm test:inventory
+pnpm test:release-readiness
 pnpm test:unit
 pnpm test:e2e
 pnpm test:a11y
@@ -389,7 +391,7 @@ the target for release-candidate visual parity.
 `pnpm verify` is the release gate. It runs formatting, linting, typechecking,
 docs and inventory validation, unit/component/physics checks, Storybook
 behavior checks, build/package checks, visual regression, Kube reference
-comparison, and `pnpm pack --dry-run`.
+strict comparison, and `pnpm pack --dry-run`.
 
 ## shadcn-style Registry
 

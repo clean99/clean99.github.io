@@ -83,6 +83,7 @@
     "test:inventory": "node scripts/validate-component-inventory.mjs",
     "test:package": "pnpm build && node tests/package-exports.mjs",
     "test:physics": "vitest run tests/refraction-physics.test.ts",
+    "test:release-readiness": "node scripts/check-release-readiness.mjs",
     "test:registry": "node scripts/build-component-registry.mjs --check",
     "test:shadcn-parity": "node scripts/check-shadcn-parity.mjs",
     "test:storybook": "pnpm build && rm -rf storybook-static-contracts && storybook build --quiet --output-dir storybook-static-contracts && STORYBOOK_STATIC_DIR=storybook-static-contracts node scripts/verify-enhanced-storybook.mjs; status=$?; rm -rf storybook-static-contracts; exit $status",
@@ -90,9 +91,9 @@
     "test:visual": "playwright test tests/visual --config=playwright.config.ts",
     "test:visual:update": "playwright test tests/visual --config=playwright.config.ts --update-snapshots",
     "typecheck": "tsc --noEmit",
-    "ci": "pnpm format && pnpm lint && pnpm typecheck && pnpm test:docs && pnpm test:inventory && pnpm test:registry && pnpm test:shadcn-parity && pnpm test:unit && pnpm test:components && pnpm test:physics && pnpm test:storybook && pnpm test:e2e && pnpm test:a11y && pnpm build && pnpm test:package",
+    "ci": "pnpm format && pnpm lint && pnpm typecheck && pnpm test:docs && pnpm test:inventory && pnpm test:registry && pnpm test:shadcn-parity && pnpm test:release-readiness && pnpm test:unit && pnpm test:components && pnpm test:physics && pnpm test:storybook && pnpm test:e2e && pnpm test:a11y && pnpm build && pnpm test:package",
     "release": "pnpm changeset publish",
-    "verify": "pnpm run ci && pnpm test:visual && pnpm test:kube-reference && pnpm pack --dry-run"
+    "verify": "pnpm run ci && pnpm test:visual && pnpm test:kube-reference:strict && pnpm pack --dry-run"
   },
   "peerDependencies": {
     "react": "^19.0.0",
