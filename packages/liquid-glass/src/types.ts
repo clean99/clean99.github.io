@@ -16,6 +16,7 @@ export type RefractiveOptions = {
   specularOpacity?: number;
   specularAngle?: number;
   magnificationGlassThickness?: number;
+  chromaticAberration?: number;
   bezelHeightFn?: (x: number) => number;
 };
 

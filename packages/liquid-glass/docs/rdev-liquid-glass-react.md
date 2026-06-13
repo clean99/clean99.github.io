@@ -129,6 +129,7 @@ the edge. This package keeps the principle, not the implementation:
 
 The public pure function is `resolveLiquidChromaticAberration()`.
 
-The model is intentionally not wired into `LiquidSurface` yet. It must first beat
-the existing Kube pixel gate when integrated into the reference engine; until
-then it remains a tested pure utility.
+The model is intentionally not wired into `LiquidSurface` defaults. The
+reference lens engine can opt into it for research captures, while the Kube
+parity stories keep it disabled so the default two-pass SVG filter contract
+does not drift.

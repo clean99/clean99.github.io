@@ -24,6 +24,10 @@ surface budget, and debug behavior.
 </LiquidSurface>
 ```
 
+`refraction.chromaticAberration` is an experimental opt-in for the reference
+lens engine. Leave it unset for production surfaces; the default enhanced path
+keeps channel splitting disabled to preserve Kube parity and readable content.
+
 ## Components
 
 Controls are typed React components with forwarded refs where interaction needs

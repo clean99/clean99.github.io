@@ -97,6 +97,7 @@ function LensFilterDefs({
 }) {
   const [magnificationStage, displacementStage] = pipeline.stages;
   const { opticalHeight, opticalWidth } = pipeline.geometry;
+  const chromaticAmount = pipeline.chromaticAberration.amount;
 
   return (
     <svg aria-hidden="true" colorInterpolationFilters="sRGB" style={{ display: "none" }}>
@@ -135,6 +136,55 @@ function LensFilterDefs({
             xChannelSelector="R"
             yChannelSelector="G"
           />
+          {pipeline.chromaticAberration.active ? (
+            <>
+              <feDisplacementMap
+                in="blurred_source"
+                in2="displacement_map"
+                result="red_displaced"
+                scale={displacementStage.scale + chromaticAmount}
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+              <feColorMatrix
+                in="red_displaced"
+                result="red_channel"
+                type="matrix"
+                values="1 0 0 0 0
+                        0 0 0 0 0
+                        0 0 0 0 0
+                        0 0 0 1 0"
+              />
+              <feColorMatrix
+                in="displaced"
+                result="green_channel"
+                type="matrix"
+                values="0 0 0 0 0
+                        0 1 0 0 0
+                        0 0 0 0 0
+                        0 0 0 1 0"
+              />
+              <feDisplacementMap
+                in="blurred_source"
+                in2="displacement_map"
+                result="blue_displaced"
+                scale={Math.max(0, displacementStage.scale - chromaticAmount)}
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+              <feColorMatrix
+                in="blue_displaced"
+                result="blue_channel"
+                type="matrix"
+                values="0 0 0 0 0
+                        0 0 0 0 0
+                        0 0 1 0 0
+                        0 0 0 1 0"
+              />
+              <feBlend in="green_channel" in2="blue_channel" mode="screen" result="green_blue" />
+              <feBlend in="red_channel" in2="green_blue" mode="screen" result="displaced" />
+            </>
+          ) : null}
           <feColorMatrix in="displaced" result="displaced_saturated" type="saturate" values="9" />
           <feImage
             height={opticalHeight}

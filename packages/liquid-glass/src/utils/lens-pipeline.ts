@@ -1,4 +1,8 @@
 import type { RefractiveOptions } from "../types";
+import {
+  resolveLiquidChromaticAberration,
+  type LiquidChromaticAberrationSample
+} from "./chromatic-aberration";
 import { estimateMaximumDisplacement, type OpticalSurfaceProfile } from "./optics";
 
 export type LensPipelineStage = {
@@ -12,6 +16,7 @@ export type LensPipelineStage = {
 };
 
 export type LensPipeline = {
+  chromaticAberration: LiquidChromaticAberrationSample;
   displacementRefraction: RefractiveOptions;
   geometry: typeof referenceLensGeometry;
   stages: [LensPipelineStage, LensPipelineStage];
@@ -62,6 +67,13 @@ export function resolveLensReferencePipeline(
   });
 
   return {
+    chromaticAberration: resolveLiquidChromaticAberration({
+      bevelWidth: referenceLensDisplacementFalloff,
+      distanceFromEdge: 0,
+      intensity: displacementRefraction.chromaticAberration ?? 0,
+      normalX: 1,
+      normalY: 0
+    }),
     displacementRefraction,
     geometry: referenceLensGeometry,
     stages: [magnificationStage, displacementStage]

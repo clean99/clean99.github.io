@@ -107,6 +107,10 @@ describe("Liquid Glass physics contract", () => {
     const pipeline = resolveLensReferencePipeline();
 
     expect(pipeline.stages).toHaveLength(2);
+    expect(pipeline.chromaticAberration).toMatchObject({
+      active: false,
+      amount: 0
+    });
     expect(pipeline.stages[0]).toMatchObject({
       bezelWidth: 0,
       glassThickness: 21.5,
@@ -138,6 +142,23 @@ describe("Liquid Glass physics contract", () => {
     expect(lensSource).not.toContain('className="lg-lens__core"');
   });
 
+  it("keeps chromatic aberration opt-in for the reference lens pipeline", () => {
+    const pipeline = resolveLensReferencePipeline({ chromaticAberration: 1 });
+
+    expect(pipeline.chromaticAberration).toMatchObject({
+      active: true,
+      amount: 1.5,
+      blue: { x: -1.5, y: 0 },
+      green: { x: 0, y: 0 },
+      red: { x: 1.5, y: 0 }
+    });
+    expect(lensReferenceEngineSource).toContain("pipeline.chromaticAberration.active");
+    expect(lensReferenceEngineSource).toContain("red_displaced");
+    expect(lensReferenceEngineSource).toContain("green_channel");
+    expect(lensReferenceEngineSource).toContain("blue_displaced");
+    expect(lensStorySource).not.toContain("chromaticAberration");
+  });
+
   it("can increase the reference lens filter strength for experimental tuning", () => {
     const pipeline = resolveLensReferencePipeline({
       glassThickness: 110,
@@ -150,7 +171,7 @@ describe("Liquid Glass physics contract", () => {
 
   it("keeps the reference lens engine as a real two-pass SVG filter", () => {
     expect(lensReferenceEngineSource.match(/<feImage/g)).toHaveLength(3);
-    expect(lensReferenceEngineSource.match(/<feDisplacementMap/g)).toHaveLength(2);
+    expect(lensReferenceEngineSource.match(/<feDisplacementMap/g)).toHaveLength(4);
     expect(lensReferenceEngineSource).toContain("createLensFilterPixelMaps");
     expect(lensReferenceEngineSource).not.toContain("calculateDisplacementMagnitudes");
     expect(lensReferenceEngineSource).not.toContain("sampleCapsuleField");

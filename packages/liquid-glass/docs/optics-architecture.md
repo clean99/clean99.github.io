@@ -107,10 +107,11 @@ filter composition with edge aberration and a clean center. We keep the physical
 idea, but not its baked map assets or single-component architecture.
 
 `resolveLiquidChromaticAberration()` is the matching channel-split contract. It
-does not generate SVG filters. It returns a pure sample with red, green, and blue
-offsets so future engines can apply color separation without distorting
-foreground content or inventing diagonal texture. The function is intentionally
-off the default rendering path until it lowers the Kube pixel diff.
+returns a pure sample with red, green, and blue offsets so engines can apply
+color separation without distorting foreground content or inventing diagonal
+texture. The reference lens engine wires it into an opt-in SVG channel split;
+the default Kube parity stories keep `chromaticAberration` unset so the live
+two-pass filter contract remains unchanged.
 
 ## Why The Center Must Stay Calm
 
