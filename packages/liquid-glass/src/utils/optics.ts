@@ -85,8 +85,7 @@ function refractOrthogonalRay({
   normalX: number;
   normalY: number;
 }) {
-  const radicand =
-    1 - ambientToMaterialRatio * ambientToMaterialRatio * (1 - normalY * normalY);
+  const radicand = 1 - ambientToMaterialRatio * ambientToMaterialRatio * (1 - normalY * normalY);
 
   if (radicand < 0) {
     return null;

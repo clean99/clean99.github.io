@@ -77,7 +77,9 @@ export const KubeReference: Story = {
             </div>
           ))}
         </div>
-        <div style={{ position: "absolute", left: "50%", bottom: 24, transform: "translateX(-50%)" }}>
+        <div
+          style={{ position: "absolute", left: "50%", bottom: 24, transform: "translateX(-50%)" }}
+        >
           <LiquidMusicPlayerBar />
         </div>
       </div>

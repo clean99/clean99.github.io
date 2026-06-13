@@ -1,0 +1,32 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "liquid-searchbox",
+  "type": "registry:ui",
+  "title": "Liquid Search Box",
+  "description": "LiquidSearchBox package-backed registry entry for @clean99/liquid-glass.",
+  "dependencies": ["@clean99/liquid-glass"],
+  "devDependencies": [],
+  "registryDependencies": ["liquid-glass"],
+  "cssVars": {
+    "theme": {
+      "lg-bg": "var(--lg-bg)",
+      "lg-text": "var(--lg-text)",
+      "lg-glass-fill": "var(--lg-glass-fill)",
+      "lg-glass-border": "var(--lg-glass-border)",
+      "lg-accent": "var(--lg-accent)"
+    }
+  },
+  "files": [
+    {
+      "path": "registry/components/liquid-searchbox.tsx",
+      "type": "registry:ui",
+      "target": "components/liquid-glass/liquid-searchbox.tsx"
+    }
+  ],
+  "meta": {
+    "category": "form",
+    "source": "src/components/LiquidSearchBox.tsx",
+    "story": "stories/LiquidSearchBox.stories.tsx",
+    "export": "LiquidSearchBox"
+  }
+}

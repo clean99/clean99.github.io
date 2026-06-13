@@ -1,0 +1,36 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "liquid-glass",
+  "type": "registry:ui",
+  "title": "Liquid Glass",
+  "description": "Refractive Liquid Glass components for React, built on @hashintel/refractive with accessible fallbacks.",
+  "dependencies": ["@clean99/liquid-glass"],
+  "devDependencies": [],
+  "registryDependencies": [],
+  "cssVars": {
+    "theme": {
+      "lg-bg": "var(--lg-bg)",
+      "lg-text": "var(--lg-text)",
+      "lg-glass-fill": "var(--lg-glass-fill)",
+      "lg-glass-border": "var(--lg-glass-border)",
+      "lg-accent": "var(--lg-accent)"
+    }
+  },
+  "files": [
+    {
+      "path": "examples/basic.tsx",
+      "type": "registry:example",
+      "target": "components/liquid-glass/basic.tsx"
+    },
+    {
+      "path": "examples/blog-nav.tsx",
+      "type": "registry:example",
+      "target": "components/liquid-glass/blog-nav.tsx"
+    },
+    {
+      "path": "examples/nextjs.tsx",
+      "type": "registry:example",
+      "target": "components/liquid-glass/nextjs.tsx"
+    }
+  ]
+}

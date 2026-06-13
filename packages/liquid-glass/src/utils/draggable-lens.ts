@@ -28,16 +28,20 @@ export type LiquidLensRect = LiquidLensSize & {
 };
 
 export type LiquidLensDropletOptions = {
+  phase?: LiquidLensDropletPhase;
   point: LiquidLensPoint | null;
   pressed?: boolean;
   rect: LiquidLensRect;
   reducedMotion?: boolean;
 };
 
+export type LiquidLensDropletPhase = "pressed" | "dragging";
+
 export type LiquidLensDropletResponse = {
   active: boolean;
   originX: number;
   originY: number;
+  phase: LiquidLensDropletPhase | "idle";
   scaleX: number;
   scaleY: number;
   transform: string;
@@ -49,9 +53,10 @@ const idleDropletResponse: LiquidLensDropletResponse = {
   active: false,
   originX: 0.5,
   originY: 0.5,
+  phase: "idle",
   scaleX: 1,
-  scaleY: 1,
-  transform: "translate3d(0px, 0px, 0) scaleX(1) scaleY(1)",
+  scaleY: 0.8,
+  transform: "scaleX(1) scaleY(0.8)",
   translateX: 0,
   translateY: 0
 };
@@ -91,6 +96,7 @@ export function resolveLensDragPosition({
 }
 
 export function resolveLensDropletResponse({
+  phase = "pressed",
   point,
   pressed = false,
   rect,
@@ -108,29 +114,34 @@ export function resolveLensDropletResponse({
       ...idleDropletResponse,
       active: true,
       originX: round(originX),
-      originY: round(originY)
+      originY: round(originY),
+      phase
     };
   }
 
   const offsetX = originX - 0.5;
   const offsetY = originY - 0.5;
-  const axisBias = Math.min(1, Math.hypot(offsetX, offsetY) * 1.7);
   const horizontalPull = Math.abs(offsetX);
   const verticalPull = Math.abs(offsetY);
-  const scaleX = 1 + 0.065 + horizontalPull * 0.055 - verticalPull * 0.015;
-  const scaleY = 1 - 0.045 - horizontalPull * 0.02 + verticalPull * 0.018;
-  const translateX = offsetX * 18 * (0.6 + axisBias * 0.4);
-  const translateY = offsetY * 10 * (0.6 + axisBias * 0.4);
+  const scaleX =
+    phase === "dragging"
+      ? 1.055 + horizontalPull * 0.01 + verticalPull * 0.004
+      : 1.109 + horizontalPull * 0.018 + verticalPull * 0.008;
+  const scaleY =
+    phase === "dragging"
+      ? 0.962 + verticalPull * 0.018 + horizontalPull * 0.006
+      : 0.952 + verticalPull * 0.02 + horizontalPull * 0.01;
 
   return {
     active: true,
     originX: round(originX),
     originY: round(originY),
+    phase,
     scaleX: round(scaleX),
     scaleY: round(scaleY),
-    transform: `translate3d(${round(translateX)}px, ${round(translateY)}px, 0) scaleX(${round(scaleX)}) scaleY(${round(scaleY)})`,
-    translateX: round(translateX),
-    translateY: round(translateY)
+    transform: `scaleX(${round(scaleX)}) scaleY(${round(scaleY)})`,
+    translateX: 0,
+    translateY: 0
   };
 }
 

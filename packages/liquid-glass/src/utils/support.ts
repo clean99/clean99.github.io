@@ -107,21 +107,15 @@ export function getBrowserCapabilities(
   };
 }
 
-export function supportsBackdropFilter(
-  environment: BrowserCapabilityEnvironment = {}
-): boolean {
+export function supportsBackdropFilter(environment: BrowserCapabilityEnvironment = {}): boolean {
   return getBrowserCapabilities(environment).supportsBackdropFilter;
 }
 
-export function supportsSvgBackdropFilter(
-  environment: BrowserCapabilityEnvironment = {}
-): boolean {
+export function supportsSvgBackdropFilter(environment: BrowserCapabilityEnvironment = {}): boolean {
   return getBrowserCapabilities(environment).supportsSvgBackdropFilter;
 }
 
-export function shouldReduceTransparency(
-  environment: BrowserCapabilityEnvironment = {}
-): boolean {
+export function shouldReduceTransparency(environment: BrowserCapabilityEnvironment = {}): boolean {
   return (
     matchesMedia(environment, "(prefers-reduced-transparency: reduce)") ||
     matchesMedia(environment, "(prefers-reduced-transparency)")
@@ -188,9 +182,9 @@ export function resolveLiquidMode(options: ResolveLiquidModeOptions = {}): Resol
   return resolveConcreteMode(candidate, capabilities, options);
 }
 
-export function readStoredLiquidMode(storage: Storage | undefined = getLocalStorage()):
-  | LiquidMode
-  | null {
+export function readStoredLiquidMode(
+  storage: Storage | undefined = getLocalStorage()
+): LiquidMode | null {
   if (!storage) {
     return null;
   }
@@ -252,10 +246,7 @@ function supportsCss(
   }
 }
 
-function matchesMedia(
-  environment: BrowserCapabilityEnvironment,
-  query: string
-): boolean {
+function matchesMedia(environment: BrowserCapabilityEnvironment, query: string): boolean {
   const matchMedia = environment.matchMedia ?? getMatchMedia();
   if (!matchMedia) {
     return false;

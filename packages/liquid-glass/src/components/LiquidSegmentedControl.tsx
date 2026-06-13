@@ -56,7 +56,9 @@ export const LiquidSegmentedControl = forwardRef<HTMLElement, LiquidSegmentedCon
               }
 
               event.preventDefault();
-              const currentIndex = enabledItems.findIndex((enabledItem) => enabledItem.value === value);
+              const currentIndex = enabledItems.findIndex(
+                (enabledItem) => enabledItem.value === value
+              );
               const direction = event.key === "ArrowRight" ? 1 : -1;
               const nextIndex =
                 (currentIndex + direction + enabledItems.length) % enabledItems.length;

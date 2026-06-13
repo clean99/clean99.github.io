@@ -77,11 +77,7 @@ export const SolidMode: Story = {
 export const ManualActivation: Story = {
   render: () => (
     <StoryFrame mode="enhanced" theme="dark">
-      <LiquidTabs
-        activationMode="manual"
-        aria-label="Manual activation sections"
-        items={items}
-      />
+      <LiquidTabs activationMode="manual" aria-label="Manual activation sections" items={items} />
     </StoryFrame>
   )
 };

@@ -4,6 +4,7 @@ import { estimateMaximumDisplacement, type OpticalSurfaceProfile } from "./optic
 export type LensPipelineStage = {
   bezelWidth: number;
   glassThickness: number;
+  mapFalloffWidth: number;
   name: "magnification" | "displacement";
   profile: OpticalSurfaceProfile;
   refractiveIndex: number;
@@ -25,9 +26,12 @@ export const referenceLensGeometry = {
   visibleWidth: 210
 } as const;
 
+export const referenceLensDisplacementFalloff = 25;
+
 export const referenceLensDisplacementRefraction = {
   blur: 0,
   glassThickness: 88,
+  magnificationGlassThickness: 21.5,
   bezelWidth: 18,
   refractiveIndex: 1.5,
   radius: referenceLensGeometry.radius,
@@ -35,20 +39,30 @@ export const referenceLensDisplacementRefraction = {
   specularAngle: 0.8
 } satisfies RefractiveOptions;
 
-export function resolveLensReferencePipeline(): LensPipeline {
+export function resolveLensReferencePipeline(
+  refraction: Partial<RefractiveOptions> = {}
+): LensPipeline {
+  const displacementRefraction = {
+    ...referenceLensDisplacementRefraction,
+    ...refraction
+  };
   const magnificationStage = createStage({
     bezelWidth: 0,
-    glassThickness: 21.5,
+    glassThickness:
+      displacementRefraction.magnificationGlassThickness ??
+      referenceLensDisplacementRefraction.magnificationGlassThickness,
+    mapFalloffWidth: referenceLensGeometry.radius,
     name: "magnification"
   });
   const displacementStage = createStage({
-    bezelWidth: referenceLensDisplacementRefraction.bezelWidth ?? 0,
-    glassThickness: referenceLensDisplacementRefraction.glassThickness ?? 0,
+    bezelWidth: displacementRefraction.bezelWidth ?? 0,
+    glassThickness: displacementRefraction.glassThickness ?? 0,
+    mapFalloffWidth: referenceLensDisplacementFalloff,
     name: "displacement"
   });
 
   return {
-    displacementRefraction: referenceLensDisplacementRefraction,
+    displacementRefraction,
     geometry: referenceLensGeometry,
     stages: [magnificationStage, displacementStage]
   };
@@ -57,10 +71,12 @@ export function resolveLensReferencePipeline(): LensPipeline {
 function createStage({
   bezelWidth,
   glassThickness,
+  mapFalloffWidth,
   name
 }: {
   bezelWidth: number;
   glassThickness: number;
+  mapFalloffWidth: number;
   name: LensPipelineStage["name"];
 }): LensPipelineStage {
   const profile: OpticalSurfaceProfile = "convex-squircle";
@@ -69,6 +85,7 @@ function createStage({
   return {
     bezelWidth,
     glassThickness,
+    mapFalloffWidth,
     name,
     profile,
     refractiveIndex,

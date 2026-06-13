@@ -52,18 +52,18 @@ export const LiquidField = forwardRef<HTMLDivElement, LiquidFieldProps>(function
   );
 });
 
-export const LiquidLabel = forwardRef<HTMLLabelElement, LiquidLabelProps>(
-  function LiquidLabel({ className, ...props }, ref) {
-    return <label {...props} className={cn("lg-field__label", className)} ref={ref} />;
+export const LiquidLabel = forwardRef<HTMLLabelElement, LiquidLabelProps>(function LiquidLabel(
+  { className, ...props },
+  ref
+) {
+  return <label {...props} className={cn("lg-field__label", className)} ref={ref} />;
+});
+
+export const LiquidFieldDescription = forwardRef<HTMLParagraphElement, LiquidFieldDescriptionProps>(
+  function LiquidFieldDescription({ className, ...props }, ref) {
+    return <p {...props} className={cn("lg-field__description", className)} ref={ref} />;
   }
 );
-
-export const LiquidFieldDescription = forwardRef<
-  HTMLParagraphElement,
-  LiquidFieldDescriptionProps
->(function LiquidFieldDescription({ className, ...props }, ref) {
-  return <p {...props} className={cn("lg-field__description", className)} ref={ref} />;
-});
 
 export const LiquidFieldError = forwardRef<HTMLParagraphElement, LiquidFieldErrorProps>(
   function LiquidFieldError({ className, role = "alert", ...props }, ref) {

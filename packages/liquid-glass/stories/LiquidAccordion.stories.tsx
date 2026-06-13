@@ -36,13 +36,7 @@ const items = [
 function ControlledAccordion() {
   const [value, setValue] = useState<LiquidAccordionValue>("foreground");
 
-  return (
-    <LiquidAccordion
-      items={items}
-      onValueChange={setValue}
-      value={value}
-    />
-  );
+  return <LiquidAccordion items={items} onValueChange={setValue} value={value} />;
 }
 
 export const LightMode: Story = {
@@ -88,11 +82,7 @@ export const SolidMode: Story = {
 export const MultipleOpen: Story = {
   render: () => (
     <StoryFrame mode="enhanced" theme="dark" width={660}>
-      <LiquidAccordion
-        defaultValue={["foreground", "keyboard"]}
-        items={items}
-        type="multiple"
-      />
+      <LiquidAccordion defaultValue={["foreground", "keyboard"]} items={items} type="multiple" />
     </StoryFrame>
   )
 };

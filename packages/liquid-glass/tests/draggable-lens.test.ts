@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
-import {
-  clampLensPosition,
-  resolveLensDragPosition,
-  resolveLensDropletResponse
-} from "../src";
+import { clampLensPosition, resolveLensDragPosition, resolveLensDropletResponse } from "../src";
 
-const lens = { width: 210, height: 120 };
+const lens = { width: 210, height: 150 };
 const bounds = { width: 706, height: 460, padding: 16 };
 
 describe("draggable lens response", () => {
@@ -13,7 +9,7 @@ describe("draggable lens response", () => {
     expect(clampLensPosition({ x: -100, y: -40 }, lens, bounds)).toEqual({ x: 16, y: 16 });
     expect(clampLensPosition({ x: 800, y: 800 }, lens, bounds)).toEqual({
       x: 480,
-      y: 324
+      y: 294
     });
   });
 
@@ -33,28 +29,50 @@ describe("draggable lens response", () => {
     const response = resolveLensDropletResponse({
       pressed: true,
       point: { x: 260, y: 155 },
-      rect: { left: 100, top: 100, width: 210, height: 120 }
+      rect: { left: 100, top: 100, width: 210, height: 150 }
     });
 
     expect(response.active).toBe(true);
+    expect(response.phase).toBe("pressed");
     expect(response.originX).toBeGreaterThan(0.5);
     expect(response.originY).toBeLessThan(0.5);
-    expect(response.scaleX).toBeGreaterThan(1.04);
-    expect(response.scaleY).toBeLessThan(1);
+    expect(response.scaleX).toBeGreaterThan(1.1);
+    expect(response.scaleX).toBeLessThan(1.12);
+    expect(response.scaleY).toBeGreaterThan(0.95);
+    expect(response.scaleY).toBeLessThan(0.97);
     expect(response.transform).toContain("scaleX");
+  });
+
+  it("models dragging as the lower-width Kube water-drop response", () => {
+    const pressed = resolveLensDropletResponse({
+      pressed: true,
+      point: { x: 260, y: 155 },
+      rect: { left: 100, top: 100, width: 210, height: 150 }
+    });
+    const dragging = resolveLensDropletResponse({
+      phase: "dragging",
+      pressed: true,
+      point: { x: 260, y: 155 },
+      rect: { left: 100, top: 100, width: 210, height: 150 }
+    });
+
+    expect(dragging.phase).toBe("dragging");
+    expect(dragging.scaleX).toBeLessThan(pressed.scaleX);
+    expect(dragging.scaleY).toBeGreaterThan(pressed.scaleY);
   });
 
   it("keeps pressed feedback visible but removes motion when requested", () => {
     const response = resolveLensDropletResponse({
       pressed: true,
       point: { x: 260, y: 155 },
-      rect: { left: 100, top: 100, width: 210, height: 120 },
+      rect: { left: 100, top: 100, width: 210, height: 150 },
       reducedMotion: true
     });
 
     expect(response.active).toBe(true);
+    expect(response.phase).toBe("pressed");
     expect(response.scaleX).toBe(1);
-    expect(response.scaleY).toBe(1);
+    expect(response.scaleY).toBe(0.8);
     expect(response.translateX).toBe(0);
     expect(response.translateY).toBe(0);
   });
@@ -64,14 +82,14 @@ describe("draggable lens response", () => {
       resolveLensDropletResponse({
         pressed: false,
         point: { x: 260, y: 155 },
-        rect: { left: 100, top: 100, width: 210, height: 120 }
+        rect: { left: 100, top: 100, width: 210, height: 150 }
       }).active
     ).toBe(false);
     expect(
       resolveLensDropletResponse({
         pressed: true,
         point: { x: 260, y: 155 },
-        rect: { left: 100, top: 100, width: 0, height: 120 }
+        rect: { left: 100, top: 100, width: 0, height: 150 }
       }).active
     ).toBe(false);
   });

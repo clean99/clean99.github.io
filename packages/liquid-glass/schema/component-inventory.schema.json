@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Liquid Glass component inventory",
+  "type": "object",
+  "required": ["components"],
+  "properties": {
+    "description": {
+      "type": "string"
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "export", "status", "category"],
+        "properties": {
+          "name": { "type": "string" },
+          "export": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["implemented", "planned", "research"]
+          },
+          "source": { "type": "string" },
+          "story": { "type": "string" },
+          "category": { "type": "string" }
+        }
+      }
+    }
+  }
+}

@@ -19,7 +19,10 @@ const defaultSearchRefraction = {
 };
 
 export const LiquidSearchBox = forwardRef<HTMLInputElement, LiquidSearchBoxProps>(
-  function LiquidSearchBox({ className, icon, placeholder = "Search", surfaceProps, type = "search", ...props }, ref) {
+  function LiquidSearchBox(
+    { className, icon, placeholder = "Search", surfaceProps, type = "search", ...props },
+    ref
+  ) {
     const {
       className: surfaceClassName,
       intensity = "medium",

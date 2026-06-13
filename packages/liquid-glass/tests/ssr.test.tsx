@@ -13,6 +13,6 @@ describe("SSR safety", () => {
 
     expect(html).toContain("Server surface");
     expect(html).toContain("Server button");
-    expect(html).toContain("data-liquid-mode=\"fallback\"");
+    expect(html).toContain('data-liquid-mode="fallback"');
   });
 });

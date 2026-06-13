@@ -22,6 +22,23 @@ The visual direction is informed by Chris Feijoo's public Liquid Glass research 
   - Used as an implementation reference during optical-model and pointer-elasticity research. No source code has been copied into this package.
   - The demos recreate component behavior and styling parameters, not the article source code.
 
+- `shuding/liquid-glass`
+  - Repository: https://github.com/shuding/liquid-glass
+  - Mentioned by `rdev/liquid-glass-react` as an adaptation source for shader utilities.
+  - Used only as an attribution and research trail. No source code has been copied into this package.
+
+- `react-resizable-panels`
+  - Package: https://www.npmjs.com/package/react-resizable-panels
+  - Repository: https://github.com/bvaughn/react-resizable-panels
+  - License: MIT
+  - Used as the behavior engine for `LiquidResizablePanelGroup`, `LiquidResizablePanel`, and `LiquidResizableHandle`.
+
+- `@tanstack/react-table`
+  - Package: https://www.npmjs.com/package/@tanstack/react-table
+  - Repository: https://github.com/TanStack/table
+  - License: MIT
+  - Used as the row-model, sorting, filtering, and pagination engine for `LiquidDataTable`.
+
 - Storybook demo image
   - Source: https://images.unsplash.com/photo-1579380656108-f98e4df8ea62
   - Credit shown in the story: Stephanie LeBlanc / Unsplash.

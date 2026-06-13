@@ -175,7 +175,8 @@ export const LiquidSurface = forwardRef<HTMLElement, LiquidSurfaceProps>(functio
       const transformScale = resolveTransformScale(
         view?.getComputedStyle(node).transform ?? "none"
       );
-      const measuredHeight = opticalBounds === "layout" ? rect.height / transformScale : rect.height;
+      const measuredHeight =
+        opticalBounds === "layout" ? rect.height / transformScale : rect.height;
       const measuredWidth = opticalBounds === "layout" ? rect.width / transformScale : rect.width;
       const nextBounds = {
         height: roundRectValue(measuredHeight),

@@ -46,10 +46,7 @@ export type LiquidDialogTriggerProps = Omit<LiquidButtonProps, "aria-controls"> 
   onClick?: MouseEventHandler<HTMLElement>;
 };
 
-export type LiquidDialogContentProps = Omit<
-  LiquidSurfaceProps,
-  "as" | "children" | "kind" | "role"
-> & {
+export type LiquidDialogContentProps = Omit<LiquidSurfaceProps, "as" | "children" | "kind"> & {
   children: ReactNode;
   closeOnBackdropClick?: boolean;
   container?: Element | null;
@@ -151,15 +148,7 @@ export const LiquidDialogContent = forwardRef<HTMLDialogElement, LiquidDialogCon
     ref
   ) {
     const context = useDialogContext("LiquidDialogContent");
-    const {
-      contentId,
-      descriptionId,
-      hasDescription,
-      modal,
-      open,
-      setOpen,
-      titleId
-    } = context;
+    const { contentId, descriptionId, hasDescription, modal, open, setOpen, titleId } = context;
     const dialogRef = useRef<HTMLDialogElement | null>(null);
 
     useEffect(() => {

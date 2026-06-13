@@ -1,0 +1,32 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "liquid-toggle",
+  "type": "registry:ui",
+  "title": "Liquid Toggle",
+  "description": "LiquidToggle package-backed registry entry for @clean99/liquid-glass.",
+  "dependencies": ["@clean99/liquid-glass"],
+  "devDependencies": [],
+  "registryDependencies": ["liquid-glass"],
+  "cssVars": {
+    "theme": {
+      "lg-bg": "var(--lg-bg)",
+      "lg-text": "var(--lg-text)",
+      "lg-glass-fill": "var(--lg-glass-fill)",
+      "lg-glass-border": "var(--lg-glass-border)",
+      "lg-accent": "var(--lg-accent)"
+    }
+  },
+  "files": [
+    {
+      "path": "registry/components/liquid-toggle.tsx",
+      "type": "registry:ui",
+      "target": "components/liquid-glass/liquid-toggle.tsx"
+    }
+  ],
+  "meta": {
+    "category": "control",
+    "source": "src/components/LiquidToggle.tsx",
+    "story": "stories/LiquidToggle.stories.tsx",
+    "export": "LiquidToggle"
+  }
+}

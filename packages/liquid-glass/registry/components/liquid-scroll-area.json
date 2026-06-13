@@ -1,0 +1,32 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "liquid-scroll-area",
+  "type": "registry:ui",
+  "title": "Liquid Scroll Area",
+  "description": "LiquidScrollArea package-backed registry entry for @clean99/liquid-glass.",
+  "dependencies": ["@clean99/liquid-glass"],
+  "devDependencies": [],
+  "registryDependencies": ["liquid-glass"],
+  "cssVars": {
+    "theme": {
+      "lg-bg": "var(--lg-bg)",
+      "lg-text": "var(--lg-text)",
+      "lg-glass-fill": "var(--lg-glass-fill)",
+      "lg-glass-border": "var(--lg-glass-border)",
+      "lg-accent": "var(--lg-accent)"
+    }
+  },
+  "files": [
+    {
+      "path": "registry/components/liquid-scroll-area.tsx",
+      "type": "registry:ui",
+      "target": "components/liquid-glass/liquid-scroll-area.tsx"
+    }
+  ],
+  "meta": {
+    "category": "layout",
+    "source": "src/components/LiquidScrollArea.tsx",
+    "story": "stories/LiquidFoundation.stories.tsx",
+    "export": "LiquidScrollArea"
+  }
+}

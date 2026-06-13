@@ -81,8 +81,7 @@ export const FocusPhotoReference: Story = {
         style={{
           minHeight: 360,
           padding: 40,
-          background:
-            "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(244,245,243,0.94))",
+          background: "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(244,245,243,0.94))",
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
         }}

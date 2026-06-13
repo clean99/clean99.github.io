@@ -1,6 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { LiquidLens, LiquidProvider, LiquidSearchBox, LiquidSurface } from "../src";
-import { longChineseText, longEnglishText, mixedText, StoryFrame } from "./story-fixtures";
+import {
+  localOpticsImage,
+  longChineseText,
+  longEnglishText,
+  mixedText,
+  StoryFrame
+} from "./story-fixtures";
 
 const meta = {
   title: "Liquid Glass/LiquidSurface",
@@ -145,7 +151,7 @@ export const KubeAlignedEnhanced: Story = {
               >
                 <img
                   alt=""
-                  src="https://images.unsplash.com/photo-1579380656108-f98e4df8ea62?q=80&w=800&auto=format&fit=crop"
+                  src={localOpticsImage}
                   style={{
                     position: "absolute",
                     inset: 0,
@@ -165,7 +171,7 @@ export const KubeAlignedEnhanced: Story = {
                     textTransform: "uppercase"
                   }}
                 >
-                  Photo: Stephanie LeBlanc / Unsplash
+                  Local deterministic optics fixture
                 </span>
               </div>
             </div>

@@ -21,10 +21,7 @@ export type LiquidTabsItem = {
   value: string;
 };
 
-export type LiquidTabsSurfaceProps = Omit<
-  LiquidSurfaceProps,
-  "as" | "children" | "kind" | "role"
->;
+export type LiquidTabsSurfaceProps = Omit<LiquidSurfaceProps, "as" | "children" | "kind" | "role">;
 
 export type LiquidTabsProps = Omit<HTMLAttributes<HTMLDivElement>, "onChange"> & {
   "aria-label": string;
@@ -62,9 +59,7 @@ export const LiquidTabs = forwardRef<HTMLDivElement, LiquidTabsProps>(function L
     [items]
   );
   const isControlled = value !== undefined;
-  const [uncontrolledValue, setUncontrolledValue] = useState(
-    defaultValue ?? firstEnabledValue
-  );
+  const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue ?? firstEnabledValue);
   const selectedValue = value ?? uncontrolledValue;
   const resolvedValue = items.some((item) => item.value === selectedValue)
     ? selectedValue

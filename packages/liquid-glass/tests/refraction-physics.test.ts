@@ -15,9 +15,14 @@ import {
 
 const styles = fs.readFileSync(path.resolve("src/styles/styles.css"), "utf8");
 const storyFixture = fs.readFileSync(path.resolve("stories/story-fixtures.tsx"), "utf8");
+const lensStorySource = fs.readFileSync(path.resolve("stories/LiquidLens.stories.tsx"), "utf8");
 const lensSource = fs.readFileSync(path.resolve("src/components/LiquidLens.tsx"), "utf8");
 const lensReferenceEngineSource = fs.readFileSync(
   path.resolve("src/engines/lens-reference-engine.tsx"),
+  "utf8"
+);
+const displacementMapSource = fs.readFileSync(
+  path.resolve("src/utils/displacement-map.ts"),
   "utf8"
 );
 const lensPipelineSource = fs.readFileSync(path.resolve("src/utils/lens-pipeline.ts"), "utf8");
@@ -124,6 +129,7 @@ describe("Liquid Glass physics contract", () => {
       })
     ).toBeCloseTo(pipeline.stages[1]?.scale ?? 0, 6);
     expect(lensPipelineSource).toContain("glassThickness: 88");
+    expect(lensPipelineSource).toContain("magnificationGlassThickness: 21.5");
     expect(lensPipelineSource).toContain("refractiveIndex: 1.5");
     expect(lensSource).toContain("referenceLensDisplacementRefraction");
     expect(lensSource).toContain('engine = "refractive"');
@@ -132,9 +138,26 @@ describe("Liquid Glass physics contract", () => {
     expect(lensSource).not.toContain('className="lg-lens__core"');
   });
 
+  it("can increase the reference lens filter strength for the pressed Kube state", () => {
+    const pipeline = resolveLensReferencePipeline({
+      glassThickness: 110,
+      magnificationGlassThickness: 43
+    });
+
+    expect(pipeline.stages[0]?.scale).toBeCloseTo(48.0071220172629, 6);
+    expect(pipeline.stages[1]?.scale).toBeCloseTo(122.80891678834695, 6);
+  });
+
   it("keeps the reference lens engine as a real two-pass SVG filter", () => {
     expect(lensReferenceEngineSource.match(/<feImage/g)).toHaveLength(3);
     expect(lensReferenceEngineSource.match(/<feDisplacementMap/g)).toHaveLength(2);
+    expect(lensReferenceEngineSource).toContain("createLensFilterPixelMaps");
+    expect(lensReferenceEngineSource).not.toContain("calculateDisplacementMagnitudes");
+    expect(lensReferenceEngineSource).not.toContain("sampleCapsuleField");
+    expect(displacementMapSource).toContain("sampleCapsuleField");
+    expect(displacementMapSource).toContain("falloffPower = 4.8");
+    expect(displacementMapSource).toContain("maxChannelMagnitude = 127");
+    expect(lensPipelineSource).toContain("referenceLensDisplacementFalloff = 25");
     expect(lensReferenceEngineSource).toContain('result="magnifying_displacement_map"');
     expect(lensReferenceEngineSource).toContain('result="displacement_map"');
     expect(lensReferenceEngineSource).toContain('result="specular_layer"');
@@ -177,6 +200,42 @@ describe("Liquid Glass physics contract", () => {
         width: 210
       }).hasOverlappingSlices
     ).toBe(true);
+  });
+
+  it("keeps the draggable precision handle at the optical Kube lens bounds", () => {
+    const handleRule = collectCssRuleBodies(styles, ".lg-precision-lens-demo__handle").join("\n");
+    const handleLensRule = collectCssRuleBodies(
+      styles,
+      ".lg-precision-lens-demo__handle .lg-lens"
+    ).join("\n");
+    const pressedHandleRule = collectCssRuleBodies(
+      styles,
+      '.lg-precision-lens-demo__handle[data-liquid-droplet="pressed"]'
+    ).join("\n");
+    const pressedLensRule = collectCssRuleBodies(
+      styles,
+      '.lg-precision-lens-demo__handle[data-liquid-droplet="pressed"] .lg-lens'
+    ).join("\n");
+
+    expect(handleRule).toContain("width: 13.125rem");
+    expect(handleRule).toContain("height: 9.375rem");
+    expect(handleRule).toContain("box-sizing: border-box");
+    expect(handleRule).toContain("padding: 0");
+    expect(handleRule).toContain("scaleY(var(--lg-demo-droplet-scale-y, 0.8))");
+    expect(handleRule).toContain("transform-origin: center");
+    expect(handleLensRule).toContain("transform: none");
+    expect(handleRule).not.toContain("padding: 0.9375rem 0");
+    expect(pressedHandleRule).not.toContain("drop-shadow");
+    expect(pressedLensRule).toContain("4px 16px 24px rgba(0, 0, 0, 0.22)");
+    expect(pressedLensRule).toContain("inset 2px 8px 24px rgba(0, 0, 0, 0.27)");
+    expect(pressedLensRule).toContain("inset -2px -8px 24px rgba(255, 255, 255, 0.27)");
+  });
+
+  it("uses Kube CSS coordinates for the draggable lens initial position", () => {
+    expect(lensStorySource).toContain("const precisionLensInitialPosition = { x: 19.5, y: 19.5 }");
+    expect(lensStorySource).toContain(
+      'style={{ position: "absolute", top: 34.5, left: 19.5, zIndex: 3 }}'
+    );
   });
 
   it("keeps foreground content outside the displacement/filter layer", () => {

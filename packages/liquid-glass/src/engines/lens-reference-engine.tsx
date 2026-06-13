@@ -12,12 +12,8 @@ import {
   type ReactNode
 } from "react";
 import type { LiquidEngineProps } from "./engine-props";
-import {
-  referenceLensGeometry,
-  resolveLensReferencePipeline,
-  type LensPipelineStage
-} from "../utils/lens-pipeline";
-import { calculateDisplacementMagnitudes } from "../utils/optics";
+import { resolveLensReferencePipeline } from "../utils/lens-pipeline";
+import { createLensFilterPixelMaps, type LiquidPixelMap } from "../utils/displacement-map";
 
 type LensHostProps = HTMLAttributes<HTMLElement> & {
   as?: ElementType;
@@ -45,7 +41,7 @@ export const LensReferenceEngine = forwardRef<HTMLElement, LiquidEngineProps>(
     const reactId = useId();
     const filterId = `lg-lens-${reactId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
     const [maps, setMaps] = useState<LensFilterMaps | null>(null);
-    const pipeline = resolveLensReferencePipeline();
+    const pipeline = resolveLensReferencePipeline(refraction);
 
     useEffect(() => {
       let isMounted = true;
@@ -166,21 +162,16 @@ function LensFilterDefs({
 }
 
 function createLensFilterMaps(): LensFilterMaps {
-  const pipeline = resolveLensReferencePipeline();
-  const [magnificationStage, displacementStage] = pipeline.stages;
+  const maps = createLensFilterPixelMaps();
 
   return {
-    displacement: createDisplacementMapDataUrl(displacementStage),
-    magnification: createDisplacementMapDataUrl(magnificationStage),
-    specular: createSpecularMapDataUrl()
+    displacement: createPixelMapDataUrl(maps.displacement),
+    magnification: createPixelMapDataUrl(maps.magnification),
+    specular: createPixelMapDataUrl(maps.specular)
   };
 }
 
-function createDisplacementMapDataUrl(stage: LensPipelineStage) {
-  const { opticalHeight, opticalWidth, radius } = referenceLensGeometry;
-  const pixelRatio = 3;
-  const width = opticalWidth * pixelRatio;
-  const height = opticalHeight * pixelRatio;
+function createPixelMapDataUrl(map: LiquidPixelMap) {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d", { willReadFrequently: true });
 
@@ -188,136 +179,12 @@ function createDisplacementMapDataUrl(stage: LensPipelineStage) {
     return emptyPngDataUrl();
   }
 
-  canvas.width = width;
-  canvas.height = height;
-  const image = context.createImageData(width, height);
-  const magnitudes = calculateDisplacementMagnitudes({
-    bezelWidth: stage.bezelWidth,
-    glassThickness: stage.glassThickness,
-    profile: stage.profile,
-    refractiveIndex: stage.refractiveIndex
-  });
-  const maxMagnitude = Math.max(...magnitudes.map(Math.abs));
-  const effectiveBezelWidth = stage.bezelWidth > 0 ? stage.bezelWidth : radius;
-
-  for (let py = 0; py < height; py += 1) {
-    for (let px = 0; px < width; px += 1) {
-      const index = (py * width + px) * 4;
-      const x = (px + 0.5) / pixelRatio;
-      const y = (py + 0.5) / pixelRatio;
-      const sample = sampleCapsuleField(x, y);
-
-      if (!sample || sample.distanceFromEdge > effectiveBezelWidth || maxMagnitude <= 0) {
-        writeRgba(image.data, index, 128, 128, 128, 255);
-        continue;
-      }
-
-      const progress = Math.max(0, Math.min(1, sample.distanceFromEdge / effectiveBezelWidth));
-      const magnitudeIndex = Math.min(
-        magnitudes.length - 1,
-        Math.max(0, Math.round(progress * (magnitudes.length - 1)))
-      );
-      const normalizedMagnitude = (magnitudes[magnitudeIndex] ?? 0) / maxMagnitude;
-      const red = 128 - sample.normalX * normalizedMagnitude * 127;
-      const green = 128 - sample.normalY * normalizedMagnitude * 127;
-
-      writeRgba(image.data, index, red, green, 128, 255);
-    }
-  }
-
+  canvas.width = map.width;
+  canvas.height = map.height;
+  const image = context.createImageData(map.width, map.height);
+  image.data.set(map.data);
   context.putImageData(image, 0, 0);
   return canvas.toDataURL("image/png");
-}
-
-function createSpecularMapDataUrl() {
-  const { opticalHeight, opticalWidth } = referenceLensGeometry;
-  const pixelRatio = 3;
-  const width = opticalWidth * pixelRatio;
-  const height = opticalHeight * pixelRatio;
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d", { willReadFrequently: true });
-
-  if (!context) {
-    return emptyPngDataUrl();
-  }
-
-  canvas.width = width;
-  canvas.height = height;
-  const image = context.createImageData(width, height);
-  const lightX = Math.cos(0.8);
-  const lightY = Math.sin(0.8);
-
-  for (let py = 0; py < height; py += 1) {
-    for (let px = 0; px < width; px += 1) {
-      const index = (py * width + px) * 4;
-      const x = (px + 0.5) / pixelRatio;
-      const y = (py + 0.5) / pixelRatio;
-      const sample = sampleCapsuleField(x, y);
-
-      if (!sample) {
-        writeRgba(image.data, index, 0, 0, 0, 0);
-        continue;
-      }
-
-      const edgeStrength = Math.max(0, 1 - sample.distanceFromEdge / 18);
-      const directional = Math.abs(sample.normalX * lightX + sample.normalY * lightY);
-      const alpha = 255 * edgeStrength * edgeStrength * directional;
-      writeRgba(image.data, index, 255, 255, 255, alpha);
-    }
-  }
-
-  context.putImageData(image, 0, 0);
-  return canvas.toDataURL("image/png");
-}
-
-function sampleCapsuleField(x: number, y: number) {
-  const { opticalHeight, opticalWidth, radius } = referenceLensGeometry;
-  const centerY = opticalHeight / 2;
-  const leftCenterX = radius;
-  const rightCenterX = opticalWidth - radius;
-
-  if (x < leftCenterX) {
-    return sampleCircleCap(x - leftCenterX, y - centerY, radius);
-  }
-
-  if (x > rightCenterX) {
-    return sampleCircleCap(x - rightCenterX, y - centerY, radius);
-  }
-
-  const distanceToTop = y;
-  const distanceToBottom = opticalHeight - y;
-  const usesTop = distanceToTop <= distanceToBottom;
-
-  return {
-    distanceFromEdge: Math.max(0, usesTop ? distanceToTop : distanceToBottom),
-    normalX: 0,
-    normalY: usesTop ? -1 : 1
-  };
-}
-
-function sampleCircleCap(dx: number, dy: number, radius: number) {
-  const length = Math.sqrt(dx * dx + dy * dy);
-
-  if (length <= 0 || length > radius) {
-    return null;
-  }
-
-  return {
-    distanceFromEdge: Math.max(0, radius - length),
-    normalX: dx / length,
-    normalY: dy / length
-  };
-}
-
-function writeRgba(data: Uint8ClampedArray, index: number, r: number, g: number, b: number, a: number) {
-  data[index] = clampByte(r);
-  data[index + 1] = clampByte(g);
-  data[index + 2] = clampByte(b);
-  data[index + 3] = clampByte(a);
-}
-
-function clampByte(value: number) {
-  return Math.max(0, Math.min(255, Math.round(Number.isFinite(value) ? value : 0)));
 }
 
 function emptyPngDataUrl() {

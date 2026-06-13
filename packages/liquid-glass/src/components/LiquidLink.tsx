@@ -8,17 +8,18 @@ export type LiquidLinkProps = Omit<LiquidSurfaceProps, "as" | "kind" | "type"> &
   href: string;
 };
 
-export const LiquidLink = forwardRef<HTMLElement, LiquidLinkProps>(
-  function LiquidLink({ as = "a", interactive = true, radius = "pill", ...props }, ref) {
-    return (
-      <LiquidSurface
-        {...props}
-        as={as}
-        interactive={interactive}
-        kind="button"
-        radius={radius}
-        ref={ref}
-      />
-    );
-  }
-);
+export const LiquidLink = forwardRef<HTMLElement, LiquidLinkProps>(function LiquidLink(
+  { as = "a", interactive = true, radius = "pill", ...props },
+  ref
+) {
+  return (
+    <LiquidSurface
+      {...props}
+      as={as}
+      interactive={interactive}
+      kind="button"
+      radius={radius}
+      ref={ref}
+    />
+  );
+});

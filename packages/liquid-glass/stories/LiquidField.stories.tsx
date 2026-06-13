@@ -4,7 +4,9 @@ import {
   LiquidFieldDescription,
   LiquidFieldError,
   LiquidInput,
+  LiquidInputOtp,
   LiquidLabel,
+  LiquidSelect,
   LiquidTextarea
 } from "../src";
 import { longChineseText, longEnglishText, StoryFrame } from "./story-fixtures";
@@ -36,7 +38,9 @@ export const DarkMode: Story = {
       <LiquidField>
         <LiquidLabel htmlFor="dark-title">Article title</LiquidLabel>
         <LiquidInput id="dark-title" placeholder="Liquid Glass in React" />
-        <LiquidFieldDescription>Foreground input text stays outside the refraction layer.</LiquidFieldDescription>
+        <LiquidFieldDescription>
+          Foreground input text stays outside the refraction layer.
+        </LiquidFieldDescription>
       </LiquidField>
     </StoryFrame>
   )
@@ -98,8 +102,37 @@ export const WithAdornments: Story = {
     <StoryFrame mode="enhanced" theme="dark" width={520} height={320}>
       <LiquidField>
         <LiquidLabel htmlFor="domain">Domain</LiquidLabel>
-        <LiquidInput endAdornment=".dev" id="domain" placeholder="clean99" startAdornment="https://" />
+        <LiquidInput
+          endAdornment=".dev"
+          id="domain"
+          placeholder="clean99"
+          startAdornment="https://"
+        />
       </LiquidField>
+    </StoryFrame>
+  )
+};
+
+export const SelectAndOtp: Story = {
+  render: () => (
+    <StoryFrame mode="fallback" theme="light" field={false} width={560} height={380}>
+      <div style={{ display: "grid", gap: 18 }}>
+        <LiquidField>
+          <LiquidLabel htmlFor="release-mode">Release mode</LiquidLabel>
+          <LiquidSelect id="release-mode" defaultValue="fallback">
+            <option value="enhanced">Enhanced</option>
+            <option value="fallback">Fallback</option>
+            <option value="solid">Solid</option>
+          </LiquidSelect>
+        </LiquidField>
+        <LiquidField>
+          <LiquidLabel id="otp-label">Verification code</LiquidLabel>
+          <LiquidInputOtp aria-labelledby="otp-label" name="verification-code" />
+          <LiquidFieldDescription>
+            Paste support fills the cells while keeping native input focus.
+          </LiquidFieldDescription>
+        </LiquidField>
+      </div>
     </StoryFrame>
   )
 };

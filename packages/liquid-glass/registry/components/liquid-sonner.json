@@ -1,0 +1,32 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "liquid-sonner",
+  "type": "registry:ui",
+  "title": "Liquid Toaster",
+  "description": "LiquidToaster package-backed registry entry for @clean99/liquid-glass.",
+  "dependencies": ["@clean99/liquid-glass"],
+  "devDependencies": [],
+  "registryDependencies": ["liquid-glass"],
+  "cssVars": {
+    "theme": {
+      "lg-bg": "var(--lg-bg)",
+      "lg-text": "var(--lg-text)",
+      "lg-glass-fill": "var(--lg-glass-fill)",
+      "lg-glass-border": "var(--lg-glass-border)",
+      "lg-accent": "var(--lg-accent)"
+    }
+  },
+  "files": [
+    {
+      "path": "registry/components/liquid-sonner.tsx",
+      "type": "registry:ui",
+      "target": "components/liquid-glass/liquid-sonner.tsx"
+    }
+  ],
+  "meta": {
+    "category": "feedback",
+    "source": "src/components/LiquidToast.tsx",
+    "story": "stories/LiquidToast.stories.tsx",
+    "export": "LiquidToaster"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "liquid-separator",
+  "type": "registry:ui",
+  "title": "Liquid Separator",
+  "description": "LiquidSeparator package-backed registry entry for @clean99/liquid-glass.",
+  "dependencies": ["@clean99/liquid-glass"],
+  "devDependencies": [],
+  "registryDependencies": ["liquid-glass"],
+  "cssVars": {
+    "theme": {
+      "lg-bg": "var(--lg-bg)",
+      "lg-text": "var(--lg-text)",
+      "lg-glass-fill": "var(--lg-glass-fill)",
+      "lg-glass-border": "var(--lg-glass-border)",
+      "lg-accent": "var(--lg-accent)"
+    }
+  },
+  "files": [
+    {
+      "path": "registry/components/liquid-separator.tsx",
+      "type": "registry:ui",
+      "target": "components/liquid-glass/liquid-separator.tsx"
+    }
+  ],
+  "meta": {
+    "category": "layout",
+    "source": "src/components/LiquidSeparator.tsx",
+    "story": "stories/LiquidFoundation.stories.tsx",
+    "export": "LiquidSeparator"
+  }
+}
