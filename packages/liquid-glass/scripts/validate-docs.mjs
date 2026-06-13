@@ -43,12 +43,14 @@ const packageRequiredFiles = [
   "docs/component-inventory.json",
   "docs/component-inventory.md",
   "docs/design-principles.md",
+  "docs/github-repository-settings.md",
   "docs/installation.md",
   "docs/kube-parity-gate.md",
   "docs/open-source-release.md",
   "docs/optics-architecture.md",
   "docs/reference-research.md",
   "docs/rdev-liquid-glass-react.md",
+  "docs/shadcn-registry.md",
   "docs/shadcn-parity.json",
   "docs/testing.md",
   "examples/README.md",
@@ -56,6 +58,7 @@ const packageRequiredFiles = [
   "liquid-glass.json",
   "registry/liquid-glass.json",
   "scripts/build-component-registry.mjs",
+  "scripts/validate-component-test-coverage.mjs",
   "scripts/check-release-readiness.mjs",
   "scripts/check-shadcn-parity.mjs",
   "scripts/verify-storybook-a11y.mjs",
@@ -92,6 +95,7 @@ mustInclude("README.md", [
   "Performance",
   "pnpm verify",
   "test:inventory",
+  "test:component-coverage",
   "test:registry",
   "test:shadcn-parity",
   "test:release-readiness",
@@ -101,6 +105,23 @@ mustInclude("README.md", [
   "test:e2e",
   "@axe-core/playwright",
   "shadcn-style Registry"
+]);
+
+mustInclude("docs/github-repository-settings.md", [
+  "git@github.com:clean99/liquid-glass.git",
+  "GitHub Actions",
+  "Branch Protection",
+  "NPM_TOKEN",
+  "Repository Secrets"
+]);
+
+mustInclude("docs/shadcn-registry.md", [
+  "npx shadcn@latest add",
+  "raw.githubusercontent.com/clean99/liquid-glass/main/liquid-glass.json",
+  "registry/components",
+  "test:registry",
+  "test:shadcn-parity",
+  "ui.shadcn.com/docs/registry"
 ]);
 
 mustInclude("ATTRIBUTIONS.md", [
@@ -182,6 +203,7 @@ if (isStandaloneRepository) {
     "playwright install --with-deps chromium",
     "pnpm test:registry",
     "pnpm test:shadcn-parity",
+    "pnpm test:component-coverage",
     "pnpm test:release-readiness",
     "pnpm test:e2e",
     "pnpm test:a11y"
@@ -255,6 +277,7 @@ for (const script of [
   "shadcn:sync",
   "test:docs",
   "test:inventory",
+  "test:component-coverage",
   "test:registry",
   "test:shadcn-parity",
   "test:release-readiness",

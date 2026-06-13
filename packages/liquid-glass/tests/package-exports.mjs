@@ -5,6 +5,9 @@ const dist = path.resolve("dist");
 const root = process.cwd();
 const packageJsonPath = path.join(root, "package.json");
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
+const inventory = JSON.parse(
+  fs.readFileSync(path.join(root, "docs", "component-inventory.json"), "utf8")
+);
 const requiredDistFiles = ["index.js", "index.cjs", "index.d.ts", "styles.css", "tokens.css"];
 const errors = [];
 
@@ -56,6 +59,13 @@ expectFileIncludes("dist/index.d.ts", [
   "RefractiveOptions",
   "LiquidMode"
 ]);
+for (const component of inventory.components.filter(
+  (inventoryComponent) => inventoryComponent.status === "implemented"
+)) {
+  expectFileIncludes("dist/index.js", [component.export]);
+  expectFileIncludes("dist/index.cjs", [component.export]);
+  expectFileIncludes("dist/index.d.ts", [component.export]);
+}
 expectFileIncludes("dist/styles.css", ["--lg-glass-fill", ".lg-surface"]);
 expectFileIncludes("dist/tokens.css", ["--lg-bg", "--lg-radius-pill"]);
 

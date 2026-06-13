@@ -76,6 +76,7 @@
     "test": "pnpm run test:unit && pnpm run test:components",
     "test:a11y": "pnpm exec playwright test tests/accessibility --config=playwright.config.ts",
     "test:components": "pnpm --filter @clean99/liquid-glass test:components && pnpm --filter blog test:components && pnpm --filter docs test:components",
+    "test:component-coverage": "pnpm --filter @clean99/liquid-glass test:component-coverage",
     "test:content": "pnpm --filter blog test:content",
     "test:e2e": "pnpm exec playwright test tests/e2e --config=playwright.config.ts",
     "test:kube-reference": "pnpm --filter docs test:kube-reference",
@@ -87,7 +88,7 @@
     "test:visual": "pnpm exec playwright test tests/visual --config=playwright.config.ts",
     "test:visual:update": "pnpm exec playwright test tests/visual --config=playwright.config.ts --update-snapshots",
     "typecheck": "pnpm --filter @clean99/liquid-glass typecheck && pnpm --filter blog typecheck && pnpm --filter docs typecheck",
-    "ci": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:components && pnpm test:physics && pnpm test:storybook && pnpm test:kube-reference && pnpm test:a11y && pnpm test:e2e && pnpm test:routes && pnpm test:content && pnpm build && pnpm test:package"
+    "ci": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:components && pnpm test:component-coverage && pnpm test:physics && pnpm test:storybook && pnpm test:kube-reference && pnpm test:a11y && pnpm test:e2e && pnpm test:routes && pnpm test:content && pnpm build && pnpm test:package"
   },
   "hexo": {
     "version": "6.3.0"

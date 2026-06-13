@@ -34,6 +34,7 @@ import {
   LiquidCarouselItem,
   LiquidCarouselNext,
   LiquidCarouselPrevious,
+  LiquidChart,
   LiquidChartContainer,
   LiquidChartLegendContent,
   LiquidChartTooltipContent,
@@ -112,9 +113,9 @@ import {
   LiquidPopoverTrigger,
   LiquidProgress,
   LiquidRadioGroup,
+  LiquidResizable,
   LiquidResizableHandle,
   LiquidResizablePanel,
-  LiquidResizablePanelGroup,
   LiquidScrollArea,
   LiquidSearchBox,
   LiquidProvider,
@@ -689,11 +690,7 @@ describe("Liquid components", () => {
 
   it("renders resizable panel groups with accessible separators", () => {
     render(
-      <LiquidResizablePanelGroup
-        aria-label="Workspace split"
-        id="workspace"
-        style={{ height: 240 }}
-      >
+      <LiquidResizable aria-label="Workspace split" id="workspace" style={{ height: 240 }}>
         <LiquidResizablePanel defaultSize="35%" id="sidebar" minSize="20%">
           Sidebar
         </LiquidResizablePanel>
@@ -701,9 +698,10 @@ describe("Liquid components", () => {
         <LiquidResizablePanel defaultSize="65%" id="main" minSize="30%">
           Main
         </LiquidResizablePanel>
-      </LiquidResizablePanelGroup>
+      </LiquidResizable>
     );
 
+    expect(screen.getByRole("group", { name: "Workspace split" })).toHaveClass("lg-resizable");
     expect(screen.getByText("Sidebar").closest("[data-panel]")).toBeInTheDocument();
     expect(screen.getByText("Sidebar").closest(".lg-resizable__panel")).toBeInTheDocument();
     expect(screen.getByRole("separator")).toHaveClass("lg-resizable__handle");
@@ -757,6 +755,10 @@ describe("Liquid components", () => {
   });
 
   it("renders chart container tokens, tooltip content, and legend content", () => {
+    expect(LiquidChart.ResponsiveContainer).toBeDefined();
+    expect(LiquidChart.Tooltip).toBeDefined();
+    expect(LiquidChart.Legend).toBeDefined();
+
     render(
       <LiquidChartContainer
         chartId="release-chart"

@@ -74,6 +74,7 @@ for (const script of [
   "typecheck",
   "test:docs",
   "test:inventory",
+  "test:component-coverage",
   "test:registry",
   "test:shadcn-parity",
   "test:unit",
@@ -95,12 +96,15 @@ for (const script of [
 }
 
 mustScript(packageJson, "test:release-readiness", ["scripts/check-release-readiness.mjs"]);
+mustScript(packageJson, "test:component-coverage", [
+  "scripts/validate-component-test-coverage.mjs"
+]);
 mustScript(packageJson, "test:kube-reference:strict", ["KUBE_STRICT_INTERACTIVE=1"]);
 mustScript(packageJson, "test:a11y", ["verify-storybook-a11y.mjs"]);
 mustScript(packageJson, "test:e2e", ["verify-liquid-behavior.mjs"]);
 mustScript(packageJson, "test:storybook", ["verify-enhanced-storybook.mjs"]);
 mustScript(packageJson, "test:package", ["tests/package-exports.mjs"]);
-mustScript(packageJson, "ci", ["pnpm test:release-readiness"]);
+mustScript(packageJson, "ci", ["pnpm test:component-coverage", "pnpm test:release-readiness"]);
 mustScript(packageJson, "verify", [
   "pnpm run ci",
   "pnpm test:visual",
@@ -124,7 +128,9 @@ const packageRequiredFiles = [
   "SECURITY.md",
   "CODE_OF_CONDUCT.md",
   "CHANGELOG.md",
+  "docs/github-repository-settings.md",
   "docs/open-source-release.md",
+  "docs/shadcn-registry.md",
   "docs/testing.md",
   "docs/component-inventory.md",
   "examples/README.md",
@@ -156,16 +162,23 @@ if (isStandaloneRepository) {
 
 if (isStandaloneRepository) {
   mustInclude(".github/workflows/ci.yml", "pnpm test:release-readiness");
+  mustInclude(".github/workflows/ci.yml", "pnpm test:component-coverage");
   mustInclude(".github/workflows/ci.yml", "pnpm test:a11y");
   mustInclude(".github/workflows/ci.yml", "pnpm test:e2e");
-  mustInclude(".github/workflows/visual.yml", "pnpm test:kube-reference");
+  mustInclude(".github/workflows/visual.yml", "pnpm test:kube-reference:strict");
   mustInclude(".github/workflows/release.yml", "pnpm verify");
   mustInclude(".github/workflows/release.yml", "NPM_TOKEN");
   mustInclude(".github/workflows/pages.yml", "actions/deploy-pages");
 }
 mustInclude("docs/open-source-release.md", "pnpm test:release-readiness");
+mustInclude("docs/open-source-release.md", "pnpm test:component-coverage");
 mustInclude("docs/open-source-release.md", "pnpm test:kube-reference:strict");
 mustInclude("docs/open-source-release.md", "pnpm pack --dry-run");
+mustInclude("docs/github-repository-settings.md", "git push -u origin main");
+mustInclude("docs/github-repository-settings.md", "Branch Protection");
+mustInclude("docs/github-repository-settings.md", "NPM_TOKEN");
+mustInclude("docs/shadcn-registry.md", "npx shadcn@latest add");
+mustInclude("docs/shadcn-registry.md", "test:shadcn-parity");
 
 if (errors.length > 0) {
   throw new Error(

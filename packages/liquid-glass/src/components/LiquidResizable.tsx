@@ -18,13 +18,17 @@ export type LiquidResizableHandleProps = SeparatorProps & {
 };
 
 export const LiquidResizablePanelGroup = forwardRef<HTMLDivElement, LiquidResizablePanelGroupProps>(
-  function LiquidResizablePanelGroup({ className, orientation = "horizontal", ...props }, ref) {
+  function LiquidResizablePanelGroup(
+    { className, orientation = "horizontal", role = "group", ...props },
+    ref
+  ) {
     return (
       <Group
         {...props}
         className={cn("lg-resizable", className)}
         elementRef={ref}
         orientation={orientation}
+        role={role}
       />
     );
   }

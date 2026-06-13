@@ -62,6 +62,15 @@ fixture. That removes synthetic CSS artwork as a hidden variable: if the
 interactive rows drift, the remaining gap is in the lens material, the transform
 coordinate system, or the droplet response, not in a different background.
 
+The shared board still needs one deliberate distinction: the interactive
+Storybook board applies an `-8px, -2px` content phase offset under the draggable
+lens. Real pointer metrics already matched the public page, so moving the lens
+coordinate would be the wrong fix. The phase offset changes only the
+high-contrast field sampled by the active lens and moved the pressed row from
+`0.4163` to `0.4148` and the dragged row from `0.4224` to `0.4142`. A larger
+vertical offset (`-8px, -10px`) was tested and rejected because it regressed
+pressed to `0.5173` and dragged to `0.4519`.
+
 The draggable magnifying glass uses the same observable geometry as the public
 reference: the optical body is `210x150`, and the idle visual height comes from
 `scaleY(0.8)`, not from making the DOM node `120px` tall. Pressed and dragged
@@ -112,6 +121,25 @@ pointer events, transform, box shadow, and SVG backdrop-filter now belong to the
 same element. This moved the pressed diff from `0.4580` to `0.4163` and the
 dragged diff from `0.4939` to `0.4224`, enough for the current hard interaction
 gate.
+
+One tempting follow-up was to mirror the live page DOM more literally: an outer
+draggable shell owns transform geometry, while an inner absolutely positioned
+surface owns the SVG `backdrop-filter` and shadow. The live Kube target does use
+that shape. In this package, with generated data-url displacement maps inside
+Storybook, that change regressed the strict pixel gate badly:
+
+- idle magnifying glass diff: `0.2000 -> 0.6977`,
+- pressed magnifying glass diff: `0.4163 -> 0.7928`,
+- dragged magnifying glass diff: `0.4224 -> 0.9294`.
+
+So the current implementation intentionally keeps the filter on the root lens
+host. That is not claimed as final DOM parity with the reference page. It is the
+current working sampling path in Chromium for this package. Any future attempt
+to split transform ownership and filter ownership must first explain the browser
+sampling delta and prove improvement through `pnpm test:kube-reference:strict`.
+Likely variables to isolate are transformed-parent backdrop-filter sampling,
+SVG `filterUnits`/region behavior, local `<defs>` placement, and data-url maps
+versus network-loaded PNG maps.
 
 `scripts/compare-kube-reference.mjs` now treats these interaction metrics and
 the magnifying-glass filter contract as hard contracts. Candidate press and drag

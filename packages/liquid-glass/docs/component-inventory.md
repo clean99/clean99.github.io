@@ -4,7 +4,8 @@ The source of truth is `docs/component-inventory.json`.
 
 The inventory tracks component coverage against the shadcn/ui baseline in `docs/shadcn-parity.json`. It is intentionally honest:
 
-- `implemented`: exported, has source, has Storybook coverage, and is checked by `pnpm test:inventory`
+- `implemented`: exported, has source, has Storybook coverage, has component test
+  coverage, and is checked by `pnpm test:inventory`
 - `planned`: part of the product-ready target but not shipped yet
 - `research`: requires design or accessibility research before implementation
 
@@ -12,6 +13,7 @@ Run:
 
 ```sh
 pnpm test:inventory
+pnpm test:component-coverage
 pnpm registry:build
 pnpm test:registry
 pnpm test:shadcn-parity
@@ -23,6 +25,11 @@ not accept a story file merely because it exists: the story must reference the
 component export it claims to cover, and the source file must reference the same
 public export. Every implemented component must also have both generated
 `registry/components/*.json` metadata and a package-backed `*.tsx` shim.
+
+`pnpm test:component-coverage` reads the same inventory and verifies that every
+implemented public component export is imported and exercised in
+`tests/components.test.tsx`. This catches the bad state where a component has
+source, a story, and a registry shim, but no component-level behavior check.
 
 `pnpm test:shadcn-parity` fetches `https://ui.shadcn.com/docs/components` and
 compares the official component slugs with `docs/shadcn-parity.json` and the

@@ -21,6 +21,7 @@ flowchart TD
   H --> J
   G --> K["Interactive pixel diff"]
   H --> K
+  K --> L["Diff PNG artifact"]
 ```
 
 `pnpm test:kube-reference` is the normal regression gate. It compares the static
@@ -31,6 +32,11 @@ hard-fails pressed and dragged lens screenshots produced by real pointer input.
 the release-candidate command used by CI and manual reviews. The interactive
 screenshots are hard gates in both commands.
 
+Each row writes target, candidate, and diff PNG artifacts under
+`test-results/kube-reference/`. The diff image is generated from the same crop
+used for the metric, so it is useful for diagnosing phase, material, and edge
+errors without changing the gate.
+
 ## Latest Measurement
 
 Measured locally on 2026-06-13 against `https://kube.io/blog/liquid-glass-css-svg/`.
@@ -38,8 +44,8 @@ Measured locally on 2026-06-13 against `https://kube.io/blog/liquid-glass-css-sv
 | Reference                | Diff ratio | Threshold | Mode |
 | ------------------------ | ---------: | --------: | ---- |
 | magnifying-glass         |     0.2000 |    0.2400 | gate |
-| magnifying-glass-pressed |     0.4163 |    0.4180 | gate |
-| magnifying-glass-dragged |     0.4224 |    0.4300 | gate |
+| magnifying-glass-pressed |     0.4148 |    0.4160 | gate |
+| magnifying-glass-dragged |     0.4142 |    0.4180 | gate |
 | searchbox                |     0.0167 |    0.0200 | gate |
 | switch                   |     0.0142 |    0.0200 | gate |
 | slider                   |     0.0149 |    0.0200 | gate |
@@ -64,6 +70,11 @@ This measurement includes these verified geometry fixes:
   handling onto an outer wrapper and backdrop-filter onto an inner lens made the
   transformed geometry diverge from active filter sampling and regressed the
   pressed/dragged screenshots.
+- the interactive Storybook board applies an `-8px, -2px` content phase offset
+  while keeping the Kube lens CSS coordinate unchanged. This moves the
+  high-contrast text field under the active lens without faking the lens motion
+  metrics. A larger vertical shift regressed pressed and dragged screenshots, so
+  the current offset is intentionally small.
 
 This proves three things:
 
@@ -74,7 +85,7 @@ This proves three things:
   is still not the final target.
 - The pressed and dragged water-drop states now pass the current hard gate, but
   the thresholds are still loose while the fixture moves toward tighter pixel
-  parity. Pressed is now gated at `0.4180`; dragged is now gated at `0.4300`.
+  parity. Pressed is now gated at `0.4160`; dragged is now gated at `0.4180`.
   They must not be described as 100% complete.
 
 ## Remaining Gap

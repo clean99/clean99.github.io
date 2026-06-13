@@ -49,6 +49,7 @@ pnpm lint
 pnpm typecheck
 pnpm test:docs
 pnpm test:inventory
+pnpm test:component-coverage
 pnpm test:registry
 pnpm test:shadcn-parity
 pnpm test:release-readiness
@@ -359,6 +360,7 @@ pnpm lint
 pnpm typecheck
 pnpm test:docs
 pnpm test:inventory
+pnpm test:component-coverage
 pnpm test:release-readiness
 pnpm test:unit
 pnpm test:e2e
@@ -397,6 +399,18 @@ strict comparison, and `pnpm pack --dry-run`.
 
 This repository includes a root `registry.json`, a flat `liquid-glass.json`, and a package-local `registry/liquid-glass.json`. It is intentionally source-readable: consumers can inspect the components, tokens, and examples without depending on a private monorepo layout.
 
+After the GitHub repository is public, registry examples can be installed with:
+
+```sh
+npx shadcn@latest add https://raw.githubusercontent.com/clean99/liquid-glass/main/liquid-glass.json
+```
+
+Single package-backed component shims can be installed the same way:
+
+```sh
+npx shadcn@latest add https://raw.githubusercontent.com/clean99/liquid-glass/main/registry/components/liquid-button.json
+```
+
 The registry also includes generated package-backed entries under
 `registry/components/`, one per implemented component. Run `pnpm registry:build`
 after inventory changes and `pnpm test:registry` before review. The gate fails if
@@ -422,8 +436,10 @@ so the scoped package cannot accidentally publish as private.
 - `docs/carousel-architecture.md`: carousel composition, Embla boundary, accessibility, and test contract.
 - `docs/component-inventory.md`: implemented and planned component inventory.
 - `docs/date-picker-architecture.md`: DatePicker composition boundary, local date semantics, and accessibility contract.
+- `docs/github-repository-settings.md`: GitHub repository, Pages, secrets, and branch protection setup.
 - `docs/optics-architecture.md`: physical invariants and engine boundaries.
 - `docs/reference-research.md`: Kube, rdev, and registry research notes.
+- `docs/shadcn-registry.md`: shadcn-style registry distribution model and commands.
 - `docs/testing.md`: local and CI validation strategy.
 - `docs/open-source-release.md`: release, Pages, and rollback checklist.
 

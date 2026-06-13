@@ -262,7 +262,13 @@ function KubeLensBoard({
         borderRadius: 12
       }}
     >
-      <div style={{ position: "absolute", inset: 1 }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: 1,
+          transform: lensBoard ? "translate(-8px, -2px)" : undefined
+        }}
+      >
         <div
           style={{
             position: "absolute",

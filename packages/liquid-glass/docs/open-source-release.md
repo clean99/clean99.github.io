@@ -50,10 +50,15 @@ those files already live in this repository.
 `pnpm test:docs` verifies the presence of these files and the key claims they
 must contain.
 
+Repository-level settings are tracked in `docs/github-repository-settings.md`.
+The shadcn-style registry distribution model is tracked in
+`docs/shadcn-registry.md`.
+
 ## Release Flow
 
-1. Run `pnpm test:release-readiness` to validate package metadata, workflows,
-   docs, registry files, Changesets, and strict release gates.
+1. Run `pnpm test:component-coverage` and `pnpm test:release-readiness` to
+   validate component behavior coverage, package metadata, workflows, docs,
+   registry files, Changesets, and strict release gates.
 2. Run `pnpm verify`.
 3. Run `pnpm test:kube-reference:strict` for release-candidate visual parity.
 4. Confirm `pnpm pack --dry-run` includes only package, docs, examples, registry,
@@ -77,6 +82,13 @@ default to private publishing on npm unless this is explicit.
 The `pages.yml` workflow installs Chromium, runs `pnpm test:a11y`, builds
 Storybook, and deploys it through GitHub Pages Actions. Repository settings must
 use "GitHub Actions" as the Pages source.
+
+## Visual Regression
+
+The `visual.yml` workflow runs deterministic Playwright visual snapshots and
+`pnpm test:kube-reference:strict`. The strict Kube gate captures the public
+reference and local Storybook with real pointer input for idle, pressed, and
+dragged states. Do not replace it with the looser command for pull requests.
 
 ## Rollback
 

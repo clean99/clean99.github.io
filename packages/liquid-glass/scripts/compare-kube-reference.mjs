@@ -3,7 +3,7 @@ import http from "node:http";
 import path from "node:path";
 import { chromium } from "playwright";
 
-/* global OffscreenCanvas, createImageBitmap, document, getComputedStyle */
+/* global FileReader, OffscreenCanvas, createImageBitmap, document, getComputedStyle */
 
 process.env.PW_TEST_SCREENSHOT_NO_FONTS_READY = "1";
 
@@ -42,7 +42,7 @@ const references = [
       heightDelta: 4,
       widthDelta: 4
     },
-    maxDiffRatio: 0.418,
+    maxDiffRatio: 0.416,
     reportOnly: false
   },
   {
@@ -64,7 +64,7 @@ const references = [
       heightDelta: 4,
       widthDelta: 4
     },
-    maxDiffRatio: 0.43,
+    maxDiffRatio: 0.418,
     reportOnly: false
   },
   {
@@ -181,11 +181,13 @@ try {
       assertFilterContractParity(reference, filterSummary);
     }
 
+    const diffPath = path.join(artifactDir, `${reference.name}-diff.png`);
     const diff = await compareImagesInBrowser(
       browser,
       targetPath,
       candidatePath,
-      reference.compareRegion
+      reference.compareRegion,
+      diffPath
     );
     assertActionMetricParity(reference, targetAction?.metrics, candidateAction?.metrics);
     const reportOnly = Boolean(reference.reportOnly) && !strictInteractivePixels;
@@ -194,6 +196,7 @@ try {
       ...reference,
       ...diff,
       candidateActionMetrics: candidateAction?.metrics,
+      diffArtifact: path.relative(process.cwd(), diffPath),
       maxDiffRatio: globalMaxDiffRatio ?? reference.maxDiffRatio,
       reportOnly,
       strictInteractivePixels,
@@ -673,7 +676,7 @@ function assertFilterContractParity(reference, summary) {
   }
 }
 
-async function compareImagesInBrowser(browser, targetPath, candidatePath, compareRegion) {
+async function compareImagesInBrowser(browser, targetPath, candidatePath, compareRegion, diffPath) {
   const [target, candidate] = await Promise.all([
     fs.readFile(targetPath),
     fs.readFile(candidatePath)
@@ -710,6 +713,7 @@ async function compareImagesInBrowser(browser, targetPath, candidatePath, compar
       context.clearRect(0, 0, width, height);
       context.drawImage(candidateImage, source.x, source.y, width, height, 0, 0, width, height);
       const candidatePixels = context.getImageData(0, 0, width, height).data;
+      const diffImage = context.createImageData(width, height);
       let different = 0;
       let totalDelta = 0;
       let totalSquaredDelta = 0;
@@ -726,11 +730,22 @@ async function compareImagesInBrowser(browser, targetPath, candidatePath, compar
         if (delta > threshold) {
           different += 1;
         }
+
+        const intensity = Math.min(255, Math.round(delta / 3));
+        diffImage.data[index] = 255;
+        diffImage.data[index + 1] = Math.max(0, 255 - intensity);
+        diffImage.data[index + 2] = Math.max(0, 255 - intensity);
+        diffImage.data[index + 3] = delta > threshold ? 255 : 96;
       }
+
+      context.putImageData(diffImage, 0, 0);
+      const diffBlob = await canvas.convertToBlob({ type: "image/png" });
+      const diffPngBase64 = await blobToBase64(diffBlob);
 
       const pixelCount = width * height;
       return {
         diffRatio: different / pixelCount,
+        diffPngBase64,
         height,
         meanDelta: totalDelta / pixelCount,
         rmsDelta: Math.sqrt(totalSquaredDelta / pixelCount),
@@ -741,6 +756,18 @@ async function compareImagesInBrowser(browser, targetPath, candidatePath, compar
         const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
         return createImageBitmap(new Blob([bytes], { type: "image/png" }));
       }
+
+      function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(reader.error);
+          reader.onload = () => {
+            const value = String(reader.result);
+            resolve(value.slice(value.indexOf(",") + 1));
+          };
+          reader.readAsDataURL(blob);
+        });
+      }
     },
     {
       candidateBase64: candidate.toString("base64"),
@@ -749,8 +776,11 @@ async function compareImagesInBrowser(browser, targetPath, candidatePath, compar
     }
   );
 
+  await fs.writeFile(diffPath, Buffer.from(result.diffPngBase64, "base64"));
   await page.close();
-  return result;
+  const summary = { ...result };
+  delete summary.diffPngBase64;
+  return summary;
 }
 
 function contentType(filePath) {

@@ -76,6 +76,7 @@
     "test": "vitest run",
     "test:a11y": "pnpm build && rm -rf storybook-static-a11y && storybook build --quiet --output-dir storybook-static-a11y && STORYBOOK_STATIC_DIR=storybook-static-a11y node scripts/verify-storybook-a11y.mjs; status=$?; rm -rf storybook-static-a11y; exit $status",
     "test:components": "vitest run --passWithNoTests",
+    "test:component-coverage": "node scripts/validate-component-test-coverage.mjs",
     "test:docs": "node scripts/validate-docs.mjs",
     "test:e2e": "pnpm build && rm -rf storybook-static-e2e && storybook build --quiet --output-dir storybook-static-e2e && STORYBOOK_STATIC_DIR=storybook-static-e2e node scripts/verify-liquid-behavior.mjs; status=$?; rm -rf storybook-static-e2e; exit $status",
     "test:kube-reference": "pnpm build && rm -rf storybook-static-kube-reference && storybook build --quiet --output-dir storybook-static-kube-reference && STORYBOOK_STATIC_DIR=storybook-static-kube-reference node scripts/compare-kube-reference.mjs; status=$?; rm -rf storybook-static-kube-reference; exit $status",
@@ -91,7 +92,7 @@
     "test:visual": "playwright test tests/visual --config=playwright.config.ts",
     "test:visual:update": "playwright test tests/visual --config=playwright.config.ts --update-snapshots",
     "typecheck": "tsc --noEmit",
-    "ci": "pnpm format && pnpm lint && pnpm typecheck && pnpm test:docs && pnpm test:inventory && pnpm test:registry && pnpm test:shadcn-parity && pnpm test:release-readiness && pnpm test:unit && pnpm test:components && pnpm test:physics && pnpm test:storybook && pnpm test:e2e && pnpm test:a11y && pnpm build && pnpm test:package",
+    "ci": "pnpm format && pnpm lint && pnpm typecheck && pnpm test:docs && pnpm test:inventory && pnpm test:component-coverage && pnpm test:registry && pnpm test:shadcn-parity && pnpm test:release-readiness && pnpm test:unit && pnpm test:components && pnpm test:physics && pnpm test:storybook && pnpm test:e2e && pnpm test:a11y && pnpm build && pnpm test:package",
     "release": "pnpm changeset publish",
     "verify": "pnpm run ci && pnpm test:visual && pnpm test:kube-reference:strict && pnpm pack --dry-run"
   },

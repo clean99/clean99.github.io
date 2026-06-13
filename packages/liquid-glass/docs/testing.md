@@ -7,6 +7,7 @@ pnpm lint
 pnpm typecheck
 pnpm test:docs
 pnpm test:inventory
+pnpm test:component-coverage
 pnpm test:unit
 pnpm test:a11y
 pnpm test:e2e
@@ -60,6 +61,9 @@ the only source of truth.
 `pnpm test:kube-reference` captures the public Kube reference page and matching
 Storybook stories. It includes static component screenshots plus
 `pressed and dragged magnifying-glass screenshots` produced by real pointer input.
+For every compared row, the script writes `*-target.png`, `*-candidate.png`, and
+`*-diff.png` under `test-results/kube-reference/`; the diff image is a red
+heatmap of the compared crop, not a hand-reviewed artifact.
 For the magnifying-glass target, the script also asserts the SVG filter contract:
 the candidate must expose the same two-pass displacement pipeline, image count,
 map count, and displacement scales before pixels are compared. This contract is
@@ -81,10 +85,18 @@ box as if the interaction had failed.
 `pnpm test:docs` verifies the open-source repository contract: required GitHub
 templates, registry files, docs, attributions, testing notes, and package scripts.
 
+`pnpm test:component-coverage` verifies that every implemented component in
+`docs/component-inventory.json` is imported and exercised in
+`tests/components.test.tsx`. It exists because a source file, story, and registry
+shim are not enough to prove a component has behavior coverage.
+
 `pnpm test:package` builds the package and verifies the publish contract:
 CommonJS and ESM entries, type declarations, CSS exports, `sideEffects`, npm
 publish access, package file whitelist, React peer dependencies, the
-`@hashintel/refractive` dependency, and the generated CSS/type outputs.
+`@hashintel/refractive` dependency, generated CSS/type outputs, and every
+implemented component export listed in `docs/component-inventory.json`. A
+component cannot be marked implemented if it disappears from the ESM, CommonJS,
+or TypeScript declaration package output.
 
 The physical unit tests intentionally exercise pure functions before UI:
 
