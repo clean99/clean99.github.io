@@ -43,7 +43,7 @@ const references = [
       widthDelta: 4
     },
     maxDiffRatio: 0.42,
-    reportOnly: true
+    reportOnly: false
   },
   {
     name: "magnifying-glass-dragged",
@@ -65,7 +65,7 @@ const references = [
       widthDelta: 4
     },
     maxDiffRatio: 0.45,
-    reportOnly: true
+    reportOnly: false
   },
   {
     name: "searchbox",

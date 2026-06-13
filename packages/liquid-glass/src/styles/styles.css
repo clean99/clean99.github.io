@@ -3500,11 +3500,15 @@
   transition: none;
 }
 
-.lg-precision-lens-demo__handle .lg-lens {
-  pointer-events: none;
-  transition: box-shadow 220ms var(--lg-ease-apple);
-  transform: none;
+.lg-precision-lens-demo__handle.lg-lens {
+  transition:
+    transform 260ms var(--lg-ease-apple),
+    box-shadow 220ms var(--lg-ease-apple);
   transform-origin: center;
+}
+
+.lg-precision-lens-demo__handle.lg-lens[data-liquid-dragging="true"] {
+  transition: none;
 }
 
 .lg-precision-lens-demo__handle::before,
@@ -3551,7 +3555,7 @@
   transform: translate(-50%, -50%) scale(0.45);
 }
 
-.lg-precision-lens-demo__handle[data-liquid-droplet="pressed"] .lg-lens {
+.lg-precision-lens-demo__handle[data-liquid-droplet="pressed"] {
   box-shadow:
     4px 16px 24px rgba(0, 0, 0, 0.22),
     inset 2px 8px 24px rgba(0, 0, 0, 0.27),

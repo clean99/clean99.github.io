@@ -206,15 +206,11 @@ describe("Liquid Glass physics contract", () => {
     const handleRule = collectCssRuleBodies(styles, ".lg-precision-lens-demo__handle").join("\n");
     const handleLensRule = collectCssRuleBodies(
       styles,
-      ".lg-precision-lens-demo__handle .lg-lens"
+      ".lg-precision-lens-demo__handle.lg-lens"
     ).join("\n");
     const pressedHandleRule = collectCssRuleBodies(
       styles,
       '.lg-precision-lens-demo__handle[data-liquid-droplet="pressed"]'
-    ).join("\n");
-    const pressedLensRule = collectCssRuleBodies(
-      styles,
-      '.lg-precision-lens-demo__handle[data-liquid-droplet="pressed"] .lg-lens'
     ).join("\n");
 
     expect(handleRule).toContain("width: 13.125rem");
@@ -223,12 +219,13 @@ describe("Liquid Glass physics contract", () => {
     expect(handleRule).toContain("padding: 0");
     expect(handleRule).toContain("scaleY(var(--lg-demo-droplet-scale-y, 0.8))");
     expect(handleRule).toContain("transform-origin: center");
-    expect(handleLensRule).toContain("transform: none");
+    expect(handleLensRule).toContain("transform 260ms var(--lg-ease-apple)");
+    expect(styles).not.toContain(".lg-precision-lens-demo__handle .lg-lens");
     expect(handleRule).not.toContain("padding: 0.9375rem 0");
     expect(pressedHandleRule).not.toContain("drop-shadow");
-    expect(pressedLensRule).toContain("4px 16px 24px rgba(0, 0, 0, 0.22)");
-    expect(pressedLensRule).toContain("inset 2px 8px 24px rgba(0, 0, 0, 0.27)");
-    expect(pressedLensRule).toContain("inset -2px -8px 24px rgba(255, 255, 255, 0.27)");
+    expect(pressedHandleRule).toContain("4px 16px 24px rgba(0, 0, 0, 0.22)");
+    expect(pressedHandleRule).toContain("inset 2px 8px 24px rgba(0, 0, 0, 0.27)");
+    expect(pressedHandleRule).toContain("inset -2px -8px 24px rgba(255, 255, 255, 0.27)");
   });
 
   it("uses Kube CSS coordinates for the draggable lens initial position", () => {
@@ -242,8 +239,11 @@ describe("Liquid Glass physics contract", () => {
     expect(lensStorySource).not.toContain("precisionLensActiveRefraction");
     expect(lensStorySource).not.toContain("glassThickness: 110");
     expect(lensStorySource).not.toContain("magnificationGlassThickness: 43");
-    expect(lensStorySource).toContain(
-      '<LiquidLens engine="reference" refraction={precisionLensIdleRefraction} />'
+    expect(lensStorySource).toContain('className="lg-precision-lens-demo__handle"');
+    expect(lensStorySource).toContain('engine="reference"');
+    expect(lensStorySource).toContain("refraction={precisionLensIdleRefraction}");
+    expect(lensStorySource).not.toContain(
+      '<div\n          aria-label="Drag the liquid glass lens"'
     );
   });
 

@@ -64,12 +64,11 @@ For the magnifying-glass target, the script also asserts the SVG filter contract
 the candidate must expose the same two-pass displacement pipeline, image count,
 map count, and displacement scales before pixels are compared. This contract is
 checked for idle, pressed, and dragged magnifying-glass captures.
-The interactive lens screenshots are report-only today, but their pointer action
-metrics are hard assertions so press and drag cannot silently stop working.
-`pnpm test:kube-reference:strict` sets `KUBE_STRICT_INTERACTIVE=1`, so those
-pressed and dragged screenshots become hard pixel gates. This strict command is
-the release-candidate target for the Kube replica work, and the current measured
-gaps are tracked in `docs/kube-parity-gate.md`.
+The interactive lens screenshots and pointer action metrics are both hard
+assertions, so press and drag cannot silently stop working or drift visually.
+`pnpm test:kube-reference:strict` sets `KUBE_STRICT_INTERACTIVE=1` and preserves
+the release-candidate target for the Kube replica work. The current measured gaps
+and threshold-tightening plan are tracked in `docs/kube-parity-gate.md`.
 Those hard metrics include the Kube-derived water-drop rule that press expands
 both axes, while drag is taller and narrower than press. The comparison script
 also compares candidate action metrics against the live Kube target with explicit

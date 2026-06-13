@@ -191,7 +191,8 @@ function DraggablePrecisionLensDemo() {
   return (
     <KubeLensStoryShell>
       <KubeLensBoard boardRef={boardRef} lensBoard referenceFrame="magnifying-glass-interactive">
-        <div
+        <LiquidLens
+          aria-hidden={false}
           aria-label="Drag the liquid glass lens"
           className="lg-precision-lens-demo__handle"
           data-lens-x={position.x}
@@ -206,11 +207,11 @@ function DraggablePrecisionLensDemo() {
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           role="button"
+          engine="reference"
+          refraction={precisionLensIdleRefraction}
           style={draggableLensStyle(position, droplet)}
           tabIndex={0}
-        >
-          <LiquidLens engine="reference" refraction={precisionLensIdleRefraction} />
-        </div>
+        />
       </KubeLensBoard>
     </KubeLensStoryShell>
   );

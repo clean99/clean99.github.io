@@ -84,10 +84,10 @@ response, and background phase.
 
 This does not replace full visual parity. It prevents a weaker failure mode:
 passing the static screenshot while breaking the interaction that makes the
-glass feel physical. The pressed and dragged screenshots are currently
-report-only while the demo artwork and droplet deformation are still converging;
-their action metrics are hard assertions, and the pixel rows are intended to
-become hard gates once the local board matches the reference fixture.
+glass feel physical. The pressed and dragged screenshots are now hard pixel
+gates, and their action metrics remain hard assertions. The current thresholds
+are still loose; future work should lower them as the local board and material
+converge with the reference fixture.
 
 Current measured interaction contract:
 
@@ -103,19 +103,29 @@ The local `LiquidLensDropletPhase` model intentionally separates `pressed` and
 the same wide shape after movement, which is not what the reference component
 does under real pointer input.
 
+The draggable story originally used an outer pointer handle and an inner
+`LiquidLens` surface. That was the wrong data structure. The action metrics could
+look close while the active backdrop-filter sampling still differed, because
+transform ownership and filter ownership lived on different DOM nodes. The
+current story makes the draggable optical body itself the `LiquidLens` surface:
+pointer events, transform, box shadow, and SVG backdrop-filter now belong to the
+same element. This moved the pressed diff from `0.4580` to `0.4163` and the
+dragged diff from `0.4939` to `0.4224`, enough for the current hard interaction
+gate.
+
 `scripts/compare-kube-reference.mjs` now treats these interaction metrics and
-the magnifying-glass filter contract as hard contracts even while the interactive
-pixels remain report-only. Candidate press and drag metrics must stay within the
-configured tolerances of the live Kube target, and every magnifying-glass state
-must expose the same two-pass filter shape and displacement scales. Future
+the magnifying-glass filter contract as hard contracts. Candidate press and drag
+metrics must stay within the configured tolerances of the live Kube target, every
+magnifying-glass state must expose the same two-pass filter shape and
+displacement scales, and pressed/dragged screenshots are pixel gates. Future
 visual tuning cannot silently regress the physical behavior or hide behind a
 different SVG pipeline.
 
 `pnpm test:kube-reference:strict` sets `KUBE_STRICT_INTERACTIVE=1` and promotes
-the pressed and dragged screenshots from report-only rows to hard pixel gates.
-The current measured status is documented in `docs/kube-parity-gate.md`; the
-strict command is expected to fail until the interactive lens material and
-water-drop deformation converge with the public reference.
+the release-candidate path used by CI and manual reviews. The current measured
+status is documented in `docs/kube-parity-gate.md`. The command now passes, but
+the remaining work is to lower thresholds toward true pixel parity rather than
+claiming that the current loose gate is final quality.
 
 ## rdev/liquid-glass-react
 
