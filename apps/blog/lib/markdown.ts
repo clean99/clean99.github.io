@@ -13,6 +13,7 @@ const processor = unified()
   .use(remarkRehype, { allowDangerousHtml: true })
   .use(rehypeRaw)
   .use(rehypeSlug)
+  .use(rehypeScrollableTables)
   .use(rehypePrettyCode, {
     theme: {
       dark: "github-dark",
@@ -35,4 +36,58 @@ export function stripMarkdown(markdown: string): string {
     .replace(/[#>*_`|~-]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+type HastElement = {
+  children?: HastNode[];
+  properties?: Record<string, unknown>;
+  tagName?: string;
+  type: string;
+};
+
+type HastNode = HastElement | { type: string; value?: string };
+
+function rehypeScrollableTables() {
+  return (tree: HastElement) => {
+    wrapTables(tree);
+  };
+}
+
+function wrapTables(parent: HastElement) {
+  const children = parent.children;
+
+  if (!children) {
+    return;
+  }
+
+  for (let index = 0; index < children.length; index += 1) {
+    const child = children[index];
+
+    if (isTable(child)) {
+      children[index] = {
+        children: [child],
+        properties: {
+          "aria-label": "Scrollable table",
+          className: ["table-scroll"],
+          role: "region",
+          tabIndex: 0
+        },
+        tagName: "div",
+        type: "element"
+      };
+      continue;
+    }
+
+    if (hasChildren(child)) {
+      wrapTables(child);
+    }
+  }
+}
+
+function isTable(node: HastNode): node is HastElement {
+  return node.type === "element" && "tagName" in node && node.tagName === "table";
+}
+
+function hasChildren(node: HastNode): node is HastElement {
+  return "children" in node && Array.isArray(node.children);
 }

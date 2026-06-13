@@ -2,14 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
-const tokens = fs.readFileSync(
-  path.resolve("packages/liquid-glass/src/styles/tokens.css"),
-  "utf8"
-);
-const styles = fs.readFileSync(
-  path.resolve("packages/liquid-glass/src/styles/styles.css"),
-  "utf8"
-);
+const tokens = fs.readFileSync(path.resolve("packages/liquid-glass/src/styles/tokens.css"), "utf8");
+const styles = fs.readFileSync(path.resolve("packages/liquid-glass/src/styles/styles.css"), "utf8");
 const screenshotCss = `
   *, *::before, *::after {
     animation: none !important;
