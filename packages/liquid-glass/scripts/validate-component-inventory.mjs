@@ -5,6 +5,7 @@ const root = process.cwd();
 const inventoryPath = path.join(root, "docs/component-inventory.json");
 const parityPath = path.join(root, "docs/shadcn-parity.json");
 const indexPath = path.join(root, "src/index.ts");
+const registryDir = path.join(root, "registry", "components");
 const inventory = JSON.parse(fs.readFileSync(inventoryPath, "utf8"));
 const parity = JSON.parse(fs.readFileSync(parityPath, "utf8"));
 const indexSource = fs.readFileSync(indexPath, "utf8");
@@ -29,18 +30,48 @@ for (const component of inventory.components) {
 
   if (!component.source) {
     errors.push(`${component.name}: implemented component is missing source`);
-  } else if (!fs.existsSync(path.join(root, component.source))) {
-    errors.push(`${component.name}: missing source file ${component.source}`);
+  } else {
+    const sourcePath = path.join(root, component.source);
+    if (!fs.existsSync(sourcePath)) {
+      errors.push(`${component.name}: missing source file ${component.source}`);
+    } else {
+      const source = fs.readFileSync(sourcePath, "utf8");
+      if (!source.includes(component.export)) {
+        errors.push(`${component.name}: source file does not reference ${component.export}`);
+      }
+    }
   }
 
   if (!component.story) {
     errors.push(`${component.name}: implemented component is missing story`);
-  } else if (!fs.existsSync(path.join(root, component.story))) {
-    errors.push(`${component.name}: missing story file ${component.story}`);
+  } else {
+    const storyPath = path.join(root, component.story);
+    if (!fs.existsSync(storyPath)) {
+      errors.push(`${component.name}: missing story file ${component.story}`);
+    } else {
+      const story = fs.readFileSync(storyPath, "utf8");
+      if (!story.includes(component.export)) {
+        errors.push(
+          `${component.name}: story file does not render or document ${component.export}`
+        );
+      }
+    }
   }
 
   if (!indexSource.includes(component.export)) {
     errors.push(`${component.name}: ${component.export} is not exported from src/index.ts`);
+  }
+
+  const registrySlug = `liquid-${component.name}`;
+  const registryItemPath = path.join(registryDir, `${registrySlug}.json`);
+  const registryShimPath = path.join(registryDir, `${registrySlug}.tsx`);
+  if (!fs.existsSync(registryItemPath)) {
+    errors.push(
+      `${component.name}: missing registry item registry/components/${registrySlug}.json`
+    );
+  }
+  if (!fs.existsSync(registryShimPath)) {
+    errors.push(`${component.name}: missing registry shim registry/components/${registrySlug}.tsx`);
   }
 }
 

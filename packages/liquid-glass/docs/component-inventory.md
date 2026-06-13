@@ -17,7 +17,12 @@ pnpm test:registry
 pnpm test:shadcn-parity
 ```
 
-This prevents implemented components from drifting out of `src/index.ts`, source files, or Storybook coverage, and prevents the parity baseline from losing official shadcn/ui component entries.
+This prevents implemented components from drifting out of `src/index.ts`,
+source files, Storybook coverage, or the generated registry. The validator does
+not accept a story file merely because it exists: the story must reference the
+component export it claims to cover, and the source file must reference the same
+public export. Every implemented component must also have both generated
+`registry/components/*.json` metadata and a package-backed `*.tsx` shim.
 
 `pnpm test:shadcn-parity` fetches `https://ui.shadcn.com/docs/components` and
 compares the official component slugs with `docs/shadcn-parity.json` and the
