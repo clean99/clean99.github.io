@@ -37,12 +37,12 @@ Measured locally on 2026-06-13 against `https://kube.io/blog/liquid-glass-css-sv
 
 | Reference                | Diff ratio | Threshold | Mode |
 | ------------------------ | ---------: | --------: | ---- |
-| magnifying-glass         |     0.2000 |    0.3000 | gate |
-| magnifying-glass-pressed |     0.4163 |    0.4200 | gate |
-| magnifying-glass-dragged |     0.4224 |    0.4500 | gate |
-| searchbox                |     0.0167 |    0.0300 | gate |
-| switch                   |     0.0142 |    0.0300 | gate |
-| slider                   |     0.0149 |    0.0300 | gate |
+| magnifying-glass         |     0.2000 |    0.2400 | gate |
+| magnifying-glass-pressed |     0.4163 |    0.4180 | gate |
+| magnifying-glass-dragged |     0.4224 |    0.4300 | gate |
+| searchbox                |     0.0167 |    0.0200 | gate |
+| switch                   |     0.0142 |    0.0200 | gate |
+| slider                   |     0.0149 |    0.0200 | gate |
 
 This measurement includes these verified geometry fixes:
 
@@ -68,12 +68,14 @@ This measurement includes these verified geometry fixes:
 This proves three things:
 
 - The static searchbox, switch, and slider stories are already within the current
-  screenshot budget.
+  screenshot budget, so their thresholds are ratcheted down to `0.0200`.
 - The static magnifying glass passes a loose gate, but it is still visually far
-  from pixel parity.
+  from pixel parity. Its threshold is ratcheted from `0.3000` to `0.2400`, which
+  is still not the final target.
 - The pressed and dragged water-drop states now pass the current hard gate, but
   the thresholds are still loose while the fixture moves toward tighter pixel
-  parity. They must not be described as 100% complete.
+  parity. Pressed is now gated at `0.4180`; dragged is now gated at `0.4300`.
+  They must not be described as 100% complete.
 
 ## Remaining Gap
 

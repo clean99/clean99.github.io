@@ -23,7 +23,7 @@ const references = [
     storyId: "liquid-glass-liquidlens--kube-reference",
     targetId: "magnifying-glass",
     compareRegion: { x: 14, y: 26, width: 216, height: 128 },
-    maxDiffRatio: 0.3
+    maxDiffRatio: 0.24
   },
   {
     name: "magnifying-glass-pressed",
@@ -42,7 +42,7 @@ const references = [
       heightDelta: 4,
       widthDelta: 4
     },
-    maxDiffRatio: 0.42,
+    maxDiffRatio: 0.418,
     reportOnly: false
   },
   {
@@ -64,26 +64,26 @@ const references = [
       heightDelta: 4,
       widthDelta: 4
     },
-    maxDiffRatio: 0.45,
+    maxDiffRatio: 0.43,
     reportOnly: false
   },
   {
     name: "searchbox",
     storyId: "liquid-glass-liquidsearchbox--kube-reference",
     targetId: "searchbox",
-    maxDiffRatio: 0.03
+    maxDiffRatio: 0.02
   },
   {
     name: "switch",
     storyId: "liquid-glass-liquidswitch--kube-reference",
     targetId: "switch",
-    maxDiffRatio: 0.03
+    maxDiffRatio: 0.02
   },
   {
     name: "slider",
     storyId: "liquid-glass-liquidslider--kube-reference",
     targetId: "slider",
-    maxDiffRatio: 0.03
+    maxDiffRatio: 0.02
   }
 ];
 
