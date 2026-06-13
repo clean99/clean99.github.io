@@ -91,6 +91,9 @@ The following gates make the research actionable:
 
 - `tests/edge-mask.test.ts` proves the edge/center blend is monotonic,
   continuous, finite, and center-restoring.
+- `tests/chromatic-aberration.test.ts` proves optional RGB splitting stays on
+  the edge normal, fades to zero before the clean center, and shuts off for
+  reduced-transparency paths.
 - `tests/displacement-map.test.ts` proves generated maps keep the center neutral,
   bend each capsule edge in the expected normal direction, and isolate specular
   alpha to the bevel.
@@ -111,3 +114,21 @@ magnification, and specular pixel maps as pure data. The reference engine consum
 those maps; it does not own the optical sampling math. This keeps component code
 reviewable and lets tests catch impossible map direction or center distortion
 before screenshots are involved.
+
+## Implemented Chromatic Layer
+
+`src/utils/chromatic-aberration.ts` is the next research layer extracted from the
+same review. The rdev filter splits red, green, and blue channel displacement at
+the edge. This package keeps the principle, not the implementation:
+
+- red and blue offsets are symmetric around the green channel,
+- offsets follow the sampled surface normal instead of an arbitrary diagonal,
+- tangent smear is forbidden,
+- the amount is multiplied by the edge mask and becomes zero in the clean center,
+- disabled and reduced-transparency paths return a resting sample.
+
+The public pure function is `resolveLiquidChromaticAberration()`.
+
+The model is intentionally not wired into `LiquidSurface` yet. It must first beat
+the existing Kube pixel gate when integrated into the reference engine; until
+then it remains a tested pure utility.

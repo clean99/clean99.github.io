@@ -135,6 +135,8 @@ The next layer is now modeled as pure math in `src/utils/optics.ts` and `src/uti
 
 `LensReferenceEngine` is an experimental implementation of that two-pass filter contract. It now matches the kube primitive shape: three `feImage` inputs, two `feDisplacementMap` passes, a saturation pass, specular compositing, and the same displacement scales. It is intentionally opt-in through `LiquidLens engine="reference"` because the generated map pixels missed the earlier kube visual gate (`0.3022` versus the then-current `0.30` threshold in the first trial). The stable `LiquidLens` default remains `@hashintel/refractive` until the generated vector field beats the current strict gate.
 
+`src/utils/chromatic-aberration.ts` is the next isolated physics layer. It keeps the useful rdev idea of RGB channel separation, but expresses it as our own pure data model: red and blue split symmetrically along the sampled edge normal, green stays neutral, tangent smear is forbidden, and the shift fades to zero through `sampleLiquidEdgeMask()`. This is not wired into production surfaces yet. It must first prove improvement through `pnpm test:kube-reference:strict`; otherwise it would just add colorful edge noise.
+
 ## Lessons From the Failed Iterations
 
 The ugly versions failed for mundane reasons:

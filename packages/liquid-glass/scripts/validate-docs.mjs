@@ -135,7 +135,9 @@ mustInclude("docs/optics-architecture.md", [
   "LiquidSurface",
   "edge",
   "foreground content",
+  "chromatic-aberration.ts",
   "displacement-map.ts",
+  "tests/chromatic-aberration.test.ts",
   "tests/displacement-map.test.ts",
   "test:physics",
   "test:kube-reference",
@@ -156,10 +158,12 @@ mustInclude("docs/reference-research.md", [
 mustInclude("docs/rdev-liquid-glass-react.md", [
   "MIT licensed",
   "sampleLiquidEdgeMask",
+  "resolveLiquidChromaticAberration",
   "createLensFilterPixelMaps",
   "resolveLiquidElasticResponse",
   "Baked base64 displacement maps",
   "edge/center blend",
+  "tests/chromatic-aberration.test.ts",
   "real pointer and drag actions"
 ]);
 

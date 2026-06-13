@@ -236,6 +236,10 @@ export { useStableId } from "./hooks/use-stable-id";
 export { LiquidProvider } from "./providers/LiquidProvider";
 export { cn } from "./utils/cn";
 export {
+  resolveLiquidChromaticAberration,
+  resolveLiquidChromaticAberrationRamp
+} from "./utils/chromatic-aberration";
+export {
   clampLensPosition,
   resolveLensDragPosition,
   resolveLensDropletResponse
@@ -590,6 +594,11 @@ export type {
 } from "./components/LiquidTooltip";
 export type { LiquidTypographyProps, LiquidTypographyVariant } from "./components/LiquidTypography";
 export type { BrowserCapabilities, BrowserCapabilityEnvironment } from "./utils/support";
+export type {
+  LiquidChromaticAberrationOptions,
+  LiquidChromaticAberrationSample,
+  LiquidChromaticChannelOffset
+} from "./utils/chromatic-aberration";
 export type {
   LiquidCommandFilter,
   LiquidCommandItemRecord,
