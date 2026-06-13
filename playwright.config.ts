@@ -4,8 +4,7 @@ export default defineConfig({
   testDir: ".",
   testMatch: ["tests/**/*.spec.ts"],
   outputDir: "test-results",
-  snapshotPathTemplate:
-    "{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}-{projectName}{ext}",
+  snapshotPathTemplate: "{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}-{projectName}{ext}",
   fullyParallel: true,
   reporter: [["list"], ["html", { outputFolder: "playwright-report", open: "never" }]],
   use: {

@@ -52,10 +52,18 @@ const meta = {
         </div>
         <div style={{ position: "relative", zIndex: 1, display: "grid", gap: 54 }}>
           <LiquidNav aria-label="Component library navigation" intensity="strong">
-            <span style={{ padding: "0 0.75rem", color: "rgba(255,255,255,0.68)", textShadow: "0 1px 3px rgba(0,0,0,0.62)" }}>
+            <span
+              style={{
+                padding: "0 0.75rem",
+                color: "rgba(255,255,255,0.68)",
+                textShadow: "0 1px 3px rgba(0,0,0,0.62)"
+              }}
+            >
               Chrome enhanced
             </span>
-            <LiquidButton aria-current="page" mode="off">Surface</LiquidButton>
+            <LiquidButton aria-current="page" mode="off">
+              Surface
+            </LiquidButton>
             <LiquidButton mode="off">Button</LiquidButton>
             <LiquidButton mode="off">Nav</LiquidButton>
             <LiquidButton mode="off">Toggle</LiquidButton>
@@ -75,14 +83,27 @@ const meta = {
               <h1 style={{ margin: "10px 0 16px", fontSize: "4.2rem", lineHeight: 0.95 }}>
                 Refractive Liquid Glass for React
               </h1>
-              <p style={{ maxWidth: 640, color: "var(--lg-text-muted)", fontSize: "1.1rem", lineHeight: 1.65 }}>
-                Enhanced mode uses SVG displacement maps through @hashintel/refractive. Text stays in
-                a clean content layer while the surface bends the high-contrast field behind it.
+              <p
+                style={{
+                  maxWidth: 640,
+                  color: "var(--lg-text-muted)",
+                  fontSize: "1.1rem",
+                  lineHeight: 1.65
+                }}
+              >
+                Enhanced mode uses SVG displacement maps through @hashintel/refractive. Text stays
+                in a clean content layer while the surface bends the high-contrast field behind it.
               </p>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 24 }}>
-                <LiquidButton intensity="medium" mode="fallback">Read Writing</LiquidButton>
-                <LiquidButton intensity="medium" mode="fallback">View Projects</LiquidButton>
-                <LiquidButton intensity="medium" mode="fallback">Explore AI Lab</LiquidButton>
+                <LiquidButton intensity="medium" mode="fallback">
+                  Read Writing
+                </LiquidButton>
+                <LiquidButton intensity="medium" mode="fallback">
+                  View Projects
+                </LiquidButton>
+                <LiquidButton intensity="medium" mode="fallback">
+                  Explore AI Lab
+                </LiquidButton>
               </div>
             </div>
             <div
@@ -159,8 +180,8 @@ const meta = {
                   Edges bend the field. Text stays crisp.
                 </h2>
                 <p style={{ margin: 0, color: "rgba(255,255,255,0.68)", lineHeight: 1.55 }}>
-                  The glass layer displaces the background only. Foreground copy remains outside
-                  the filter.
+                  The glass layer displaces the background only. Foreground copy remains outside the
+                  filter.
                 </p>
               </article>
             </div>

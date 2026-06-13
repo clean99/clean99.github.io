@@ -2,8 +2,27 @@ node_modules
 public
 dist
 .next
+apps/blog/.next
+apps/blog/out
 apps/docs/storybook-static
+packages/*/storybook-static
+packages/*/storybook-static-*
 coverage
 playwright-report
 test-results
 pnpm-lock.yaml
+db.json
+
+# Legacy Hexo source and generated/site-adjacent assets are intentionally
+# outside the maintained monorepo formatting gate.
+_config*.yml
+.agents
+output
+sketches
+source
+themes
+tools
+test
+scaffolds
+openspec
+tmp

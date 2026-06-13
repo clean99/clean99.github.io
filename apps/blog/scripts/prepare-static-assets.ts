@@ -8,8 +8,14 @@ fs.rmSync(publicDir, { recursive: true, force: true });
 fs.mkdirSync(publicDir, { recursive: true });
 
 copyDirectory(getSourcePath("img"), path.join(publicDir, "img"));
-copyFile(path.join(getRepoRoot(), "themes", "minima", "source", "images", "favicon.png"), path.join(publicDir, "favicon.png"));
-copyFile(path.join(getRepoRoot(), "themes", "minima", "source", "images", "thumbnail.jpg"), path.join(publicDir, "thumbnail.jpg"));
+copyFile(
+  path.join(getRepoRoot(), "themes", "minima", "source", "images", "favicon.png"),
+  path.join(publicDir, "favicon.png")
+);
+copyFile(
+  path.join(getRepoRoot(), "themes", "minima", "source", "images", "thumbnail.jpg"),
+  path.join(publicDir, "thumbnail.jpg")
+);
 
 const aiLabPublicDir = path.join(publicDir, "ai-coding-lab");
 fs.mkdirSync(aiLabPublicDir, { recursive: true });

@@ -22,9 +22,7 @@ export default function HomePage() {
         <p className="eyebrow">Software Engineer · Frontend Systems · AI Agents</p>
         <h1>Koh Hom</h1>
         <p className="lede">I build reliable frontend systems and AI-assisted workflows.</p>
-        <p>
-          Long-form notes on performance, architecture, agents, learning, and clear thinking.
-        </p>
+        <p>Long-form notes on performance, architecture, agents, learning, and clear thinking.</p>
         <div className="actions">
           <LiquidButton as="a" href="/writing/" intensity="medium">
             Read Writing
@@ -45,8 +43,8 @@ export default function HomePage() {
             <LiquidCard as="article" className="focus-card" key={area} mode="fallback">
               <LiquidPill mode="solid">{area}</LiquidPill>
               <p>
-                Notes and experiments that turn ambiguous engineering work into smaller
-                verifiable systems.
+                Notes and experiments that turn ambiguous engineering work into smaller verifiable
+                systems.
               </p>
             </LiquidCard>
           ))}

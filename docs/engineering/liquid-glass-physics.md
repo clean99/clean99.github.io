@@ -64,14 +64,14 @@ The public kube.io Liquid Glass article is used as a visual reference for compon
 
 Current component targets:
 
-| Component | Target Geometry | Enhanced Filter Owner |
-| --- | --- | --- |
-| `LiquidLens` | `210 x 120`, `75px` radius | lens surface |
-| `LiquidSearchBox` | `336 x 45`, `28px` radius | searchbox plate |
-| `LiquidSwitch` | `160 x 67` track, visual `95 x 60` thumb | thumb only |
-| `LiquidSlider` | `330 x 14` track, visual `54 x 36` thumb | thumb only |
-| `LiquidMusicPlayerBar` | `640 x 63`, `34px` radius | player plate |
-| `LiquidNav` | one continuous plate | nav plate only |
+| Component              | Target Geometry                          | Enhanced Filter Owner |
+| ---------------------- | ---------------------------------------- | --------------------- |
+| `LiquidLens`           | `210 x 120`, `75px` radius               | lens surface          |
+| `LiquidSearchBox`      | `336 x 45`, `28px` radius                | searchbox plate       |
+| `LiquidSwitch`         | `160 x 67` track, visual `95 x 60` thumb | thumb only            |
+| `LiquidSlider`         | `330 x 14` track, visual `54 x 36` thumb | thumb only            |
+| `LiquidMusicPlayerBar` | `640 x 63`, `34px` radius                | player plate          |
+| `LiquidNav`            | one continuous plate                     | nav plate only        |
 
 ## Design Rules
 
@@ -96,18 +96,20 @@ The gate should fail on:
 - Unexpected crosshatch material texture.
 - Layout geometry drift beyond the documented component target.
 
-Current `pnpm --filter docs test:kube-reference` thresholds:
+Current `pnpm test:kube-reference:strict` thresholds:
 
-| Target | Compared Region | Current Threshold |
-| --- | --- | --- |
-| `magnifying-glass` | Lens optical crop, excluding article image and paragraphs | `0.30` |
-| `searchbox` | Full component demo frame | `0.03` |
-| `switch` | Full component demo frame | `0.03` |
-| `slider` | Full component demo frame | `0.03` |
+| Target                     | Compared Region                                           | Current Threshold |
+| -------------------------- | --------------------------------------------------------- | ----------------- |
+| `magnifying-glass`         | Lens optical crop, excluding article image and paragraphs | `0.24`            |
+| `magnifying-glass-pressed` | Real pointer press handle crop                            | `0.416`           |
+| `magnifying-glass-dragged` | Real pointer drag handle crop                             | `0.418`           |
+| `searchbox`                | Full component demo frame                                 | `0.02`            |
+| `switch`                   | Full component demo frame                                 | `0.02`            |
+| `slider`                   | Full component demo frame                                 | `0.02`            |
 
 The lens uses a crop because the reference demo contains article-specific prose and a third-party photo. Those are not component-library acceptance criteria. The crop keeps the test focused on the optical shell, high-contrast text bend, edge highlight, and displacement behavior.
 
-The searchbox, switch, and slider compare the full demo frame because their reference areas contain only deterministic fixture content and the component itself. Matching the reference `24px` grid and radial background reduced their pixel diff from roughly `15%` to roughly `1.4-1.7%`.
+The pressed and dragged lens rows use real Playwright pointer input against both the public kube target and the local Storybook frame. They are not theoretical geometry checks. The searchbox, switch, and slider compare the full demo frame because their reference areas contain only deterministic fixture content and the component itself. Matching the reference `24px` grid and radial background reduced their pixel diff from roughly `15%` to roughly `1.4-1.7%`.
 
 The separate Storybook behavior gate lives in `apps/docs/scripts/verify-liquid-behavior.mjs`. It validates the Apple-like interaction contract from built Storybook iframes: focus scale, material deepening, no hard white/black/system-blue rings, increased shadow layers, hover material alpha, active scale relaxation, and reduced-motion suppression.
 
@@ -117,7 +119,7 @@ The gate loads the public reference page with `domcontentloaded`, not `networkid
 
 The `rdev/liquid-glass-react` review lives in `docs/engineering/rdev-liquid-glass-react-review.md`. The adopted part is the edge-distance pointer elasticity idea, expressed as our own pure model in `packages/liquid-glass/src/utils/elasticity.ts`. The rejected parts are direct engine replacement, default runtime shader generation, and always-on pointer tracking.
 
-The magnifying-glass Kube fixture uses measured target geometry, not guessed layout: 706px by 460px frame, label at y=46, title at y=81, and lens at y=36. A failed iteration moved the lens upward by eye and regressed the crop diff from 0.3123 to 0.4807. The fixture correction lowered the diff to 0.2897, so the gate was tightened from 0.33 to 0.30. The lens then adopted an explicit overscan optical radius: a visible 210 by 120 capsule keeps the target 75px filter radius instead of clamping to 60px. That lowered the crop diff to 0.2854 and aligned the computed CSS radius with kube.
+The magnifying-glass Kube fixture uses measured target geometry, not guessed layout: 706px by 460px frame, label at y=46, title at y=81, and lens at y=36. A failed iteration moved the lens upward by eye and regressed the crop diff from 0.3123 to 0.4807. The fixture correction lowered the diff to 0.2897, so the gate was tightened from 0.33 to 0.30. The lens then adopted an explicit overscan optical radius: a visible 210 by 120 capsule keeps the target 75px filter radius instead of clamping to 60px. That lowered the crop diff to 0.2854 and aligned the computed CSS radius with kube. The current strict crop is `0.2000`, with real pressed and dragged handle crops gated at `0.4148 <= 0.416` and `0.4142 <= 0.418`.
 
 The next useful adjustment was optical thickness. With `@hashintel/refractive`, `glassThickness: 88`, `bezelWidth: 18`, and `refractiveIndex: 1.5` produce a displacement scale of roughly `98.247`, matching the kube target's stronger displacement pass. That lowered the lens crop diff to 0.2826. A tempting nested two-surface experiment tried to model kube's weaker first pass (`glassThickness: 21.5`, `bezelWidth: 0`) outside the stronger 88-thickness pass. It was rejected because the screenshot diff regressed to 0.3086. The lesson is simple: DOM-stacking two backdrop filters is not equivalent to kube's filter graph. The remaining gap is engine-level filter composition, not CSS decoration or extra wrapper elements.
 
@@ -131,7 +133,7 @@ The current fix keeps the visible lens at `210 x 120` by rendering an authored `
 
 The next layer is now modeled as pure math in `src/utils/optics.ts` and `src/utils/lens-pipeline.ts`. `estimateMaximumDisplacement` samples the convex-squircle surface, applies the same orthogonal-ray Snell simplification described in the kube article, and returns the SVG `feDisplacementMap` scale. The reference lens pipeline has two stages: a `21.5px` thickness / `0px` bezel magnification pass that resolves to roughly `24px`, then the existing `88px` thickness / `18px` bezel displacement pass that resolves to `98.247133px`. This proves the next visual gap is a real two-pass filter-composition gap, not an arbitrary CSS tuning problem.
 
-`LensReferenceEngine` is an experimental implementation of that two-pass filter contract. It now matches the kube primitive shape: three `feImage` inputs, two `feDisplacementMap` passes, a saturation pass, specular compositing, and the same displacement scales. It is intentionally opt-in through `LiquidLens engine="reference"` because the generated map pixels still miss the kube visual gate (`0.3022` versus the current `0.30` threshold in the first trial). The stable `LiquidLens` default remains `@hashintel/refractive` until the generated vector field beats the gate.
+`LensReferenceEngine` is an experimental implementation of that two-pass filter contract. It now matches the kube primitive shape: three `feImage` inputs, two `feDisplacementMap` passes, a saturation pass, specular compositing, and the same displacement scales. It is intentionally opt-in through `LiquidLens engine="reference"` because the generated map pixels missed the earlier kube visual gate (`0.3022` versus the then-current `0.30` threshold in the first trial). The stable `LiquidLens` default remains `@hashintel/refractive` until the generated vector field beats the current strict gate.
 
 ## Lessons From the Failed Iterations
 
@@ -163,11 +165,11 @@ Additional gate coverage:
 
 Manual Chromium checks from Storybook:
 
-| Story | Selector | Mode | Filter |
-| --- | --- | --- | --- |
-| `liquid-glass-liquidnav--apple-like-tabs` | `.lg-nav__surface` | `enhanced` | `url("#...")` |
-| `liquid-glass-liquidtabs--dense-blog-example` | `.lg-tabs__list` | `enhanced` | `url("#...")` |
-| `liquid-glass-liquidsearchbox--kube-reference` | `.lg-searchbox` | `enhanced` | `url("#...")` |
+| Story                                          | Selector           | Mode       | Filter        |
+| ---------------------------------------------- | ------------------ | ---------- | ------------- |
+| `liquid-glass-liquidnav--apple-like-tabs`      | `.lg-nav__surface` | `enhanced` | `url("#...")` |
+| `liquid-glass-liquidtabs--dense-blog-example`  | `.lg-tabs__list`   | `enhanced` | `url("#...")` |
+| `liquid-glass-liquidsearchbox--kube-reference` | `.lg-searchbox`    | `enhanced` | `url("#...")` |
 
 ## 2026-06-12 Search Focus Measurement
 

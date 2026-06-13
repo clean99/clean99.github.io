@@ -9,8 +9,8 @@
     "clean": "pnpm --filter @clean99/liquid-glass clean && pnpm --filter blog clean && pnpm --filter docs clean && hexo clean",
     "deploy": "hexo deploy",
     "dev": "pnpm --filter blog dev",
-    "format": "prettier --check .",
-    "format:write": "prettier --write .",
+    "format": "prettier --check package.json pnpm-workspace.yaml tsconfig.base.json eslint.config.mjs playwright.config.ts .github apps packages docs/adr docs/engineering",
+    "format:write": "prettier --write package.json pnpm-workspace.yaml tsconfig.base.json eslint.config.mjs playwright.config.ts .github apps packages docs/adr docs/engineering",
     "legacy:build": "pnpm run ai-coding-lab:build && hexo clean && hexo generate",
     "legacy:lint": "node tools/social-growth/lint.mjs",
     "legacy:test": "node --test test/*.test.mjs",
@@ -79,16 +79,21 @@
     "test:component-coverage": "pnpm --filter @clean99/liquid-glass test:component-coverage",
     "test:content": "pnpm --filter blog test:content",
     "test:e2e": "pnpm exec playwright test tests/e2e --config=playwright.config.ts",
+    "test:inventory": "pnpm --filter @clean99/liquid-glass test:inventory",
     "test:kube-reference": "pnpm --filter docs test:kube-reference",
+    "test:kube-reference:strict": "pnpm --filter docs test:kube-reference:strict",
     "test:package": "pnpm --filter @clean99/liquid-glass test:package",
     "test:physics": "pnpm --filter @clean99/liquid-glass test:physics",
+    "test:registry": "pnpm --filter @clean99/liquid-glass test:registry",
+    "test:release-readiness": "pnpm --filter @clean99/liquid-glass test:release-readiness",
     "test:routes": "pnpm --filter blog test:routes",
+    "test:shadcn-parity": "pnpm --filter @clean99/liquid-glass test:shadcn-parity",
     "test:storybook": "pnpm --filter docs test:storybook",
     "test:unit": "pnpm run legacy:test && pnpm --filter @clean99/liquid-glass test:unit && pnpm --filter blog test:unit && pnpm --filter docs test:unit",
     "test:visual": "pnpm exec playwright test tests/visual --config=playwright.config.ts",
     "test:visual:update": "pnpm exec playwright test tests/visual --config=playwright.config.ts --update-snapshots",
     "typecheck": "pnpm --filter @clean99/liquid-glass typecheck && pnpm --filter blog typecheck && pnpm --filter docs typecheck",
-    "ci": "pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:components && pnpm test:component-coverage && pnpm test:physics && pnpm test:storybook && pnpm test:kube-reference && pnpm test:a11y && pnpm test:e2e && pnpm test:routes && pnpm test:content && pnpm build && pnpm test:package"
+    "ci": "pnpm format && pnpm lint && pnpm typecheck && pnpm test:unit && pnpm test:components && pnpm test:inventory && pnpm test:component-coverage && pnpm test:registry && pnpm test:shadcn-parity && pnpm test:release-readiness && pnpm test:physics && pnpm test:storybook && pnpm test:kube-reference:strict && pnpm test:a11y && pnpm test:e2e && pnpm test:routes && pnpm test:content && pnpm build && pnpm test:package"
   },
   "hexo": {
     "version": "6.3.0"

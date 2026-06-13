@@ -4,12 +4,8 @@
     "baseUrl": ".",
     "paths": {
       "@clean99/liquid-glass": ["../../packages/liquid-glass/src/index.ts"],
-      "@clean99/liquid-glass/styles.css": [
-        "../../packages/liquid-glass/src/styles/styles.css"
-      ],
-      "@clean99/liquid-glass/tokens.css": [
-        "../../packages/liquid-glass/src/styles/tokens.css"
-      ]
+      "@clean99/liquid-glass/styles.css": ["../../packages/liquid-glass/src/styles/styles.css"],
+      "@clean99/liquid-glass/tokens.css": ["../../packages/liquid-glass/src/styles/tokens.css"]
     }
   },
   "include": [".storybook/**/*.ts", "stories/**/*.ts", "stories/**/*.tsx", "global.d.ts"],

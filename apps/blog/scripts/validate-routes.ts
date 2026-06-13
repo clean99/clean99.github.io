@@ -28,9 +28,10 @@ if (!postRoutes.includes("/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-T
 const outDir = getBlogPath("out");
 if (process.env.VALIDATE_EXPORT === "1" && fs.existsSync(outDir)) {
   for (const route of requiredStaticRoutes) {
-    const file = route.endsWith(".xml") || route.endsWith(".txt") || route.endsWith(".html")
-      ? path.join(outDir, route.replace(/^\//, ""))
-      : path.join(outDir, route.replace(/^\//, ""), "index.html");
+    const file =
+      route.endsWith(".xml") || route.endsWith(".txt") || route.endsWith(".html")
+        ? path.join(outDir, route.replace(/^\//, ""))
+        : path.join(outDir, route.replace(/^\//, ""), "index.html");
 
     if (!fs.existsSync(file)) {
       throw new Error(`Missing exported route file: ${file}`);
@@ -38,4 +39,6 @@ if (process.env.VALIDATE_EXPORT === "1" && fs.existsSync(outDir)) {
   }
 }
 
-console.log(`Validated ${requiredStaticRoutes.length} static routes and ${postRoutes.length} post routes.`);
+console.log(
+  `Validated ${requiredStaticRoutes.length} static routes and ${postRoutes.length} post routes.`
+);

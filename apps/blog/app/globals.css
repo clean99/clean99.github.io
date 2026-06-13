@@ -18,9 +18,17 @@ body {
   background:
     linear-gradient(90deg, rgba(15, 23, 42, 0.04) 0 1px, transparent 1px 72px),
     linear-gradient(180deg, rgba(15, 23, 42, 0.035) 0 1px, transparent 1px 72px),
-    linear-gradient(135deg, var(--site-bg), color-mix(in srgb, var(--lg-accent), var(--site-bg) 92%) 48%, color-mix(in srgb, var(--lg-accent-2), var(--site-bg) 94%));
+    linear-gradient(
+      135deg,
+      var(--site-bg),
+      color-mix(in srgb, var(--lg-accent), var(--site-bg) 92%) 48%,
+      color-mix(in srgb, var(--lg-accent-2), var(--site-bg) 94%)
+    );
   background-attachment: fixed;
-  background-size: 72px 72px, 72px 72px, auto;
+  background-size:
+    72px 72px,
+    72px 72px,
+    auto;
   color: var(--site-text);
   font-family:
     -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial,
@@ -278,7 +286,12 @@ h2 {
     background:
       linear-gradient(90deg, rgba(255, 255, 255, 0.055) 0 1px, transparent 1px 72px),
       linear-gradient(180deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 72px),
-      linear-gradient(135deg, var(--site-bg), color-mix(in srgb, var(--lg-accent), var(--site-bg) 86%) 46%, color-mix(in srgb, var(--lg-accent-2), var(--site-bg) 90%));
+      linear-gradient(
+        135deg,
+        var(--site-bg),
+        color-mix(in srgb, var(--lg-accent), var(--site-bg) 86%) 46%,
+        color-mix(in srgb, var(--lg-accent-2), var(--site-bg) 90%)
+      );
   }
 }
 
