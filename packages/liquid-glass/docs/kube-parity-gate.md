@@ -54,9 +54,13 @@ This measurement includes two verified geometry fixes:
 - the specular pass uses a narrow gray rim instead of a broad white highlight.
 - the bevel displacement pass uses a `25px` edge falloff, not the full capsule
   radius.
-- the active water-drop shadow belongs to the lens surface itself; applying it
+- the water-drop shadow belongs to the lens surface itself; applying it
   as an outer handle `drop-shadow()` makes the material read like plastic and
   regresses the pressed/dragged screenshot rows.
+- all magnifying-glass states now write a filter-contract artifact. The live
+  Kube target keeps the same two-pass displacement scales during idle, pressed,
+  and dragged captures, so pointer parity must be solved through geometry,
+  background phase, and material response instead of fake active filter boosts.
 
 This proves three things:
 
@@ -69,11 +73,9 @@ This proves three things:
 
 ## Why Strict Mode Fails Today
 
-The reference lens changes both layers during interaction:
+The reference lens changes the visible material during interaction:
 
 - the DOM body scales into a local water-drop shape,
-- the SVG displacement pass increases,
-- the magnification pass increases,
 - the material highlight follows the active capsule.
 
 The local implementation already checks action metrics, but the screenshot diff

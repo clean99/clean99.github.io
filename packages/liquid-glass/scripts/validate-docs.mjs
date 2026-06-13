@@ -29,7 +29,7 @@ function mustInclude(relativePath, snippets) {
   }
 }
 
-const requiredFiles = [
+const packageRequiredFiles = [
   "README.md",
   "LICENSE",
   "ATTRIBUTIONS.md",
@@ -59,7 +59,10 @@ const requiredFiles = [
   "scripts/check-shadcn-parity.mjs",
   "scripts/verify-storybook-a11y.mjs",
   "schema/component-inventory.schema.json",
-  "schema/shadcn-parity.schema.json",
+  "schema/shadcn-parity.schema.json"
+];
+
+const standaloneRequiredFiles = [
   ".github/workflows/ci.yml",
   ".github/workflows/visual.yml",
   ".github/workflows/pages.yml",
@@ -71,6 +74,11 @@ const requiredFiles = [
   ".github/dependabot.yml",
   ".github/CODEOWNERS"
 ];
+
+const isStandaloneRepository = fs.existsSync(path.join(root, ".github"));
+const requiredFiles = isStandaloneRepository
+  ? [...packageRequiredFiles, ...standaloneRequiredFiles]
+  : packageRequiredFiles;
 
 for (const file of requiredFiles) {
   mustExist(file);
@@ -160,24 +168,26 @@ mustInclude("docs/open-source-release.md", [
   "NPM_TOKEN",
   "publishConfig.access"
 ]);
-mustInclude(".github/workflows/release.yml", [
-  "pnpm verify",
-  "pnpm release",
-  "NPM_TOKEN",
-  "playwright install --with-deps chromium"
-]);
-mustInclude(".github/workflows/ci.yml", [
-  "playwright install --with-deps chromium",
-  "pnpm test:registry",
-  "pnpm test:shadcn-parity",
-  "pnpm test:e2e",
-  "pnpm test:a11y"
-]);
-mustInclude(".github/workflows/pages.yml", [
-  "playwright install --with-deps chromium",
-  "pnpm test:a11y",
-  "actions/deploy-pages"
-]);
+if (isStandaloneRepository) {
+  mustInclude(".github/workflows/release.yml", [
+    "pnpm verify",
+    "pnpm release",
+    "NPM_TOKEN",
+    "playwright install --with-deps chromium"
+  ]);
+  mustInclude(".github/workflows/ci.yml", [
+    "playwright install --with-deps chromium",
+    "pnpm test:registry",
+    "pnpm test:shadcn-parity",
+    "pnpm test:e2e",
+    "pnpm test:a11y"
+  ]);
+  mustInclude(".github/workflows/pages.yml", [
+    "playwright install --with-deps chromium",
+    "pnpm test:a11y",
+    "actions/deploy-pages"
+  ]);
+}
 mustInclude(".changeset/config.json", [
   '"access": "public"',
   '"baseBranch": "main"',

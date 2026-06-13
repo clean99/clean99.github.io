@@ -61,8 +61,9 @@ the only source of truth.
 Storybook stories. It includes static component screenshots plus
 `pressed and dragged magnifying-glass screenshots` produced by real pointer input.
 For the magnifying-glass target, the script also asserts the SVG filter contract:
-the candidate must expose the same two-pass displacement pipeline and matching
-map count before pixels are compared.
+the candidate must expose the same two-pass displacement pipeline, image count,
+map count, and displacement scales before pixels are compared. This contract is
+checked for idle, pressed, and dragged magnifying-glass captures.
 The interactive lens screenshots are report-only today, but their pointer action
 metrics are hard assertions so press and drag cannot silently stop working.
 `pnpm test:kube-reference:strict` sets `KUBE_STRICT_INTERACTIVE=1`, so those

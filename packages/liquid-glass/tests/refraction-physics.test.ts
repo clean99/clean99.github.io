@@ -138,7 +138,7 @@ describe("Liquid Glass physics contract", () => {
     expect(lensSource).not.toContain('className="lg-lens__core"');
   });
 
-  it("can increase the reference lens filter strength for the pressed Kube state", () => {
+  it("can increase the reference lens filter strength for experimental tuning", () => {
     const pipeline = resolveLensReferencePipeline({
       glassThickness: 110,
       magnificationGlassThickness: 43
@@ -235,6 +235,15 @@ describe("Liquid Glass physics contract", () => {
     expect(lensStorySource).toContain("const precisionLensInitialPosition = { x: 19.5, y: 19.5 }");
     expect(lensStorySource).toContain(
       'style={{ position: "absolute", top: 34.5, left: 19.5, zIndex: 3 }}'
+    );
+  });
+
+  it("does not fake Kube pointer parity by boosting active filter scales", () => {
+    expect(lensStorySource).not.toContain("precisionLensActiveRefraction");
+    expect(lensStorySource).not.toContain("glassThickness: 110");
+    expect(lensStorySource).not.toContain("magnificationGlassThickness: 43");
+    expect(lensStorySource).toContain(
+      '<LiquidLens engine="reference" refraction={precisionLensIdleRefraction} />'
     );
   });
 

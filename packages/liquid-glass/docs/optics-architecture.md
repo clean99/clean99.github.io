@@ -80,12 +80,13 @@ transparent, fades out again a few pixels inside the edge, and uses gray
 directional intensity instead of opaque white. Wide white highlights are treated
 as plastic, not glass, and are covered by pixel-map tests.
 
-The reference lens can vary the two pass strengths through refraction options.
-The idle Kube-like magnifier uses `glassThickness: 88` and
-`magnificationGlassThickness: 21.5`; the active pointer state uses
-`glassThickness: 110` and `magnificationGlassThickness: 43`. Keeping those
-numbers in the pipeline makes pressed/dragged tests validate real SVG
-displacement changes instead of only checking a CSS transform.
+The reference lens can vary the two pass strengths through refraction options,
+but the Kube parity stories intentionally keep the live target values:
+`glassThickness: 88` and `magnificationGlassThickness: 21.5`. Browser contract
+artifacts now verify that idle, pressed, and dragged captures all expose the same
+two-pass filter scales as the public Kube page. Pointer parity therefore belongs
+to geometry, background phase, and material response; increasing SVG displacement
+for active state would be a fake pass.
 
 ## Edge Mask Model
 

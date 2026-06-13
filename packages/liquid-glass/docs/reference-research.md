@@ -69,17 +69,18 @@ states change the outer optical body's scale from that baseline. The reference
 CSS coordinate is `top: 19.5px`; the apparent visual top is lower only because
 the scaled element uses a centered transform origin. The static comparison story
 keeps its absolute visual overlay coordinate separate from the draggable CSS
-coordinate so the two fixtures do not drift. The reference
-engine also changes the two filter stages during active input:
+coordinate so the two fixtures do not drift. The live reference keeps the same
+two filter stages during active input:
 
-- idle displacement thickness: `glassThickness: 88`,
-- active displacement thickness: `glassThickness: 110`,
-- idle magnification thickness: `magnificationGlassThickness: 21.5`,
-- active magnification thickness: `magnificationGlassThickness: 43`.
+- displacement thickness equivalent: `glassThickness: 88`,
+- magnification thickness equivalent: `magnificationGlassThickness: 21.5`,
+- observed displacement scales: `[24, 98.247...]` for idle, pressed, and dragged
+  captures.
 
-This matters because the Kube component increases both the shape scale and the
-SVG displacement scale on pointer down. Matching only the DOM transform produces
-a correctly sized capsule with the wrong internal refraction.
+This matters because a local implementation can cheat by increasing SVG
+displacement on pointer down. The live page does not need that. Matching Kube
+requires the same filter contract plus the right water-drop geometry, material
+response, and background phase.
 
 This does not replace full visual parity. It prevents a weaker failure mode:
 passing the static screenshot while breaking the interaction that makes the
@@ -102,11 +103,13 @@ The local `LiquidLensDropletPhase` model intentionally separates `pressed` and
 the same wide shape after movement, which is not what the reference component
 does under real pointer input.
 
-`scripts/compare-kube-reference.mjs` now treats these interaction metrics as a
-hard contract even while the interactive pixels remain report-only. Candidate
-press and drag metrics must stay within the configured tolerances of the live
-Kube target, so future visual tuning cannot silently regress the physical
-behavior.
+`scripts/compare-kube-reference.mjs` now treats these interaction metrics and
+the magnifying-glass filter contract as hard contracts even while the interactive
+pixels remain report-only. Candidate press and drag metrics must stay within the
+configured tolerances of the live Kube target, and every magnifying-glass state
+must expose the same two-pass filter shape and displacement scales. Future
+visual tuning cannot silently regress the physical behavior or hide behind a
+different SVG pipeline.
 
 `pnpm test:kube-reference:strict` sets `KUBE_STRICT_INTERACTIVE=1` and promotes
 the pressed and dragged screenshots from report-only rows to hard pixel gates.

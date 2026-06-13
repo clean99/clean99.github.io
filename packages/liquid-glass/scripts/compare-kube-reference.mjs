@@ -160,7 +160,7 @@ try {
     await candidateScreenshotSubject.screenshot({ path: candidatePath });
     await candidateAction?.cleanup();
 
-    if (reference.name === "magnifying-glass") {
+    if (reference.targetId === "magnifying-glass") {
       const [targetContract, candidateContract] = await Promise.all([
         readFilterContract(targetElement, "kube"),
         readFilterContract(candidateElement, "local")
@@ -627,7 +627,7 @@ function summarizeFilterContract(target, candidate) {
 }
 
 function assertFilterContractParity(reference, summary) {
-  if (reference.name !== "magnifying-glass") {
+  if (reference.targetId !== "magnifying-glass") {
     return;
   }
 
@@ -640,6 +640,35 @@ function assertFilterContractParity(reference, summary) {
   if (summary.candidateDisplacementMapCount !== summary.targetDisplacementMapCount) {
     throw new Error(
       `Kube displacement map count mismatch for ${reference.name}: target=${summary.targetDisplacementMapCount}, candidate=${summary.candidateDisplacementMapCount} (${JSON.stringify(summary)})`
+    );
+  }
+
+  if (summary.candidateImageCount !== summary.targetImageCount) {
+    throw new Error(
+      `Kube filter image count mismatch for ${reference.name}: target=${summary.targetImageCount}, candidate=${summary.candidateImageCount} (${JSON.stringify(summary)})`
+    );
+  }
+
+  if (summary.candidateDisplacementScales.length !== summary.targetDisplacementScales.length) {
+    throw new Error(
+      `Kube displacement scale count mismatch for ${reference.name}: target=${summary.targetDisplacementScales.length}, candidate=${summary.candidateDisplacementScales.length} (${JSON.stringify(summary)})`
+    );
+  }
+
+  const scaleFailures = summary.targetDisplacementScales
+    .map((targetScale, index) => {
+      const candidateScale = summary.candidateDisplacementScales[index];
+      const delta = Math.abs(candidateScale - targetScale);
+
+      return delta > 1
+        ? `scale[${index}]: target=${round(targetScale)}, candidate=${round(candidateScale)}, delta=${round(delta)}`
+        : null;
+    })
+    .filter(Boolean);
+
+  if (scaleFailures.length > 0) {
+    throw new Error(
+      `Kube displacement scales diverged for ${reference.name}: ${scaleFailures.join("; ")}`
     );
   }
 }

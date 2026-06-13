@@ -40,11 +40,6 @@ const precisionLensIdleRefraction = {
   specularAngle: 0.8,
   magnificationGlassThickness: 21.5
 };
-const precisionLensActiveRefraction = {
-  ...precisionLensIdleRefraction,
-  glassThickness: 110,
-  magnificationGlassThickness: 43
-};
 type DragSession = {
   pointerStart: LiquidLensPoint;
   positionStart: LiquidLensPoint;
@@ -214,12 +209,7 @@ function DraggablePrecisionLensDemo() {
           style={draggableLensStyle(position, droplet)}
           tabIndex={0}
         >
-          <LiquidLens
-            engine="reference"
-            refraction={
-              droplet.active ? precisionLensActiveRefraction : precisionLensIdleRefraction
-            }
-          />
+          <LiquidLens engine="reference" refraction={precisionLensIdleRefraction} />
         </div>
       </KubeLensBoard>
     </KubeLensStoryShell>
