@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>Designing an Operations Heartbeat System | Koh Hom — Software, AI, and Inner Practice</title>
+  
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/">
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/06/18/Designing-an-Operations-Heartbeat-System/" />
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/" />
+  <meta name="description" content="A system design write-up on turning UI activity events into reliable agent state across compute windows, HCM state commits, downstream propagation, multi-region cutover, and service split boundaries.">
+  
+  <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta property="og:site_name" content="Koh Hom — Software, AI, and Inner Practice" />
+  
+  <meta property="og:type" content="article" />
+  <meta property="article:published_time" content="2026-06-18T17:30:00.000Z" />
+  <meta property="article:modified_time" content="2026-06-18T17:30:00.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="fault-tolerance" />
+  
+  <meta property="article:tag" content="reliability" />
+  
+  
+  <meta property="og:title" content="Designing an Operations Heartbeat System | Koh Hom — Software, AI, and Inner Practice" />
+  <meta property="og:locale" content="en_US" />
+  <meta property="og:locale:alternate" content="zh_CN" />
+  <meta property="og:description" content="A system design write-up on turning UI activity events into reliable agent state across compute windows, HCM state commits, downstream propagation, multi-region cutover, and service split boundaries.">
+  <meta property="og:url" content="https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="Designing an Operations Heartbeat System | Koh Hom — Software, AI, and Inner Practice">
+  <meta name="twitter:description" content="A system design write-up on turning UI activity events into reliable agent state across compute windows, HCM state commits, downstream propagation, multi-region cutover, and service split boundaries.">
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta name="twitter:url" content="https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Designing an Operations Heartbeat System","datePublished":"2026-06-18T17:30:00.000Z","dateModified":"2026-06-18T17:30:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/","mainEntityOfPage":"https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/","inLanguage":"en","description":"An operations platform starts with a simple question: how do we know whether an agent is online? The smallest version is almost boring. The frontend sends a heartbeat every few seconds. The backend st","keywords":["Software Engineering","fault-tolerance","reliability"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Designing an Operations Heartbeat System","item":"https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var path = window.location.pathname;
+    var isZhPath = path === '/zh' || path.indexOf('/zh/') === 0;
+    if (isZhPath) {
+      localStorage.setItem('preferredLang', 'zh');
+      return;
+    }
+    if (path !== '/') return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
+    if (stored === 'zh') {
+      window.location.replace('/zh/' + window.location.search + window.location.hash);
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom — Software, AI, and Inner Practice" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <header class="site-header">
+  <div class="site-header__top">
+    <div class="site-actions">
+      <button class="theme-toggle" type="button" onclick="setDarkMode(!document.body.classList.contains('darkmode'))" aria-label="Toggle color theme">
+        <span id="themeIcon" aria-hidden="true">◐</span>
+      </button>
+      <a
+        href="/zh/2026/06/18/Designing-an-Operations-Heartbeat-System/"
+        class="language-switch"
+        onclick="localStorage.setItem('preferredLang', 'zh')"
+        aria-label="阅读中文版"
+      >
+        <span class="language-switch__full">中文</span>
+        <span class="language-switch__short" aria-hidden="true">中</span>
+      </a>
+    </div>
+  </div>
+
+  <nav class="site-nav" aria-label="Primary navigation">
+    <a href="/">Home</a>
+    
+      
+        
+        <a href="/writing">Writing</a>
+      
+    
+      
+        
+        <a href="/projects">Projects</a>
+      
+    
+      
+        
+        <a href="/ai-coding-lab">AI Skills</a>
+      
+    
+      
+        
+        <a href="/interviewers">For Interviewers</a>
+      
+    
+      
+        
+        <a href="/About">About</a>
+      
+    
+  </nav>
+</header>
+
+<script>
+  if (localStorage.getItem('preferredTheme') === 'dark') {
+    setDarkMode(true);
+  }
+  function setDarkMode(isDark) {
+    document.body.classList.toggle('darkmode', isDark);
+    var icon = document.getElementById('themeIcon');
+    if (icon) icon.textContent = isDark ? '◑' : '◐';
+    if (isDark) {
+      localStorage.setItem('preferredTheme', 'dark');
+    } else {
+      localStorage.removeItem('preferredTheme');
+    }
+  }
+</script>
+
+        <div class="trans">
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">Designing an Operations Heartbeat System</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/zh/2026/06/18/Designing-an-Operations-Heartbeat-System/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
+          阅读中文版
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2026-06-18T17:30:00.000Z">
+      <meta itemprop="dateModified" content="2026-06-18T17:30:00.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <p>An operations platform starts with a simple question: how do we know whether an agent is online?</p>
+<p>The smallest version is almost boring. The frontend sends a heartbeat every few seconds. The backend stores <code>last_seen_at</code>. If the timestamp is too old, the agent becomes offline.</p>
+<p>That version can light up a green dot. It is nowhere near enough for dispatching, workforce management, routing, monitoring, and time tracking. In the system I worked on, the HCM and Heartbeat path served 47,149 agents, 7,000 skill groups, about 4,000 QPS, and 141 upstream services. At that scale, “online” becomes a state platform.</p>
+<p>Here is the target shape first.</p>
+<p><img src="/img/hcm-heartbeat-design/v13-final-target.png" alt="Final target HCM heartbeat state platform"></p>
+<p><em>Figure 0: The final target is a state platform. User activity enters through the Workbench SDK, WS-API, and Frontier long-link path, then flows through Heartbeat, MQ, Compute, HCM, and downstream state propagation. Generated by gpt-image-2.</em></p>
+<p>The rest of this article builds the system from <code>last_seen_at</code> to that final design, one engineering problem at a time.</p>
+<h2 id="Can-we-tell-whether-an-agent-is-active"><a href="#Can-we-tell-whether-an-agent-is-active" class="headerlink" title="Can we tell whether an agent is active?"></a>Can we tell whether an agent is active?</h2><p>Version 0 writes state directly.</p>
+<p><img src="/img/hcm-heartbeat-design/v0-direct-write.png" alt="Version 0 direct status write"></p>
+<p><em>Figure 1: The naive heartbeat design records the latest heartbeat timestamp. It has no task count, skill group context, business rules, or region ownership. Generated by gpt-image-2.</em></p>
+<p>The data model is tiny:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">agent_id</span><br><span class="line">last_seen_at</span><br><span class="line">status</span><br></pre></td></tr></table></figure>
+
+<p>The frontend reports heartbeat events. The backend updates <code>last_seen_at</code>. A scheduled job scans expired records and marks agents as <code>OFFLINE</code>.</p>
+<p>This model works for a lightweight presence indicator. An operations platform asks harder questions:</p>
+<ul>
+<li>Can this online agent receive a new ticket?</li>
+<li>Should an agent who is working on a ticket be auto-marked abnormal?</li>
+<li>Which skill groups and business lines does this rule apply to?</li>
+<li>Has the abnormal status already been notified?</li>
+<li>Have WFM, routing, and analytics received the same state?</li>
+<li>During a region cutover, which region is allowed to emit a state change?</li>
+</ul>
+<p><code>last_seen_at</code> gives us recent activity. The production system needs business context.</p>
+<h2 id="How-do-UI-events-enter-Heartbeat-reliably"><a href="#How-do-UI-events-enter-Heartbeat-reliably" class="headerlink" title="How do UI events enter Heartbeat reliably?"></a>How do UI events enter Heartbeat reliably?</h2><p>The next layer moves activity intake out of direct writes and into an event stream.</p>
+<p><img src="/img/hcm-heartbeat-design/v1-event-buffer.png" alt="Version 1 event intake"></p>
+<p><em>Figure 2: Workbench activity enters through SDK, WS-API, and Frontier before Heartbeat writes the raw event stream to MQ. State calculation comes later. Generated by gpt-image-2.</em></p>
+<p>The frontend does more than send a periodic heartbeat. It reports clicks, key events, mouse activity, URL changes, ticket open, ticket reply, ticket completion, handoff, escalation, and other workbench actions.</p>
+<p>These events mean different things, but they share one property: they prove an agent did something at a specific time.</p>
+<p>Between the agent UI and Heartbeat, the workbench uses a long-link path:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Agent UI</span><br><span class="line">-&gt; Workbench SDK</span><br><span class="line">-&gt; WS-API</span><br><span class="line">-&gt; Frontier</span><br><span class="line">-&gt; Heartbeat Service</span><br><span class="line">-&gt; Raw MQ</span><br></pre></td></tr></table></figure>
+
+<p>The Workbench SDK keeps one long-link connection per window. Business modules register by <code>module + entity</code>, and <code>deviceID</code> identifies the channel. That granularity matters. If <code>entity</code> is too fine, a user switching entities can hit a short unregistered window and lose a push.</p>
+<p>WS-API handles long-link initialization, module registration, deregistration, and short-link compensation. Frontier owns the long-link channel. When Frontier has problems, the client can use short polling to fetch messages that were not acked. The default interval is 30 seconds and can be lowered by configuration during an incident.</p>
+<p>We also dedupe early. Business messages carry <code>ReqID</code>, and the SDK keeps a recent <code>ReqID</code> cache. The RPC push service generates <code>msgID</code>, so long-link delivery and short-poll compensation can dedupe the same logical message. If a business flow needs ordering, it carries an <code>Index</code>; ordering semantics stay with the business.</p>
+<p>Raw MQ solves a separate set of problems:</p>
+<ul>
+<li>UI modules share a single long-link instead of each owning a channel.</li>
+<li>Frontier failures can fall back to short polling.</li>
+<li>The client can dedupe with <code>ReqID</code> and <code>msgID</code>.</li>
+<li>Traffic spikes land in a queue instead of the compute path.</li>
+<li>Consumers can restart and continue from the event stream.</li>
+<li>Intake and calculation can deploy independently.</li>
+<li>New rules can reuse the same raw activity stream.</li>
+</ul>
+<p>The queue contains input, not truth.</p>
+<p>If a consumer turns every <code>keyup</code> into <code>ONLINE</code>, and every missing event into <code>ABNORMAL</code>, the system will still misclassify people. Events lack task count, skill group membership, work status, rule scope, and notification history.</p>
+<p>That leads to the compute layer.</p>
+<h2 id="How-do-events-become-state-candidates"><a href="#How-do-events-become-state-candidates" class="headerlink" title="How do events become state candidates?"></a>How do events become state candidates?</h2><p>Compute turns raw activity into candidate state changes.</p>
+<p><img src="/img/hcm-heartbeat-design/v2-compute-layer.png" alt="Version 2 compute layer"></p>
+<p><em>Figure 3: Compute consumes raw events, reads current facts from HCM, and produces candidate status changes. Generated by gpt-image-2.</em></p>
+<p>Compute has one job: convert “an event happened” into “this agent may need a state change.”</p>
+<p>Event types fall into a few groups:</p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>1</code></td>
+<td>Online heartbeat</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>Work status change</td>
+</tr>
+<tr>
+<td><code>3-12</code></td>
+<td>Ticket opened, replied, completed, transferred, escalated</td>
+</tr>
+<tr>
+<td><code>100-105</code></td>
+<td>Click, key event, mouse, status switch, outbound call, URL change</td>
+</tr>
+<tr>
+<td><code>3001</code></td>
+<td>No action for 15 minutes result</td>
+</tr>
+<tr>
+<td><code>3002</code></td>
+<td>Abnormal for 15 minutes result</td>
+</tr>
+<tr>
+<td><code>3003</code></td>
+<td>Not on app</td>
+</tr>
+<tr>
+<td><code>4000</code></td>
+<td>Rule Config V2 result</td>
+</tr>
+</tbody></table>
+<p>Compute does not write the final status. It first asks HCM for current facts:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GetWorkStatus(agent_id, tenant_id, channel)</span><br></pre></td></tr></table></figure>
+
+<p>HCM returns current work status, task count, skill group membership, and related facts. Compute combines those facts with the rule configuration:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">event + current facts + rule = candidate</span><br></pre></td></tr></table></figure>
+
+<p>A candidate is still only a candidate. An agent may have no action after 10:00, so Compute may produce an abnormal candidate at 10:10. At 10:10:01, the agent may receive a new ticket. HCM must re-read the facts before committing the state.</p>
+<p>Keep that boundary hard: Compute calculates candidates. HCM commits facts.</p>
+<h2 id="How-do-we-calculate-“no-action-for-N-minutes”"><a href="#How-do-we-calculate-“no-action-for-N-minutes”" class="headerlink" title="How do we calculate “no action for N minutes”?"></a>How do we calculate “no action for N minutes”?</h2><p>Many heartbeat rules are time-window rules:</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>System action</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ONLINE</code> and no task for 30 seconds</td>
+<td>Move to <code>IDLE</code></td>
+</tr>
+<tr>
+<td><code>ONLINE / IDLE / BUSY</code> and no action, or not on app, for 8 minutes</td>
+<td>Send a reminder</td>
+</tr>
+<tr>
+<td><code>ONLINE / IDLE / BUSY</code> and no action, or not on app, for 10 minutes</td>
+<td>Move to <code>ABNORMAL</code></td>
+</tr>
+<tr>
+<td><code>ABNORMAL</code> and still no action, or not on app, for another 10 minutes</td>
+<td>Move to <code>OFFLINE</code></td>
+</tr>
+</tbody></table>
+<p>The obvious implementation is one timer per agent.</p>
+<p>That becomes painful quickly. Timers disappear on process restart. Autoscaling spreads timers across instances. Region cutover now has to move timer ownership. For tens of thousands of agents, in-process timers couple business state to instance lifetime.</p>
+<p>We used Redis zset to represent time windows.</p>
+<p><img src="/img/hcm-heartbeat-design/v3-time-window.png" alt="Version 3 Redis zset time window"></p>
+<p><em>Figure 4: Candidate agents are written into Redis zsets by event timestamp. Cron scans due records and sends exception messages back into the state update path. Generated by gpt-image-2.</em></p>
+<p>Redis keeps several queues:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">agent_no_action_for_8_min</span><br><span class="line">agent_no_action_for_10_min</span><br><span class="line">queue_agent_no_action_for_15_min</span><br><span class="line">agent_in_abnormal_status_more_then_10_min</span><br><span class="line">queue_agent_in_abnormal_status_more_then_15_min</span><br><span class="line">agent_not_on_app_for_5_min</span><br><span class="line">queue_agent_not_on_app</span><br></pre></td></tr></table></figure>
+
+<p>The zset score is the timestamp. A due scan uses <code>zrangebyscore</code> for everything older than <code>now - threshold</code>.</p>
+<p>This data structure fits the problem:</p>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>zset behavior</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Time-window checks</td>
+<td>Score is timestamp</td>
+</tr>
+<tr>
+<td>Compute restart safety</td>
+<td>Candidates stay in Redis</td>
+</tr>
+<tr>
+<td>Multiple rules</td>
+<td>Separate zsets per rule family</td>
+</tr>
+<tr>
+<td>Duplicate reminder control</td>
+<td>Add agent&#x2F;message&#x2F;rule locks</td>
+</tr>
+<tr>
+<td>Canary and rollback</td>
+<td>Queue, rule, and IDC switches stay configurable</td>
+</tr>
+</tbody></table>
+<p>Cron scans every 2 seconds. Before emitting messages, it checks whether the current IDC can send and grabs a short TTL global lock to avoid duplicate emission from multiple instances.</p>
+<p>One detail matters more than it looks: the business window and the dedupe lock window should be different.</p>
+<p>For a 10-minute no-action reminder, the business threshold is 600 seconds. The agent-level dedupe lock can be 840 seconds. That reduces reminder spam while still leaving room for later transitions such as <code>ABNORMAL -&gt; OFFLINE</code>.</p>
+<h2 id="Who-writes-the-final-status"><a href="#Who-writes-the-final-status" class="headerlink" title="Who writes the final status?"></a>Who writes the final status?</h2><p>Compute emits candidates. HCM writes the final status.</p>
+<p>HCM owns the agent, skill group, task count, current status, and state-change log. If several services can write status independently, downstream systems will see competing facts.</p>
+<p>The status enum looks like this:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ONLINE(1000)</span><br><span class="line">TRAINING(1001)</span><br><span class="line">BREAK(1002)</span><br><span class="line">MEETING(1003)</span><br><span class="line">ABNORMAL(1004)</span><br><span class="line">IDLE(1005)</span><br><span class="line">LUNCH(1006)</span><br><span class="line">OFFLINE(1007)</span><br><span class="line">OTHER(1008)</span><br><span class="line">BUSY(1009)</span><br><span class="line">STANDBY(1010)</span><br></pre></td></tr></table></figure>
+
+<p>When HCM consumes an exception candidate, it reads the current facts again and checks:</p>
+<ol>
+<li>Does the current status still match the rule?</li>
+<li>Does the current task count allow this transition?</li>
+<li>Is the agent in a covered skill group?</li>
+<li>Is this region allowed to send state changes?</li>
+<li>Has this exception already been notified or handled?</li>
+</ol>
+<p>A rule can look like this:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;access_party_ids&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">2</span><span class="punctuation">,</span> <span class="number">3</span><span class="punctuation">,</span> <span class="number">9</span><span class="punctuation">,</span> <span class="number">45</span><span class="punctuation">,</span> <span class="number">46</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">1000</span><span class="punctuation">,</span> <span class="number">1005</span><span class="punctuation">,</span> <span class="number">1009</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;no_heart_time_limit&quot;</span><span class="punctuation">:</span> <span class="number">600</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;status_to&quot;</span><span class="punctuation">:</span> <span class="number">1004</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;status_change_note&quot;</span><span class="punctuation">:</span> <span class="string">&quot;No action for 10min, automatically changes to abnormal.&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;notifies&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Lark&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;title&quot;</span><span class="punctuation">:</span> <span class="string">&quot;abnormal hint&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>The rule affects both the state transition and the notification. Compute configuration, Redis queues, and HCM rules all constrain the final behavior.</p>
+<p>HCM’s responsibilities stay small and strict:</p>
+<ul>
+<li>Reject stale candidates.</li>
+<li>Recheck current facts.</li>
+<li>Write <code>status_table</code>.</li>
+<li>Write <code>unified_work_status_log</code>.</li>
+<li>Hand the state change to the downstream propagation path.</li>
+</ul>
+<h2 id="How-do-downstream-systems-get-the-same-state"><a href="#How-do-downstream-systems-get-the-same-state" class="headerlink" title="How do downstream systems get the same state?"></a>How do downstream systems get the same state?</h2><p>After HCM commits a status, WFM, routing, analytics, and other consumers still need the same fact.</p>
+<p><img src="/img/hcm-heartbeat-design/v4-final-pipeline.png" alt="Version 4 final single-region pipeline"></p>
+<p><em>Figure 5: The single-region pipeline splits intake, candidate calculation, time windows, state commit, and downstream propagation. Generated by gpt-image-2.</em></p>
+<p>The propagation path is:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HCM UpdateWorkStatus</span><br><span class="line">-&gt; status_table</span><br><span class="line">-&gt; DBus / binlog</span><br><span class="line">-&gt; status change MQ</span><br><span class="line">-&gt; WFM / Routing / Analytics</span><br></pre></td></tr></table></figure>
+
+<p>This gives consumers a DB-backed fact stream. The cost is a longer path. A slow binlog handler, event dispatcher, MQ backlog, or downstream consumer can make users see stale state.</p>
+<p>We hit that failure mode.</p>
+<p>During one US-TTP incident, WFM’s omni-channel view did not show the current status. HCM DB already had the agent offline, and the HCM-to-WFM send path looked successful.</p>
+<p>The real delay was earlier. The binlog-to-HCM-MQ path had about 300k messages queued. The work status handler was not the slow part. Another handler that depended on ES was timing out, and multiple handlers shared one consumption path. The slow handler dragged status propagation with it.</p>
+<p>The fix direction was obvious after the incident: add handler-level latency metrics, and move work status propagation closer to a direct binlog-to-RMQ path so unrelated event distribution cannot block it.</p>
+<p>The design question is simple: which handler can stall the state path, which consumer group shares a failure domain, and which metric proves the downstream view received the state?</p>
+<h2 id="How-do-events-survive-a-region-cutover"><a href="#How-do-events-survive-a-region-cutover" class="headerlink" title="How do events survive a region cutover?"></a>How do events survive a region cutover?</h2><p>The single-region pipeline works until disaster recovery and traffic cutover enter the picture.</p>
+<p>Heartbeat events are the input to state calculation. If traffic moves to a target region before that region has recent Raw MQ events, Compute loses the time-window context. Agents can be marked no-action right after cutover, or abnormal calculation can pause until enough fresh context accumulates.</p>
+<p>The first cross-region change is MQ mirror.</p>
+<p><img src="/img/hcm-heartbeat-design/v5-mq-mirror.png" alt="Version 5 cross-region MQ mirror"></p>
+<p><em>Figure 6: Raw MQ is mirrored between regions so the target region already has a consumable activity stream before it receives traffic. Generated by gpt-image-2.</em></p>
+<p>Mirror protects event continuity:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Region A Raw MQ &lt;-&gt; Region B Raw MQ</span><br></pre></td></tr></table></figure>
+
+<p>Before cutover, both regions can see recent heartbeat events. When traffic actually moves, the target region is not starting from an empty queue. It already sees recent clicks, key events, heartbeats, ticket actions, and status events.</p>
+<p>The cutover runbook then follows the data path:</p>
+<ol>
+<li>Check Heartbeat, HCM, Raw MQ, binlog MQ, and status MQ in the current region.</li>
+<li>Move a small traffic slice, for example 2%.</li>
+<li>Check <code>from_dc</code> dimensions to verify the target region receives expected traffic.</li>
+<li>Check mirrored Raw MQ lag, error rate, and consumption rate.</li>
+<li>If anything looks wrong, remove the routing config and cut traffic back.</li>
+</ol>
+<p>MQ mirror reduces event loss. It also creates a new problem: two regions can see the same event.</p>
+<p>Duplicate events are tolerable. Duplicate state changes are dangerous. The same no-action candidate emitted in two regions can send two exception messages to HCM, and downstream systems may receive repeated state changes.</p>
+<p>That takes us to dedupe.</p>
+<h2 id="How-do-we-handle-duplicates-after-mirror"><a href="#How-do-we-handle-duplicates-after-mirror" class="headerlink" title="How do we handle duplicates after mirror?"></a>How do we handle duplicates after mirror?</h2><p>Duplicate control has two stages.</p>
+<p>The sender side ensures only one region emits exception messages.</p>
+<p>The state side makes HCM re-read current facts and apply idempotent checks before writing.</p>
+<p><img src="/img/hcm-heartbeat-design/v6-region-dedupe.png" alt="Version 6 region dedupe"></p>
+<p><em>Figure 7: Mirror keeps events continuous, while active-region ownership and dedupe locks keep state changes single-writer. Generated by gpt-image-2.</em></p>
+<p>Compute can consume mirrored events in both regions. Cron checks <code>active_idc</code> before emitting due candidates:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">active_idc = true  -&gt; can emit exception message</span><br><span class="line">active_idc = false -&gt; calculate only, no emit</span><br></pre></td></tr></table></figure>
+
+<p>Before sending, Cron also takes a dedupe lock. The lock must match the state transition boundary. Too broad, and unrelated rules block each other. Too narrow, and repeated messages for the same stage leak through.</p>
+<p>A practical lock key is:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">agent_id + rule_id + window_start</span><br></pre></td></tr></table></figure>
+
+<p>Redis zset helps collapse part of the duplicate input, because the same member written twice updates the score. The actual send path still needs the agent&#x2F;rule&#x2F;window lock.</p>
+<p>HCM remains the final guard. When it receives an exception message, it re-reads current status, task count, skill group membership, and rule config. It writes <code>status_table</code> and <code>unified_work_status_log</code> only if the current facts still match the rule. If the agent already has a task, or the status changed through another path, HCM drops the candidate.</p>
+<p>After cross-region support, the state path has three independent switches:</p>
+<table>
+<thead>
+<tr>
+<th>Switch</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Traffic routing</td>
+<td>Controls which region receives requests</td>
+</tr>
+<tr>
+<td>MQ mirror</td>
+<td>Controls whether events copy across regions</td>
+</tr>
+<tr>
+<td><code>active_idc</code></td>
+<td>Controls which region can emit exception status messages</td>
+</tr>
+</tbody></table>
+<p>Keep those switches separate. Request routing, event replication, and state emission ownership often need different rollout and rollback timing.</p>
+<h2 id="How-do-we-split-TT-and-IES-without-breaking-the-old-path"><a href="#How-do-we-split-TT-and-IES-without-breaking-the-old-path" class="headerlink" title="How do we split TT and IES without breaking the old path?"></a>How do we split TT and IES without breaking the old path?</h2><p>The system later served both IES and TT business lines. Sharing HCM, Heartbeat, DB, MQ, and routing update paths tied release risk, capacity, and disaster recovery together.</p>
+<p>The tempting split is to create TT HCM, TT Heartbeat, TT DB, and TT MQ, then move all TT upstreams in one shot.</p>
+<p>That is a bad bet. HCM touches login, status update, skill groups, task count, routing, WFM, and binlog propagation. A field mismatch, filter bug, or consumer group mistake can affect dispatch and state sync.</p>
+<p>The safer first phase is coexistence.</p>
+<p><img src="/img/hcm-heartbeat-design/v7-tt-ies-coexistence.png" alt="Version 7 TT IES coexistence"></p>
+<p><em>Figure 8: TT upstreams first move to TT HCM, while writes still land in IES HCM. Forwarding and dsyncer leave room for rollback. Generated by gpt-image-2.</em></p>
+<p>The phase-one path is:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">TT upstream</span><br><span class="line">-&gt; TT HCM</span><br><span class="line">-&gt; forward RPC to IES HCM</span><br><span class="line">-&gt; IES DB</span><br><span class="line">-&gt; dsyncer</span><br><span class="line">-&gt; TT DB</span><br></pre></td></tr></table></figure>
+
+<p>The goal is narrow: move the call entry point first, keep the write truth in the old path.</p>
+<p>To let the old HCM know which data should also flow to TT, add an ownership filter:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">agent_id</span><br><span class="line">-&gt; agent_skill_group_rel</span><br><span class="line">-&gt; skill_group</span><br><span class="line">-&gt; access_party</span><br><span class="line">-&gt; TT or IES</span><br></pre></td></tr></table></figure>
+
+<p>Cache the result in Redis. On cache miss, read DB, resolve access party, then write the cache. Work status, agent-skill-group relations, and routing updates can all use this ownership result.</p>
+<p>This phase is rollback-friendly. If TT HCM has a problem, traffic can continue through the original IES path. If the filter has a problem, forwarding can be disabled by config while the old path keeps serving agents.</p>
+<h2 id="When-can-the-split-become-real"><a href="#When-can-the-split-become-real" class="headerlink" title="When can the split become real?"></a>When can the split become real?</h2><p>After coexistence is stable, the second phase separates writes, events, MQ, and routing updates.</p>
+<p><img src="/img/hcm-heartbeat-design/v8-tt-ies-isolation.png" alt="Version 8 TT IES isolation"></p>
+<p><em>Figure 9: After the split, TT and IES own separate upstream, HCM, DB, MQ, and routing update paths. Generated by gpt-image-2.</em></p>
+<p>The split includes:</p>
+<ol>
+<li>TT HCM stops forwarding RPCs to IES HCM.</li>
+<li>The IES-to-TT dsyncer stops.</li>
+<li>IES heartbeat and MQ stop consuming TT agent messages.</li>
+<li>TT routing consumes only TT status updates.</li>
+<li>IES routing consumes only IES status updates.</li>
+</ol>
+<p>After that, the old HCM path sheds about 3,000 agents and about 2,000 QPS.</p>
+<p>There are two things to prove: the services are separated, and the state facts are closed inside each side.</p>
+<ul>
+<li>TT agent heartbeat enters only the TT side.</li>
+<li>TT agent status is committed only by TT HCM.</li>
+<li>TT status changes go only to TT routing, WFM, and data consumers.</li>
+<li>IES keeps its original path without TT release and cutover risk.</li>
+</ul>
+<p>Only then is the split actually done.</p>
+<h2 id="How-do-we-notice-when-frontend-activity-stops-entering-the-system"><a href="#How-do-we-notice-when-frontend-activity-stops-entering-the-system" class="headerlink" title="How do we notice when frontend activity stops entering the system?"></a>How do we notice when frontend activity stops entering the system?</h2><p>State calculation depends on input events. Green backend RPC metrics only prove backend services are alive. They do not prove user activity reached Heartbeat.</p>
+<p>After one GCP-to-NO1A cutover, agents frequently became abnormal while they were still working in the workbench. The failure was in long-link configuration: <code>keyup</code> and <code>keydown</code> events were not reliably entering Heartbeat.</p>
+<p>HCM error rate could not see that part of the input path. We needed input health before state calculation.</p>
+<p><img src="/img/hcm-heartbeat-design/v9-input-health.png" alt="Version 9 input health"></p>
+<p><em>Figure 10: Before calculating state, the system verifies that user activity enters through Workbench SDK, WS-API, Frontier, Heartbeat intake, and Raw MQ. Generated by gpt-image-2.</em></p>
+<p>Input health needs several dimensions:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Why it matters</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>event_rate&#123;event_type, region, channel&#125;</code></td>
+<td>Detect drops in click, key, heartbeat, and other activity events</td>
+</tr>
+<tr>
+<td><code>client_lag</code></td>
+<td>Measure delay from client action to server intake</td>
+</tr>
+<tr>
+<td><code>frontier_error_rate</code></td>
+<td>Detect long-link channel failures</td>
+</tr>
+<tr>
+<td><code>ws_register_failure</code></td>
+<td>Detect module&#x2F;entity registration failures</td>
+</tr>
+<tr>
+<td><code>short_poll_lag</code></td>
+<td>Check whether short-link compensation keeps up</td>
+</tr>
+<tr>
+<td><code>raw_mq_lag</code></td>
+<td>Detect backlog after events enter MQ</td>
+</tr>
+<tr>
+<td><code>synthetic_action</code></td>
+<td>Send scheduled synthetic actions per region to prove the path works</td>
+</tr>
+<tr>
+<td><code>no_action_ratio</code></td>
+<td>Detect abnormal candidates concentrated by region, version, or channel</td>
+</tr>
+</tbody></table>
+<p>The stronger design feeds input health into the rule layer.</p>
+<p>If one region or workbench version has unhealthy input, automatic abnormal rules should degrade: extend the window, pause auto-abnormal, or send reminders only. When input recovers, normal calculation resumes.</p>
+<p>That reduces automation during incidents, but it prevents a worse failure: marking working agents abnormal because the collection path broke.</p>
+<h2 id="What-if-HCM-is-correct-and-downstream-is-stale"><a href="#What-if-HCM-is-correct-and-downstream-is-stale" class="headerlink" title="What if HCM is correct and downstream is stale?"></a>What if HCM is correct and downstream is stale?</h2><p>Once HCM commits a status, downstream systems still need to receive it. This was the US-TTP ES incident in another form: HCM DB had the correct offline state, but WFM still displayed the old state.</p>
+<p>The binlog-to-HCM-MQ path had about 300k queued messages. The work status handler was not slow. An ES-dependent handler timed out and blocked shared consumption.</p>
+<p>The design response is to give state propagation its own lane.</p>
+<p><img src="/img/hcm-heartbeat-design/v10-handler-isolation.png" alt="Version 10 handler isolation"></p>
+<p><em>Figure 11: Binlog consumers are split by business meaning. A slow search handler no longer blocks work status delivery to WFM and routing. Generated by gpt-image-2.</em></p>
+<p>The target shape treats status change as a first-class event:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HCM transaction</span><br><span class="line">-&gt; status_table</span><br><span class="line">-&gt; status_change_outbox</span><br><span class="line">-&gt; work_status_dispatcher</span><br><span class="line">-&gt; status MQ</span><br><span class="line">-&gt; WFM / Routing</span><br></pre></td></tr></table></figure>
+
+<p><code>status_change_outbox</code> is written in the same transaction as the status update. The dispatcher only delivers outbox status events to the status MQ.</p>
+<p>Search, analytics, and audit can keep consuming binlog or subscribe to their own event streams. They should not share the same blocking point as work status propagation. Slow handlers get their own retry and DLQ.</p>
+<p>End-to-end metrics need to follow the same split:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>status_commit_to_mq_latency</code></td>
+<td>HCM DB commit to status message send</td>
+</tr>
+<tr>
+<td><code>mq_to_wfm_latency</code></td>
+<td>Status MQ to WFM consumption</td>
+</tr>
+<tr>
+<td><code>handler_lag&#123;handler&#125;</code></td>
+<td>Backlog per handler</td>
+</tr>
+<tr>
+<td><code>handler_error_rate&#123;handler&#125;</code></td>
+<td>Error rate per handler</td>
+</tr>
+<tr>
+<td><code>downstream_state_age</code></td>
+<td>Age of the state seen by downstream compared with HCM commit</td>
+</tr>
+</tbody></table>
+<p>The worst state-system failure is a correct source of truth with stale consumers. Split commit, outbound delivery, and consumption, then measure each segment.</p>
+<h2 id="How-do-we-keep-hot-status-reads-from-taking-HCM-down"><a href="#How-do-we-keep-hot-status-reads-from-taking-HCM-down" class="headerlink" title="How do we keep hot status reads from taking HCM down?"></a>How do we keep hot status reads from taking HCM down?</h2><p><code>GetWorkStatus</code> is a hot read in this pipeline. Compute calls it. Upstreams call it. During one OOM incident, downstream error rate spikes aligned with <code>GetWorkStatus</code> traffic spikes.</p>
+<p>The state system needs a capacity guard.</p>
+<p><img src="/img/hcm-heartbeat-design/v11-status-read-guard.png" alt="Version 11 status read guard"></p>
+<p><em>Figure 12: <code>GetWorkStatus</code> gets quota in front, caller isolation inside, and short-TTL cache plus autoscaling signals behind it. Generated by gpt-image-2.</em></p>
+<p>The goal is caller isolation. If one upstream goes bad, its failure should stay inside its budget.</p>
+<p><code>GetWorkStatus</code> needs several defenses:</p>
+<table>
+<thead>
+<tr>
+<th>Defense</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Per-caller quota</td>
+<td>Limit one abusive upstream first</td>
+</tr>
+<tr>
+<td>Bulkhead pool</td>
+<td>Separate Compute, WFM, admin, and other callers</td>
+</tr>
+<tr>
+<td>Read cache</td>
+<td>Short-TTL cache for repeated reads</td>
+</tr>
+<tr>
+<td>Stale read budget</td>
+<td>Allow slightly stale reads on non-write paths</td>
+</tr>
+<tr>
+<td>Circuit breaker</td>
+<td>Fail fast when DB or dependencies are unhealthy</td>
+</tr>
+<tr>
+<td>Autoscale signal</td>
+<td>Scale by QPS, heap, GC, and p99 latency</td>
+</tr>
+</tbody></table>
+<p>Heartbeat Compute should also reduce pressure. If the same agent reports many events in a short window, Compute does not need to call <code>GetWorkStatus</code> for every event. It can merge by agent in a small window, read a local or Redis snapshot, and still let HCM recheck before final commit.</p>
+<p>The path changes from “every caller hits DB-shaped truth” into a read service with budgets, isolation, and degradation.</p>
+<h2 id="How-do-query-changes-ship-safely"><a href="#How-do-query-changes-ship-safely" class="headerlink" title="How do query changes ship safely?"></a>How do query changes ship safely?</h2><p>One HCM 4.3 rollback exposed a release problem.</p>
+<p>Canary looked fine. After ROW, new error logs appeared. Two <code>LEFT JOIN</code>s amplified a <code>count</code> SQL path and caused DB timeouts.</p>
+<p>Canary alone did not cover this class of failure. Canary traffic is smaller and its data distribution may be kind. Expensive queries need their own cost gate.</p>
+<p><img src="/img/hcm-heartbeat-design/v12-query-release-guard.png" alt="Version 12 query release guard"></p>
+<p><em>Figure 13: Query changes pass through feature flags, canary, shadow query, EXPLAIN checks, slow SQL monitoring, and rollback gates. Generated by gpt-image-2.</em></p>
+<p>A query rollout can follow this path:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">query change</span><br><span class="line">-&gt; feature flag</span><br><span class="line">-&gt; canary</span><br><span class="line">-&gt; shadow query</span><br><span class="line">-&gt; row traffic</span><br><span class="line">-&gt; auto rollback</span><br></pre></td></tr></table></figure>
+
+<p><code>shadow query</code> does not affect online response. It compares result and cost. The release system watches:</p>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>EXPLAIN</code> row estimate over budget</td>
+<td>Block release</td>
+</tr>
+<tr>
+<td>Shadow query result mismatch</td>
+<td>Block release</td>
+</tr>
+<tr>
+<td>p99 query latency over budget</td>
+<td>Degrade or rollback</td>
+</tr>
+<tr>
+<td>New error logs</td>
+<td>Rollback</td>
+</tr>
+<tr>
+<td>DB timeout increase</td>
+<td>Rollback</td>
+</tr>
+</tbody></table>
+<p>Feature flags should be finer than “use new query.” A better split is by filter shape:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">simple filter -&gt; old query</span><br><span class="line">join filter   -&gt; join query</span><br></pre></td></tr></table></figure>
+
+<p>If a complex filter path breaks, only that path rolls back.</p>
+<h2 id="What-remains-open"><a href="#What-remains-open" class="headerlink" title="What remains open?"></a>What remains open?</h2><p>By this point, the heartbeat design has become a state platform. Intake, compute, commit, propagation, capacity, release, and ownership boundaries can each be observed and degraded separately.</p>
+<p>There is still more to build:</p>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Extension</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>How do we verify more rules?</td>
+<td>Build a rule simulator that replays historical events and reports how many agents a new rule would affect</td>
+</tr>
+<tr>
+<td>How do we debug one wrong status quickly?</td>
+<td>Build a per-agent timeline across input events, candidates, zsets, HCM commits, and downstream consumption</td>
+</tr>
+<tr>
+<td>Can multi-region ownership split-brain?</td>
+<td>Drill <code>active_idc</code> switchovers and compare duplicate messages and missing messages</td>
+</tr>
+<tr>
+<td>What if downstream stays stale for too long?</td>
+<td>Add reconciliation jobs that compare WFM&#x2F;routing state against HCM facts</td>
+</tr>
+<tr>
+<td>Can read cache return stale data in dangerous paths?</td>
+<td>Add versioned cache values and stale-read budgets, while keeping write paths closed by HCM recheck</td>
+</tr>
+</tbody></table>
+<h2 id="Final-design"><a href="#Final-design" class="headerlink" title="Final design"></a>Final design</h2><p>The original question was simple: how do we know whether an agent is online?</p>
+<p>The final design has two planes.</p>
+<p>The data plane turns user activity into state facts:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Agent UI</span><br><span class="line">-&gt; Workbench SDK</span><br><span class="line">-&gt; WS-API</span><br><span class="line">-&gt; Frontier</span><br><span class="line">-&gt; Heartbeat Service</span><br><span class="line">-&gt; Raw MQ</span><br><span class="line">-&gt; Compute</span><br><span class="line">-&gt; Redis zset</span><br><span class="line">-&gt; Exception MQ</span><br><span class="line">-&gt; HCM</span><br><span class="line">-&gt; DB + Outbox</span><br><span class="line">-&gt; Status MQ</span><br><span class="line">-&gt; WFM / Routing / Analytics</span><br></pre></td></tr></table></figure>
+
+<p>The control plane keeps the data plane bounded during failure:</p>
+<ul>
+<li>The frontend reports activity and heartbeat events.</li>
+<li>Workbench SDK owns the long-link singleton, reconnect, short-link compensation, and client-side dedupe.</li>
+<li>Input health proves activity reached Heartbeat.</li>
+<li>MQ mirror preserves event continuity across regions.</li>
+<li>Redis zset and dedupe locks collapse repeated candidates.</li>
+<li><code>active_idc</code> decides which region can emit exception messages.</li>
+<li>HCM recheck closes the final status commit.</li>
+<li>Outbox and handler isolation protect work status propagation.</li>
+<li>Quota, cache, bulkheads, and circuit breakers protect hot reads.</li>
+<li>Query gates control risky SQL changes.</li>
+<li>TT&#x2F;IES ownership separates agent, skill group, MQ, and routing boundaries.</li>
+</ul>
+<p>The design is much larger than <code>last_seen_at</code>, but each layer earns its place. A heartbeat system that drives routing and workforce management is not a ping loop. It is an event intake system, a time-window calculator, a state authority, a propagation pipeline, a multi-region failover path, and a set of release and capacity guardrails around the same fact: what state is this agent in right now?</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/fault-tolerance/" rel="tag">fault-tolerance</a>, <a class="classtest-link" href="/tags/reliability/" rel="tag">reliability</a> — <time datetime="2026-06-18T17:30:00.000Z">Jun 19, 2026</time></p>
+    </footer>
+  </article>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">
+        &copy; 2026 Koh Hom.
+        
+          <a href="mailto:xff9924@gmail.com">Email</a>
+        
+        <a href="https://github.com/clean99" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="/atom.xml">RSS</a>
+        <a href="/Links">Links</a>
+      </p>
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+  
+
+</body>
+
+</html>
