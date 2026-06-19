@@ -15,10 +15,10 @@
   
   <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
-  <link rel="canonical" href="https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/">
-  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/06/18/Designing-an-Operations-Heartbeat-System/" />
-  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/" />
-  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/" />
+  <link rel="canonical" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/">
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
   <meta name="description" content="A system design write-up on turning UI activity events into reliable agent state across compute windows, HCM state commits, downstream propagation, multi-region cutover, and service split boundaries.">
   
   <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
@@ -29,8 +29,8 @@
   <meta property="og:site_name" content="Koh Hom — Software, AI, and Inner Practice" />
   
   <meta property="og:type" content="article" />
-  <meta property="article:published_time" content="2026-06-18T17:30:00.000Z" />
-  <meta property="article:modified_time" content="2026-06-18T17:30:00.000Z" />
+  <meta property="article:published_time" content="2026-06-19T04:00:00.000Z" />
+  <meta property="article:modified_time" content="2026-06-19T04:00:00.000Z" />
   <meta property="article:author" content="Koh Hom" />
   
   <meta property="article:tag" content="Software Engineering" />
@@ -44,7 +44,7 @@
   <meta property="og:locale" content="en_US" />
   <meta property="og:locale:alternate" content="zh_CN" />
   <meta property="og:description" content="A system design write-up on turning UI activity events into reliable agent state across compute windows, HCM state commits, downstream propagation, multi-region cutover, and service split boundaries.">
-  <meta property="og:url" content="https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/" />
+  <meta property="og:url" content="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@Clean993">
@@ -52,7 +52,7 @@
   <meta name="twitter:title" content="Designing an Operations Heartbeat System | Koh Hom — Software, AI, and Inner Practice">
   <meta name="twitter:description" content="A system design write-up on turning UI activity events into reliable agent state across compute windows, HCM state commits, downstream propagation, multi-region cutover, and service split boundaries.">
   <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
-  <meta name="twitter:url" content="https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/" />
+  <meta name="twitter:url" content="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
 
   <!-- Mobile Specific Metas
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
@@ -159,8 +159,8 @@
   <!-- JSON-LD Structured Data
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Designing an Operations Heartbeat System","datePublished":"2026-06-18T17:30:00.000Z","dateModified":"2026-06-18T17:30:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/","mainEntityOfPage":"https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/","inLanguage":"en","description":"An operations platform starts with a simple question: how do we know whether an agent is online? The smallest version is almost boring. The frontend sends a heartbeat every few seconds. The backend st","keywords":["Software Engineering","fault-tolerance","reliability"]}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Designing an Operations Heartbeat System","item":"https://clean99.github.io/2026/06/18/Designing-an-Operations-Heartbeat-System/"}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Designing an Operations Heartbeat System","datePublished":"2026-06-19T04:00:00.000Z","dateModified":"2026-06-19T04:00:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/","mainEntityOfPage":"https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/","inLanguage":"en","description":"An operations platform starts with a simple question: how do we know whether an agent is online? The smallest version is almost boring. The frontend sends a heartbeat every few seconds. The backend st","keywords":["Software Engineering","fault-tolerance","reliability"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"Designing an Operations Heartbeat System","item":"https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/"}]}</script>
   
 
   <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
@@ -199,7 +199,7 @@
         <span id="themeIcon" aria-hidden="true">◐</span>
       </button>
       <a
-        href="/zh/2026/06/18/Designing-an-Operations-Heartbeat-System/"
+        href="/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/"
         class="language-switch"
         onclick="localStorage.setItem('preferredLang', 'zh')"
         aria-label="阅读中文版"
@@ -263,14 +263,14 @@
       <h2 itemprop="headline">Designing an Operations Heartbeat System</h2>
       
       <p style="margin-bottom: 0.5rem;">
-        <a href="/zh/2026/06/18/Designing-an-Operations-Heartbeat-System/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
+        <a href="/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'zh')">
           阅读中文版
         </a>
       </p>
       
       <meta itemprop="author" content="Koh Hom">
-      <meta itemprop="datePublished" content="2026-06-18T17:30:00.000Z">
-      <meta itemprop="dateModified" content="2026-06-18T17:30:00.000Z">
+      <meta itemprop="datePublished" content="2026-06-19T04:00:00.000Z">
+      <meta itemprop="dateModified" content="2026-06-19T04:00:00.000Z">
     </header>
     <div itemprop="articleBody">
       <p>An operations platform starts with a simple question: how do we know whether an agent is online?</p>
@@ -800,7 +800,7 @@
 	    </script>
     </div>
     <footer>
-      <p><a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/fault-tolerance/" rel="tag">fault-tolerance</a>, <a class="classtest-link" href="/tags/reliability/" rel="tag">reliability</a> — <time datetime="2026-06-18T17:30:00.000Z">Jun 19, 2026</time></p>
+      <p><a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/fault-tolerance/" rel="tag">fault-tolerance</a>, <a class="classtest-link" href="/tags/reliability/" rel="tag">reliability</a> — <time datetime="2026-06-19T04:00:00.000Z">Jun 19, 2026</time></p>
     </footer>
   </article>
   
