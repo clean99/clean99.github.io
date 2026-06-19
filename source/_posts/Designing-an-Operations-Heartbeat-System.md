@@ -1,6 +1,6 @@
 ---
 title: "Designing an Operations Heartbeat System"
-date: 2026-06-19 01:30:00
+date: 2026-06-19 12:00:00
 tags: [Software Engineering, reliability, fault-tolerance]
 area: engineering
 summary: "A system design write-up on turning UI activity events into reliable agent state across compute windows, HCM state commits, downstream propagation, multi-region cutover, and service split boundaries."
