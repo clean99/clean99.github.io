@@ -289,15 +289,16 @@
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">agent_id</span><br><span class="line">last_seen_at</span><br><span class="line">status</span><br></pre></td></tr></table></figure>
 
 <p>前端每隔 N 秒发心跳。服务端更新 <code>last_seen_at</code>。定时任务扫描超时的人，把状态改成 <code>OFFLINE</code>。</p>
-<p>这个模型适合很轻的场景，比如显示一个在线灯。运营管理系统的问题更具体：</p>
+<p>这个模型适合很轻的场景，比如显示一个在线灯。先不讨论任务数、技能组和规则，单看 UI 到 Heartbeat 的接入层，就已经有一组工程问题：</p>
 <ul>
-<li>在线的人是否可以接单？</li>
-<li>正在处理工单的人能不能被自动切成异常？</li>
-<li>某条异常规则只对部分业务线生效，怎么灰度？</li>
-<li>状态变化之后，WFM、路由和数据侧怎么同步？</li>
-<li>多 region 切流时，哪个 region 可以发送状态变更？</li>
+<li>一个工作台页面里有多个业务模块，不能每个模块都自己建一条通道。</li>
+<li>用户动作是突发的，连续输入不能变成同步写入风暴。</li>
+<li>浏览器长链会断，重连期间的消息要能补回来。</li>
+<li>长链推送和短链补偿可能送到同一条逻辑消息。</li>
+<li>Heartbeat 服务重启后，输入流不能丢。</li>
+<li>状态计算要能独立发布，不应该和浏览器 SDK 绑死。</li>
 </ul>
-<p><code>last_seen_at</code> 只能提供最近活跃时间。上面这些问题需要更多业务上下文。</p>
+<p><code>last_seen_at</code> 只能提供一个时间戳。下一步要解决的是：怎么把浏览器动作变成可靠的事件流。</p>
 <p>所以第一版适合作为思维起点，生产系统还要继续往前推。</p>
 <h2 id="问题-2：UI-到-Heartbeat-的事件怎么可靠进入系统？"><a href="#问题-2：UI-到-Heartbeat-的事件怎么可靠进入系统？" class="headerlink" title="问题 2：UI 到 Heartbeat 的事件怎么可靠进入系统？"></a>问题 2：UI 到 Heartbeat 的事件怎么可靠进入系统？</h2><p>下一步先补 UI 到 Heartbeat 的接入层，再把事件放进 Raw MQ。</p>
 <p><img src="/img/hcm-heartbeat-design/v1-event-buffer.png" alt="版本 1：把工作台动作变成事件流"></p>
@@ -310,18 +311,64 @@
 <p>Workbench SDK 在一个 window 内维护一个长链接。业务模块按 <code>module + entity</code> 注册，<code>deviceID</code> 标识这条通道。<code>module + entity</code> 的粒度要控制好，粒度太细，切换 entity 时容易出现短暂未建联，推送就会掉在窗口外。</p>
 <p>WS-API 负责初始化长链、注册&#x2F;注销 module，也负责短链补偿。Frontier 负责长链通道。Frontier 异常时，端上可以通过短链轮询补未 ack 的消息，默认间隔是 30 秒，可以用配置调整。</p>
 <p>重复消息也在这一层先处理一遍。业务后端传 <code>ReqID</code>，SDK 保存最近一批 <code>ReqID</code> 做去重；RPC 推送服务生成 <code>msgID</code>，长链推送和短链补偿都按 <code>msgID</code> 做兜底去重。业务需要顺序时，可以带 <code>Index</code>，排序语义由业务自己维护。</p>
-<p>这一步解决的是工程问题：</p>
-<ul>
-<li>浏览器里多个业务模块共用一条长链。</li>
-<li>Frontier 异常时，可以用短链补偿。</li>
-<li>端上可以按 <code>ReqID</code> &#x2F; <code>msgID</code> 去重。</li>
-<li>峰值流量可以被队列削掉。</li>
-<li>消费者重启后可以继续消费。</li>
-<li>事件接收和状态计算可以分开部署。</li>
-<li>后面新增规则时，可以复用同一份事件流。</li>
-</ul>
+<p>每个节点都对应一个明确的问题：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Workbench SDK</td>
+<td>一个页面里多个模块共用一条客户端通道</td>
+<td>连接池和客户端资源归属</td>
+</tr>
+<tr>
+<td><code>module + entity</code> 注册</td>
+<td>事件要路由到正确业务模块，同时避免每个模块开新链路</td>
+<td>命名空间和订阅边界</td>
+</tr>
+<tr>
+<td><code>deviceID</code></td>
+<td>后端推送需要识别一个稳定的浏览器窗口</td>
+<td>会话身份</td>
+</tr>
+<tr>
+<td>WS-API</td>
+<td>初始化、注册、注销、补偿需要统一入口</td>
+<td>控制面和数据投递分离</td>
+</tr>
+<tr>
+<td>Frontier</td>
+<td>长链投递交给专门的通道服务</td>
+<td>职责分离</td>
+</tr>
+<tr>
+<td>短链补偿</td>
+<td>长链异常时，最近消息还能补回来</td>
+<td>降级路径</td>
+</tr>
+<tr>
+<td><code>ReqID</code> &#x2F; <code>msgID</code> 去重</td>
+<td>长链和补偿可能送到同一条逻辑消息</td>
+<td>幂等</td>
+</tr>
+<tr>
+<td>Raw MQ</td>
+<td>用户动作突发和服务重启不能直接冲击 Compute</td>
+<td>背压和持久缓冲</td>
+</tr>
+<tr>
+<td>Heartbeat 接入服务</td>
+<td>浏览器协议细节不能泄漏到 Compute</td>
+<td>适配层边界</td>
+</tr>
+</tbody></table>
 <p>Raw MQ 里的事件是输入数据。</p>
 <p>如果消费端拿到一个 <code>keyup</code> 事件就直接把人标在线，拿不到事件就标异常，系统还是会误判。因为事件缺上下文：它不知道当前状态、任务数、技能组、业务线规则，也不知道这条异常是否已经处理过。</p>
+<p>接下来才轮到业务上下文问题：这个 agent 能不能接单，规则覆盖哪些 skill group，异常是否已经处理过，哪个 region 可以发状态变更。这些不是接入层的问题，要交给 Compute 和 HCM。</p>
 <p>这就需要下一层。</p>
 <h2 id="问题-3：怎么把事件变成状态判断？"><a href="#问题-3：怎么把事件变成状态判断？" class="headerlink" title="问题 3：怎么把事件变成状态判断？"></a>问题 3：怎么把事件变成状态判断？</h2><p>我们加一个 Compute 层。</p>
 <p><img src="/img/hcm-heartbeat-design/v2-compute-layer.png" alt="版本 2：加一层计算，把事件变成候选状态"></p>
@@ -377,6 +424,41 @@
 
 <p>候选只是待确认结果。比如一个 agent 在 10:00 后没有动作，Compute 在 10:10 认为他可能要转异常。但 10:10:01 他可能刚接到新任务。最终能不能改状态，还要由 HCM 再读一次事实。</p>
 <p>Compute 层的边界要硬。它负责算候选，不负责提交最终状态。</p>
+<p>版本 2 引入这些东西，各自有明确边界：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Compute</td>
+<td>原始事件需要业务解释，才能影响状态</td>
+<td>领域服务边界</td>
+</tr>
+<tr>
+<td><code>GetWorkStatus</code> 读取</td>
+<td>候选判断需要当前任务数、状态和技能组事实</td>
+<td>先读事实再决策</td>
+</tr>
+<tr>
+<td>候选状态变更</td>
+<td>计算层不能直接写最终事实</td>
+<td>命令暂存</td>
+</tr>
+<tr>
+<td>规则配置</td>
+<td>状态规则变化快于服务代码</td>
+<td>策略和代码分离</td>
+</tr>
+<tr>
+<td>HCM 二次校验</td>
+<td>Compute 产出候选后，事实可能已经变了</td>
+<td>乐观校验</td>
+</tr>
+</tbody></table>
 <h2 id="问题-4：怎么计算“多久没有动作”？"><a href="#问题-4：怎么计算“多久没有动作”？" class="headerlink" title="问题 4：怎么计算“多久没有动作”？"></a>问题 4：怎么计算“多久没有动作”？</h2><p>很多心跳规则都带时间窗口：</p>
 <table>
 <thead>
@@ -443,6 +525,46 @@
 <p>Cron 每 2 秒扫一次队列。扫描之前先检查当前 IDC 是否允许发送，再抢一个短 TTL 的全局锁，避免多个实例重复发同一批异常消息。</p>
 <p>这里有个容易踩坑的点：业务窗口和防重锁时间要分开设置。</p>
 <p>比如 10 分钟无操作触发提醒，业务窗口是 600 秒，但 agent 维度的防重锁可以设成 840 秒。这样同一阶段可以减少刷屏，后续 <code>ABNORMAL -&gt; OFFLINE</code> 也还有计算机会。</p>
+<p>版本 3 引入的是时间窗口计算层：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Redis zset</td>
+<td>几万个 timer 不应该绑在进程内存里</td>
+<td>状态外置</td>
+</tr>
+<tr>
+<td>timestamp score</td>
+<td>到期候选需要按时间高效扫描</td>
+<td>按时间建索引</td>
+</tr>
+<tr>
+<td>多条规则队列</td>
+<td>不同窗口和规则不能共享隐式状态</td>
+<td>工作分区</td>
+</tr>
+<tr>
+<td>Cron scanner</td>
+<td>到期任务要从请求流里拆出来执行</td>
+<td>定时 worker</td>
+</tr>
+<tr>
+<td>全局 TTL 锁</td>
+<td>多实例可能扫到同一批队列</td>
+<td>租约协调</td>
+</tr>
+<tr>
+<td>防重锁窗口</td>
+<td>重复提醒控制要和业务阈值分开</td>
+<td>幂等窗口</td>
+</tr>
+</tbody></table>
 <h2 id="问题-5：谁可以写最终状态？"><a href="#问题-5：谁可以写最终状态？" class="headerlink" title="问题 5：谁可以写最终状态？"></a>问题 5：谁可以写最终状态？</h2><p>Compute 算出来的是候选。最终状态只能由 HCM 写入。</p>
 <p>原因很简单：HCM 才拥有 agent、skill group、任务数、当前状态和状态变更日志。状态写入必须集中，否则下游系统会看到多个版本的事实。</p>
 <p>座席状态本身是一组枚举：</p>
@@ -468,6 +590,41 @@
 <li>写 <code>unified_work_status_log</code>。</li>
 <li>把状态变化交给下游传播链路。</li>
 </ul>
+<p>版本 4 的第一部分是建立状态权威：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HCM 统一写状态</td>
+<td>多个写方会制造多个状态事实</td>
+<td>单写者 &#x2F; 事实源</td>
+</tr>
+<tr>
+<td>状态枚举</td>
+<td>调用方需要稳定的状态语义</td>
+<td>显式领域模型</td>
+</tr>
+<tr>
+<td>规则覆盖校验</td>
+<td>规则只覆盖指定状态、技能组和业务范围</td>
+<td>策略执行</td>
+</tr>
+<tr>
+<td>任务数二次校验</td>
+<td>Compute 产出候选后，派单事实可能已变化</td>
+<td>提交时一致性</td>
+</tr>
+<tr>
+<td>状态日志</td>
+<td>状态变化需要审计和下游回放上下文</td>
+<td>追加式历史</td>
+</tr>
+</tbody></table>
 <h2 id="问题-6：下游怎么拿到一致的状态？"><a href="#问题-6：下游怎么拿到一致的状态？" class="headerlink" title="问题 6：下游怎么拿到一致的状态？"></a>问题 6：下游怎么拿到一致的状态？</h2><p>状态写进 HCM DB 后，还要继续传播给下游。</p>
 <p>WFM、RouteQueue、数据侧和其他业务通常通过状态变更消息更新自己的视图。</p>
 <p>最终链路长这样：</p>
@@ -482,6 +639,41 @@
 <p>最后问题出在更前面：binlog 到 HCM MQ 链路堆了约 300k 条消息。work status handler 没有变慢，另一个依赖 ES 的 handler 超时了。多个 handler 共用一条消费链路，慢 handler 把其他状态传播一起拖住了。</p>
 <p>这个事故之后，我们补了 handler 维度耗时指标，也把“消费 binlog 后直接发 RMQ，减少中间事件分发阻塞”列进改造项。</p>
 <p>这类问题在设计阶段就应该被问出来：哪个 handler 可以拖住主链路？哪个消费组有共享故障面？哪个指标能说明下游真的收到状态？</p>
+<p>版本 4 的第二部分是状态传播边界：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>status_table</code></td>
+<td>下游需要已提交事实，不能消费候选</td>
+<td>持久事实源</td>
+</tr>
+<tr>
+<td>DBus &#x2F; binlog</td>
+<td>消费者要跟随 DB 提交，又不能耦合写 RPC</td>
+<td>变更数据捕获</td>
+</tr>
+<tr>
+<td>status change MQ</td>
+<td>WFM 和 routing 要异步消费状态事实</td>
+<td>事件驱动传播</td>
+</tr>
+<tr>
+<td>handler 指标</td>
+<td>DB 写成功后，慢 handler 仍然可能拖住状态传播</td>
+<td>分段可观测</td>
+</tr>
+<tr>
+<td>消费隔离改造</td>
+<td>无关 handler 不能阻塞工作状态传播</td>
+<td>故障域隔离</td>
+</tr>
+</tbody></table>
 <h2 id="问题-7：跨-region-切流时，事件怎么不断？"><a href="#问题-7：跨-region-切流时，事件怎么不断？" class="headerlink" title="问题 7：跨 region 切流时，事件怎么不断？"></a>问题 7：跨 region 切流时，事件怎么不断？</h2><p>前面的链路在单 region 内已经能工作。新的问题来自容灾和切流。</p>
 <p>Heartbeat 事件是状态计算的输入。切流时，如果流量调度先把请求打到目标 region，但目标 region 的 Raw MQ 里没有前一段时间的事件，Compute 会缺少时间窗口里的上下文。结果可能是 agent 刚切过去就被判断成无操作，或者异常计算延迟一段时间才恢复。</p>
 <p>所以跨 region 的第一层改造是 MQ mirror。</p>
@@ -502,6 +694,41 @@
 <p>MQ mirror 让事件更难丢。新的问题也随之出现：两个 region 都可能看到同一条事件。</p>
 <p>事件重复本身还好，真正危险的是重复触发状态变更。比如同一条 no action 候选在两个 region 各发一次，HCM 可能收到两条异常消息，下游也可能收到两次状态变化。</p>
 <p>所以下一层要处理重复。</p>
+<p>版本 5 引入的是跨 region 事件连续性：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MQ mirror</td>
+<td>目标 region 接流前要先拿到最近事件</td>
+<td>复制日志</td>
+</tr>
+<tr>
+<td><code>from_dc</code> 维度</td>
+<td>切流时要证明流量和事件进入了哪个 region</td>
+<td>可追踪来源</td>
+</tr>
+<tr>
+<td>lag &#x2F; 消费速率检查</td>
+<td>目标事件流追上前不能贸然接流</td>
+<td>就绪门禁</td>
+</tr>
+<tr>
+<td>小流量切片</td>
+<td>region 切换要先有可回滚的小步</td>
+<td>灰度切流</td>
+</tr>
+<tr>
+<td>删除调度配置回滚</td>
+<td>切流失败不应该依赖代码回滚</td>
+<td>运维控制面</td>
+</tr>
+</tbody></table>
 <h2 id="问题-8：mirror-之后，重复事件怎么处理？"><a href="#问题-8：mirror-之后，重复事件怎么处理？" class="headerlink" title="问题 8：mirror 之后，重复事件怎么处理？"></a>问题 8：mirror 之后，重复事件怎么处理？</h2><p>重复事件要分两段处理。</p>
 <p>第一段在发送侧：只有一个 region 能发送异常消息。</p>
 <p>第二段在状态侧：HCM 写状态前再读一次当前事实，做幂等判断。</p>
@@ -538,6 +765,36 @@
 </tr>
 </tbody></table>
 <p>这三个开关要分开：请求入口、事件复制、状态发送权可以按不同节奏切换。这样切流、回滚和演练才有操作空间。</p>
+<p>版本 6 把 mirror 后的事件变成安全状态变更：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>active_idc</code></td>
+<td>两个 region 都能算，但只能一个 region 发状态变更</td>
+<td>leader 归属</td>
+</tr>
+<tr>
+<td>agent&#x2F;rule&#x2F;window 锁</td>
+<td>同一个到期候选可能被看见多次</td>
+<td>幂等键</td>
+</tr>
+<tr>
+<td>HCM 二次校验</td>
+<td>重复或过期候选不能写出旧状态</td>
+<td>防御式写校验</td>
+</tr>
+<tr>
+<td>流量 &#x2F; mirror &#x2F; emit 三套开关</td>
+<td>请求、事件复制、写权限切换节奏不同</td>
+<td>正交控制面</td>
+</tr>
+</tbody></table>
 <h2 id="问题-9：TT-和-IES-拆分时，怎么不打断老链路？"><a href="#问题-9：TT-和-IES-拆分时，怎么不打断老链路？" class="headerlink" title="问题 9：TT 和 IES 拆分时，怎么不打断老链路？"></a>问题 9：TT 和 IES 拆分时，怎么不打断老链路？</h2><p>HCM&#x2F;Heartbeat 后来同时服务 IES 和 TT 侧业务。两边共用 HCM、Heartbeat、DB、MQ 和 routing 更新链路时，发布、容量和容灾都会绑在一起。</p>
 <p>TT 内容侧要拆出去，最简单的做法是新建 TT HCM、TT Heartbeat、TT DB 和 TT MQ，然后让上游一次性切走。</p>
 <p>这个方案风险很高。HCM 连着登录、状态更新、skill group、任务数、路由、WFM 和 binlog 传播。一次性切干净，任何一个字段、过滤条件或 MQ 消费组出错，都会影响接单和状态同步。</p>
@@ -553,6 +810,46 @@
 
 <p>判断结果写 Redis cache。cache miss 时查 DB，拿到 access party 后再写回。工作状态、agent-skillgroup 关系和 routing 更新都可以按这个结果过滤。</p>
 <p>这层改造带来的好处是可回滚。TT HCM 出问题，可以继续走 IES 原链路。filter 出问题，也可以通过配置关掉转发，先保住旧路径。</p>
+<p>版本 7 是迁移桥：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TT HCM 入口</td>
+<td>上游可以先迁入口，不必一次切完写链路</td>
+<td>绞杀者模式</td>
+</tr>
+<tr>
+<td>转发 RPC 到 IES HCM</td>
+<td>第一阶段仍由旧事实源写状态</td>
+<td>兼容适配器</td>
+</tr>
+<tr>
+<td>dsyncer</td>
+<td>TT 侧先建立本地读模型，写入仍留在旧路径</td>
+<td>数据复制</td>
+</tr>
+<tr>
+<td>ownership filter</td>
+<td>TT 和 IES 数据要按 agent 归属拆开</td>
+<td>按领域归属路由</td>
+</tr>
+<tr>
+<td>Redis ownership cache</td>
+<td>归属判断是高频读</td>
+<td>read-through cache</td>
+</tr>
+<tr>
+<td>配置开关</td>
+<td>迁移出问题要能不发版回滚</td>
+<td>feature flag &#x2F; 回滚杠杆</td>
+</tr>
+</tbody></table>
 <h2 id="问题-10：什么时候可以真的拆开？"><a href="#问题-10：什么时候可以真的拆开？" class="headerlink" title="问题 10：什么时候可以真的拆开？"></a>问题 10：什么时候可以真的拆开？</h2><p>共存阶段跑稳之后，才进入第二阶段。</p>
 <p>第二阶段要把写入、事件、MQ 和 routing 更新都拆开：</p>
 <p><img src="/img/hcm-heartbeat-design/v8-tt-ies-isolation.png" alt="版本 8：迁移后隔离 TT 和 IES"></p>
@@ -574,6 +871,41 @@
 <li>IES 侧保留原有路径，不被 TT 发布和切流影响。</li>
 </ul>
 <p>这时 TT&#x2F;IES 拆分才算完成。</p>
+<p>版本 8 是把迁移桥拆掉：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>停止转发</td>
+<td>TT 写入不再依赖 IES 可用性</td>
+<td>服务归属</td>
+</tr>
+<tr>
+<td>停止 dsyncer</td>
+<td>临时同步链路不能永久留在系统里</td>
+<td>迁移产物下线</td>
+</tr>
+<tr>
+<td>TT &#x2F; IES 独立 MQ</td>
+<td>事件要留在自己的业务边界内</td>
+<td>bounded context</td>
+</tr>
+<tr>
+<td>独立 routing 消费者</td>
+<td>路由更新不能跨 ownership 边界</td>
+<td>消费者归属</td>
+</tr>
+<tr>
+<td>闭合性校验</td>
+<td>拆分完成要证明事实和副作用都在本侧闭合</td>
+<td>不变量验证</td>
+</tr>
+</tbody></table>
 <h2 id="问题-11：前端动作没进来，系统怎么发现？"><a href="#问题-11：前端动作没进来，系统怎么发现？" class="headerlink" title="问题 11：前端动作没进来，系统怎么发现？"></a>问题 11：前端动作没进来，系统怎么发现？</h2><p>状态计算依赖输入事件。后端 RPC 全绿，只能说明后端还活着，说明不了用户动作真的进了 Heartbeat。</p>
 <p>GCP -&gt; NO1A 切流后，出现过 agent 频繁 abnormal。人还在工作台操作，系统却判断他长时间没动作。最后查到的问题在工作台长链路配置：<code>keyup</code> &#x2F; <code>keydown</code> 事件没有稳定进入 Heartbeat。</p>
 <p>HCM 错误率覆盖不到这段输入链路。状态计算前面要加一层输入健康检查。</p>
@@ -623,6 +955,41 @@
 <p>工程上更稳的做法是把输入健康接进规则层。</p>
 <p>如果某个 region 或工作台版本的输入健康已经异常，自动 abnormal 规则应该降级：延长窗口、暂停自动切异常，或者只发提醒。等输入链路恢复后，再回到正常计算。</p>
 <p>这样做会牺牲一部分自动化程度，但能避免“因为采集链路断了，把正在工作的人切成异常”。</p>
+<p>版本 9 补的是输入可观测性：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>输入健康指标</td>
+<td>后端成功率不能证明用户动作已经进来</td>
+<td>端到端可观测</td>
+</tr>
+<tr>
+<td><code>frontier_error_rate</code> &#x2F; <code>ws_register_failure</code></td>
+<td>长链和注册失败要有自己的信号</td>
+<td>分层遥测</td>
+</tr>
+<tr>
+<td><code>short_poll_lag</code></td>
+<td>降级路径也要被度量</td>
+<td>fallback 可观测</td>
+</tr>
+<tr>
+<td>synthetic action</td>
+<td>低流量场景下，被动指标可能看不出链路断裂</td>
+<td>主动探测</td>
+</tr>
+<tr>
+<td>规则降级</td>
+<td>输入不健康时，自动化规则要先收住</td>
+<td>业务规则熔断</td>
+</tr>
+</tbody></table>
 <h2 id="问题-12：HCM-已经写状态，下游还是旧状态怎么办？"><a href="#问题-12：HCM-已经写状态，下游还是旧状态怎么办？" class="headerlink" title="问题 12：HCM 已经写状态，下游还是旧状态怎么办？"></a>问题 12：HCM 已经写状态，下游还是旧状态怎么办？</h2><p>状态提交成功以后，下游还要拿到同一个事实。这里出过一个很典型的事故：US-TTP ES down 时，WFM 的 Omni-channel view 没有反映实时状态。</p>
 <p>排查时，HCM DB 里的 agent 已经 offline，HCM 到 WFM 的消息看起来也发成功了。最后发现 binlog 到 HCM MQ 堆了约 300k 条消息。work status handler 本身没慢，另一个依赖 ES 的 handler 超时了。多个 handler 共用一条消费链路，慢 handler 把工作状态传播拖住了。</p>
 <p>这个问题把 V4 的状态传播继续往前推一层：状态变更要有独立车道。</p>
@@ -663,6 +1030,41 @@
 </tr>
 </tbody></table>
 <p>状态系统最怕“主库已经对了，下游还错着”。只有把提交、出站、消费分开看，才能知道慢在哪一段。</p>
+<p>版本 10 隔离的是状态传播链路：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>status_change_outbox</code></td>
+<td>DB 提交和出站事件要一起成功或一起失败</td>
+<td>事务 outbox</td>
+</tr>
+<tr>
+<td><code>work_status_dispatcher</code></td>
+<td>工作状态不能排在无关 handler 后面</td>
+<td>专用 worker</td>
+</tr>
+<tr>
+<td>handler 独立 retry &#x2F; DLQ</td>
+<td>慢消费者需要自己的恢复通道</td>
+<td>bulkhead 隔离</td>
+</tr>
+<tr>
+<td>端到端延迟指标</td>
+<td>下游旧状态要能定位到具体段</td>
+<td>pipeline 可观测</td>
+</tr>
+<tr>
+<td>对账方向</td>
+<td>下游状态可能偏离 HCM 事实</td>
+<td>最终一致性修复</td>
+</tr>
+</tbody></table>
 <h2 id="问题-13：热读接口把-HCM-打爆怎么办？"><a href="#问题-13：热读接口把-HCM-打爆怎么办？" class="headerlink" title="问题 13：热读接口把 HCM 打爆怎么办？"></a>问题 13：热读接口把 HCM 打爆怎么办？</h2><p><code>GetWorkStatus</code> 是这条链路里的热接口。Compute 要查它，上游也要查它。一次 OOM 事故里，downstream error rate spike 和 <code>GetWorkStatus</code> 流量峰值对齐。</p>
 <p>这说明状态系统还需要容量防线。</p>
 <p><img src="/img/hcm-heartbeat-design/v11-status-read-guard.png" alt="版本 11：保护热状态读接口"></p>
@@ -703,6 +1105,46 @@
 </tbody></table>
 <p>Heartbeat Compute 侧也要配合。比如同一个 agent 在短时间内连续上报动作，不需要每条事件都 RPC 查一次当前状态。可以按 agent 做小窗口合并，或者读取本地&#x2F;Redis 状态快照，再把最终提交交给 HCM recheck。</p>
 <p>这层改造把 <code>GetWorkStatus</code> 从“谁来都查 DB”变成“有预算、有隔离、有降级的状态读服务”。</p>
+<p>版本 11 把热读接口变成受保护的服务：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>per-caller quota</td>
+<td>单个上游可能打爆共享状态读</td>
+<td>公平性和准入控制</td>
+</tr>
+<tr>
+<td>bulkhead pool</td>
+<td>不同调用方不能抢光彼此 worker</td>
+<td>bulkhead 隔离</td>
+</tr>
+<tr>
+<td>短 TTL cache</td>
+<td>重复读不能每次都打 DB</td>
+<td>cache-aside</td>
+</tr>
+<tr>
+<td>stale read budget</td>
+<td>部分读路径可以用新鲜度换可用性</td>
+<td>显式一致性预算</td>
+</tr>
+<tr>
+<td>circuit breaker</td>
+<td>依赖坏掉时要快速失败</td>
+<td>故障收敛</td>
+</tr>
+<tr>
+<td>Compute 侧合并</td>
+<td>同一 agent 短时间多事件可以合并读</td>
+<td>请求合并</td>
+</tr>
+</tbody></table>
 <h2 id="问题-14：查询改动怎么安全上线？"><a href="#问题-14：查询改动怎么安全上线？" class="headerlink" title="问题 14：查询改动怎么安全上线？"></a>问题 14：查询改动怎么安全上线？</h2><p>HCM 4.3 的 DB query rollback 暴露的是发布防线。</p>
 <p>canary 阶段看起来正常，ROW 后出现新错误日志。原因是两个 <code>LEFT JOIN</code> 放大了 <code>count</code> SQL 的数据量，最后打到 DB timeout。</p>
 <p>“先 canary 再全量”覆盖不了这类问题。canary 流量小，数据分布也可能偏，复杂查询要单独过成本检查。</p>
@@ -744,6 +1186,46 @@
 <figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">simple filter -&gt; old query</span><br><span class="line">join filter   -&gt; join query</span><br></pre></td></tr></table></figure>
 
 <p>这样某个复杂 filter 出问题时，可以只回退这条查询路径，不影响其他查询。</p>
+<p>版本 12 给数据访问加发布门禁：</p>
+<table>
+<thead>
+<tr>
+<th>节点 &#x2F; 改动</th>
+<th>解决的问题</th>
+<th>软件工程概念</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>feature flag</td>
+<td>查询行为需要运行时回滚</td>
+<td>渐进式发布</td>
+</tr>
+<tr>
+<td>canary</td>
+<td>新查询先吃小流量</td>
+<td>受控暴露</td>
+</tr>
+<tr>
+<td>shadow query</td>
+<td>结果和成本可以先验证，不影响线上返回</td>
+<td>dark launch</td>
+</tr>
+<tr>
+<td><code>EXPLAIN</code> 成本预算</td>
+<td>昂贵查询计划要在进流量前拦住</td>
+<td>静态成本门禁</td>
+</tr>
+<tr>
+<td>慢 SQL &#x2F; 错误预算</td>
+<td>运行时成本可能和 canary 预期不同</td>
+<td>自动回滚信号</td>
+</tr>
+<tr>
+<td>filter 级 fallback</td>
+<td>一个复杂 filter 出问题，不该回滚所有查询</td>
+<td>细粒度 kill switch</td>
+</tr>
+</tbody></table>
 <h2 id="后续还要解决什么？"><a href="#后续还要解决什么？" class="headerlink" title="后续还要解决什么？"></a>后续还要解决什么？</h2><p>上面的 V9 到 V12 把系统推成一个状态平台。输入链路、计算链路、提交链路、传播链路、容量链路、发布链路都要能被单独观测和单独降级。</p>
 <p>后面还可以继续扩：</p>
 <table>

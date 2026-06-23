@@ -7,4 +7,4 @@ https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interprete
 https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/
 https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/
 https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/
-https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/
+https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/
