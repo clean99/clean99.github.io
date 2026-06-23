@@ -41,16 +41,16 @@ status
 
 The frontend reports heartbeat events. The backend updates `last_seen_at`. A scheduled job scans expired records and marks agents as `OFFLINE`.
 
-This model works for a lightweight presence indicator. An operations platform asks harder questions:
+This model works for a lightweight presence indicator. Before we even talk about task count or skill groups, the intake path already has problems:
 
-- Can this online agent receive a new ticket?
-- Should an agent who is working on a ticket be auto-marked abnormal?
-- Which skill groups and business lines does this rule apply to?
-- Has the abnormal status already been notified?
-- Have WFM, routing, and analytics received the same state?
-- During a region cutover, which region is allowed to emit a state change?
+- A workbench page has multiple modules. They should not each open their own channel.
+- User activity is bursty. A typing burst should not become a synchronous write storm.
+- Browser connections drop. A reconnect should not make the system lose recent activity.
+- Long-link push and short-poll compensation can deliver the same logical message twice.
+- Heartbeat service restarts should not erase the input stream.
+- State calculation should be deployable without changing the browser SDK.
 
-`last_seen_at` gives us recent activity. The production system needs business context.
+`last_seen_at` gives us a timestamp. The next problem is to turn browser activity into a reliable event stream.
 
 ## How do UI events enter Heartbeat reliably?
 
@@ -81,19 +81,25 @@ WS-API handles long-link initialization, module registration, deregistration, an
 
 We also dedupe early. Business messages carry `ReqID`, and the SDK keeps a recent `ReqID` cache. The RPC push service generates `msgID`, so long-link delivery and short-poll compensation can dedupe the same logical message. If a business flow needs ordering, it carries an `Index`; ordering semantics stay with the business.
 
-Raw MQ solves a separate set of problems:
+Each node earns its place:
 
-- UI modules share a single long-link instead of each owning a channel.
-- Frontier failures can fall back to short polling.
-- The client can dedupe with `ReqID` and `msgID`.
-- Traffic spikes land in a queue instead of the compute path.
-- Consumers can restart and continue from the event stream.
-- Intake and calculation can deploy independently.
-- New rules can reuse the same raw activity stream.
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| Workbench SDK | Multiple modules in one page need one shared client-side channel | Connection pooling and client-side ownership |
+| `module + entity` registration | Events must be routed to the right business module without opening new links | Namespacing and subscription boundaries |
+| `deviceID` | A backend push target needs a stable browser-window identity | Session identity |
+| WS-API | Init, register, deregister, and compensation need one control surface | Control plane separate from data delivery |
+| Frontier | Long-link delivery should be handled by a dedicated channel service | Separation of concerns |
+| Short-poll compensation | Long-link outages should not drop recent messages | Graceful degradation |
+| `ReqID` / `msgID` dedupe | Push and compensation can deliver the same logical event twice | Idempotency |
+| Raw MQ | Bursty activity and service restarts should not hit Compute directly | Backpressure and durable buffering |
+| Heartbeat intake service | Browser protocol details should not leak into Compute | Adapter boundary |
 
 The queue contains input, not truth.
 
 If a consumer turns every `keyup` into `ONLINE`, and every missing event into `ABNORMAL`, the system will still misclassify people. Events lack task count, skill group membership, work status, rule scope, and notification history.
+
+That leads to the next set of questions, which are about business context: can this agent receive a ticket, which skill groups does the rule cover, has the abnormal status already been handled, and which region can emit a state change? Compute and HCM own those decisions.
 
 That leads to the compute layer.
 
@@ -135,6 +141,16 @@ event + current facts + rule = candidate
 A candidate is still only a candidate. An agent may have no action after 10:00, so Compute may produce an abnormal candidate at 10:10. At 10:10:01, the agent may receive a new ticket. HCM must re-read the facts before committing the state.
 
 Keep that boundary hard: Compute calculates candidates. HCM commits facts.
+
+Version 2 adds these pieces for specific reasons:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| Compute | Raw events need business interpretation before they can affect state | Domain service boundary |
+| `GetWorkStatus` read | A candidate needs current task, status, and skill group facts | Read-before-decide |
+| Candidate state change | Calculation should not write final truth directly | Command staging |
+| Rule configuration | Status logic changes faster than service code | Policy/data separation |
+| HCM recheck requirement | Facts can change after Compute produced a candidate | Optimistic validation |
 
 ## How do we calculate "no action for N minutes"?
 
@@ -186,6 +202,17 @@ Cron scans every 2 seconds. Before emitting messages, it checks whether the curr
 One detail matters more than it looks: the business window and the dedupe lock window should be different.
 
 For a 10-minute no-action reminder, the business threshold is 600 seconds. The agent-level dedupe lock can be 840 seconds. That reduces reminder spam while still leaving room for later transitions such as `ABNORMAL -> OFFLINE`.
+
+Version 3 adds these pieces:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| Redis zset | Tens of thousands of timers should not live inside process memory | Externalized state |
+| Timestamp score | Due candidates need efficient time-window scans | Index by time |
+| Separate rule queues | Different windows and rules should not share hidden state | Work partitioning |
+| Cron scanner | Due work needs a repeatable executor outside request flow | Scheduled worker |
+| Global TTL lock | Multiple instances may scan the same queue | Lease-based coordination |
+| Dedupe lock window | Repeated reminders should be bounded independently from rule threshold | Idempotency window |
 
 ## Who writes the final status?
 
@@ -245,6 +272,16 @@ HCM's responsibilities stay small and strict:
 - Write `unified_work_status_log`.
 - Hand the state change to the downstream propagation path.
 
+Version 4 introduces a state authority:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| HCM as writer | Multiple writers would create competing status facts | Single writer / source of truth |
+| Status enum | Callers need stable state semantics | Explicit domain model |
+| Rule coverage check | Rules apply to selected status, skill group, and business scope | Policy enforcement |
+| Task-count recheck | Work assignment can change after Compute emitted the candidate | Consistency at commit time |
+| Status log | State changes need auditability and downstream replay context | Append-only history |
+
 ## How do downstream systems get the same state?
 
 After HCM commits a status, WFM, routing, analytics, and other consumers still need the same fact.
@@ -274,6 +311,16 @@ The real delay was earlier. The binlog-to-HCM-MQ path had about 300k messages qu
 The fix direction was obvious after the incident: add handler-level latency metrics, and move work status propagation closer to a direct binlog-to-RMQ path so unrelated event distribution cannot block it.
 
 The design question is simple: which handler can stall the state path, which consumer group shares a failure domain, and which metric proves the downstream view received the state?
+
+The propagation part of Version 4 adds a second set of boundaries:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| `status_table` | Downstream systems need a committed fact, not a candidate | Durable source of truth |
+| DBus / binlog | Consumers need to follow DB commits without coupling to write RPCs | Change data capture |
+| Status change MQ | WFM and routing should consume state asynchronously | Event-driven propagation |
+| Handler metrics | A slow handler can hide behind a successful DB write | Observability by stage |
+| Consumer isolation plan | Unrelated handlers can block work status propagation | Failure-domain isolation |
 
 ## How do events survive a region cutover?
 
@@ -308,6 +355,16 @@ MQ mirror reduces event loss. It also creates a new problem: two regions can see
 Duplicate events are tolerable. Duplicate state changes are dangerous. The same no-action candidate emitted in two regions can send two exception messages to HCM, and downstream systems may receive repeated state changes.
 
 That takes us to dedupe.
+
+Version 5 adds event continuity across regions:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| MQ mirror | Target region needs recent activity before it receives traffic | Replicated log |
+| `from_dc` dimension | Operators need to prove where traffic and events are flowing | Traceable provenance |
+| Lag and consume-rate checks | Cutover should wait for the target stream to catch up | Readiness gate |
+| Small traffic slice | Region changes need a reversible first step | Canary cutover |
+| Rollback by routing config | Cutover failure should not require code rollback | Operational control plane |
 
 ## How do we handle duplicates after mirror?
 
@@ -350,6 +407,15 @@ After cross-region support, the state path has three independent switches:
 
 Keep those switches separate. Request routing, event replication, and state emission ownership often need different rollout and rollback timing.
 
+Version 6 turns mirrored events into safe state changes:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| `active_idc` | Two regions can calculate, but only one should emit state changes | Leader ownership |
+| Agent/rule/window lock | The same due candidate can be seen more than once | Idempotency key |
+| HCM recheck | Duplicate or stale candidates should not commit stale state | Defensive write validation |
+| Separate traffic / mirror / emit switches | Request flow, event replication, and write ownership change at different speeds | Orthogonal control planes |
+
 ## How do we split TT and IES without breaking the old path?
 
 The system later served both IES and TT business lines. Sharing HCM, Heartbeat, DB, MQ, and routing update paths tied release risk, capacity, and disaster recovery together.
@@ -391,6 +457,17 @@ Cache the result in Redis. On cache miss, read DB, resolve access party, then wr
 
 This phase is rollback-friendly. If TT HCM has a problem, traffic can continue through the original IES path. If the filter has a problem, forwarding can be disabled by config while the old path keeps serving agents.
 
+Version 7 is a migration bridge:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| TT HCM entry | Upstreams can move before the write path is fully split | Strangler pattern |
+| Forward RPC to IES HCM | Old source of truth stays in charge during phase one | Compatibility adapter |
+| Dsyncer | TT side can build a local read model while writes remain old-path | Data replication |
+| Ownership filter | TT and IES data must be separated by agent ownership | Routing by domain ownership |
+| Redis ownership cache | Ownership checks are hot and repeated | Read-through cache |
+| Config kill switch | Migration needs rollback without redeploy | Feature flag / rollback lever |
+
 ## When can the split become real?
 
 After coexistence is stable, the second phase separates writes, events, MQ, and routing updates.
@@ -417,6 +494,16 @@ There are two things to prove: the services are separated, and the state facts a
 - IES keeps its original path without TT release and cutover risk.
 
 Only then is the split actually done.
+
+Version 8 removes the bridge after ownership is proven:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| Stop forwarding | TT writes should no longer depend on IES availability | Service ownership |
+| Stop dsyncer | Dual-write/read-model sync should not stay forever | Temporary migration artifact removal |
+| Separate TT / IES MQ | Events should stay inside their owning business line | Bounded context |
+| Separate routing consumers | Routing updates should not cross ownership boundaries | Consumer ownership |
+| Closure checks | A split is done only when facts and side effects are local | Invariant verification |
 
 ## How do we notice when frontend activity stops entering the system?
 
@@ -448,6 +535,16 @@ The stronger design feeds input health into the rule layer.
 If one region or workbench version has unhealthy input, automatic abnormal rules should degrade: extend the window, pause auto-abnormal, or send reminders only. When input recovers, normal calculation resumes.
 
 That reduces automation during incidents, but it prevents a worse failure: marking working agents abnormal because the collection path broke.
+
+Version 9 adds input observability:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| Input health metrics | Backend success does not prove frontend actions arrived | End-to-end observability |
+| `frontier_error_rate` / `ws_register_failure` | Long-link and registration failures need their own signals | Layer-specific telemetry |
+| `short_poll_lag` | Degradation path must be measured too | Fallback observability |
+| Synthetic action | Passive metrics may miss a broken path with low traffic | Active probing |
+| Rule degradation | Bad input should reduce automation before it creates bad state | Circuit breaker for business rules |
 
 ## What if HCM is correct and downstream is stale?
 
@@ -488,6 +585,16 @@ End-to-end metrics need to follow the same split:
 
 The worst state-system failure is a correct source of truth with stale consumers. Split commit, outbound delivery, and consumption, then measure each segment.
 
+Version 10 isolates propagation:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| `status_change_outbox` | DB commit and outbound event should succeed or fail together | Transactional outbox |
+| `work_status_dispatcher` | Work status should not wait behind unrelated handlers | Dedicated worker |
+| Handler-specific retry / DLQ | Slow consumers need isolated recovery paths | Bulkhead isolation |
+| End-to-end latency metrics | Stale downstream state must be traced to a segment | Pipeline observability |
+| Reconciliation direction | Downstream state can drift from HCM facts | Eventual consistency repair |
+
 ## How do we keep hot status reads from taking HCM down?
 
 `GetWorkStatus` is a hot read in this pipeline. Compute calls it. Upstreams call it. During one OOM incident, downstream error rate spikes aligned with `GetWorkStatus` traffic spikes.
@@ -514,6 +621,17 @@ The goal is caller isolation. If one upstream goes bad, its failure should stay 
 Heartbeat Compute should also reduce pressure. If the same agent reports many events in a short window, Compute does not need to call `GetWorkStatus` for every event. It can merge by agent in a small window, read a local or Redis snapshot, and still let HCM recheck before final commit.
 
 The path changes from "every caller hits DB-shaped truth" into a read service with budgets, isolation, and degradation.
+
+Version 11 turns a hot read into a protected service:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| Per-caller quota | One upstream can overwhelm shared state reads | Fairness and admission control |
+| Bulkhead pool | Caller groups should not exhaust each other's workers | Bulkhead isolation |
+| Short-TTL cache | Repeated reads should not all hit DB | Cache-aside |
+| Stale read budget | Some reads can trade freshness for availability | Explicit consistency budget |
+| Circuit breaker | Broken dependencies should fail fast | Failure containment |
+| Compute-side merge | Many events for one agent can collapse into fewer reads | Request coalescing |
 
 ## How do query changes ship safely?
 
@@ -556,6 +674,17 @@ join filter   -> join query
 ```
 
 If a complex filter path breaks, only that path rolls back.
+
+Version 12 adds release gates around data access:
+
+| Node / change | Problem it solves | Software engineering idea |
+| --- | --- | --- |
+| Feature flag | Query behavior needs runtime rollback | Progressive delivery |
+| Canary | New query should see a small traffic slice first | Controlled exposure |
+| Shadow query | Result and cost can be checked without affecting users | Dark launch |
+| `EXPLAIN` budget | Expensive query plans should be blocked before traffic | Static cost guard |
+| Slow SQL and error budgets | Runtime cost can differ from canary expectation | Automated rollback signal |
+| Filter-level fallback | One expensive filter should not roll back every query path | Granular kill switch |
 
 ## What remains open?
 
