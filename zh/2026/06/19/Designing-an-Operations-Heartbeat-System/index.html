@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+
+  <!-- Minima -->
+  <!-- Hexo theme created by @adisaktijrs -->
+
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+
+  
+  <title>运营管理心跳系统设计 | Koh Hom — Software, AI, and Inner Practice</title>
+  
+  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
+  
+  <link rel="canonical" href="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/">
+  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
+  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
+  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
+  <meta name="description" content="从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/IES 拆分，一步步推导运营管理心跳系统的设计。">
+  
+  <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
+  
+  <meta name="author" content="Koh Hom">
+  
+  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta property="og:site_name" content="Koh Hom — Software, AI, and Inner Practice" />
+  
+  <meta property="og:type" content="article" />
+  <meta property="article:published_time" content="2026-06-19T04:00:00.000Z" />
+  <meta property="article:modified_time" content="2026-06-19T04:00:00.000Z" />
+  <meta property="article:author" content="Koh Hom" />
+  
+  <meta property="article:tag" content="Software Engineering" />
+  
+  <meta property="article:tag" content="fault-tolerance" />
+  
+  <meta property="article:tag" content="reliability" />
+  
+  
+  <meta property="og:title" content="运营管理心跳系统设计 | Koh Hom — Software, AI, and Inner Practice" />
+  <meta property="og:locale" content="zh_CN" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="og:description" content="从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/IES 拆分，一步步推导运营管理心跳系统的设计。">
+  <meta property="og:url" content="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@Clean993">
+  <meta name="twitter:creator" content="@Clean993">
+  <meta name="twitter:title" content="运营管理心跳系统设计 | Koh Hom — Software, AI, and Inner Practice">
+  <meta name="twitter:description" content="从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/IES 拆分，一步步推导运营管理心跳系统的设计。">
+  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
+  <meta name="twitter:url" content="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0FA0CE">
+
+  <!-- Preconnect to external origins
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
+  <!-- Preload fonts
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+<link rel="stylesheet" href="/css/normalize.css">
+
+  
+<link rel="stylesheet" href="/css/skeleton.css">
+
+  
+<link rel="stylesheet" href="/css/custom.css">
+
+  
+<link rel="stylesheet" href="/css/prism-dark.css">
+
+  
+<link rel="stylesheet" href="/css/prism-line-numbers.css">
+
+  <!-- User css -->
+  
+  
+<link rel="stylesheet" href="/css/user.css">
+
+  
+  
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+
+  <!-- Custom Theme Color Style
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <style>
+  a:not(.icon) {
+    text-decoration-color: #0FA0CE;
+    background-image: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0) 50%,
+      #0FA0CE 50%
+    );
+  }
+  blockquote {
+    border-left: 8px solid #0FA0CE;
+  }
+  .nanobar .bar {
+    background: #0FA0CE;
+  }
+  .button.button-primary:hover,
+  button.button-primary:hover,
+  input[type="submit"].button-primary:hover,
+  input[type="reset"].button-primary:hover,
+  input[type="button"].button-primary:hover,
+  .button.button-primary:focus,
+  button.button-primary:focus,
+  input[type="submit"].button-primary:focus,
+  input[type="reset"].button-primary:focus,
+  input[type="button"].button-primary:focus {
+    background-color: #0FA0CE;
+    border-color: #0FA0CE;
+  }
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="search"]:focus,
+  input[type="text"]:focus,
+  input[type="tel"]:focus,
+  input[type="url"]:focus,
+  input[type="password"]:focus,
+  textarea:focus,
+  select:focus {
+    border: 1px solid #0FA0CE;
+  }
+</style>
+
+  <!-- Google Analytics (With Privacy Settings On)
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+    <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+  
+    gtag('config', 'G-QRLPVVLS6T');
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
+     crossorigin="anonymous"></script>
+
+  <!-- JSON-LD Structured Data
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"运营管理心跳系统设计","datePublished":"2026-06-19T04:00:00.000Z","dateModified":"2026-06-19T04:00:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/","mainEntityOfPage":"https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/","inLanguage":"zh-CN","description":"运营管理系统里有一个很基础的问题：怎么知道一个运营现在是否在线？ 最小实现很简单。前端每隔几秒发一个心跳包，服务端保存 last_seen_at。如果超过一段时间没有收到心跳，就把这个人标成离线。 这个版本能点亮一个在线灯。要支撑派单、排班、监控和工时统计，它还差很多上下文。运营是否在线，需要同时看他是否有任务、属于哪个技能组、当前状态能不能接单、是否在灰度规则里、异常状态是否已经通知过、下游系统","keywords":["Software Engineering","fault-tolerance","reliability"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"运营管理心跳系统设计","item":"https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/"}]}</script>
+  
+
+  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
+  <script>
+  (function() {
+    var stored = localStorage.getItem('preferredLang');
+    if (stored) return;
+    var path = window.location.pathname;
+    var isZhPath = path === '/zh' || path.indexOf('/zh/') === 0;
+    if (isZhPath) {
+      localStorage.setItem('preferredLang', 'zh');
+      return;
+    }
+    if (path !== '/') return;
+    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
+    localStorage.setItem('preferredLang', stored);
+    if (stored === 'zh') {
+      window.location.replace('/zh/' + window.location.search + window.location.hash);
+    }
+  })();
+  </script>
+
+<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom — Software, AI, and Inner Practice" type="application/atom+xml">
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+      <div>
+
+        <header class="site-header">
+  <div class="site-header__top">
+    <div class="site-actions">
+      <button class="theme-toggle" type="button" onclick="setDarkMode(!document.body.classList.contains('darkmode'))" aria-label="Toggle color theme">
+        <span id="themeIcon" aria-hidden="true">◐</span>
+      </button>
+      <a
+        href="/2026/06/19/Designing-an-Operations-Heartbeat-System/"
+        class="language-switch"
+        onclick="localStorage.setItem('preferredLang', 'en')"
+        aria-label="Read in English"
+      >
+        <span class="language-switch__full">EN</span>
+        <span class="language-switch__short" aria-hidden="true">EN</span>
+      </a>
+    </div>
+  </div>
+
+  <nav class="site-nav" aria-label="Primary navigation">
+    <a href="/zh/">首页</a>
+    
+      
+        
+        <a href="/zh/writing">写作</a>
+      
+    
+      
+        
+        <a href="/zh/projects">项目</a>
+      
+    
+      
+        
+        <a href="/zh/ai-coding-lab">AI Skills</a>
+      
+    
+      
+        
+        <a href="/zh/interviewers">面试官入口</a>
+      
+    
+      
+        
+        <a href="/zh/About">关于</a>
+      
+    
+  </nav>
+</header>
+
+<script>
+  if (localStorage.getItem('preferredTheme') === 'dark') {
+    setDarkMode(true);
+  }
+  function setDarkMode(isDark) {
+    document.body.classList.toggle('darkmode', isDark);
+    var icon = document.getElementById('themeIcon');
+    if (icon) icon.textContent = isDark ? '◑' : '◐';
+    if (isDark) {
+      localStorage.setItem('preferredTheme', 'dark');
+    } else {
+      localStorage.removeItem('preferredTheme');
+    }
+  }
+</script>
+
+        <div class="trans">
+            <article itemscope itemtype="https://schema.org/BlogPosting">
+    <header>
+      <h2 itemprop="headline">运营管理心跳系统设计</h2>
+      
+      <p style="margin-bottom: 0.5rem;">
+        <a href="/2026/06/19/Designing-an-Operations-Heartbeat-System/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
+          Read in English
+        </a>
+      </p>
+      
+      <meta itemprop="author" content="Koh Hom">
+      <meta itemprop="datePublished" content="2026-06-19T04:00:00.000Z">
+      <meta itemprop="dateModified" content="2026-06-19T04:00:00.000Z">
+    </header>
+    <div itemprop="articleBody">
+      <p>运营管理系统里有一个很基础的问题：怎么知道一个运营现在是否在线？</p>
+<p>最小实现很简单。前端每隔几秒发一个心跳包，服务端保存 <code>last_seen_at</code>。如果超过一段时间没有收到心跳，就把这个人标成离线。</p>
+<p>这个版本能点亮一个在线灯。要支撑派单、排班、监控和工时统计，它还差很多上下文。运营是否在线，需要同时看他是否有任务、属于哪个技能组、当前状态能不能接单、是否在灰度规则里、异常状态是否已经通知过、下游系统是否已经拿到最新状态。</p>
+<p>我维护的 HCM&#x2F;Heartbeat 系统服务 47,149 个 agent、7,000 个 skill group、约 4,000 QPS 和 141 个上游调用方。这篇文章从一个最朴素的实现开始，一层一层把系统推出来。</p>
+<p>先看最终目标：</p>
+<p><img src="/img/hcm-heartbeat-design/v13-final-target.png" alt="最终目标：HCM 心跳状态平台"></p>
+<p>图 0：最终目标是一套状态平台。图片由 gpt-image-2 生成。用户动作先经过统一工作台 SDK、WS-API 和 Frontier 长链，再进入 Heartbeat、MQ、Compute、HCM 和下游状态传播链路。</p>
+<p>下面从 <code>last_seen_at</code> 开始，一步步把这张图搭出来。</p>
+<p>每加一层，都先问一个问题。</p>
+<h2 id="问题-1：怎么知道运营有没有活跃？"><a href="#问题-1：怎么知道运营有没有活跃？" class="headerlink" title="问题 1：怎么知道运营有没有活跃？"></a>问题 1：怎么知道运营有没有活跃？</h2><p>第一版可以直接写状态。</p>
+<p><img src="/img/hcm-heartbeat-design/v0-direct-write.png" alt="版本 0：收到心跳就直接写状态"></p>
+<p>图 1：最朴素的心跳实现。图片由 gpt-image-2 生成。它可以记录最近心跳时间，但缺少任务数、技能组、业务规则和 region 信息。</p>
+<p>这个方案的数据结构大概是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">agent_id</span><br><span class="line">last_seen_at</span><br><span class="line">status</span><br></pre></td></tr></table></figure>
+
+<p>前端每隔 N 秒发心跳。服务端更新 <code>last_seen_at</code>。定时任务扫描超时的人，把状态改成 <code>OFFLINE</code>。</p>
+<p>这个模型适合很轻的场景，比如显示一个在线灯。运营管理系统的问题更具体：</p>
+<ul>
+<li>在线的人是否可以接单？</li>
+<li>正在处理工单的人能不能被自动切成异常？</li>
+<li>某条异常规则只对部分业务线生效，怎么灰度？</li>
+<li>状态变化之后，WFM、路由和数据侧怎么同步？</li>
+<li>多 region 切流时，哪个 region 可以发送状态变更？</li>
+</ul>
+<p><code>last_seen_at</code> 只能提供最近活跃时间。上面这些问题需要更多业务上下文。</p>
+<p>所以第一版适合作为思维起点，生产系统还要继续往前推。</p>
+<h2 id="问题-2：UI-到-Heartbeat-的事件怎么可靠进入系统？"><a href="#问题-2：UI-到-Heartbeat-的事件怎么可靠进入系统？" class="headerlink" title="问题 2：UI 到 Heartbeat 的事件怎么可靠进入系统？"></a>问题 2：UI 到 Heartbeat 的事件怎么可靠进入系统？</h2><p>下一步先补 UI 到 Heartbeat 的接入层，再把事件放进 Raw MQ。</p>
+<p><img src="/img/hcm-heartbeat-design/v1-event-buffer.png" alt="版本 1：把工作台动作变成事件流"></p>
+<p>图 2：统一工作台先用 SDK、WS-API 和 Frontier 承接浏览器里的动作事件，再交给 Heartbeat 和 Raw MQ。图片由 gpt-image-2 生成。状态计算留到下一层。</p>
+<p>前端上报的内容不只有定时心跳，还有点击、输入、鼠标、URL 变化、打开工单、回复工单、完成工单、转交工单等动作。</p>
+<p>这些动作的含义不同，但它们有一个共同点：都只能说明“这个 agent 在某个时间点发生过动作”。</p>
+<p>在统一工作台里，UI 到 Heartbeat 之间还有一层长链通道：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Agent UI</span><br><span class="line">-&gt; Workbench SDK</span><br><span class="line">-&gt; WS-API</span><br><span class="line">-&gt; Frontier</span><br><span class="line">-&gt; Heartbeat Service</span><br><span class="line">-&gt; Raw MQ</span><br></pre></td></tr></table></figure>
+
+<p>Workbench SDK 在一个 window 内维护一个长链接。业务模块按 <code>module + entity</code> 注册，<code>deviceID</code> 标识这条通道。<code>module + entity</code> 的粒度要控制好，粒度太细，切换 entity 时容易出现短暂未建联，推送就会掉在窗口外。</p>
+<p>WS-API 负责初始化长链、注册&#x2F;注销 module，也负责短链补偿。Frontier 负责长链通道。Frontier 异常时，端上可以通过短链轮询补未 ack 的消息，默认间隔是 30 秒，可以用配置调整。</p>
+<p>重复消息也在这一层先处理一遍。业务后端传 <code>ReqID</code>，SDK 保存最近一批 <code>ReqID</code> 做去重；RPC 推送服务生成 <code>msgID</code>，长链推送和短链补偿都按 <code>msgID</code> 做兜底去重。业务需要顺序时，可以带 <code>Index</code>，排序语义由业务自己维护。</p>
+<p>这一步解决的是工程问题：</p>
+<ul>
+<li>浏览器里多个业务模块共用一条长链。</li>
+<li>Frontier 异常时，可以用短链补偿。</li>
+<li>端上可以按 <code>ReqID</code> &#x2F; <code>msgID</code> 去重。</li>
+<li>峰值流量可以被队列削掉。</li>
+<li>消费者重启后可以继续消费。</li>
+<li>事件接收和状态计算可以分开部署。</li>
+<li>后面新增规则时，可以复用同一份事件流。</li>
+</ul>
+<p>Raw MQ 里的事件是输入数据。</p>
+<p>如果消费端拿到一个 <code>keyup</code> 事件就直接把人标在线，拿不到事件就标异常，系统还是会误判。因为事件缺上下文：它不知道当前状态、任务数、技能组、业务线规则，也不知道这条异常是否已经处理过。</p>
+<p>这就需要下一层。</p>
+<h2 id="问题-3：怎么把事件变成状态判断？"><a href="#问题-3：怎么把事件变成状态判断？" class="headerlink" title="问题 3：怎么把事件变成状态判断？"></a>问题 3：怎么把事件变成状态判断？</h2><p>我们加一个 Compute 层。</p>
+<p><img src="/img/hcm-heartbeat-design/v2-compute-layer.png" alt="版本 2：加一层计算，把事件变成候选状态"></p>
+<p>图 3：Compute 消费原始事件，回查 HCM 拿当前事实，再生成异常候选。图片由 gpt-image-2 生成。</p>
+<p>Compute 层只做一件事：把“事件”转成“候选状态变更”。</p>
+<p>常见的事件类型可以分成几组：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>1</code></td>
+<td>在线心跳</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>工作状态变化</td>
+</tr>
+<tr>
+<td><code>3-12</code></td>
+<td>打开、回复、完成、转交、升级工单等业务动作</td>
+</tr>
+<tr>
+<td><code>100-105</code></td>
+<td>点击、输入、鼠标、切状态、呼出、URL 变化</td>
+</tr>
+<tr>
+<td><code>3001</code></td>
+<td>no action 15 min 计算结果</td>
+</tr>
+<tr>
+<td><code>3002</code></td>
+<td>abnormal 15 min 计算结果</td>
+</tr>
+<tr>
+<td><code>3003</code></td>
+<td>not on app</td>
+</tr>
+<tr>
+<td><code>4000</code></td>
+<td>Rule Config V2 计算结果</td>
+</tr>
+</tbody></table>
+<p>Compute 收到原始事件后，不直接写状态。它先问 HCM：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GetWorkStatus(agent_id, tenant_id, channel)</span><br></pre></td></tr></table></figure>
+
+<p>HCM 返回当前工作状态、任务数、技能组关系等信息。Compute 再结合规则判断这个 agent 是否进入异常候选。</p>
+<p>这一步的核心是把判断拆开：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">事件 + 当前事实 + 规则 = 候选</span><br></pre></td></tr></table></figure>
+
+<p>候选只是待确认结果。比如一个 agent 在 10:00 后没有动作，Compute 在 10:10 认为他可能要转异常。但 10:10:01 他可能刚接到新任务。最终能不能改状态，还要由 HCM 再读一次事实。</p>
+<p>Compute 层的边界要硬。它负责算候选，不负责提交最终状态。</p>
+<h2 id="问题-4：怎么计算“多久没有动作”？"><a href="#问题-4：怎么计算“多久没有动作”？" class="headerlink" title="问题 4：怎么计算“多久没有动作”？"></a>问题 4：怎么计算“多久没有动作”？</h2><p>很多心跳规则都带时间窗口：</p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>系统动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ONLINE</code> 且 30 秒没有任务</td>
+<td>自动转成 <code>IDLE</code></td>
+</tr>
+<tr>
+<td><code>ONLINE / IDLE / BUSY</code> 超过 8 分钟无操作或不在工作台</td>
+<td>发提醒</td>
+</tr>
+<tr>
+<td><code>ONLINE / IDLE / BUSY</code> 超过 10 分钟无操作或不在工作台</td>
+<td>自动转成 <code>ABNORMAL</code></td>
+</tr>
+<tr>
+<td><code>ABNORMAL</code> 再持续 10 分钟无操作或不在工作台</td>
+<td>自动转成 <code>OFFLINE</code></td>
+</tr>
+</tbody></table>
+<p>最直觉的实现是给每个 agent 建一个 timer。</p>
+<p>这个方案很快会变麻烦。进程重启时 timer 丢失，扩缩容时 timer 分散到不同实例，跨 region 切流时还要处理 timer 归属。对几万个 agent 来说，进程内 timer 会把复杂度绑到实例生命周期上。</p>
+<p>我们用 Redis zset 表达时间窗口。</p>
+<p><img src="/img/hcm-heartbeat-design/v3-time-window.png" alt="版本 3：用 Redis zset 表达时间窗口"></p>
+<p>图 4：候选 agent 按事件时间写入 Redis zset。图片由 gpt-image-2 生成。Cron 扫描到期数据，再把异常消息送回状态更新流程。</p>
+<p>Redis 里维护几类队列：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">agent_no_action_for_8_min</span><br><span class="line">agent_no_action_for_10_min</span><br><span class="line">queue_agent_no_action_for_15_min</span><br><span class="line">agent_in_abnormal_status_more_then_10_min</span><br><span class="line">queue_agent_in_abnormal_status_more_then_15_min</span><br><span class="line">agent_not_on_app_for_5_min</span><br><span class="line">queue_agent_not_on_app</span><br></pre></td></tr></table></figure>
+
+<p>score 存事件时间戳。到期扫描时，用 <code>zrangebyscore</code> 取出 <code>now - threshold</code> 之前的 agent。</p>
+<p>这个结构有几个好处：</p>
+<table>
+<thead>
+<tr>
+<th>需求</th>
+<th>zset 怎么处理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>按时间窗口判断</td>
+<td>score 存 timestamp</td>
+</tr>
+<tr>
+<td>Compute 重启后保留候选</td>
+<td>候选状态在 Redis</td>
+</tr>
+<tr>
+<td>多套规则同时存在</td>
+<td>不同规则拆到不同 zset</td>
+</tr>
+<tr>
+<td>避免重复提醒</td>
+<td>agent&#x2F;message&#x2F;rule 维度加锁</td>
+</tr>
+<tr>
+<td>支持灰度和回滚</td>
+<td>队列、规则、IDC 开关走配置</td>
+</tr>
+</tbody></table>
+<p>Cron 每 2 秒扫一次队列。扫描之前先检查当前 IDC 是否允许发送，再抢一个短 TTL 的全局锁，避免多个实例重复发同一批异常消息。</p>
+<p>这里有个容易踩坑的点：业务窗口和防重锁时间要分开设置。</p>
+<p>比如 10 分钟无操作触发提醒，业务窗口是 600 秒，但 agent 维度的防重锁可以设成 840 秒。这样同一阶段可以减少刷屏，后续 <code>ABNORMAL -&gt; OFFLINE</code> 也还有计算机会。</p>
+<h2 id="问题-5：谁可以写最终状态？"><a href="#问题-5：谁可以写最终状态？" class="headerlink" title="问题 5：谁可以写最终状态？"></a>问题 5：谁可以写最终状态？</h2><p>Compute 算出来的是候选。最终状态只能由 HCM 写入。</p>
+<p>原因很简单：HCM 才拥有 agent、skill group、任务数、当前状态和状态变更日志。状态写入必须集中，否则下游系统会看到多个版本的事实。</p>
+<p>座席状态本身是一组枚举：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ONLINE(1000)</span><br><span class="line">TRAINING(1001)</span><br><span class="line">BREAK(1002)</span><br><span class="line">MEETING(1003)</span><br><span class="line">ABNORMAL(1004)</span><br><span class="line">IDLE(1005)</span><br><span class="line">LUNCH(1006)</span><br><span class="line">OFFLINE(1007)</span><br><span class="line">OTHER(1008)</span><br><span class="line">BUSY(1009)</span><br><span class="line">STANDBY(1010)</span><br></pre></td></tr></table></figure>
+
+<p>HCM 消费异常候选后，会重新读取当前状态，然后做二次判断：</p>
+<ol>
+<li>当前状态是否还匹配规则。</li>
+<li>当前任务数是否允许切换。</li>
+<li>当前 agent 是否属于规则覆盖的 skill group。</li>
+<li>当前 region 是否允许发送状态变更。</li>
+<li>这次异常是否已经通知或处理过。</li>
+</ol>
+<p>规则配置可以长这样：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;access_party_ids&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">2</span><span class="punctuation">,</span> <span class="number">3</span><span class="punctuation">,</span> <span class="number">9</span><span class="punctuation">,</span> <span class="number">45</span><span class="punctuation">,</span> <span class="number">46</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">1000</span><span class="punctuation">,</span> <span class="number">1005</span><span class="punctuation">,</span> <span class="number">1009</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;no_heart_time_limit&quot;</span><span class="punctuation">:</span> <span class="number">600</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;status_to&quot;</span><span class="punctuation">:</span> <span class="number">1004</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;status_change_note&quot;</span><span class="punctuation">:</span> <span class="string">&quot;No action for 10min, automatically changes to abnormal.&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;notifies&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Lark&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;title&quot;</span><span class="punctuation">:</span> <span class="string">&quot;abnormal hint&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>这段配置同时影响状态变更和通知。Compute 的 TCC、Redis 队列和 HCM 规则共同约束最终行为。</p>
+<p>这套设计里，HCM 的职责很清楚：</p>
+<ul>
+<li>拒绝过期候选。</li>
+<li>根据当前事实判断能不能改状态。</li>
+<li>写 status table。</li>
+<li>写 <code>unified_work_status_log</code>。</li>
+<li>把状态变化交给下游传播链路。</li>
+</ul>
+<h2 id="问题-6：下游怎么拿到一致的状态？"><a href="#问题-6：下游怎么拿到一致的状态？" class="headerlink" title="问题 6：下游怎么拿到一致的状态？"></a>问题 6：下游怎么拿到一致的状态？</h2><p>状态写进 HCM DB 后，还要继续传播给下游。</p>
+<p>WFM、RouteQueue、数据侧和其他业务通常通过状态变更消息更新自己的视图。</p>
+<p>最终链路长这样：</p>
+<p><img src="/img/hcm-heartbeat-design/v4-final-pipeline.png" alt="最终链路：事件进入，状态由 HCM 提交，下游消费事实"></p>
+<p>图 5：最终链路保留了前面几个版本的组件，但职责被拆开：事件接收、候选计算、时间窗口、状态写入、状态传播。图片由 gpt-image-2 生成。</p>
+<p>状态传播走的是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HCM UpdateWorkStatus</span><br><span class="line">-&gt; status_table</span><br><span class="line">-&gt; DBus / binlog</span><br><span class="line">-&gt; status change MQ</span><br><span class="line">-&gt; WFM / Routing / Analytics</span><br></pre></td></tr></table></figure>
+
+<p>这个设计让所有下游都从 DB 变更事实出发。代价是链路变长了，任何 binlog handler、事件分发、MQ 堆积或下游消费延迟，都会让用户看到旧状态。</p>
+<p>我们踩过这个坑。</p>
+<p>一次 US-TTP 事故里，WFM 的 Omni-channel view 没有反映实时状态。排查时 HCM DB 里的 agent 已经 offline，HCM 到 WFM 的消息看起来也发成功了。</p>
+<p>最后问题出在更前面：binlog 到 HCM MQ 链路堆了约 300k 条消息。work status handler 没有变慢，另一个依赖 ES 的 handler 超时了。多个 handler 共用一条消费链路，慢 handler 把其他状态传播一起拖住了。</p>
+<p>这个事故之后，我们补了 handler 维度耗时指标，也把“消费 binlog 后直接发 RMQ，减少中间事件分发阻塞”列进改造项。</p>
+<p>这类问题在设计阶段就应该被问出来：哪个 handler 可以拖住主链路？哪个消费组有共享故障面？哪个指标能说明下游真的收到状态？</p>
+<h2 id="问题-7：跨-region-切流时，事件怎么不断？"><a href="#问题-7：跨-region-切流时，事件怎么不断？" class="headerlink" title="问题 7：跨 region 切流时，事件怎么不断？"></a>问题 7：跨 region 切流时，事件怎么不断？</h2><p>前面的链路在单 region 内已经能工作。新的问题来自容灾和切流。</p>
+<p>Heartbeat 事件是状态计算的输入。切流时，如果流量调度先把请求打到目标 region，但目标 region 的 Raw MQ 里没有前一段时间的事件，Compute 会缺少时间窗口里的上下文。结果可能是 agent 刚切过去就被判断成无操作，或者异常计算延迟一段时间才恢复。</p>
+<p>所以跨 region 的第一层改造是 MQ mirror。</p>
+<p><img src="/img/hcm-heartbeat-design/v5-mq-mirror.png" alt="版本 5：跨 region mirror 心跳事件"></p>
+<p>图 6：Raw MQ 在 region 之间做 mirror。图片由 gpt-image-2 生成。目标 region 在接管流量前，已经有一份可消费的事件流。</p>
+<p>这层解决的是事件连续性。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Region A Raw MQ &lt;-&gt; Region B Raw MQ</span><br></pre></td></tr></table></figure>
+
+<p>切流前，两个 region 都能拿到最近的心跳事件。真正调度流量时，目标 region 不需要从空队列开始计算。它已经能看到 agent 最近的点击、输入、心跳、工单动作和状态事件。</p>
+<p>切流 SOP 也围绕这条链路设计：</p>
+<ol>
+<li>先看当前 region 的 Heartbeat、HCM、Raw MQ、binlog MQ、status MQ 指标。</li>
+<li>用条件化调度切一小段流量，比如 2%。</li>
+<li>看 <code>from_dc</code> 维度，确认目标 region 收到预期流量。</li>
+<li>看 mirror 后的 Raw MQ lag、错误率和消费速率。</li>
+<li>异常时删除调度配置，把流量切回。</li>
+</ol>
+<p>MQ mirror 让事件更难丢。新的问题也随之出现：两个 region 都可能看到同一条事件。</p>
+<p>事件重复本身还好，真正危险的是重复触发状态变更。比如同一条 no action 候选在两个 region 各发一次，HCM 可能收到两条异常消息，下游也可能收到两次状态变化。</p>
+<p>所以下一层要处理重复。</p>
+<h2 id="问题-8：mirror-之后，重复事件怎么处理？"><a href="#问题-8：mirror-之后，重复事件怎么处理？" class="headerlink" title="问题 8：mirror 之后，重复事件怎么处理？"></a>问题 8：mirror 之后，重复事件怎么处理？</h2><p>重复事件要分两段处理。</p>
+<p>第一段在发送侧：只有一个 region 能发送异常消息。</p>
+<p>第二段在状态侧：HCM 写状态前再读一次当前事实，做幂等判断。</p>
+<p><img src="/img/hcm-heartbeat-design/v6-region-dedupe.png" alt="版本 6：让 mirror 后的事件可以安全消费"></p>
+<p>图 7：mirror 保证事件连续，active region 和 dedupe lock 控制状态变更只提交一次。图片由 gpt-image-2 生成。</p>
+<p>Compute 可以在两个 region 都消费事件，但 Cron 扫描到期队列时会先检查 <code>active_idc</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">active_idc = true  -&gt; can emit exception message</span><br><span class="line">active_idc = false -&gt; calculate only, no emit</span><br></pre></td></tr></table></figure>
+
+<p>发送前再加一层 dedupe lock。锁的粒度不能太粗，否则不同规则会互相挡住；也不能太细，否则同一阶段的重复消息挡不住。比较合适的是把 agent、规则和时间窗口放进同一个去重键：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">agent_id + rule_id + window_start</span><br></pre></td></tr></table></figure>
+
+<p>Redis zset 也会帮忙收敛一部分重复候选。相同 member 重复写入时，后写入会更新 score。Cron 真正发消息时，还要按 agent&#x2F;rule&#x2F;window 抢锁。</p>
+<p>HCM 是最后一道保护。</p>
+<p>收到异常消息后，HCM 重新读取当前状态、任务数、skill group 归属和规则配置。只有当前事实还满足规则，才写 <code>status_table</code> 和 <code>unified_work_status_log</code>。如果 agent 已经有任务，或者状态已经被别的路径改走，这条候选会被丢掉。</p>
+<p>跨 region 之后，状态链路多了三类开关：</p>
+<table>
+<thead>
+<tr>
+<th>开关</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>流量调度</td>
+<td>控制请求进哪个 region</td>
+</tr>
+<tr>
+<td>MQ mirror</td>
+<td>控制事件是否跨 region 复制</td>
+</tr>
+<tr>
+<td><code>active_idc</code></td>
+<td>控制哪个 region 可以发送异常状态消息</td>
+</tr>
+</tbody></table>
+<p>这三个开关要分开：请求入口、事件复制、状态发送权可以按不同节奏切换。这样切流、回滚和演练才有操作空间。</p>
+<h2 id="问题-9：TT-和-IES-拆分时，怎么不打断老链路？"><a href="#问题-9：TT-和-IES-拆分时，怎么不打断老链路？" class="headerlink" title="问题 9：TT 和 IES 拆分时，怎么不打断老链路？"></a>问题 9：TT 和 IES 拆分时，怎么不打断老链路？</h2><p>HCM&#x2F;Heartbeat 后来同时服务 IES 和 TT 侧业务。两边共用 HCM、Heartbeat、DB、MQ 和 routing 更新链路时，发布、容量和容灾都会绑在一起。</p>
+<p>TT 内容侧要拆出去，最简单的做法是新建 TT HCM、TT Heartbeat、TT DB 和 TT MQ，然后让上游一次性切走。</p>
+<p>这个方案风险很高。HCM 连着登录、状态更新、skill group、任务数、路由、WFM 和 binlog 传播。一次性切干净，任何一个字段、过滤条件或 MQ 消费组出错，都会影响接单和状态同步。</p>
+<p>所以第一阶段先做共存。</p>
+<p><img src="/img/hcm-heartbeat-design/v7-tt-ies-coexistence.png" alt="版本 7：TT 拆分先进入共存阶段"></p>
+<p>图 8：TT upstream 先迁到 TT HCM，写入事实仍由 IES HCM 承担。图片由 gpt-image-2 生成。dsyncer 和转发逻辑保留回滚空间。</p>
+<p>第一阶段的链路是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">TT upstream</span><br><span class="line">-&gt; TT HCM</span><br><span class="line">-&gt; forward RPC to IES HCM</span><br><span class="line">-&gt; IES DB</span><br><span class="line">-&gt; dsyncer</span><br><span class="line">-&gt; TT DB</span><br></pre></td></tr></table></figure>
+
+<p>这一步的目标很明确：先把调用入口迁走，写入事实先留在旧链路。</p>
+<p>为了让旧 HCM 知道哪些数据要转给 TT，需要加 ownership filter。判断路径是：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">agent_id</span><br><span class="line">-&gt; agent_skill_group_rel</span><br><span class="line">-&gt; skill_group</span><br><span class="line">-&gt; access_party</span><br><span class="line">-&gt; TT or IES</span><br></pre></td></tr></table></figure>
+
+<p>判断结果写 Redis cache。cache miss 时查 DB，拿到 access party 后再写回。工作状态、agent-skillgroup 关系和 routing 更新都可以按这个结果过滤。</p>
+<p>这层改造带来的好处是可回滚。TT HCM 出问题，可以继续走 IES 原链路。filter 出问题，也可以通过配置关掉转发，先保住旧路径。</p>
+<h2 id="问题-10：什么时候可以真的拆开？"><a href="#问题-10：什么时候可以真的拆开？" class="headerlink" title="问题 10：什么时候可以真的拆开？"></a>问题 10：什么时候可以真的拆开？</h2><p>共存阶段跑稳之后，才进入第二阶段。</p>
+<p>第二阶段要把写入、事件、MQ 和 routing 更新都拆开：</p>
+<p><img src="/img/hcm-heartbeat-design/v8-tt-ies-isolation.png" alt="版本 8：迁移后隔离 TT 和 IES"></p>
+<p>图 9：拆分完成后，TT 和 IES 各自拥有 upstream、HCM、DB、MQ 和 routing 更新链路。图片由 gpt-image-2 生成。</p>
+<p>拆分动作包括：</p>
+<ol>
+<li>TT HCM 停止把 RPC 转发到 IES HCM。</li>
+<li>IES 到 TT 的 dsyncer 停止。</li>
+<li>IES heartbeat&#x2F;MQ 停止消费 TT agent 消息。</li>
+<li>TT routing 只消费 TT 侧状态更新。</li>
+<li>IES routing 只消费 IES 侧状态更新。</li>
+</ol>
+<p>拆完后，旧 HCM 侧减少约 3,000 个 agent 和约 2,000 QPS。</p>
+<p>这里要验证两件事：服务已经拆出来，两边的状态事实也各自闭合。</p>
+<ul>
+<li>TT agent 的心跳只进入 TT 侧。</li>
+<li>TT agent 的状态只由 TT HCM 提交。</li>
+<li>TT 状态变化只进 TT routing&#x2F;WFM&#x2F;data 链路。</li>
+<li>IES 侧保留原有路径，不被 TT 发布和切流影响。</li>
+</ul>
+<p>这时 TT&#x2F;IES 拆分才算完成。</p>
+<h2 id="问题-11：前端动作没进来，系统怎么发现？"><a href="#问题-11：前端动作没进来，系统怎么发现？" class="headerlink" title="问题 11：前端动作没进来，系统怎么发现？"></a>问题 11：前端动作没进来，系统怎么发现？</h2><p>状态计算依赖输入事件。后端 RPC 全绿，只能说明后端还活着，说明不了用户动作真的进了 Heartbeat。</p>
+<p>GCP -&gt; NO1A 切流后，出现过 agent 频繁 abnormal。人还在工作台操作，系统却判断他长时间没动作。最后查到的问题在工作台长链路配置：<code>keyup</code> &#x2F; <code>keydown</code> 事件没有稳定进入 Heartbeat。</p>
+<p>HCM 错误率覆盖不到这段输入链路。状态计算前面要加一层输入健康检查。</p>
+<p><img src="/img/hcm-heartbeat-design/v9-input-health.png" alt="版本 9：监控输入事件链路"></p>
+<p>图 10：状态计算之前先确认用户动作事件稳定进入系统。图片由 gpt-image-2 生成。Workbench SDK、WS-API、Frontier、Heartbeat 接收、Raw MQ 都要上报输入健康指标。</p>
+<p>输入健康可以按几个维度看：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>event_rate&#123;event_type, region, channel&#125;</code></td>
+<td>看点击、输入、心跳等事件是否突然下降</td>
+</tr>
+<tr>
+<td><code>client_lag</code></td>
+<td>看客户端动作到服务端接收的延迟</td>
+</tr>
+<tr>
+<td><code>frontier_error_rate</code></td>
+<td>看长链通道是否异常</td>
+</tr>
+<tr>
+<td><code>ws_register_failure</code></td>
+<td>看 module&#x2F;entity 注册是否失败</td>
+</tr>
+<tr>
+<td><code>short_poll_lag</code></td>
+<td>看短链补偿是否跟得上</td>
+</tr>
+<tr>
+<td><code>raw_mq_lag</code></td>
+<td>看事件进入 MQ 后是否堆积</td>
+</tr>
+<tr>
+<td><code>synthetic_action</code></td>
+<td>每个 region 定时打模拟动作，验证链路能跑通</td>
+</tr>
+<tr>
+<td><code>no_action_ratio</code></td>
+<td>看异常候选是否突然集中在某个 region、版本或 channel</td>
+</tr>
+</tbody></table>
+<p>工程上更稳的做法是把输入健康接进规则层。</p>
+<p>如果某个 region 或工作台版本的输入健康已经异常，自动 abnormal 规则应该降级：延长窗口、暂停自动切异常，或者只发提醒。等输入链路恢复后，再回到正常计算。</p>
+<p>这样做会牺牲一部分自动化程度，但能避免“因为采集链路断了，把正在工作的人切成异常”。</p>
+<h2 id="问题-12：HCM-已经写状态，下游还是旧状态怎么办？"><a href="#问题-12：HCM-已经写状态，下游还是旧状态怎么办？" class="headerlink" title="问题 12：HCM 已经写状态，下游还是旧状态怎么办？"></a>问题 12：HCM 已经写状态，下游还是旧状态怎么办？</h2><p>状态提交成功以后，下游还要拿到同一个事实。这里出过一个很典型的事故：US-TTP ES down 时，WFM 的 Omni-channel view 没有反映实时状态。</p>
+<p>排查时，HCM DB 里的 agent 已经 offline，HCM 到 WFM 的消息看起来也发成功了。最后发现 binlog 到 HCM MQ 堆了约 300k 条消息。work status handler 本身没慢，另一个依赖 ES 的 handler 超时了。多个 handler 共用一条消费链路，慢 handler 把工作状态传播拖住了。</p>
+<p>这个问题把 V4 的状态传播继续往前推一层：状态变更要有独立车道。</p>
+<p><img src="/img/hcm-heartbeat-design/v10-handler-isolation.png" alt="版本 10：隔离状态传播 handler"></p>
+<p>图 11：binlog 下游按业务语义拆成独立 handler。图片由 gpt-image-2 生成。Search handler 变慢时，work status handler 仍然可以把状态送到 WFM 和 routing。</p>
+<p>更好的目标形态是把状态变化当成一等事件处理：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HCM transaction</span><br><span class="line">-&gt; status_table</span><br><span class="line">-&gt; status_change_outbox</span><br><span class="line">-&gt; work_status_dispatcher</span><br><span class="line">-&gt; status MQ</span><br><span class="line">-&gt; WFM / Routing</span><br></pre></td></tr></table></figure>
+
+<p><code>status_change_outbox</code> 和状态写入放在同一个事务里。dispatcher 只负责把 outbox 里的状态事件送到状态 MQ。</p>
+<p>Search、analytics、audit 这些消费者可以继续消费 binlog 或订阅自己的事件流，但它们不应该和 work status propagation 共用同一个阻塞点。慢 handler 要进入自己的 retry &#x2F; DLQ，不能拖住 WFM 和 routing。</p>
+<p>这层还要补端到端指标：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>status_commit_to_mq_latency</code></td>
+<td>HCM 写 DB 到状态消息发出的延迟</td>
+</tr>
+<tr>
+<td><code>mq_to_wfm_latency</code></td>
+<td>状态 MQ 到 WFM 消费完成的延迟</td>
+</tr>
+<tr>
+<td><code>handler_lag&#123;handler&#125;</code></td>
+<td>每个 handler 自己的堆积</td>
+</tr>
+<tr>
+<td><code>handler_error_rate&#123;handler&#125;</code></td>
+<td>每个 handler 自己的错误率</td>
+</tr>
+<tr>
+<td><code>downstream_state_age</code></td>
+<td>下游看到的状态距离 HCM 提交多久</td>
+</tr>
+</tbody></table>
+<p>状态系统最怕“主库已经对了，下游还错着”。只有把提交、出站、消费分开看，才能知道慢在哪一段。</p>
+<h2 id="问题-13：热读接口把-HCM-打爆怎么办？"><a href="#问题-13：热读接口把-HCM-打爆怎么办？" class="headerlink" title="问题 13：热读接口把 HCM 打爆怎么办？"></a>问题 13：热读接口把 HCM 打爆怎么办？</h2><p><code>GetWorkStatus</code> 是这条链路里的热接口。Compute 要查它，上游也要查它。一次 OOM 事故里，downstream error rate spike 和 <code>GetWorkStatus</code> 流量峰值对齐。</p>
+<p>这说明状态系统还需要容量防线。</p>
+<p><img src="/img/hcm-heartbeat-design/v11-status-read-guard.png" alt="版本 11：保护热状态读接口"></p>
+<p>图 12：<code>GetWorkStatus</code> 前面加 quota，内部按调用方隔离线程池，后面用短 TTL cache 和自动扩容信号保护 DB。图片由 gpt-image-2 生成。</p>
+<p>这里的目标是把不同调用方隔开。单个上游出问题时，故障范围停在自己的预算里。</p>
+<p><code>GetWorkStatus</code> 至少需要这几层保护：</p>
+<table>
+<thead>
+<tr>
+<th>防线</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>per-caller quota</td>
+<td>单个上游打爆时，先限制这个上游</td>
+</tr>
+<tr>
+<td>bulkhead pool</td>
+<td>Compute、WFM、管理台等调用方分开线程池</td>
+</tr>
+<tr>
+<td>read cache</td>
+<td>短 TTL 缓存状态，挡住重复读</td>
+</tr>
+<tr>
+<td>stale read budget</td>
+<td>非写路径允许读到短时间内的旧状态</td>
+</tr>
+<tr>
+<td>circuit breaker</td>
+<td>DB 或依赖异常时快速失败</td>
+</tr>
+<tr>
+<td>autoscale signal</td>
+<td>按 QPS、heap、GC、p99 延迟扩容</td>
+</tr>
+</tbody></table>
+<p>Heartbeat Compute 侧也要配合。比如同一个 agent 在短时间内连续上报动作，不需要每条事件都 RPC 查一次当前状态。可以按 agent 做小窗口合并，或者读取本地&#x2F;Redis 状态快照，再把最终提交交给 HCM recheck。</p>
+<p>这层改造把 <code>GetWorkStatus</code> 从“谁来都查 DB”变成“有预算、有隔离、有降级的状态读服务”。</p>
+<h2 id="问题-14：查询改动怎么安全上线？"><a href="#问题-14：查询改动怎么安全上线？" class="headerlink" title="问题 14：查询改动怎么安全上线？"></a>问题 14：查询改动怎么安全上线？</h2><p>HCM 4.3 的 DB query rollback 暴露的是发布防线。</p>
+<p>canary 阶段看起来正常，ROW 后出现新错误日志。原因是两个 <code>LEFT JOIN</code> 放大了 <code>count</code> SQL 的数据量，最后打到 DB timeout。</p>
+<p>“先 canary 再全量”覆盖不了这类问题。canary 流量小，数据分布也可能偏，复杂查询要单独过成本检查。</p>
+<p><img src="/img/hcm-heartbeat-design/v12-query-release-guard.png" alt="版本 12：让查询改动可控上线"></p>
+<p>图 13：查询改动先经过 feature flag、canary、shadow query、EXPLAIN 和慢 SQL 监控。图片由 gpt-image-2 生成。异常时切回 old query。</p>
+<p>查询发布可以按这条路径走：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">query change</span><br><span class="line">-&gt; feature flag</span><br><span class="line">-&gt; canary</span><br><span class="line">-&gt; shadow query</span><br><span class="line">-&gt; row traffic</span><br><span class="line">-&gt; auto rollback</span><br></pre></td></tr></table></figure>
+
+<p><code>shadow query</code> 不参与线上返回，只比较结果和成本。发布系统要看几类信号：</p>
+<table>
+<thead>
+<tr>
+<th>信号</th>
+<th>动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>EXPLAIN</code> row estimate 超阈值</td>
+<td>拦住发布</td>
+</tr>
+<tr>
+<td>shadow query 结果不一致</td>
+<td>拦住发布</td>
+</tr>
+<tr>
+<td>p99 查询耗时超过预算</td>
+<td>降级或回滚</td>
+</tr>
+<tr>
+<td>新错误日志增加</td>
+<td>回滚</td>
+</tr>
+<tr>
+<td>DB timeout 增加</td>
+<td>回滚</td>
+</tr>
+</tbody></table>
+<p>对查询路径来说，feature flag 不能只开关整个功能。更实用的是按 filter 字段选择 old query 或 join query：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">simple filter -&gt; old query</span><br><span class="line">join filter   -&gt; join query</span><br></pre></td></tr></table></figure>
+
+<p>这样某个复杂 filter 出问题时，可以只回退这条查询路径，不影响其他查询。</p>
+<h2 id="后续还要解决什么？"><a href="#后续还要解决什么？" class="headerlink" title="后续还要解决什么？"></a>后续还要解决什么？</h2><p>上面的 V9 到 V12 把系统推成一个状态平台。输入链路、计算链路、提交链路、传播链路、容量链路、发布链路都要能被单独观测和单独降级。</p>
+<p>后面还可以继续扩：</p>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>扩展方向</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>规则变多以后怎么验证</td>
+<td>做 rule simulator，用历史事件回放新规则，看会影响多少 agent</td>
+</tr>
+<tr>
+<td>状态错误怎么快速定位</td>
+<td>做 per-agent timeline，把输入事件、候选、zset、HCM 提交、下游消费串起来</td>
+</tr>
+<tr>
+<td>多 region 会不会脑裂</td>
+<td>定期演练 <code>active_idc</code> 切换，检查重复消息和丢消息</td>
+</tr>
+<tr>
+<td>下游状态长期落后怎么处理</td>
+<td>增加状态 reconciliation job，把 WFM&#x2F;routing 与 HCM 事实对账</td>
+</tr>
+<tr>
+<td>热读缓存会不会读脏</td>
+<td>给缓存结果加版本号和过期预算，写路径仍由 HCM recheck 收口</td>
+</tr>
+</tbody></table>
+<h2 id="最终设计"><a href="#最终设计" class="headerlink" title="最终设计"></a>最终设计</h2><p>回到最开始的问题：怎么知道一个运营是否在线？</p>
+<p>回到开头那张最终目标图，可以按两条线看：数据面和控制面。</p>
+<p>数据面负责把用户动作变成状态事实：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Agent UI</span><br><span class="line">-&gt; Workbench SDK</span><br><span class="line">-&gt; WS-API</span><br><span class="line">-&gt; Frontier</span><br><span class="line">-&gt; Heartbeat Service</span><br><span class="line">-&gt; Raw MQ</span><br><span class="line">-&gt; Compute</span><br><span class="line">-&gt; Redis zset</span><br><span class="line">-&gt; Exception MQ</span><br><span class="line">-&gt; HCM</span><br><span class="line">-&gt; DB + Outbox</span><br><span class="line">-&gt; Status MQ</span><br><span class="line">-&gt; WFM / Routing / Analytics</span><br></pre></td></tr></table></figure>
+
+<p>控制面负责让这条链路在异常时还能收住：</p>
+<ul>
+<li>前端负责上报动作和心跳。</li>
+<li>Workbench SDK 负责长链单例、断链重连、短链补偿和端上去重。</li>
+<li>输入健康确认动作事件真的进入 Heartbeat。</li>
+<li>MQ mirror 保留跨 region 事件连续性。</li>
+<li>Redis zset 和 dedupe lock 控制候选重复。</li>
+<li><code>active_idc</code> 控制哪个 region 能发送异常消息。</li>
+<li>HCM recheck 收口最终状态提交。</li>
+<li>Outbox 和 handler 隔离保护工作状态传播。</li>
+<li>quota、cache、bulkhead 和 circuit breaker 保护热读接口。</li>
+<li>query gate 控制复杂查询发布。</li>
+<li>TT&#x2F;IES ownership 控制 agent、skill group、MQ 和 routing 更新归属。</li>
+</ul>
+<p>这个设计看起来比第一版复杂很多。每一层都是被上一个问题推出来的：</p>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>新问题</th>
+<th>新增设计</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>V0</td>
+<td>怎么记录最近活跃</td>
+<td><code>last_seen_at</code></td>
+</tr>
+<tr>
+<td>V1</td>
+<td>UI 到 Heartbeat 的事件怎么可靠进入系统</td>
+<td>Workbench SDK + WS-API + Frontier + Raw MQ</td>
+</tr>
+<tr>
+<td>V2</td>
+<td>事件怎么变成状态判断</td>
+<td>Compute + <code>GetWorkStatus</code></td>
+</tr>
+<tr>
+<td>V3</td>
+<td>多分钟窗口怎么计算</td>
+<td>Redis zset + Cron</td>
+</tr>
+<tr>
+<td>V4</td>
+<td>谁写最终状态，下游怎么拿事实</td>
+<td>HCM + DB&#x2F;binlog&#x2F;status MQ</td>
+</tr>
+<tr>
+<td>V5</td>
+<td>跨 region 切流时事件怎么不断</td>
+<td>MQ mirror</td>
+</tr>
+<tr>
+<td>V6</td>
+<td>mirror 之后重复事件怎么处理</td>
+<td><code>active_idc</code> + dedupe + HCM recheck</td>
+</tr>
+<tr>
+<td>V7</td>
+<td>TT 拆分怎么保留回滚路径</td>
+<td>TT HCM 转发 + ownership filter + dsyncer</td>
+</tr>
+<tr>
+<td>V8</td>
+<td>怎么把 TT&#x2F;IES 真正拆开</td>
+<td>独立 HCM&#x2F;DB&#x2F;MQ&#x2F;routing 链路</td>
+</tr>
+<tr>
+<td>V9</td>
+<td>前端动作没进来怎么发现</td>
+<td>input health + synthetic action</td>
+</tr>
+<tr>
+<td>V10</td>
+<td>下游状态被慢 handler 拖住怎么办</td>
+<td>handler isolation + outbox + DLQ</td>
+</tr>
+<tr>
+<td>V11</td>
+<td>热读接口把 HCM 打爆怎么办</td>
+<td>quota + cache + bulkhead + load shedding</td>
+</tr>
+<tr>
+<td>V12</td>
+<td>查询改动怎么安全上线</td>
+<td>feature flag + shadow query + auto rollback</td>
+</tr>
+</tbody></table>
+<p>最开始的问题只是“这个人还在不在线”。最后系统回答的是一组更具体的问题：这个 agent 最近有没有动作，输入事件链路是否健康，当前有没有任务，属于哪个 skill group，规则是否覆盖他，哪个 region 可以发异常，状态能不能提交，下游是否拿到了同一个事实，热读接口是否在预算内，查询发布是否能回滚，TT 和 IES 的 ownership 是否已经分开。</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+    </div>
+    <footer>
+      <p><a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/fault-tolerance/" rel="tag">fault-tolerance</a>, <a class="classtest-link" href="/tags/reliability/" rel="tag">reliability</a> — <time datetime="2026-06-19T04:00:00.000Z">Jun 19, 2026</time></p>
+    </footer>
+  </article>
+  
+
+
+          <div class="row mt-2">
+  
+    <div class="eight columns">
+      <p id="madewith">
+        &copy; 2026 Koh Hom.
+        
+          <a href="mailto:xff9924@gmail.com">邮箱</a>
+        
+        <a href="https://github.com/clean99" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="/atom.xml">RSS</a>
+        <a href="/zh/Links">友链</a>
+      </p>
+    </div>
+
+    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
+    <div class="four columns mb-3 posisi" >
+
+      
+      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
+        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
+        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
+        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
+      </a>
+      
+
+      
+      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
+        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
+      </a>
+      
+
+    </div>
+  
+</div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <script src="/js/nanobar.min.js"></script>
+  <script>
+    var options = {
+      classname: 'nanobar',
+      id: 'myNanobar'
+    };
+    var nanobar = new Nanobar(options);
+    nanobar.go(30);
+    nanobar.go(76);
+    nanobar.go(100);
+  </script>
+  
+
+</body>
+
+</html>
