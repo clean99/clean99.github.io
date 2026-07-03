@@ -44,16 +44,20 @@ To make analysis easier, we can break the metric down by process.
 
 We can divide downstream users by upstream users to get each step's conversion rate. UV, the starting user count, multiplied by all conversion rates becomes GMV:
 
-```text
-GMV
-= UV
-× PDP arrival rate
-× Add to cart / Buy now rate
-× Checkout start rate
-× Payment success rate
-× Orders per buyer
-× AOV
-```
+<div class="math-display">
+\[
+\begin{aligned}
+\mathrm{GMV}
+&= \mathrm{UV} \\
+&\quad \times \text{PDP arrival rate} \\
+&\quad \times \text{Add to cart / Buy now rate} \\
+&\quad \times \text{Checkout start rate} \\
+&\quad \times \text{Payment success rate} \\
+&\quad \times \text{Orders per buyer} \\
+&\quad \times \mathrm{AOV}
+\end{aligned}
+\]
+</div>
 
 Each layer has a different meaning:
 
@@ -69,26 +73,38 @@ Each layer has a different meaning:
 
 We can also break it down from the user operating perspective, to understand which user group's GMV is rising or falling and which lever should be pulled.
 
-```text
-GMV = Σ GMV of each user segment
+<div class="math-display">
+\[
+\mathrm{GMV}_{\text{total}} = \sum_{s \in \text{segments}} \mathrm{GMV}_{s}
+\]
+</div>
 
-GMV of one segment
-= active users in that segment
-× purchase conversion rate
-× orders per buyer
-× AOV
-```
+<div class="math-display">
+\[
+\begin{aligned}
+\mathrm{GMV}_{s}
+&= \text{active users}_{s} \\
+&\quad \times \text{purchase conversion rate}_{s} \\
+&\quad \times \text{orders per buyer}_{s} \\
+&\quad \times \mathrm{AOV}_{s}
+\end{aligned}
+\]
+</div>
 
 By new and existing users, or by region and age:
 
-```text
-Total GMV
-= new user GMV
-+ existing user GMV
-+ reactivated user GMV
-+ high-value user GMV
-+ low-frequency user GMV
-```
+<div class="math-display">
+\[
+\begin{aligned}
+\mathrm{GMV}_{\text{total}}
+&= \mathrm{GMV}_{\text{new users}}
+ + \mathrm{GMV}_{\text{existing users}}
+ + \mathrm{GMV}_{\text{reactivated users}} \\
+&\quad + \mathrm{GMV}_{\text{high-value users}}
+ + \mathrm{GMV}_{\text{low-frequency users}}
+\end{aligned}
+\]
+</div>
 
 Then we can judge who caused the GMV change:
 
@@ -288,19 +304,23 @@ Experiment structure:
 
 The Primary Metric can be:
 
-```text
-Web-assisted App paid GMV per eligible MWeb UV within 7 days
-```
+<div class="math-display">
+\[
+\mathrm{Primary\ Metric}
+=
+\frac{\text{7-day Web-assisted App paid GMV}}{\text{eligible MWeb UV}}
+\]
+</div>
 
 Why this metric?
 
 Because it constrains three things at the same time:
 
-```text
-Web-assisted: must be attributable to a Web touchpoint
-App paid GMV: must really transact inside the app
-per eligible MWeb UV: look beyond total GMV and measure value per unit of traffic
-```
+| Constraint | Meaning |
+| --- | --- |
+| Web-assisted | Must be attributable to a Web touchpoint |
+| App paid GMV | Must really transact inside the app |
+| per eligible MWeb UV | Look beyond total GMV and measure value per unit of traffic |
 
 Secondary Metrics:
 

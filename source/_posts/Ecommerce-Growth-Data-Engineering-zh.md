@@ -77,16 +77,20 @@ permalink: zh/2026/07/02/Ecommerce-Growth-Data-Engineering/
 
 
 
-```Plain Text
-GMV
-= UV
-× PDP 到达率
-× 加购/立即买率
-× Checkout 发起率
-× 支付成功率
-× 人均订单数
-× AOV
-```
+<div class="math-display">
+\[
+\begin{aligned}
+\mathrm{GMV}
+&= \mathrm{UV} \\
+&\quad \times \text{PDP 到达率} \\
+&\quad \times \text{加购/立即买率} \\
+&\quad \times \text{Checkout 发起率} \\
+&\quad \times \text{支付成功率} \\
+&\quad \times \text{人均订单数} \\
+&\quad \times \mathrm{AOV}
+\end{aligned}
+\]
+</div>
 
 
 
@@ -112,15 +116,23 @@ GMV
 
 
 
-```Plain Text
-GMV = Σ 各类用户的 GMV
+<div class="math-display">
+\[
+\mathrm{GMV}_{\text{总}} = \sum_{s \in \text{用户类型}} \mathrm{GMV}_{s}
+\]
+</div>
 
-某类用户 GMV
-= 该类活跃用户数
-× 购买转化率
-× 人均订单数
-× AOV
-```
+<div class="math-display">
+\[
+\begin{aligned}
+\mathrm{GMV}_{s}
+&= \text{该类活跃用户数} \\
+&\quad \times \text{购买转化率} \\
+&\quad \times \text{人均订单数} \\
+&\quad \times \mathrm{AOV}
+\end{aligned}
+\]
+</div>
 
 
 
@@ -128,14 +140,18 @@ GMV = Σ 各类用户的 GMV
 
 
 
-```Plain Text
-总 GMV
-= 新客 GMV
-+ 老客 GMV
-+ 回流用户 GMV
-+ 高价值用户 GMV
-+ 低频用户 GMV
-```
+<div class="math-display">
+\[
+\begin{aligned}
+\mathrm{GMV}_{\text{总}}
+&= \mathrm{GMV}_{\text{新客}}
+ + \mathrm{GMV}_{\text{老客}}
+ + \mathrm{GMV}_{\text{回流用户}} \\
+&\quad + \mathrm{GMV}_{\text{高价值用户}}
+ + \mathrm{GMV}_{\text{低频用户}}
+\end{aligned}
+\]
+</div>
 
 
 
@@ -439,9 +455,13 @@ Primary Metric 建议用：
 
 
 
-```Plain Text
-7 天内 Web-assisted App paid GMV per eligible MWeb UV
-```
+<div class="math-display">
+\[
+\mathrm{Primary\ Metric}
+=
+\frac{\text{7 天内 Web-assisted App paid GMV}}{\text{eligible MWeb UV}}
+\]
+</div>
 
 
 
@@ -451,11 +471,11 @@ Primary Metric 建议用：
 
 
 
-```Plain Text
-Web-assisted：必须能归因到 Web 触点
-App paid GMV：必须真的在 App 内成交
-per eligible MWeb UV：不能只看总 GMV，要看单位流量价值
-```
+| 约束 | 含义 |
+|-|-|
+| Web-assisted | 必须能归因到 Web 触点 |
+| App paid GMV | 必须真的在 App 内成交 |
+| per eligible MWeb UV | 不能只看总 GMV，要看单位流量价值 |
 
 
 
