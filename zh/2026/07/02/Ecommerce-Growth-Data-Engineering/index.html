@@ -11,7 +11,7 @@
   <meta charset="utf-8">
 
   
-  <title>电商增长数据工程化：漏斗、归因和实验 | Koh Hom — Software, AI, and Inner Practice</title>
+  <title>从工程视角理解电商增长数据的本质 | Koh Hom — Software, AI, and Inner Practice</title>
   
   <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
   
@@ -19,7 +19,7 @@
   <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/07/02/Ecommerce-Growth-Data-Engineering/" />
   <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/" />
   <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/07/02/Ecommerce-Growth-Data-Engineering/" />
-  <meta name="description" content="GMV 不是一个适合直接 debug 的指标。它适合作为业务结果，但如果问题从“GMV 低”开始，方案直接跳到“加一个活动模块”，中间全靠猜。 增长工程真正有价值的地方，是把业务想法拆成一条可验证的因果链：假设、埋点、实验、判断、放量和收益衡量。没有这条链，功能上线了，GMV 动了，也没人能说清楚是">
+  <meta name="description" content="最近转进一个新的组，主要是做东南亚 TikTok Shop 营销&amp;#x2F;用户增长的，由于自己之前没有接触过增长工程师这个专业，所以借着团队内现有项目和 GPT 学了一轮，我了解到了数据在增长工程里几乎是最重要的东西，以下是我的学习增长数据心得，本文纯手写，请放心食用。  做工程和画页面是两件完全">
   
   <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
   
@@ -40,17 +40,17 @@
   <meta property="article:tag" content="Growth" />
   
   
-  <meta property="og:title" content="电商增长数据工程化：漏斗、归因和实验 | Koh Hom — Software, AI, and Inner Practice" />
+  <meta property="og:title" content="从工程视角理解电商增长数据的本质 | Koh Hom — Software, AI, and Inner Practice" />
   <meta property="og:locale" content="zh_CN" />
   <meta property="og:locale:alternate" content="en_US" />
-  <meta property="og:description" content="GMV 不是一个适合直接 debug 的指标。它适合作为业务结果，但如果问题从“GMV 低”开始，方案直接跳到“加一个活动模块”，中间全靠猜。 增长工程真正有价值的地方，是把业务想法拆成一条可验证的因果链：假设、埋点、实验、判断、放量和收益衡量。没有这条链，功能上线了，GMV 动了，也没人能说清楚是">
+  <meta property="og:description" content="最近转进一个新的组，主要是做东南亚 TikTok Shop 营销&amp;#x2F;用户增长的，由于自己之前没有接触过增长工程师这个专业，所以借着团队内现有项目和 GPT 学了一轮，我了解到了数据在增长工程里几乎是最重要的东西，以下是我的学习增长数据心得，本文纯手写，请放心食用。  做工程和画页面是两件完全">
   <meta property="og:url" content="https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/" />
 
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@Clean993">
   <meta name="twitter:creator" content="@Clean993">
-  <meta name="twitter:title" content="电商增长数据工程化：漏斗、归因和实验 | Koh Hom — Software, AI, and Inner Practice">
-  <meta name="twitter:description" content="GMV 不是一个适合直接 debug 的指标。它适合作为业务结果，但如果问题从“GMV 低”开始，方案直接跳到“加一个活动模块”，中间全靠猜。 增长工程真正有价值的地方，是把业务想法拆成一条可验证的因果链：假设、埋点、实验、判断、放量和收益衡量。没有这条链，功能上线了，GMV 动了，也没人能说清楚是">
+  <meta name="twitter:title" content="从工程视角理解电商增长数据的本质 | Koh Hom — Software, AI, and Inner Practice">
+  <meta name="twitter:description" content="最近转进一个新的组，主要是做东南亚 TikTok Shop 营销&amp;#x2F;用户增长的，由于自己之前没有接触过增长工程师这个专业，所以借着团队内现有项目和 GPT 学了一轮，我了解到了数据在增长工程里几乎是最重要的东西，以下是我的学习增长数据心得，本文纯手写，请放心食用。  做工程和画页面是两件完全">
   <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
   <meta name="twitter:url" content="https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/" />
 
@@ -159,8 +159,8 @@
   <!-- JSON-LD Structured Data
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"电商增长数据工程化：漏斗、归因和实验","datePublished":"2026-07-02T09:30:00.000Z","dateModified":"2026-07-02T09:30:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/","mainEntityOfPage":"https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/","inLanguage":"zh-CN","description":"GMV 不是一个适合直接 debug 的指标。它适合作为业务结果，但如果问题从“GMV 低”开始，方案直接跳到“加一个活动模块”，中间全靠猜。 增长工程真正有价值的地方，是把业务想法拆成一条可验证的因果链：假设、埋点、实验、判断、放量和收益衡量。没有这条链，功能上线了，GMV 动了，也没人能说清楚是不是这个功能带来的。 图：增长工程的验证闭环。业务想法要先变成指标假设，再经过埋点、实验、判断和收益","keywords":["Software Engineering","Data","Growth"]}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"电商增长数据工程化：漏斗、归因和实验","item":"https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/"}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"从工程视角理解电商增长数据的本质","datePublished":"2026-07-02T09:30:00.000Z","dateModified":"2026-07-02T09:30:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/","mainEntityOfPage":"https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/","inLanguage":"zh-CN","description":"最近转进一个新的组，主要是做东南亚 TikTok Shop 营销&#x2F;用户增长的，由于自己之前没有接触过增长工程师这个专业，所以借着团队内现有项目和 GPT 学了一轮，我了解到了数据在增长工程里几乎是最重要的东西，以下是我的学习增长数据心得，本文纯手写，请放心食用。 做工程和画页面是两件完全不同的事，最后产生的效果也不同。 很多工程师会 follow 产品的想法，在首页加几个模块、在某个交易","keywords":["Software Engineering","Data","Growth"]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"从工程视角理解电商增长数据的本质","item":"https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/"}]}</script>
   
 
   <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
@@ -260,7 +260,7 @@
         <div class="trans">
             <article itemscope itemtype="https://schema.org/BlogPosting">
     <header>
-      <h2 itemprop="headline">电商增长数据工程化：漏斗、归因和实验</h2>
+      <h2 itemprop="headline">从工程视角理解电商增长数据的本质</h2>
       
       <p style="margin-bottom: 0.5rem;">
         <a href="/2026/07/02/Ecommerce-Growth-Data-Engineering/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
@@ -273,23 +273,29 @@
       <meta itemprop="dateModified" content="2026-07-02T09:30:00.000Z">
     </header>
     <div itemprop="articleBody">
-      <p>GMV 不是一个适合直接 debug 的指标。它适合作为业务结果，但如果问题从“GMV 低”开始，方案直接跳到“加一个活动模块”，中间全靠猜。</p>
-<p>增长工程真正有价值的地方，是把业务想法拆成一条可验证的因果链：假设、埋点、实验、判断、放量和收益衡量。没有这条链，功能上线了，GMV 动了，也没人能说清楚是不是这个功能带来的。</p>
+      <blockquote>
+<p>最近转进一个新的组，主要是做东南亚 TikTok Shop 营销&#x2F;用户增长的，由于自己之前没有接触过增长工程师这个专业，所以借着团队内现有项目和 GPT 学了一轮，我了解到了数据在增长工程里几乎是最重要的东西，以下是我的学习增长数据心得，本文纯手写，请放心食用。</p>
+</blockquote>
+<p>做工程和画页面是两件完全不同的事，最后产生的效果也不同。</p>
+<p>很多工程师会 follow 产品的想法，在首页加几个模块、在某个交易节点加一个弹窗，但不知道为什么要这么做，最后往往效果不好，也无法验证收益。而一个工程化的解决思路，就像 Debugging 一样，是要弄清楚用户在哪一步流失了，卡住了，导致最后没有转化成成交额，并针对这一步进行优化，同时用实验验证优化是否达到预期。</p>
+<p><strong>工程师在增长业务里最重要的价值，是把业务想法变成可验证的因果链路。</strong></p>
+<p>拿电商举例子，电商看的核心指标是 GMV（商品交易总额），那么今天老板跟你说，GMV 低于行业平均水平，要提升 xx%。于是你开始忙活起来，拍一拍脑袋，觉得首页没有展示足够的大促信息，你加上了大促信息模块，结果呢？GMV 并没有明显上涨。就算上涨了，同一时间，其他同事也在开发新功能，你也很难跟老板解释这个 GMV 的上涨就是你贡献的。</p>
+<p>出现这个问题，本质上是因为 GMV 是一个高度抽象的指标，它的上升或下降是很多不同因素共同作用的总和。你不知道是因为商品质量、价格、还是系统性能等各种原因造成的。所以单纯基于这个指标，你做的改动和决策很可能没办法抓到根因。就像 debug 一样，一条很长的链路，你没有打 log，看结果猜根因，效率也很低。</p>
+<p>更科学的做法，是把整个增长流程变成一个可验证的系统：用数据驱动决策、验证决策、衡量收益。</p>
 <p><img src="/img/ecommerce-growth-data/growth-validation-loop.png" alt="Growth engineering validation loop"></p>
-<p>图：增长工程的验证闭环。业务想法要先变成指标假设，再经过埋点、实验、判断和收益衡量。generated by gpt-image-2.</p>
-<h2 id="GMV-是结果，不是根因"><a href="#GMV-是结果，不是根因" class="headerlink" title="GMV 是结果，不是根因"></a>GMV 是结果，不是根因</h2><p>电商里最常看的指标通常是 GMV。它代表平台成交规模，这没问题。</p>
-<p>问题是，它不告诉你哪里坏了。</p>
-<p>GMV 下降可能是流量少了，用户看到的商品不相关，商品详情页慢，库存没了，checkout 摩擦太大，支付失败，订单服务回调异常，也可能只是客单价下降。</p>
-<p>这些是完全不同的问题，责任方和修法都不一样。</p>
-<p>这和排查线上问题很像。一条很长的调用链失败了，你只看最终错误，不看中间日志，基本就是拍脑袋。增长也一样。顶层指标动了，但因果路径不可见。</p>
-<h2 id="先把交易路径拆成漏斗"><a href="#先把交易路径拆成漏斗" class="headerlink" title="先把交易路径拆成漏斗"></a>先把交易路径拆成漏斗</h2><p>第一步，是把 GMV 按用户流程拆开。</p>
-<p>要提升 GMV，本质上要让足够多的用户到达成功下单，同时让订单有足够的价值。这个过程可以拆成一个从流量、商品曝光、购买意图、checkout、支付到订单成功的漏斗。</p>
+<p><em>Figure: Growth engineering validation loop. A business idea becomes a metric hypothesis, tracking design, experiment, decision, and impact measurement. generated by gpt-image-2.</em></p>
+<h2 id="电商增长数据工程化"><a href="#电商增长数据工程化" class="headerlink" title="电商增长数据工程化"></a>电商增长数据工程化</h2><p>下面拿电商增长工程（我负责的项目）举例子，跟大家讲一讲怎么做数据驱动增长工程。</p>
+<h3 id="节点拆分"><a href="#节点拆分" class="headerlink" title="节点拆分"></a>节点拆分</h3><p>电商交易最终指标是 GMV（商品交易总额），它代表了在该平台上产生交易的规模有多大，它是一个高度抽象的指标。其他的指标都是间接作用于该指标上的。</p>
+<h4 id="工程视角拆分"><a href="#工程视角拆分" class="headerlink" title="工程视角拆分"></a>工程视角拆分</h4><p>为了方便我们分析，我们可以把指标按流程进行拆解：</p>
+<p><strong>要提升 GMV，就要让尽可能多的用户以高客单价到达成交</strong>。我们可以把这个流程转化成一系列指标，追踪到达每个关键流程的用户数量，形成一个漏斗图：</p>
 <p><img src="/img/ecommerce-growth-data/ecommerce-conversion-funnel.png" alt="Ecommerce conversion funnel"></p>
-<p>图：电商转化漏斗，从入口流量到订单成功和 GMV。generated by gpt-image-2.</p>
-<p>一个简化拆法是：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GMV</span><br><span class="line">= UV</span><br><span class="line">× PDP 到达率</span><br><span class="line">× 加购 / 立即买率</span><br><span class="line">× Checkout 发起率</span><br><span class="line">× 支付成功率</span><br><span class="line">× 人均订单数</span><br><span class="line">× AOV</span><br></pre></td></tr></table></figure>
+<p><em>Figure: Ecommerce conversion funnel from entry traffic to order success and GMV. generated by gpt-image-2.</em></p>
+<p>我们可以下游用户量除以上游用户量，形成该节点的转化率，UV（最开始的用户量）乘所有转化率就是 GMV：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">GMV</span><br><span class="line">= UV</span><br><span class="line">× PDP 到达率</span><br><span class="line">× 加购/立即买率</span><br><span class="line">× Checkout 发起率</span><br><span class="line">× 支付成功率</span><br><span class="line">× 人均订单数</span><br><span class="line">× AOV</span><br></pre></td></tr></table></figure>
 
-<p>每一层对应的问题不一样：</p>
+
+
+<p>每一层都有不同含义：</p>
 <table>
 <thead>
 <tr>
@@ -299,268 +305,271 @@
 </tr>
 </thead>
 <tbody><tr>
-<td>入口曝光到商品点击</td>
+<td>入口曝光 -&gt; 商品点击</td>
 <td>CTR</td>
-<td>模块位置、利益点、视觉权重、商品相关性</td>
+<td>模块位置、视觉、利益点、商品相关性不够</td>
 </tr>
 <tr>
-<td>商品点击到 PDP</td>
+<td>商品点击 -&gt; PDP</td>
 <td>到达率</td>
-<td>跳转失败、页面慢、商品不可用、埋点缺失</td>
+<td>跳转失败、性能差、商品不可用、埋点缺失</td>
 </tr>
 <tr>
-<td>PDP 到加购或立即买</td>
-<td>购买意图</td>
-<td>价格、库存、运费、券、评价、信任</td>
+<td>PDP -&gt; 加购&#x2F;立即买</td>
+<td>商品转化意图</td>
+<td>价格、库存、运费、券、评价、信任问题</td>
 </tr>
 <tr>
-<td>Checkout 到支付</td>
+<td>Checkout -&gt; Payment</td>
 <td>交易摩擦</td>
 <td>登录、地址、支付方式、费用突增、风控</td>
 </tr>
 <tr>
-<td>支付到订单</td>
+<td>Payment -&gt; Order</td>
 <td>系统链路</td>
-<td>支付回调、库存锁定、订单服务、幂等</td>
+<td>支付回调、库存锁定、订单服务、幂等问题</td>
 </tr>
 </tbody></table>
-<p>这比讨论“增长”有用得多。问题终于有了位置。</p>
-<p>如果 PDP 到达率下降，先别急着重写活动模块。跳转、性能、商品状态、埋点都应该先查。如果支付成功了但订单创建掉了，增长同学也别继续改文案，应该看交易后端链路。</p>
-<h2 id="再按用户类型拆-GMV"><a href="#再按用户类型拆-GMV" class="headerlink" title="再按用户类型拆 GMV"></a>再按用户类型拆 GMV</h2><p>漏斗视角回答的是用户掉在哪里。经营视角回答的是哪类用户变了。</p>
-<p>同一个 GMV，还可以按新客、老客、回流用户、高价值用户、低频用户、地区、渠道来拆。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">某类用户 GMV</span><br><span class="line">= 该类活跃用户数</span><br><span class="line">× 购买转化率</span><br><span class="line">× 人均订单数</span><br><span class="line">× AOV</span><br></pre></td></tr></table></figure>
+<h4 id="经营视角拆分"><a href="#经营视角拆分" class="headerlink" title="经营视角拆分"></a>经营视角拆分</h4><p>我们也可以按用户经营视角拆分，了解是哪类用户成交额在上涨&#x2F;下滑，应该拉哪个杠杆。</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">GMV = Σ 各类用户的 GMV</span><br><span class="line"></span><br><span class="line">某类用户 GMV</span><br><span class="line">= 该类活跃用户数</span><br><span class="line">× 购买转化率</span><br><span class="line">× 人均订单数</span><br><span class="line">× AOV</span><br></pre></td></tr></table></figure>
 
-<p>这个拆分会直接影响方案：</p>
-<table>
-<thead>
-<tr>
-<th>现象</th>
-<th>更像什么问题</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>老用户活跃下降</td>
-<td>留存或召回</td>
-</tr>
-<tr>
-<td>新用户变多但不买</td>
-<td>新客承接或落地页质量</td>
-</tr>
-<tr>
-<td>买家数稳定但订单频次下降</td>
-<td>复购、活动节奏、生命周期</td>
-</tr>
-<tr>
-<td>订单数稳定但 AOV 下降</td>
-<td>货盘、价格、凑单、促销结构</td>
-</tr>
-</tbody></table>
-<p>数据结构才是关键。如果所有讨论都从一个巨大的 GMV 数字开始，每个方案都听起来像那么回事。把 GMV 按流程和人群拆开，很多方案会立刻露出问题。</p>
-<h2 id="不要孤立优化局部指标"><a href="#不要孤立优化局部指标" class="headerlink" title="不要孤立优化局部指标"></a>不要孤立优化局部指标</h2><p>漏斗本身也会骗人，前提是各节点没有串起来。</p>
-<p>假设你只优化首页到 PDP 的转化率。最极端的方案是用户一进首页就自动跳商品详情页。PDP 到达率会变成 100%，业务会被搞坏。</p>
-<p>App 下载引导也一样。你可以用更强的弹窗把 App open 做上去。如果这些用户不下单，不在 D7 回访，也没有长期价值，这只是搬运流量。</p>
-<p>有用的增长指标必须能向下游传导。一个功能应该改善局部环节，并把价值传到最终业务结果。</p>
+
+
+<p>按新老客分（也可以按地区、年龄等）：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">总 GMV</span><br><span class="line">= 新客 GMV</span><br><span class="line">+ 老客 GMV</span><br><span class="line">+ 回流用户 GMV</span><br><span class="line">+ 高价值用户 GMV</span><br><span class="line">+ 低频用户 GMV</span><br></pre></td></tr></table></figure>
+
+
+
+<p>判断 GMV 变化到底是谁导致的：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">老用户活跃下降 -&gt; 留存/召回问题</span><br><span class="line">新客变多但不买 -&gt; 新客承接问题</span><br><span class="line">买家数没变但订单频次下降 -&gt; 复购/活动问题</span><br><span class="line">订单数没变但 AOV 下降 -&gt; 货盘/价格/凑单问题</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="节点串联"><a href="#节点串联" class="headerlink" title="节点串联"></a>节点串联</h3><p>拆分节点可以帮助我们看清哪个环节用户流失量最大，帮助我们排查根因。但只有根因还不够，我们还要确保修复最终能作用到我们的终极目标，也就是 GMV 上，这时候，我们需要从数据上串联整个链路。比方说，一个用户打开了首页，我们要知道他这次打开页面是否点进 PDP，是否下单，最后贡献给 GMV。</p>
+<p>没有这个关联性保证，最容易得出错误的决策和结论。比如我们只关注用户从打开首页到商品详情的转化率，那我们最极端可以做一个重定向，用户一进首页，我们就自动跳转到某个商品详情。这样做转化率是 100%，但是最后肯定会严重伤害 GMV。</p>
+<p>同样的，某些诱导用户下载 App 的手段，表面上下载量上升了，但是最后对用户下单、成为留存用户没有帮助，ROI 也是非常低。</p>
+<p>所以，功能改动一定要以能否传导到 GMV 为准，而不是只看某个环节指标。</p>
+<h3 id="几种分析方法"><a href="#几种分析方法" class="headerlink" title="几种分析方法"></a>几种分析方法</h3><h4 id="漏斗分析"><a href="#漏斗分析" class="headerlink" title="漏斗分析"></a>漏斗分析</h4><p>漏斗回答的是：“用户在哪一步掉了？”</p>
 <p><img src="/img/ecommerce-growth-data/web-to-app-growth-path.png" alt="Web and app growth path"></p>
-<p>图：Web 和 App 的增长链路。活动点击可以继续走 Web checkout，也可以分叉到 App 激活、下单和留存。generated by gpt-image-2.</p>
-<p>我更愿意把漏斗当成责任图来看：</p>
+<p><em>Figure: Web and app growth path. A promo click can continue through web checkout or branch into app activation, order, and retention. generated by gpt-image-2.</em></p>
+<p>漏斗分析主要是为了定位责任：</p>
+<ul>
+<li>CTR 低：前端展示、活动利益点、商品排序、推荐策略。</li>
+<li>PDP 到达低：跳转、性能、商品状态、deeplink、埋点。</li>
+<li>PDP 加购低：价格、库存、优惠、评价、信任。</li>
+<li>Checkout 支付低：登录、地址、支付、运费、风控。</li>
+<li>App 打开后首单低：landing 不一致、权益落差、登录摩擦、商品丢失。</li>
+</ul>
+<h4 id="Cohort-x2F-留存分析"><a href="#Cohort-x2F-留存分析" class="headerlink" title="Cohort &#x2F; 留存分析"></a>Cohort &#x2F; 留存分析</h4><p>Cohort 回答的是：“这批用户后面怎么样？” 你不能只看当天打开 App，因为很多点击只是误触或低质量流量。</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">按进入 App 的日期分 cohort：</span><br><span class="line">D0 打开 App</span><br><span class="line">D0 登录</span><br><span class="line">D0 首单</span><br><span class="line">D1 回访</span><br><span class="line">D7 回访</span><br><span class="line">D30 回访</span><br><span class="line">D7/D30 GMV</span><br></pre></td></tr></table></figure>
+
+
+
+<p>如果 A&#x2F;B 方案让 App 打开提升 20%，但 D7 留存和首单没有提升，这不是好增长，是流量搬运。</p>
+<h4 id="归因分析"><a href="#归因分析" class="headerlink" title="归因分析"></a>归因分析</h4><p>归因回答的是：“这个 GMV 应该算谁的贡献？”</p>
+<p>常见模型：</p>
 <table>
 <thead>
 <tr>
-<th>分析方法</th>
-<th>回答的问题</th>
+<th>模型</th>
+<th>解释</th>
+<th>风险</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>漏斗分析</td>
-<td>用户在哪一步掉了？</td>
+<td>Last Click</td>
+<td>最后一次点击拿贡献</td>
+<td>容易高估临门一脚</td>
 </tr>
 <tr>
-<td>Cohort &#x2F; 留存分析</td>
-<td>这批用户后面怎么样？</td>
+<td>First Click</td>
+<td>第一次触点拿贡献</td>
+<td>容易高估入口</td>
 </tr>
 <tr>
-<td>归因分析</td>
-<td>这个 GMV 应该算谁的贡献？</td>
+<td>Linear</td>
+<td>多触点平分</td>
+<td>简单但粗糙</td>
 </tr>
 <tr>
-<td>A&#x2F;B Test</td>
-<td>这个改动是不是导致了结果变化？</td>
+<td>Time Decay</td>
+<td>越接近下单权重越高</td>
+<td>仍是相关，不是因果</td>
 </tr>
 </tbody></table>
-<p>很多时候四个都要有。漏斗找漏点，留存判断流量质量，归因避免乱领功，A&#x2F;B 把因果从时间波动里分出来。</p>
-<h2 id="一个具体场景：Mobile-Web-购买意图到-App-下单"><a href="#一个具体场景：Mobile-Web-购买意图到-App-下单" class="headerlink" title="一个具体场景：Mobile Web 购买意图到 App 下单"></a>一个具体场景：Mobile Web 购买意图到 App 下单</h2><p>电商里经常会遇到这种结构。</p>
-<p>Mobile Web 有稳定流量，因为搜索、社交分享、SEO 页面、活动链接都会落到 Web。App 的人均 GMV 更高，登录态、支付体验和复购承接也更好，但 App DAU 有压力。</p>
-<p>粗糙方案是“把 App banner 做大一点”。</p>
-<p>更好的问题应该更窄：当 Mobile Web 用户已经表现出购买意图时，要不要用一个 App Landing Page 承接，让他进 App 完成购买？</p>
-<p>这个问题可以拆成三个假设：</p>
-<ol>
-<li>Mobile Web 上存在一批高意图用户，比如点击了 <code>Buy Now</code>、<code>Add to Cart</code>、领券或活动商品。</li>
-<li>当前 Web 到 App 的承接效率低，原因可能是 banner 太泛、deeplink 丢上下文、商品和券没有保住。</li>
-<li>如果在购买意图发生后承接，并保留商品、权益和归因上下文，App 首单、留存和单位 eligible 用户 GMV 会提升。</li>
-</ol>
-<h2 id="把承接链路拆成两个漏斗"><a href="#把承接链路拆成两个漏斗" class="headerlink" title="把承接链路拆成两个漏斗"></a>把承接链路拆成两个漏斗</h2><p>这条链路不能停在 App open。</p>
-<p>App open 很便宜。App order 难得多。D7、D30 留存更难。长期价值才是真正有用的答案。</p>
+<h4 id="A-x2F-B-Test"><a href="#A-x2F-B-Test" class="headerlink" title="A&#x2F;B Test"></a>A&#x2F;B Test</h4><p>A&#x2F;B 回答的是：“这个改动是不是导致了结果变化？”</p>
+<p>一个合格实验必须有：</p>
+<ul>
+<li><strong>Primary Metric</strong>：只能有 1 个，决定胜负。例如 Web-assisted App GMV per UV、订单转化率、buyer rate。</li>
+<li><strong>Secondary Metrics</strong>：解释为什么赢或输。例如 CTR、PDP 到达率、加购率。</li>
+<li><strong>Guardrail Metrics</strong>：不能伤害的指标。例如 LCP、CLS、bounce、退款率、投诉、其他频道 GMV。</li>
+<li><strong>Stable Randomization</strong>：按用户&#x2F;device 稳定分桶，不要每次刷新变组。</li>
+<li><strong>Enough Sample Size</strong>：样本不足不下结论。</li>
+<li><strong>Run Full Cycle</strong>：至少覆盖完整业务周期，电商通常不能只跑半天。</li>
+<li><strong>No Peeking</strong>：中途看到涨了就停，很容易出错。</li>
+<li><strong>SRM Check</strong>：实验组&#x2F;对照组流量比例异常，结果直接不可信。</li>
+</ul>
+<p>一个例子：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">实验：MWeb 点击购买时展示 App 承接页</span><br><span class="line"></span><br><span class="line">Control：现有链路</span><br><span class="line">Treatment：点击 Buy Now 后进入 App landing，引导打开 App 并保留商品/权益</span><br><span class="line"></span><br><span class="line">Primary：</span><br><span class="line">  7 天内 Web-assisted App paid GMV per exposed UV</span><br><span class="line"></span><br><span class="line">Secondary：</span><br><span class="line">  App open rate</span><br><span class="line">  App landing success rate</span><br><span class="line">  App login rate</span><br><span class="line">  App first order rate</span><br><span class="line"></span><br><span class="line">Guardrail：</span><br><span class="line">  Web direct GMV</span><br><span class="line">  total paid GMV</span><br><span class="line">  bounce rate</span><br><span class="line">  page performance</span><br><span class="line">  complaint/refund</span><br></pre></td></tr></table></figure>
+
+<h3 id="完整案例：MWeb-点击购买后用-App-Landing-承接"><a href="#完整案例：MWeb-点击购买后用-App-Landing-承接" class="headerlink" title="完整案例：MWeb 点击购买后用 App Landing 承接"></a>完整案例：MWeb 点击购买后用 App Landing 承接</h3><p>前面讲了 GMV 拆解、漏斗、归因、留存和 A&#x2F;B。如果这些概念分开看，还是有点散。下面用一个真实项目场景把它们串起来，看看数据驱动怎么做决策。</p>
+<p><strong>想法：Toko Mobile Web 用户点击购买后，是否应该通过一个 App Landing Page 引导用户进 App 完成购买？</strong></p>
+<h4 id="1-业务问题"><a href="#1-业务问题" class="headerlink" title="1. 业务问题"></a>1. 业务问题</h4><p>通过观察数据，现在 Toko 有一个很典型的结构性问题：</p>
+<ul>
+<li>Toko Web：DAU 高且稳定，但 GMV 很低</li>
+<li>Toko App：GMV 高，但 DAU 在下降</li>
+</ul>
+<p>这说明 Web 可能承载了大量商品浏览、SEO、搜索、活动入口流量，但没有很好地把这些流量转化成交易。尤其是 Mobile Web，用户在手机上浏览商品时，天然更适合被引导到 App 内完成交易，因为 App 里通常有更完整的登录态、支付体验、权益承接和复购能力。</p>
+<p>但现在的问题是：Web 上虽然有引导进 App 的 banner，但它缺少明确的场景和用户动机。用户只是看到“打开 App”并不会觉得自己应该点。相比之下，更合理的场景是：当用户已经点击 <code>Buy Now</code> 或表现出购买意图时，再用一个 landing page 承接，告诉用户“进 App 可以保留当前商品、领取当前权益、继续完成购买”。</p>
+<p>所以这个项目要验证：</p>
+<p>高意图 MWeb 用户能否通过更好的 App 承接转化成 App 内首单、留存和长期 GMV</p>
+<h4 id="业务假设"><a href="#业务假设" class="headerlink" title="业务假设"></a>业务假设</h4><p>这个需求背后的假设可以拆成三层：</p>
+<p>假设 1：MWeb 上有一批高购买意图用户</p>
+<p>证据：他们点击了 Buy Now &#x2F; Add to Cart &#x2F; 领取券 &#x2F; 查看 Flash Sale 商品</p>
+<p>假设 2：当前 Web -&gt; App 引导效率低</p>
+<p>原因：banner 泛化、动机弱、deeplink 承接不完整、商品&#x2F;券&#x2F;价格可能丢失</p>
+<p>假设 3：如果在购买意图发生后，用 App Landing 承接</p>
+<p>结果：App 打开率、登录率、首单率、后续留存和 GMV 会提升</p>
+<h4 id="指标链路"><a href="#指标链路" class="headerlink" title="指标链路"></a>指标链路</h4><p>这个项目的完整指标链路应该是：</p>
+<p>下面这张图把 MWeb eligible UV 到 D30 GMV &#x2F; LTV 拆成 Web intent 和 App value 两段。</p>
+<p>漏斗图：</p>
 <p><img src="/img/ecommerce-growth-data/mweb-app-measurement-funnel.png" alt="MWeb-to-App measurement funnel"></p>
-<p>图：MWeb 到 App 的实验指标漏斗。价值要按 eligible MWeb UV 衡量，不能只看总 GMV。generated by gpt-image-2.</p>
-<p>链路至少要包括：</p>
+<p><em>Figure: MWeb-to-App measurement funnel for the app landing experiment. Value is measured per eligible MWeb UV rather than total GMV alone. generated by gpt-image-2.</em></p>
+<p>每一层回答的问题不同：</p>
 <table>
 <thead>
 <tr>
 <th>环节</th>
 <th>指标</th>
-<th>检查什么</th>
+<th>说明</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>Eligible Mobile Web UV</td>
-<td>实验分母</td>
-<td>不能和全站流量混算</td>
+<td>MWeb Eligible UV</td>
+<td>符合实验条件的 MWeb 用户</td>
+<td>分母，不能用全站 UV 混算</td>
 </tr>
 <tr>
-<td>CTA click</td>
-<td>购买意图</td>
-<td>用户是否表达了意图</td>
+<td>CTA Click</td>
+<td>点击购买&#x2F;打开 App</td>
+<td>是否有购买意图</td>
 </tr>
 <tr>
-<td>Landing page view</td>
-<td>Web 承接</td>
-<td>承接页是否到达</td>
+<td>Landing Page View</td>
+<td>承接页到达</td>
+<td>Web 侧跳转是否正常</td>
 </tr>
 <tr>
-<td>Deep link success</td>
-<td>技术桥</td>
-<td>App 是否正确打开</td>
+<td>Deep Link Success</td>
+<td>Deeplink 成功率</td>
+<td>技术链路是否通</td>
 </tr>
 <tr>
-<td>App landing success</td>
-<td>上下文保留</td>
-<td>商品、活动、权益是否保住</td>
+<td>App Landing Success</td>
+<td>App 指定页面到达</td>
+<td>是否保留商品、活动、券</td>
 </tr>
 <tr>
-<td>Login &#x2F; activate</td>
-<td>身份承接</td>
-<td>用户是否能继续</td>
+<td>Login &#x2F; Activate</td>
+<td>登录&#x2F;激活率</td>
+<td>身份承接是否完成</td>
 </tr>
 <tr>
-<td>First order</td>
-<td>交易</td>
-<td>意图是否变成收入</td>
+<td>First Order</td>
+<td>首单率</td>
+<td>是否真正带来交易</td>
 </tr>
 <tr>
-<td>D7 &#x2F; D30 retention</td>
-<td>质量</td>
-<td>是否形成有价值的 App 用户</td>
+<td>D7&#x2F;D30 Retention</td>
+<td>留存</td>
+<td>用户是否有长期价值</td>
 </tr>
 <tr>
-<td>Repeat order</td>
+<td>Repeat Order</td>
 <td>复购</td>
-<td>留存是否继续变成购买</td>
+<td>留存是否继续转成购买</td>
 </tr>
 <tr>
 <td>D30 GMV &#x2F; LTV</td>
 <td>长期价值</td>
-<td>是否值得放量</td>
+<td>最终是否值得做</td>
 </tr>
 </tbody></table>
-<p>分母很重要。“App 总 GMV 提升”可能是别的 App 活动带来的。“Web-assisted app paid GMV per eligible Mobile Web UV”难造假得多。</p>
-<h2 id="实验要允许自己失败"><a href="#实验要允许自己失败" class="headerlink" title="实验要允许自己失败"></a>实验要允许自己失败</h2><p>一个有用的实验，必须有机会说“不值得做”。</p>
-<p>App Landing 这个例子可以这样设计：</p>
-<table>
-<thead>
-<tr>
-<th>项</th>
-<th>设计</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>实验对象</td>
-<td>在 Mobile Web 点击 <code>Buy Now</code>、<code>Add to Cart</code> 或高意图 CTA 的用户</td>
-</tr>
-<tr>
-<td>Control</td>
-<td>维持现有 Web 购买链路或现有 App banner 逻辑</td>
-</tr>
-<tr>
-<td>Treatment</td>
-<td>高意图点击进入 App Landing Page，再带着商品、权益和归因上下文 deeplink 到 App</td>
-</tr>
-<tr>
-<td>Primary metric</td>
-<td>7 天内 Web-assisted app paid GMV per eligible Mobile Web UV</td>
-</tr>
-<tr>
-<td>Secondary metrics</td>
-<td>App open rate、App landing success rate、login rate、first order rate</td>
-</tr>
-<tr>
-<td>Guardrails</td>
-<td>Web direct GMV、total paid GMV、bounce rate、page performance、refund、cancel、complaint</td>
-</tr>
-</tbody></table>
+<h4 id="实验设计"><a href="#实验设计" class="headerlink" title="实验设计"></a>实验设计</h4><p>可以设计一个 A&#x2F;B 实验：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">实验对象：</span><br><span class="line">Mobile Web 上点击 Buy Now / Add to Cart / 高意图 CTA 的用户</span><br><span class="line"></span><br><span class="line">Control：</span><br><span class="line">维持现有链路，例如继续走 Web 购买链路或现有 App banner 逻辑</span><br><span class="line"></span><br><span class="line">Treatment：</span><br><span class="line">点击 Buy Now 后进入 App Landing Page</span><br><span class="line">Landing Page 展示当前商品、价格、活动权益、App 打开按钮</span><br><span class="line">点击后通过 deeplink 打开 App，并保留商品、券、活动和 attribution_id</span><br></pre></td></tr></table></figure>
+
+
+
+<p>实验结构：</p>
 <p><img src="/img/ecommerce-growth-data/app-landing-experiment-split.png" alt="App landing experiment split"></p>
-<p>图：App Landing Page 的 A&#x2F;B 实验分桶。稳定分桶保证 Control 和 Treatment 可比，最终由指标和护栏决定是否放量。generated by gpt-image-2.</p>
-<p>稳定分桶不是流程形式。如果用户刷新就换组，结果就是垃圾。如果 Treatment 把 Web direct GMV 抢走了，但 total GMV 没涨，结果也是垃圾。</p>
-<p>护栏的作用，就是防止局部胜利变成业务损失。</p>
-<h2 id="归因是数据契约"><a href="#归因是数据契约" class="headerlink" title="归因是数据契约"></a>归因是数据契约</h2><p>这个实验能不能成立，关键在归因。</p>
-<p>如果 App 订单无法关联回 Web 触点，这个实验就证明不了什么。App 订单可能涨了，但你不知道是不是 App Landing Page 带来的。</p>
-<p>承接链路里必须有一个稳定的 <code>web_attribution_id</code> 或类似标识，从 Mobile Web 一直传到 App 订单。</p>
+<p><em>Figure: A&#x2F;B experiment split for the app landing page. Stable buckets keep control and treatment comparable while metrics and guardrails decide rollout. generated by gpt-image-2.</em></p>
+<h4 id="指标设计"><a href="#指标设计" class="headerlink" title="指标设计"></a>指标设计</h4><p>Primary Metric 建议用：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">7 天内 Web-assisted App paid GMV per eligible MWeb UV</span><br></pre></td></tr></table></figure>
+
+
+
+<p>为什么是这个？</p>
+<p>因为它同时约束了三个东西：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Web-assisted：必须能归因到 Web 触点</span><br><span class="line">App paid GMV：必须真的在 App 内成交</span><br><span class="line">per eligible MWeb UV：不能只看总 GMV，要看单位流量价值</span><br></pre></td></tr></table></figure>
+
+
+
+<p>Secondary Metrics：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Landing Page View Rate</span><br><span class="line">Deep Link Click Rate</span><br><span class="line">Deep Link Success Rate</span><br><span class="line">App Landing Success Rate</span><br><span class="line">Login Rate</span><br><span class="line">First Order Rate</span><br><span class="line">D7 Retention</span><br><span class="line">D7 Repeat Order Rate</span><br></pre></td></tr></table></figure>
+
+
+
+<p>Guardrail Metrics：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Web Direct GMV</span><br><span class="line">Total（Web+App) Paid GMV</span><br><span class="line">Bounce Rate</span><br><span class="line">Page Performance</span><br><span class="line">Refund / Cancel / Complaint</span><br><span class="line">SEO Traffic</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="埋点和归因要求"><a href="#埋点和归因要求" class="headerlink" title="埋点和归因要求"></a>埋点和归因要求</h4><p>这个实验能不能判断清楚，关键不在页面，而在归因链路。</p>
+<p>必须有一个稳定的 <code>web_attribution_id</code>，从 MWeb 一直传到 App 订单：</p>
 <p><img src="/img/ecommerce-growth-data/cross-channel-attribution-handoff.png" alt="Cross-channel attribution handoff"></p>
-<p>图：跨端归因传递。Web 触点把 attribution_id 带过 landing、deeplink、App landing 和 App order。generated by gpt-image-2.</p>
-<p>事件链至少应该覆盖：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mweb_buy_now_click</span><br><span class="line">app_landing_page_view</span><br><span class="line">deeplink_click</span><br><span class="line">deeplink_success</span><br><span class="line">app_target_page_view</span><br><span class="line">app_login_success</span><br><span class="line">app_order_success</span><br></pre></td></tr></table></figure>
+<p><em>Figure: Cross-channel attribution handoff. The web touchpoint carries an attribution_id through landing, deeplink, app landing, and app order. generated by gpt-image-2.</em></p>
+<p>关键事件包括：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mweb_buy_now_click</span><br><span class="line">app_landing_page_view</span><br><span class="line">deeplink_click</span><br><span class="line">deeplink_success</span><br><span class="line">app_target_page_view</span><br><span class="line">app_login_success</span><br><span class="line">app_order_success</span><br></pre></td></tr></table></figure>
 
-<p>事件参数要足够把链路 join 起来：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">web_attribution_id</span><br><span class="line">user_id</span><br><span class="line">device_id</span><br><span class="line">session_id</span><br><span class="line">product_id</span><br><span class="line">sku_id</span><br><span class="line">campaign_id</span><br><span class="line">entrance</span><br><span class="line">source_page</span><br><span class="line">target_page</span><br><span class="line">btm_chain</span><br><span class="line">experiment_id</span><br><span class="line">variant_id</span><br><span class="line">app_installed_flag</span><br><span class="line">login_state</span><br></pre></td></tr></table></figure>
+<p>关键参数包括：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">web_attribution_id</span><br><span class="line">user_id</span><br><span class="line">device_id</span><br><span class="line">session_id</span><br><span class="line">product_id</span><br><span class="line">sku_id</span><br><span class="line">campaign_id</span><br><span class="line">entrance</span><br><span class="line">source_page</span><br><span class="line">target_page</span><br><span class="line">btm_chain</span><br><span class="line">experiment_id</span><br><span class="line">variant_id</span><br><span class="line">app_installed_flag</span><br><span class="line">login_state</span><br></pre></td></tr></table></figure>
 
-<p>不同系统的字段名会变，但原则不能变。归因 key 要跨过 Web 到 App 的边界，实验分组也要跟着一起传。</p>
-<h2 id="用决策矩阵收口"><a href="#用决策矩阵收口" class="headerlink" title="用决策矩阵收口"></a>用决策矩阵收口</h2><p>实验结束后，不要挑一个最绿的指标给自己庆功。</p>
-<p>用矩阵判断：</p>
+<p>如果没有 <code>web_attribution_id</code> 或类似归因字段，即使 App 订单涨了，我们也没法证明是 Web 改造带来的。</p>
+<h4 id="决策方式"><a href="#决策方式" class="headerlink" title="决策方式"></a>决策方式</h4><p>实验结束后，不是看某一个指标涨了就上线，而是分情况判断。</p>
 <table>
 <thead>
 <tr>
-<th>结果</th>
-<th>判断</th>
+<th><strong>结果</strong></th>
+<th><strong>判断</strong></th>
 </tr>
 </thead>
 <tbody><tr>
-<td>App open 涨，first order 不涨</td>
-<td>只是搬运流量</td>
+<td>App open 涨，First Order 不涨</td>
+<td>承接弱，只是搬运流量</td>
 </tr>
 <tr>
-<td>First order 涨，Web direct GMV 跌更多</td>
-<td>可能在蚕食 Web</td>
+<td>First Order 涨，Web Direct GMV 跌更多</td>
+<td>可能蚕食 Web，不一定放量</td>
 </tr>
 <tr>
-<td>App GMV 涨，D7 &#x2F; D30 留存差</td>
-<td>低质量转化</td>
+<td>App GMV 涨，D7&#x2F;D30 留存差</td>
+<td>低质量转化，长期价值不足</td>
 </tr>
 <tr>
-<td>Web-assisted app GMV 涨，total GMV 涨，护栏正常</td>
+<td>Web-assisted App GMV 涨，总 GMV 涨，护栏正常</td>
 <td>可以放量</td>
 </tr>
 <tr>
-<td>Deep link success 低</td>
-<td>先修技术桥，不要急着优化 UI</td>
+<td>Deep Link Success 低</td>
+<td>先修技术链路，不要急着优化 UI</td>
 </tr>
 <tr>
-<td>App landing success 低</td>
-<td>先修商品、券、页面上下文承接</td>
+<td>App Landing Success 低</td>
+<td>商品&#x2F;券&#x2F;页面承接丢失，需要修承接</td>
 </tr>
 </tbody></table>
-<p>理想结果其实很朴素：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Treatment group</span><br><span class="line">Web-assisted app GMV per eligible UV increases</span><br><span class="line">Total paid GMV increases</span><br><span class="line">Web direct GMV is not materially damaged</span><br><span class="line">D7 / D30 retention is healthy</span><br><span class="line">Refund, complaint, performance, and bounce guardrails stay clean</span><br></pre></td></tr></table></figure>
-
-<p>这里越朴素越好。增长系统要产出决策，不是产出感觉。</p>
-<h2 id="我会记住的模型"><a href="#我会记住的模型" class="headerlink" title="我会记住的模型"></a>我会记住的模型</h2><p>增长工程不是“把指标做上去”。这个说法太虚，没法指导工程。</p>
-<p>更好的模型接近线上排障：</p>
-<ol>
-<li>把顶层指标拆成流程结构和人群结构。</li>
-<li>把局部动作连到下游价值。</li>
-<li>让归因贯穿整条链路。</li>
-<li>用能否定方案的实验来验证。</li>
-<li>用护栏防止局部胜利掩盖业务损失。</li>
-</ol>
-<p>如果一个功能没法表达成因果链，第一件事不是开工。第一件事是把数据模型补到这个问题可以被回答。</p>
+<p>最终比较理想的结果是：</p>
+<figure class="highlight plaintext"><figcaption><span>Text</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Treatment 组</span><br><span class="line">Web-assisted App GMV / eligible UV 提升</span><br><span class="line">Total Paid GMV 提升</span><br><span class="line">Web Direct GMV 没有明显受伤</span><br><span class="line">D7/D30 留存正常</span><br><span class="line">退款、投诉、性能、跳出率无明显恶化</span><br></pre></td></tr></table></figure>
 
 <div id="gitalk-container"></div>
 <script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
