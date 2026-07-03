@@ -104,7 +104,8 @@
   –––––––––––––––––––––––––––––––––––––––––––––––––– -->
   <%- css('css/normalize.css') %>
   <%- css('css/skeleton.css') %>
-  <%- css('css/custom.css') %>
+  <% var assetVersion = theme.asset_version ? '?v=' + theme.asset_version : ''; %>
+  <link rel="stylesheet" href="<%- url_for('/css/custom.css') %><%- assetVersion %>">
   <%- css('css/prism-dark.css') %>
   <%- css('css/prism-line-numbers.css') %>
   <!-- User css -->

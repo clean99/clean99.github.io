@@ -28,6 +28,7 @@ tcolor: 0FA0CE
 #(could be also located outside of theme)
 # Relative to source/ directory
 usercss: css/user.css
+asset_version: 20260703-01
 
 # social profile at the footer/bottom
 footer: true
