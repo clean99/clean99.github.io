@@ -60,7 +60,7 @@
   %>
   <meta property="og:image" content="<%-config.url + ogImage %>">
   <meta property="og:site_name" content="<%= config.title %>" />
-  <% if (is_post()) { %>
+  <% if (is_post() && page.math) { %>
   <meta property="og:type" content="article" />
   <meta property="article:published_time" content="<%= page.date.toISOString() %>" />
   <meta property="article:modified_time" content="<%= (page.updated || page.date).toISOString() %>" />
