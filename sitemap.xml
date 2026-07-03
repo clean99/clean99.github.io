@@ -92,7 +92,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/</loc>
+    <loc>https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/</loc>
     
     <lastmod>2026-06-05</lastmod>
     
@@ -101,7 +101,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/</loc>
+    <loc>https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/</loc>
     
     <lastmod>2026-06-05</lastmod>
     
@@ -308,7 +308,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2024/04/16/React-Performance-Optimization/</loc>
+    <loc>https://clean99.github.io/zh/2024/04/16/React-Performance-Optimization/</loc>
     
     <lastmod>2024-04-16</lastmod>
     
@@ -317,7 +317,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2024/04/16/React-Performance-Optimization/</loc>
+    <loc>https://clean99.github.io/2024/04/16/React-Performance-Optimization/</loc>
     
     <lastmod>2024-04-16</lastmod>
     
@@ -344,15 +344,6 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://clean99.github.io/zh/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/</loc>
     
     <lastmod>2024-04-10</lastmod>
@@ -362,7 +353,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/</loc>
+    <loc>https://clean99.github.io/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/</loc>
     
     <lastmod>2024-04-10</lastmod>
     
@@ -372,6 +363,15 @@
   
   <url>
     <loc>https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/</loc>
+    
+    <lastmod>2024-04-10</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/</loc>
     
     <lastmod>2024-04-10</lastmod>
     
@@ -488,7 +488,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/</loc>
+    <loc>https://clean99.github.io/zh/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/</loc>
     
     <lastmod>2023-02-22</lastmod>
     
@@ -497,7 +497,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/</loc>
+    <loc>https://clean99.github.io/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/</loc>
     
     <lastmod>2023-02-22</lastmod>
     
@@ -524,7 +524,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2022/12/18/Does-Github-Copilot-Worth-It/</loc>
+    <loc>https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/</loc>
     
     <lastmod>2022-12-18</lastmod>
     
@@ -533,7 +533,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/</loc>
+    <loc>https://clean99.github.io/zh/2022/12/18/Does-Github-Copilot-Worth-It/</loc>
     
     <lastmod>2022-12-18</lastmod>
     
@@ -632,15 +632,6 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/</loc>
-    
-    <lastmod>2022-04-25</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://clean99.github.io/zh/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/</loc>
     
     <lastmod>2022-04-25</lastmod>
@@ -650,7 +641,16 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/zh/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
+    <loc>https://clean99.github.io/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/</loc>
+    
+    <lastmod>2022-04-25</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://clean99.github.io/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
     
     <lastmod>2022-04-24</lastmod>
     
@@ -659,7 +659,7 @@
   </url>
   
   <url>
-    <loc>https://clean99.github.io/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
+    <loc>https://clean99.github.io/zh/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
     
     <lastmod>2022-04-24</lastmod>
     
