@@ -399,11 +399,10 @@ body.darkmode figure.highlight {
 .math-display {
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 1.2rem 1.6rem;
-  margin: 2.4rem 0;
-  border: 1px solid var(--rule);
-  border-radius: 8px;
-  background: var(--surface);
+  padding: 0.7rem 0;
+  margin: 2.2rem 0;
+  border: 0;
+  background: transparent;
 }
 
 .math-display .mjx-container[jax="CHTML"][display="true"] {
@@ -420,8 +419,7 @@ body.darkmode figure.highlight {
 }
 
 body.darkmode .math-display {
-  background: #26272d;
-  border-color: #3d3d40;
+  background: transparent;
 }
 
 article[itemtype="https://schema.org/BlogPosting"] > header {
