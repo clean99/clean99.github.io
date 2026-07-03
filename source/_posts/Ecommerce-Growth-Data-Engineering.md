@@ -4,7 +4,6 @@ date: 2026-07-02 17:30:00
 tags: [Software Engineering, Data, Growth]
 lang: en
 i18n_key: Ecommerce-Growth-Data-Engineering
-math: true
 ---
 
 > I recently moved to a new team working on Southeast Asia TikTok Shop marketing and user growth. I had not worked as a growth engineer before, so I used the team's existing projects and GPT to learn the area. The biggest thing I learned is that data is one of the most important things in growth engineering. These are my notes from that learning process, written by hand.

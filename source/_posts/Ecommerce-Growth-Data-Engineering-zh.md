@@ -5,7 +5,6 @@ tags: [Software Engineering, Data, Growth]
 lang: zh
 i18n_key: Ecommerce-Growth-Data-Engineering
 permalink: zh/2026/07/02/Ecommerce-Growth-Data-Engineering/
-math: true
 ---
 
 > 最近转进一个新的组，主要是做东南亚 TikTok Shop 营销/用户增长的，由于自己之前没有接触过增长工程师这个专业，所以借着团队内现有项目和 GPT 学了一轮，我了解到了数据在增长工程里几乎是最重要的东西，以下是我的学习增长数据心得，本文纯手写，请放心食用。
