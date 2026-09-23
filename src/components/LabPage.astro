@@ -1,0 +1,623 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import catalog from "../../content/ai-coding-lab/catalog.json";
+import { labCopy } from "../lib/copy/lab";
+import { localizePath, t, type Lang } from "../lib/i18n";
+import {
+  catalogOrder,
+  categoryFacets,
+  categoryLabel,
+  excerpt,
+  filterCounts,
+  formatSize,
+  shortPath,
+  type Catalog,
+  type CatalogItem
+} from "../lib/lab";
+import { projectCards } from "../lib/projects";
+import { allPosts } from "../data/posts";
+import { breadcrumbNode } from "../lib/seo";
+import { formatLongDate } from "../lib/dates";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const ui = t(lang);
+const copy = labCopy(lang);
+const path = localizePath("/ai-coding-lab/", lang);
+
+const data = catalog as Catalog;
+const items = catalogOrder(data.items);
+const skills = items.filter((item) => item.kind === "skill");
+const files = items.filter((item) => item.kind === "file");
+const counts = filterCounts(items);
+const facets = categoryFacets(items, lang);
+
+const grouped = facets.map((facet) => ({
+  ...facet,
+  items: skills.filter((item) => item.category === facet.id)
+}));
+
+const related = projectCards(await allPosts(), lang)
+  .filter((card) => card.post.area === "ai" || card.post.tags.some((tag) => tag.slug === "ai"))
+  .slice(0, 3);
+
+const generated = formatLongDate(new Date(data.generatedAt), lang);
+const alternates = { en: "/ai-coding-lab/", zh: "/zh/ai-coding-lab/" };
+const rssPath = localizePath("/atom.xml", lang);
+
+const jsonLd = [
+  breadcrumbNode([
+    { name: ui.breadcrumbHome, path: localizePath("/", lang) },
+    { name: ui.nav.lab, path }
+  ])
+];
+
+function itemTitle(item: CatalogItem): string {
+  return item.kind === "file" ? item.name : `/${item.name}`;
+}
+---
+
+<BaseLayout
+  lang={lang}
+  title={copy.title}
+  description={copy.lede}
+  path={path}
+  alternates={alternates}
+  jsonLd={jsonLd}
+  section="projects"
+>
+  <div class="wrap lab-head">
+    <div class="head-copy">
+      <p class="eyebrow label">{copy.eyebrow}</p>
+      <h1>{copy.title}</h1>
+      <p class="lede">{copy.lede}</p>
+    </div>
+
+    <ol class="pipeline" aria-label={copy.pipelineTitle}>
+      {copy.pipelineSteps.map((step, index) => (
+        <li>
+          <span class="pipeline-index label">{String(index + 1).padStart(2, "0")}</span>
+          <span class="pipeline-body">
+            <strong>{step.title}</strong>
+            <span class="pipeline-blurb">{step.blurb}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+  </div>
+
+  <div class="wrap">
+    <section class="statement" aria-labelledby="lab-statement-title">
+      <div>
+        <p id="lab-statement-title" class="label">
+          {copy.statementTitle}
+        </p>
+        <p class="statement-text">{copy.statement}</p>
+      </div>
+      <dl class="meta">
+        <div>
+          <dt class="label">{copy.statusLabel}</dt>
+          <dd class="status">{copy.statusReady}</dd>
+        </div>
+        <div>
+          <dt class="label">{copy.generatedLabel}</dt>
+          <dd>{generated}</dd>
+        </div>
+        <div>
+          <dt class="label">{copy.commitLabel}</dt>
+          <dd>
+            <code>{data.source.commit.slice(0, 7)}</code>
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <ul class="stats" role="list">
+      <li>
+        <span class="stat-value">{data.stats.skills}</span>
+        <span class="label">{copy.skillsLabel}</span>
+      </li>
+      <li>
+        <span class="stat-value">{data.stats.files}</span>
+        <span class="label">{copy.filesLabel}</span>
+      </li>
+      <li>
+        <span class="stat-value">{data.stats.redacted}</span>
+        <span class="label">{copy.sanitizedLabel}</span>
+      </li>
+      <li>
+        <span class="stat-value">{Math.round(data.stats.bytesIndexed / 1024)}</span>
+        <span class="label">KB</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="wrap">
+    <div class="controls" data-lab-controls hidden>
+      <label class="search">
+        <span class="visually-hidden">{copy.searchLabel}</span>
+        <input type="search" data-lab-search placeholder={copy.searchPlaceholder} autocomplete="off" />
+      </label>
+      <div class="filters" role="group" aria-label={copy.controlsLabel}>
+        {(
+          [
+            ["all", copy.filters.all, counts.all],
+            ["skill", copy.filters.skill, counts.skill],
+            ["file", copy.filters.file, counts.file],
+            ["redacted", copy.filters.redacted, counts.redacted]
+          ] as const
+        ).map(([id, label, count]) => (
+          <button type="button" class="chip" data-lab-filter={id} aria-pressed={id === "all" ? "true" : "false"}>
+            {label} <span class="filter-count">{count}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+    <p class="empty" data-lab-empty hidden>
+      {copy.empty}
+    </p>
+  </div>
+
+  <div class="wrap catalog" data-lab-catalog>
+    <section aria-labelledby="lab-files-title">
+      <div class="section-head">
+        <h2 id="lab-files-title">{copy.filesLabel}</h2>
+        <span class="label">{copy.counts.files(files.length)}</span>
+      </div>
+      <ul class="items files" role="list">
+        {files.map((item) => (
+          <li
+            class="item"
+            data-kind={item.kind}
+            data-redacted={String(item.redacted)}
+            data-search={`${item.name} ${item.description} ${item.category} ${item.path}`.toLowerCase()}
+          >
+            <p class="item-head label">
+              <span class="item-cat">{categoryLabel(item.category, lang)}</span>
+              {item.redacted && <span class="badge">{copy.sanitizedLabel}</span>}
+            </p>
+            <h3 class="item-name">{itemTitle(item)}</h3>
+            <p class="item-desc">{item.description}</p>
+            <p class="item-path label">
+              <code>{shortPath(item.path)}</code>
+              <span class="size">{formatSize(item.size)}</span>
+            </p>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {grouped.map((group) => (
+      <section aria-labelledby={`lab-${group.id.replace(/\s+/g, "-")}-title`} data-lab-group>
+        <div class="section-head">
+          <h2 id={`lab-${group.id.replace(/\s+/g, "-")}-title`}>{group.label}</h2>
+          <span class="label">{copy.counts.skills(group.count)}</span>
+        </div>
+        <ul class="items" role="list">
+          {group.items.map((item) => (
+            <li
+              class="item"
+              data-kind={item.kind}
+              data-redacted={String(item.redacted)}
+              data-search={`${item.name} ${item.description} ${item.category} ${item.path}`.toLowerCase()}
+            >
+              <p class="item-head label">
+                <span class="item-cat">{categoryLabel(item.category, lang)}</span>
+                {item.redacted && <span class="badge">{copy.sanitizedLabel}</span>}
+              </p>
+              <h3 class="item-name">{itemTitle(item)}</h3>
+              <p class="item-desc">{item.description}</p>
+              <p class="item-excerpt">{excerpt(item.content)}</p>
+              <p class="item-path label">
+                <code>{shortPath(item.path)}</code>
+                <span class="size">{formatSize(item.size)}</span>
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+
+    {related.length > 0 && (
+      <section class="related" aria-labelledby="lab-related-title">
+        <div class="section-head">
+          <h2 id="lab-related-title">{copy.workLabel}</h2>
+          <a class="arrow-link" href={localizePath("/writing/", lang)}>
+            {ui.allWriting}
+          </a>
+        </div>
+        <p class="related-lede">{copy.workLede}</p>
+        <ul class="related-list" role="list">
+          {related.map((card) => (
+            <li>
+              <a href={card.post.url} data-astro-prefetch>
+                <span class="related-title">{card.post.title}</span>
+                <span class="label">{ui.readingTime(card.post.minutes)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <p class="note label">
+      {copy.note} <a href={rssPath}>{ui.rss}</a>
+    </p>
+  </div>
+
+  <script>
+    import "../client/lab";
+  </script>
+</BaseLayout>
+
+<style>
+  .lab-head {
+    display: grid;
+    gap: var(--space-l);
+    padding-block: var(--space-2xl) var(--space-xl);
+  }
+
+  .head-copy h1 {
+    margin-top: var(--space-s);
+    /* 18ch of Fraunces 600, fixed in em so the fallback's narrower "0" cannot rewrap it on swap. */
+    max-width: 12.15em;
+    font-size: var(--step-4);
+    letter-spacing: -0.02em;
+  }
+
+  :lang(zh) .head-copy h1 {
+    max-width: 12em;
+    letter-spacing: 0;
+    line-height: 1.25;
+  }
+
+  .lede {
+    margin-top: var(--space-m);
+    max-width: 42rem;
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .pipeline {
+    display: grid;
+    gap: 1px;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--rule);
+    background: var(--rule);
+  }
+
+  .pipeline li {
+    display: flex;
+    gap: var(--space-s);
+    padding: var(--space-s);
+    background: var(--paper);
+  }
+
+  .pipeline-index {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pipeline-body {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .pipeline-body strong {
+    font-family: var(--font-display-stack);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .pipeline-blurb {
+    font-size: var(--step--1);
+    line-height: 1.45;
+    color: var(--ink-soft);
+  }
+
+  .statement {
+    display: grid;
+    gap: var(--space-m);
+    padding: var(--space-m);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+  }
+
+  .statement-text {
+    margin-top: var(--space-2xs);
+    max-width: 46rem;
+    line-height: 1.6;
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: var(--space-s);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--rule);
+  }
+
+  .meta dd {
+    margin-top: 0.2rem;
+    font-size: var(--step--1);
+    overflow-wrap: anywhere;
+  }
+
+  .status::before {
+    content: "◆ ";
+    color: var(--accent);
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: var(--space-l);
+    padding: 0;
+    list-style: none;
+    border-block: 1px solid var(--rule);
+  }
+
+  .stats li {
+    display: grid;
+    gap: 0.15rem;
+    padding: var(--space-s);
+  }
+
+  .stats li:not(:first-child) {
+    border-left: 1px solid var(--rule);
+  }
+
+  .stats li:nth-child(n + 3) {
+    border-top: 1px solid var(--rule);
+    border-left: 0;
+  }
+
+  .stats li:nth-child(3) {
+    border-left: 0;
+  }
+
+  .stat-value {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-2);
+    font-variant-numeric: lining-nums tabular-nums;
+    line-height: 1.1;
+  }
+
+  .controls {
+    display: grid;
+    gap: var(--space-s);
+    margin-top: var(--space-xl);
+  }
+
+  .search input {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+    font-size: var(--step-0);
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .filters button {
+    border-radius: 999px;
+  }
+
+  /* Clear the UA button fill only while unpressed: the shared .chip rule paints the
+     pressed state, and this block would otherwise outrank it and hide the label. */
+  .filters button[aria-pressed="false"] {
+    background: none;
+  }
+
+  .filter-count {
+    color: var(--ink-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .filters button[aria-pressed="true"] .filter-count {
+    color: var(--paper);
+    opacity: 0.75;
+  }
+
+  .empty {
+    margin-top: var(--space-m);
+    color: var(--ink-soft);
+  }
+
+  .catalog {
+    margin-top: var(--space-xl);
+  }
+
+  .catalog section + section {
+    margin-top: var(--space-2xl);
+  }
+
+  .items {
+    display: grid;
+    gap: var(--space-s);
+    padding: 0;
+    list-style: none;
+  }
+
+  .item {
+    display: grid;
+    gap: var(--space-xs);
+    padding: var(--space-m);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+  }
+
+  .item-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+  }
+
+  .badge {
+    color: var(--accent);
+  }
+
+  .badge::before {
+    content: "◆ ";
+  }
+
+  .item-name {
+    font-family: var(--font-mono-stack);
+    font-size: var(--step-0);
+    font-weight: 500;
+    font-variation-settings: normal;
+    letter-spacing: -0.01em;
+    overflow-wrap: anywhere;
+  }
+
+  .item-desc {
+    max-width: 46rem;
+    font-size: var(--step-0);
+    line-height: 1.5;
+  }
+
+  .item-excerpt {
+    max-width: 46rem;
+    font-size: var(--step--1);
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  .item-path {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem var(--space-s);
+    padding-top: var(--space-2xs);
+    border-top: 1px solid var(--rule);
+  }
+
+  .item-path code {
+    font-size: var(--step--2);
+    overflow-wrap: anywhere;
+  }
+
+  .size {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .related-lede {
+    margin-bottom: var(--space-m);
+    color: var(--ink-soft);
+  }
+
+  .related-list {
+    display: grid;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .related-list li {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .related-list a {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem var(--space-m);
+    padding: var(--space-s) var(--space-2xs);
+    text-decoration: none;
+    color: var(--ink);
+    transition: background-color 0.2s var(--ease-out);
+  }
+
+  .related-list a:hover {
+    background: var(--accent-wash);
+  }
+
+  .related-title {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-0);
+    font-weight: 500;
+    line-height: 1.35;
+  }
+
+  .related-list a:hover .related-title {
+    color: var(--accent);
+  }
+
+  .note {
+    margin-top: var(--space-2xl);
+    max-width: 46rem;
+    font-family: var(--font-body-stack);
+    font-size: var(--step--1);
+    line-height: 1.7;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  @media (min-width: 48rem) {
+    .stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .stats li {
+      padding-left: var(--space-m);
+    }
+
+    .stats li:first-child {
+      padding-left: 0;
+    }
+
+    .stats li:nth-child(n + 3) {
+      border-top: 0;
+    }
+
+    .stats li:nth-child(3) {
+      border-left: 1px solid var(--rule);
+    }
+
+    .items {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .statement {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      column-gap: var(--space-xl);
+    }
+
+    .meta {
+      padding-top: 0;
+      border-top: 0;
+      grid-template-columns: repeat(3, auto);
+      border-left: 1px solid var(--rule);
+      padding-left: var(--space-l);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .lab-head {
+      grid-template-columns: minmax(0, 1fr) 24rem;
+      align-items: start;
+      column-gap: var(--space-2xl);
+    }
+
+    .items {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

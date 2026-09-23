@@ -1,0 +1,102 @@
+/*
+ * Ink & Seal — design tokens.
+ * Paper, ink, and one seal-red accent. Dark mode is "lamp-lit desk": warm near-black
+ * paper with a brighter vermilion so the accent keeps its contrast.
+ */
+:root {
+  color-scheme: light;
+
+  --paper: #f4f1ea;
+  --paper-raised: #faf8f3;
+  --paper-sunk: #ebe6db;
+  --ink: #1c1a17;
+  --ink-soft: #45403a;
+  --ink-muted: #686157;
+  --rule: #dcd5c8;
+  --rule-strong: #b8ae9d;
+  --accent: #b8321f;
+  --accent-strong: #93240f;
+  --on-accent: #fbf6ee;
+  --accent-wash: rgb(184 50 31 / 0.08);
+  --seal-red: #b8321f;
+  --seal-paper: #f4f1ea;
+  --mark: rgb(236 196 84 / 0.45);
+  --selection: rgb(184 50 31 / 0.18);
+  --grain-opacity: 0.35;
+  --shadow-lift: 0 1px 0 rgb(28 26 23 / 0.04), 0 12px 32px -18px rgb(58 40 22 / 0.35);
+
+  --font-display-stack: var(--font-display);
+  --font-body-stack: var(--font-body);
+  --font-mono-stack: var(--font-mono);
+
+  /* Fluid type scale, 20rem → 80rem viewport. */
+  --step--2: 0.75rem;
+  --step--1: clamp(0.8125rem, 0.79rem + 0.1vw, 0.875rem);
+  --step-0: clamp(1.0625rem, 1.02rem + 0.21vw, 1.1875rem);
+  --step-1: clamp(1.25rem, 1.18rem + 0.35vw, 1.5rem);
+  --step-2: clamp(1.5rem, 1.36rem + 0.62vw, 1.95rem);
+  --step-3: clamp(1.875rem, 1.6rem + 1.25vw, 2.75rem);
+  --step-4: clamp(2.25rem, 1.8rem + 2.2vw, 3.75rem);
+  --step-5: clamp(2.75rem, 1.9rem + 4.2vw, 5.5rem);
+
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-s: 1rem;
+  --space-m: 1.5rem;
+  --space-l: 2.25rem;
+  --space-xl: 3.5rem;
+  --space-2xl: clamp(4rem, 3rem + 5vw, 7rem);
+
+  --gutter: 1.25rem;
+  --measure: 45rem;
+  --wide: 74rem;
+  --radius: 4px;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #121110;
+    --paper-raised: #1a1917;
+    --paper-sunk: #0c0b0a;
+    --ink: #ece6da;
+    --ink-soft: #c7bfb1;
+    --ink-muted: #9a9185;
+    --rule: #2b2824;
+    --rule-strong: #4a433a;
+    --accent: #ff7a59;
+    --accent-strong: #ffa184;
+    --on-accent: #1a0e0a;
+    --accent-wash: rgb(255 122 89 / 0.1);
+    --seal-red: #c23a24;
+    --seal-paper: #f6eee2;
+    --mark: rgb(236 196 84 / 0.28);
+    --selection: rgb(255 122 89 / 0.28);
+    --grain-opacity: 0.18;
+    --shadow-lift: 0 1px 0 rgb(0 0 0 / 0.3), 0 16px 40px -20px rgb(0 0 0 / 0.8);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #121110;
+  --paper-raised: #1a1917;
+  --paper-sunk: #0c0b0a;
+  --ink: #ece6da;
+  --ink-soft: #c7bfb1;
+  --ink-muted: #9a9185;
+  --rule: #2b2824;
+  --rule-strong: #4a433a;
+  --accent: #ff7a59;
+  --accent-strong: #ffa184;
+  --on-accent: #1a0e0a;
+  --accent-wash: rgb(255 122 89 / 0.1);
+  --seal-red: #c23a24;
+  --seal-paper: #f6eee2;
+  --mark: rgb(236 196 84 / 0.28);
+  --selection: rgb(255 122 89 / 0.28);
+  --grain-opacity: 0.18;
+  --shadow-lift: 0 1px 0 rgb(0 0 0 / 0.3), 0 16px 40px -20px rgb(0 0 0 / 0.8);
+}

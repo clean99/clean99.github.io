@@ -139,7 +139,7 @@ export function buildBrowserReadiness({
     composeDraft,
     blockers,
     warnings,
-    nextActions: nextActions({ blockers, signals, publishMode, profileDir, profileDirectory, userBrowserSession }),
+    nextActions: nextActions({ blockers, signals, profileDir, profileDirectory, userBrowserSession }),
     boundary: 'Readiness only. Do not publish, upload media, reply, like, repost, follow, edit profile, pin content, or click final X buttons without action-time confirmation.',
   };
 }
@@ -285,7 +285,7 @@ function readinessStatus({ blockers, signals, observedAccount, publishMode, user
   return 'blocked_browser_readiness';
 }
 
-function nextActions({ blockers, signals, publishMode, profileDir, userBrowserSession }) {
+function nextActions({ blockers, signals, profileDir, userBrowserSession }) {
   const actions = [];
   if (!blockers.length) {
     if (userBrowserSession?.usable) {

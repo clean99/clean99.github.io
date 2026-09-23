@@ -1,0 +1,141 @@
+---
+import { formatMonthDay, formatShortDate, toIsoWithOffset } from "../lib/dates";
+import { t, type Lang } from "../lib/i18n";
+import type { Post } from "../lib/posts";
+import { AREA_LABELS } from "../lib/taxonomy";
+
+interface Props {
+  posts: readonly Post[];
+  lang: Lang;
+  /** Inside a year group the year is already on screen. */
+  dateStyle?: "full" | "monthDay";
+  showSummary?: boolean;
+  showArea?: boolean;
+}
+
+const { posts, lang, dateStyle = "full", showSummary = false, showArea = true } = Astro.props;
+const ui = t(lang);
+---
+
+<ol class="ledger" role="list">
+  {posts.map((post) => (
+    <li class="row" data-area={post.area}>
+      <time class="date label" datetime={toIsoWithOffset(post.date)}>
+        {dateStyle === "monthDay" ? formatMonthDay(post.date, lang) : formatShortDate(post.date)}
+      </time>
+      <div class="main">
+        <a class="title" href={post.url} data-astro-prefetch>
+          {post.title}
+        </a>
+        {showSummary && <p class="summary">{post.summary}</p>}
+      </div>
+      <p class="meta label">
+        {showArea && <span class="area">{AREA_LABELS[lang][post.area]}</span>}
+        {post.caseStudy && <span class="case">{ui.caseStudy}</span>}
+        <span class="minutes">{ui.readingTime(post.minutes)}</span>
+      </p>
+    </li>
+  ))}
+</ol>
+
+<style>
+  .ledger {
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr) auto;
+    gap: var(--space-2xs) var(--space-m);
+    align-items: baseline;
+    padding: var(--space-s) var(--space-2xs);
+    border-bottom: 1px solid var(--rule);
+    transition: background-color 0.2s var(--ease-out);
+  }
+
+  .row:hover,
+  .row:focus-within {
+    background: var(--accent-wash);
+  }
+
+  .date {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .title {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: 1.3;
+    text-decoration: none;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+
+  /* The whole row is the hit target; the link stays the only focusable element. */
+  .title::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .row:hover .title {
+    color: var(--accent);
+  }
+
+  .title:focus-visible {
+    outline: none;
+  }
+
+  .row:has(.title:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .summary {
+    margin-top: 0.35rem;
+    max-width: 42rem;
+    font-size: var(--step--1);
+    line-height: 1.6;
+    color: var(--ink-soft);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: end;
+    gap: 0.35rem 0.9rem;
+    white-space: nowrap;
+  }
+
+  .case {
+    color: var(--accent);
+  }
+
+  .case::before {
+    content: "◆ ";
+  }
+
+  @media (max-width: 40rem) {
+    .row {
+      grid-template-columns: minmax(0, 1fr);
+      padding-inline: 0;
+      gap: 0.3rem;
+    }
+
+    .date {
+      order: -1;
+    }
+
+    .meta {
+      justify-content: start;
+    }
+  }
+</style>

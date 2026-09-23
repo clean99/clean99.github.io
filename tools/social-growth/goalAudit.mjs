@@ -50,7 +50,7 @@ export function buildGoalAudit({
         evidenceLine('articles loaded', articles.length),
         evidenceLine('Chinese articles loaded', articles.filter((article) => article.lang === 'zh').length),
       ],
-      gap: 'Load tracked Chinese blog posts from source/_posts before building the X queue.',
+      gap: 'Load tracked Chinese blog posts from content/posts before building the X queue.',
     }),
     requirement({
       id: 'candidate_generation',

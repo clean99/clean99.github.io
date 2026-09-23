@@ -1,0 +1,153 @@
+---
+/**
+ * GitHub Pages serves this single document, with status 404, for every path the
+ * build did not produce. Two jobs: help a reader who mistyped find what they
+ * wanted, and send the case variants of live pages (`/About/`,
+ * `/tags/Frontend/`) to the page that actually exists — those cannot be shipped
+ * as files because the build disk is usually case-insensitive.
+ *
+ * Both languages are in the one document, so the copy shown and the links used
+ * are chosen in the browser from the requested path.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { allPosts } from "../data/posts";
+import { LANGS } from "../lib/i18n";
+import { NOT_FOUND_COPY } from "../lib/copy/not-found";
+import { collectTags, postsForLang } from "../lib/posts";
+import { caseMapFor } from "../lib/sitemap";
+import type { Lang } from "../lib/i18n";
+
+export const prerender = true;
+
+const posts = await allPosts();
+const tags: Partial<Record<Lang, readonly { slug: string }[]>> = {};
+for (const lang of LANGS) tags[lang] = collectTags(posts, lang);
+const caseMap = caseMapFor({ posts, tags });
+// Both lists ship; the reader's own language is the one shown, so a Chinese
+// 404 offers Chinese notes rather than a fallback to the English index.
+const recent = Object.fromEntries(
+  LANGS.map((lang) => [
+    lang,
+    postsForLang(posts, lang)
+      .slice(0, 6)
+      .map((post) => ({ url: post.url, title: post.title }))
+  ])
+) as Record<Lang, { url: string; title: string }[]>;
+const copy = NOT_FOUND_COPY.en;
+---
+
+<BaseLayout
+  lang="en"
+  title={copy.title}
+  description={copy.lede}
+  path="/404"
+  noindex
+  alternates={{ en: "/404", zh: "/zh/404" }}
+>
+  <section class="wrap not-found">
+    <p class="eyebrow label">{copy.eyebrow}</p>
+    <h1 data-nf="title">{copy.title}</h1>
+    <p class="lede" data-nf="lede">
+      {copy.lede}
+    </p>
+
+    <ul class="not-found-actions">
+      <li>
+        <a class="button" href={copy.homePath} data-nf="home">
+          {copy.home}
+        </a>
+      </li>
+      <li>
+        <a class="arrow-link" href={copy.writingPath} data-nf="writing">
+          {copy.writing}
+        </a>
+      </li>
+    </ul>
+    <p class="label hint" data-nf="searchHint">
+      {copy.searchHint}
+    </p>
+
+    <nav aria-labelledby="recent-title">
+      <h2 id="recent-title" data-nf="recent">
+        {copy.recent}
+      </h2>
+      {LANGS.map((lang) => (
+        <ul data-nf-recent={lang} hidden={lang !== "en"}>
+          {recent[lang].map((post) => (
+            <li>
+              <a href={post.url}>{post.title}</a>
+            </li>
+          ))}
+        </ul>
+      ))}
+    </nav>
+  </section>
+
+  <script is:inline type="application/json" id="case-map" set:html={JSON.stringify(caseMap)}></script>
+  <script is:inline type="application/json" id="not-found-copy" set:html={JSON.stringify(NOT_FOUND_COPY)}></script>
+  <script>
+    import "../client/not-found";
+  </script>
+</BaseLayout>
+
+<style>
+  .not-found {
+    padding-block: var(--space-2xl);
+  }
+
+  .not-found-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-l);
+    align-items: center;
+    /* The list is compact; the gap between the two actions is what separates them. */
+    margin-block: var(--space-l) 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.55rem 1.25rem;
+    border-radius: var(--radius);
+    background: var(--ink);
+    font-family: var(--font-mono-stack);
+    font-size: var(--step--1);
+    font-weight: 500;
+    color: var(--paper);
+    text-decoration: none;
+    transition:
+      background-color 0.2s var(--ease-out),
+      transform 0.2s var(--ease-out);
+  }
+
+  .button:hover {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .button:active {
+    transform: translateY(1px);
+  }
+
+  .hint {
+    margin-top: var(--space-m);
+    color: var(--ink-soft);
+  }
+
+  h2 {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-1);
+    margin-top: var(--space-xl);
+  }
+
+  nav ul {
+    padding-left: 1.1rem;
+  }
+
+  nav li + li {
+    margin-top: var(--space-xs);
+  }
+</style>

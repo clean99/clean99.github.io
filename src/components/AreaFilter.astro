@@ -1,0 +1,110 @@
+---
+import { ALL_AREAS, areaHref, resolveArea } from "../lib/filter";
+import type { Lang } from "../lib/i18n";
+import { AREAS, AREA_LABELS, type Area } from "../lib/taxonomy";
+
+interface Props {
+  /** Language-neutral index path, e.g. `/writing/`. */
+  path: string;
+  /** `?area=` as requested; absent or unknown values fall back to All. */
+  area?: string | undefined;
+  counts: Record<Area, number>;
+  /** Notes matching the requested area, for the caption the server renders. */
+  shown: number;
+  lang: Lang;
+  label: string;
+  allLabel: string;
+  /** Live count captions; the client substitutes `{shown}` and `{total}`. */
+  countAll: string;
+  countFiltered: string;
+}
+
+const { path, area: requested, counts, shown, lang, label, allLabel, countAll, countFiltered } = Astro.props;
+const areas = AREAS.filter((area) => counts[area] > 0);
+const selected = resolveArea(requested, areas);
+const total = areas.reduce((sum, area) => sum + counts[area], 0);
+const caption =
+  shown === total
+    ? countAll.replace("{total}", String(total))
+    : countFiltered.replace("{shown}", String(shown)).replace("{total}", String(total));
+const chips = [
+  { area: ALL_AREAS, label: allLabel, count: total },
+  ...areas.map((area: Area) => ({ area, label: AREA_LABELS[lang][area], count: counts[area] }))
+];
+---
+
+<nav
+  class="filter"
+  aria-labelledby="filter-label"
+  data-area-filter
+  data-base-path={path}
+  data-count-template={countFiltered}
+  data-count-all-template={countAll}
+  data-pagefind-ignore
+>
+  <p id="filter-label" class="label">
+    {label}
+  </p>
+  <ul class="chips" role="list">
+    {chips.map((chip) => (
+      <li>
+        <a
+          class="chip"
+          href={areaHref(path, chip.area)}
+          data-area-chip
+          data-area={chip.area}
+          aria-current={chip.area === selected ? "page" : undefined}
+        >
+          <span class="chip-name">{chip.label}</span>
+          <span class="chip-count">{chip.count}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+  <p class="live label">
+    <span data-area-status role="status" aria-live="polite">
+      {caption}
+    </span>
+  </p>
+</nav>
+
+<style>
+  .filter {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-m);
+    border-top: 1px solid var(--ink);
+  }
+
+  .filter .label {
+    margin: 0;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: var(--space-2xs) 0 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  /* One chip per area, with its count set beside the name. */
+  .chip {
+    gap: 0.5em;
+  }
+
+  .chip-count {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.7;
+  }
+
+  .chip:hover .chip-count,
+  .chip[aria-current="page"] .chip-count {
+    opacity: 1;
+  }
+
+  .live {
+    margin-top: var(--space-2xs);
+  }
+</style>

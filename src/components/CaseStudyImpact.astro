@@ -1,0 +1,70 @@
+---
+import { impactParts } from "../lib/projects";
+
+/**
+ * The diamond-marked result list used by both the post's case-study aside and
+ * the Work page's cards, so a case study reads the same in either place.
+ */
+interface Props {
+  items: readonly string[];
+  /** Give the list its own name where no visible heading introduces it. */
+  label?: string | undefined;
+  /** Feature cards show results in two columns where there is room. */
+  columns?: 1 | 2;
+}
+
+const { items, label, columns = 1 } = Astro.props;
+---
+
+<ul class="impact" role="list" aria-label={label} data-columns={columns}>
+  {items.map((line) => (
+    <li>{impactParts(line).map((part) => (part.code ? <code>{part.text}</code> : part.text))}</li>
+  ))}
+</ul>
+
+<style>
+  .impact {
+    display: grid;
+    gap: 0.45rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .impact[data-columns="2"] {
+    column-gap: var(--space-l);
+  }
+
+  .impact li {
+    position: relative;
+    padding-left: 1.15rem;
+    font-size: var(--step--1);
+    line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .impact li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.58em;
+    width: 0.42rem;
+    height: 0.42rem;
+    background: var(--accent);
+    rotate: 45deg;
+  }
+
+  .impact code {
+    padding: 0.05em 0.3em;
+    border-radius: 3px;
+    background: var(--accent-wash);
+    font-family: var(--font-mono-stack);
+    font-size: 0.92em;
+    overflow-wrap: anywhere;
+  }
+
+  @media (min-width: 48rem) {
+    .impact[data-columns="2"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

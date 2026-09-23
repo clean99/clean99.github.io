@@ -210,18 +210,10 @@ function clearPublicationState(queue) {
   return {
     ...queue,
     status: 'dry_run',
-    items: queue.items.map((item) => {
-      const {
-        publishedAt,
-        xPostUrl,
-        xArticleUrl,
-        ...rest
-      } = item;
-      return {
-        ...rest,
-        status: 'draft',
-      };
-    }),
+    items: queue.items.map(({ publishedAt: _publishedAt, xPostUrl: _xPostUrl, xArticleUrl: _xArticleUrl, ...rest }) => ({
+      ...rest,
+      status: 'draft',
+    })),
   };
 }
 

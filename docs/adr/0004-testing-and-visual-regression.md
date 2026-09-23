@@ -2,7 +2,7 @@
 
 Date: 2026-06-11
 
-Status: Accepted
+Status: Superseded by [ADR 0005](0005-astro-static-rebuild.md)
 
 ## Context
 

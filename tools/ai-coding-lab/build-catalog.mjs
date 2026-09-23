@@ -15,7 +15,7 @@ function argValue(name) {
 }
 
 const sourceDir = argValue('--source') || process.env.CODEX_SETUP_DIR;
-const outputPath = path.resolve(repoRoot, argValue('--output') || 'source/ai-coding-lab/catalog.json');
+const outputPath = path.resolve(repoRoot, argValue('--output') || 'content/ai-coding-lab/catalog.json');
 
 const catalog = buildCatalog({ sourceDir });
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });

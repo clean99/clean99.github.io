@@ -1,0 +1,157 @@
+/*
+ * Metric-matched fallbacks for the two text faces.
+ *
+ * Until the webfonts arrive, text renders in a local Times-metric face scaled to the webfont's
+ * advance widths, so line breaks (and everything below them) stay put when the swap happens.
+ * Astro's automatic fallbacks derive one size-adjust from the OS/2 average width and never
+ * synthesise bold, so 600-weight titles wrapped onto different lines. Each ratio below was
+ * measured instead: headline-style English in the webfont divided by the same text in the
+ * matching Times New Roman face (regular below 550, with 400 and 500 scaled separately; bold above), which holds from
+ * 16px to 64px. Overrides keep the webfont's absolute ascent and descent after the adjustment
+ * (Fraunces 0.978 / 0.255 em, Newsreader 0.735 / 0.265 em).
+ *
+ * Liberation Serif and Tinos are metric-compatible with Times New Roman, which covers Linux
+ * and ChromeOS; elsewhere the stack falls through to Georgia.
+ *
+ * The webfonts in src/assets/fonts are trimmed by scripts/optimize-fonts.py, which leaves
+ * outlines, advances and vertical metrics alone, so these ratios survive a re-run.
+ */
+
+@font-face {
+  font-family: "Fraunces Fallback";
+  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Liberation Serif"), local("Tinos");
+  font-style: normal;
+  font-weight: 100 449;
+  size-adjust: 115.6%;
+  ascent-override: 84.6%;
+  descent-override: 22.06%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Fraunces Fallback";
+  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Liberation Serif"), local("Tinos");
+  font-style: normal;
+  font-weight: 450 549;
+  size-adjust: 117.3%;
+  ascent-override: 83.38%;
+  descent-override: 21.74%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Fraunces Fallback";
+  src:
+    local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"), local("Liberation Serif Bold"), local("Tinos Bold");
+  font-style: normal;
+  font-weight: 550 900;
+  size-adjust: 112.2%;
+  ascent-override: 87.17%;
+  descent-override: 22.73%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Fraunces Fallback";
+  src:
+    local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT"), local("Liberation Serif Italic"),
+    local("Tinos Italic");
+  font-style: italic;
+  font-weight: 100 549;
+  size-adjust: 109.4%;
+  ascent-override: 89.4%;
+  descent-override: 23.31%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Fraunces Fallback";
+  src:
+    local("Times New Roman Bold Italic"), local("TimesNewRomanPS-BoldItalicMT"), local("Liberation Serif Bold Italic"),
+    local("Tinos Bold Italic");
+  font-style: italic;
+  font-weight: 550 900;
+  size-adjust: 111.5%;
+  ascent-override: 87.71%;
+  descent-override: 22.87%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Liberation Serif"), local("Tinos");
+  font-style: normal;
+  font-weight: 100 549;
+  size-adjust: 104.5%;
+  ascent-override: 70.33%;
+  descent-override: 25.36%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Newsreader Fallback";
+  src:
+    local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"), local("Liberation Serif Bold"), local("Tinos Bold");
+  font-style: normal;
+  font-weight: 550 900;
+  size-adjust: 103.6%;
+  ascent-override: 70.95%;
+  descent-override: 25.58%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Newsreader Fallback";
+  src:
+    local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT"), local("Liberation Serif Italic"),
+    local("Tinos Italic");
+  font-style: italic;
+  font-weight: 100 549;
+  size-adjust: 98.9%;
+  ascent-override: 74.32%;
+  descent-override: 26.79%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Newsreader Fallback";
+  src:
+    local("Times New Roman Bold Italic"), local("TimesNewRomanPS-BoldItalicMT"), local("Liberation Serif Bold Italic"),
+    local("Tinos Bold Italic");
+  font-style: italic;
+  font-weight: 550 900;
+  size-adjust: 104.2%;
+  ascent-override: 70.54%;
+  descent-override: 25.43%;
+  line-gap-override: 0%;
+}
+
+/*
+ * The home hero title (weight 400) runs about 2% wider in Fraunces than the average above, which
+ * was enough to put it on four lines in one font and three in the other at 390px. It gets a copy
+ * of the face (--font-hero in astro.config.mjs) whose fallback is scaled to that title.
+ */
+
+@font-face {
+  font-family: "Fraunces Hero Fallback";
+  src: local("Times New Roman"), local("TimesNewRomanPSMT"), local("Liberation Serif"), local("Tinos");
+  font-style: normal;
+  font-weight: 100 549;
+  size-adjust: 118.5%;
+  ascent-override: 82.53%;
+  descent-override: 21.52%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Fraunces Hero Fallback";
+  src:
+    local("Times New Roman Italic"), local("TimesNewRomanPS-ItalicMT"), local("Liberation Serif Italic"),
+    local("Tinos Italic");
+  font-style: italic;
+  font-weight: 100 549;
+  size-adjust: 109.5%;
+  ascent-override: 89.32%;
+  descent-override: 23.29%;
+  line-gap-override: 0%;
+}

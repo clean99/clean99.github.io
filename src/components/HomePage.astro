@@ -1,0 +1,557 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import PostList from "./PostList.astro";
+import SealMark from "./SealMark.astro";
+import { allPosts } from "../data/posts";
+import { localizePath, t, type Lang } from "../lib/i18n";
+import { countByArea, postsForLang, projectPicks } from "../lib/posts";
+import { AREAS, AREA_BLURBS, AREA_LABELS } from "../lib/taxonomy";
+import { AUTHOR } from "../site.config";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const ui = t(lang);
+const [titleLead, titleAccent, titleTail] = ui.heroTitle;
+
+const posts = (await allPosts()).filter((post) => !post.draft);
+const notes = postsForLang(posts, lang);
+const since = Math.min(...posts.map((post) => post.date.getUTCFullYear()));
+const caseStudyCount = notes.filter((post) => post.caseStudy).length;
+const work = projectPicks(posts, lang).slice(0, 5);
+const recent = notes.slice(0, 6);
+const areaCounts = countByArea(posts, lang);
+const areas = AREAS.filter((area) => areaCounts[area] > 0);
+const writingPath = localizePath("/writing/", lang);
+
+const stats = [
+  { label: ui.statSince, value: String(since) },
+  { label: ui.statNotes, value: String(notes.length) },
+  { label: ui.statCases, value: String(caseStudyCount) },
+  { label: ui.statLangs, value: "EN / 中文" }
+];
+
+// The signature is always the Chinese name, set vertically like a scroll's colophon.
+const colophon = `${AUTHOR.nativeName} · ${t("zh").siteTagline}`;
+---
+
+<BaseLayout lang={lang} alternates={{ en: "/", zh: "/zh/" }} heroFont>
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <div class="hero-text">
+      <p class="eyebrow label">{ui.siteTagline}</p>
+      <h1 id="hero-title">
+        {titleLead}
+        <em>{titleAccent}</em>
+        {titleTail}
+      </h1>
+      <p class="lede">{ui.heroLede}</p>
+      <p class="actions">
+        <a class="button" href={localizePath("/projects/", lang)} data-astro-prefetch>
+          {ui.heroPrimary}
+        </a>
+        <a class="arrow-link" href={localizePath("/about/", lang)} data-astro-prefetch>
+          {ui.heroSecondary}
+        </a>
+      </p>
+    </div>
+    <div class="hero-mark" aria-hidden="true">
+      <SealMark size="100%" class="stamp" />
+      <p class="colophon" lang="zh-CN">
+        {colophon}
+      </p>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <dl class="stats">
+      {stats.map((stat) => (
+        <div>
+          <dt class="label">{stat.label}</dt>
+          <dd>{stat.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+
+  {work.length > 0 && (
+    <section class="wrap block" aria-labelledby="work-title">
+      <div class="section-head">
+        <h2 id="work-title">{ui.selectedWork}</h2>
+        <a class="arrow-link" href={localizePath("/projects/", lang)}>
+          {ui.allWork}
+        </a>
+      </div>
+      <ol class="work" role="list">
+        {work.map((post, index) => (
+          <li class="card" data-area={post.area}>
+            <p class="card-meta label">
+              <span class="index">{String(index + 1).padStart(2, "0")}</span>
+              <span>{AREA_LABELS[lang][post.area]}</span>
+              {post.caseStudy && <span class="case">{ui.caseStudy}</span>}
+            </p>
+            <h3>
+              <a href={post.url} data-astro-prefetch>
+                {post.title}
+              </a>
+            </h3>
+            {post.summary && <p class="summary">{post.summary}</p>}
+            {post.caseStudy && post.caseStudy.impact.length > 0 && (
+              <ul class="impact" role="list" aria-label={ui.impact}>
+                {post.caseStudy.impact.slice(0, 2).map((line) => (
+                  <li>{line}</li>
+                ))}
+              </ul>
+            )}
+            {post.caseStudy && post.caseStudy.stack.length > 0 && (
+              <ul class="stack" role="list" aria-label={ui.stack}>
+                {post.caseStudy.stack.slice(0, 5).map((item) => (
+                  <li class="chip">{item}</li>
+                ))}
+              </ul>
+            )}
+            <p class="card-foot label">{ui.readingTime(post.minutes)}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+  )}
+
+  <section class="wrap block" aria-labelledby="recent-title">
+    <div class="section-head">
+      <h2 id="recent-title">{ui.recent}</h2>
+      <a class="arrow-link" href={writingPath}>
+        {ui.allWriting}
+      </a>
+    </div>
+    <PostList posts={recent} lang={lang} />
+  </section>
+
+  <section class="wrap block" aria-labelledby="areas-title">
+    <div class="section-head">
+      <h2 id="areas-title">{ui.areas}</h2>
+      <a class="arrow-link" href={localizePath("/tags/", lang)}>
+        {ui.allTags}
+      </a>
+    </div>
+    <ul class="areas" role="list">
+      {areas.map((area) => (
+        <li>
+          <a href={`${writingPath}?area=${area}`}>
+            <span class="area-head">
+              <span class="area-name">{AREA_LABELS[lang][area]}</span>
+              <span class="label">{ui.notes(areaCounts[area])}</span>
+            </span>
+            <span class="area-blurb">{AREA_BLURBS[lang][area]}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    display: grid;
+    gap: var(--space-l);
+    padding-block: var(--space-2xl) var(--space-xl);
+  }
+
+  .hero h1 {
+    margin-top: var(--space-s);
+    /* em, not ch: the width must not change when the fallback's "0" is swapped for Fraunces'. */
+    max-width: 10.4em;
+    font-family: var(--font-hero);
+    font-size: var(--step-5);
+    font-weight: 400;
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  :lang(zh) .hero h1 {
+    max-width: 12em;
+    font-size: var(--step-4);
+    letter-spacing: 0;
+    line-height: 1.2;
+  }
+
+  .hero em {
+    font-style: italic;
+    color: var(--accent);
+    background: linear-gradient(transparent 64%, var(--mark) 64% 90%, transparent 90%);
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  :lang(zh) .hero em {
+    font-style: normal;
+  }
+
+  .lede {
+    margin-top: var(--space-m);
+    max-width: 38rem;
+    font-size: var(--step-1);
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-m);
+    margin-top: var(--space-l);
+  }
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.55rem 1.25rem;
+    border-radius: var(--radius);
+    background: var(--ink);
+    font-family: var(--font-mono-stack);
+    font-size: var(--step--1);
+    font-weight: 500;
+    color: var(--paper);
+    text-decoration: none;
+    transition:
+      background-color 0.2s var(--ease-out),
+      transform 0.2s var(--ease-out);
+  }
+
+  .button:hover {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .button:active {
+    transform: translateY(1px);
+  }
+
+  /* The seal: the page's one piece of motion, pressed once on arrival. */
+  .hero-mark {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+    order: -1;
+  }
+
+  .hero-mark :global(.stamp) {
+    width: 3.5rem;
+    height: 3.5rem;
+    rotate: -6deg;
+    animation: stamp 0.7s 0.25s var(--ease-out) both;
+  }
+
+  :global(:root:not([data-theme="dark"])) .hero-mark :global(.stamp) {
+    mix-blend-mode: multiply;
+  }
+
+  .colophon {
+    font-family: var(--font-display-stack);
+    font-size: var(--step--1);
+    letter-spacing: 0.3em;
+    color: var(--ink-muted);
+  }
+
+  @keyframes stamp {
+    from {
+      opacity: 0;
+      scale: 1.5;
+      rotate: -14deg;
+      filter: blur(3px);
+    }
+    60% {
+      opacity: 1;
+      scale: 0.96;
+      filter: none;
+    }
+    to {
+      scale: 1;
+      rotate: -6deg;
+    }
+  }
+
+  @media (min-width: 56rem) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      column-gap: var(--space-xl);
+    }
+
+    .hero-mark {
+      order: 0;
+      align-items: flex-start;
+      padding-right: var(--space-m);
+    }
+
+    .hero-mark :global(.stamp) {
+      width: clamp(7rem, 4rem + 6vw, 10rem);
+      height: auto;
+      aspect-ratio: 1;
+    }
+
+    .colophon {
+      margin-top: var(--space-m);
+      writing-mode: vertical-rl;
+      font-size: var(--step-0);
+      letter-spacing: 0.45em;
+    }
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-block: 1px solid var(--ink);
+  }
+
+  .stats div {
+    display: grid;
+    gap: 0.35rem;
+    padding: var(--space-s) var(--space-s) var(--space-s) 0;
+  }
+
+  .stats div:nth-child(even) {
+    padding-left: var(--space-s);
+    border-left: 1px solid var(--rule);
+  }
+
+  .stats div:nth-child(n + 3) {
+    border-top: 1px solid var(--rule);
+  }
+
+  .stats dd {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-2);
+    font-variant-numeric: lining-nums tabular-nums;
+    line-height: 1.1;
+  }
+
+  @media (min-width: 48rem) {
+    .stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .stats div:not(:first-child) {
+      padding-left: var(--space-m);
+      border-left: 1px solid var(--rule);
+    }
+
+    .stats div:nth-child(n + 3) {
+      border-top: 0;
+    }
+  }
+
+  .block {
+    margin-top: var(--space-2xl);
+  }
+
+  .work {
+    display: grid;
+    gap: var(--space-s);
+    padding: 0;
+    list-style: none;
+  }
+
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-m);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+    transition:
+      border-color 0.2s var(--ease-out),
+      box-shadow 0.2s var(--ease-out),
+      translate 0.2s var(--ease-out);
+  }
+
+  .card:hover {
+    border-color: var(--rule-strong);
+    box-shadow: var(--shadow-lift);
+    translate: 0 -2px;
+  }
+
+  .card:has(h3 a:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+  }
+
+  .index {
+    color: var(--accent);
+  }
+
+  .case::before {
+    content: "◆ ";
+    color: var(--accent);
+  }
+
+  .card h3 {
+    font-size: var(--step-1);
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .card h3 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .card h3 a:focus-visible {
+    outline: none;
+  }
+
+  /* Whole card is the hit target; the heading link stays the only tab stop. */
+  .card h3 a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .card:hover h3 a {
+    color: var(--accent);
+  }
+
+  .summary {
+    font-size: var(--step--1);
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .impact {
+    display: grid;
+    gap: 0.4rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .impact li {
+    position: relative;
+    padding-left: 1.1rem;
+    font-size: var(--step--1);
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .impact li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 0.4rem;
+    height: 0.4rem;
+    background: var(--accent);
+    rotate: 45deg;
+  }
+
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card-foot {
+    margin-top: auto;
+    padding-top: var(--space-2xs);
+  }
+
+  @media (min-width: 48rem) {
+    .work {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card:first-child {
+      grid-column: 1 / -1;
+      padding: var(--space-l);
+    }
+
+    .card:first-child h3 {
+      /* 30ch of Fraunces 600, fixed in em so the fallback's narrower "0" cannot rewrap it on swap. */
+      max-width: 20.25em;
+      font-size: var(--step-3);
+      line-height: 1.12;
+    }
+
+    .card:first-child .summary {
+      max-width: 42rem;
+      font-size: var(--step-0);
+    }
+
+    /* After the full-width feature card the rest pair up; a leftover card takes the whole row. */
+    .card:last-child:nth-child(even) {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Flex rather than grid so a short last row stretches instead of leaving an empty cell. */
+  .areas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--rule);
+    background: var(--rule);
+  }
+
+  .areas li {
+    flex: 1 1 16rem;
+  }
+
+  .areas a {
+    display: grid;
+    align-content: start;
+    gap: var(--space-2xs);
+    height: 100%;
+    padding: var(--space-m);
+    background: var(--paper);
+    text-decoration: none;
+    color: var(--ink);
+    transition: background-color 0.2s var(--ease-out);
+  }
+
+  .areas a:hover {
+    background: var(--accent-wash);
+  }
+
+  .area-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0 var(--space-s);
+  }
+
+  .area-name {
+    text-wrap: balance;
+  }
+
+  .area-name {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-1);
+    font-weight: 500;
+  }
+
+  .areas a:hover .area-name {
+    color: var(--accent);
+  }
+
+  .area-blurb {
+    font-size: var(--step--1);
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+</style>

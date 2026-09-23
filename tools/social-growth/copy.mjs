@@ -572,10 +572,6 @@ export function dedupePoints(points) {
   return result;
 }
 
-function compactSteps(steps, limit = 3) {
-  return steps.slice(0, limit).map((step) => step.replace(/[。.]$/u, '')).join(' / ');
-}
-
 function numberedSteps(steps, limit = 5) {
   return steps.slice(0, limit).map((step, index) => `${index + 1}. ${step}`).join('\n');
 }

@@ -1,0 +1,112 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { localizePath, t, type Lang } from "../lib/i18n";
+import { prosePage } from "../lib/pages";
+import { breadcrumbNode } from "../lib/seo";
+import { AUTHOR } from "../site.config";
+import "../styles/prose.css";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const ui = t(lang);
+const page = await prosePage("links", lang);
+const path = localizePath("/links/", lang);
+const aboutPath = localizePath("/about/", lang);
+
+const alternates = { en: "/links/", zh: "/zh/links/" };
+const jsonLd = [
+  breadcrumbNode([
+    { name: ui.breadcrumbHome, path: localizePath("/", lang) },
+    { name: ui.links, path }
+  ])
+];
+---
+
+<BaseLayout
+  lang={lang}
+  title={page.title}
+  description={page.description}
+  path={path}
+  alternates={alternates}
+  jsonLd={jsonLd}
+  section="about"
+>
+  <div class="wrap links-page">
+    <header class="page-head">
+      <p class="eyebrow label">
+        <a href={aboutPath}>{ui.nav.about}</a>
+        <span class="sep" aria-hidden="true">
+          /
+        </span>
+        {ui.links}
+      </p>
+      <h1>{page.title}</h1>
+    </header>
+
+    <div class="prose">
+      <page.Content />
+    </div>
+
+    <p class="own">
+      <span class="label">{ui.links}</span>
+      <a href={AUTHOR.github} rel="me">
+        {AUTHOR.githubHandle}
+      </a>
+      <span aria-hidden="true">·</span>
+      <a href={`mailto:${AUTHOR.email}`}>{AUTHOR.email}</a>
+      <span aria-hidden="true">·</span>
+      <a href={localizePath("/atom.xml", lang)}>{ui.rss}</a>
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .links-page {
+    padding-block: var(--space-2xl) 0;
+  }
+
+  .links-page .page-head {
+    padding-block: 0 var(--space-l);
+  }
+
+  .eyebrow {
+    gap: var(--space-3xs);
+  }
+
+  .eyebrow a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .sep {
+    color: var(--rule-strong);
+  }
+
+  .links-page h1 {
+    /* 24ch of Fraunces 600, fixed in em so the fallback's narrower "0" cannot rewrap it on swap. */
+    max-width: 16.2em;
+  }
+
+  .prose {
+    max-width: var(--measure);
+  }
+
+  .own {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-s);
+    max-width: var(--measure);
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono-stack);
+    font-size: var(--step--1);
+  }
+
+  .own .label {
+    flex-basis: 100%;
+  }
+</style>

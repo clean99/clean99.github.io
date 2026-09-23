@@ -1,0 +1,207 @@
+---
+import { t, type Lang } from "../lib/i18n";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const ui = t(lang);
+---
+
+<dialog
+  class="search"
+  aria-labelledby="search-title"
+  data-search-dialog
+  data-loading={ui.searchLoading}
+  data-empty={ui.searchEmpty}
+  data-unavailable={ui.searchUnavailable}
+  data-count-one={ui.searchCount.one}
+  data-count-other={ui.searchCount.other}
+>
+  <form method="dialog" class="panel" role="search">
+    <h2 id="search-title" class="visually-hidden">
+      {ui.search}
+    </h2>
+    <div class="field">
+      <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false">
+        <circle cx="8.5" cy="8.5" r="5.75" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+        <path d="m13 13 4.25 4.25" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
+      </svg>
+      <input
+        type="search"
+        name="q"
+        placeholder={ui.searchPlaceholder}
+        aria-label={ui.search}
+        aria-describedby="search-status"
+        autocomplete="off"
+        spellcheck="false"
+        enterkeyhint="go"
+        data-search-input
+      />
+      <button type="submit" class="close" aria-label={ui.searchClose} formnovalidate>
+        Esc
+      </button>
+    </div>
+    <p id="search-status" class="status label" role="status" aria-live="polite" data-search-status></p>
+    <ol class="results" role="list" data-search-results></ol>
+    <p class="hint label" aria-hidden="true">
+      {ui.searchHint}
+    </p>
+  </form>
+</dialog>
+
+<script>
+  import "../client/search";
+</script>
+
+<style>
+  .search {
+    width: min(100% - 2 * var(--gutter), 40rem);
+    max-height: min(80dvh, 44rem);
+    margin: 12dvh auto auto;
+    padding: 0;
+    border: 1px solid var(--rule-strong);
+    border-radius: 6px;
+    background: var(--paper-raised);
+    color: var(--ink);
+    box-shadow:
+      var(--shadow-lift),
+      0 30px 80px -30px rgb(0 0 0 / 0.45);
+    overflow: hidden;
+  }
+
+  .search[open] {
+    animation: rise 0.18s var(--ease-out);
+  }
+
+  .search::backdrop {
+    background: rgb(20 16 12 / 0.38);
+    backdrop-filter: blur(3px);
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      translate: 0 8px;
+    }
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    max-height: inherit;
+  }
+
+  .field {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-s) var(--space-m);
+    border-bottom: 1px solid var(--rule);
+    color: var(--ink-muted);
+  }
+
+  .field input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.25rem 0;
+    border: 0;
+    background: none;
+    font-family: var(--font-body-stack);
+    font-size: var(--step-1);
+    color: var(--ink);
+    outline: none;
+  }
+
+  .field input::placeholder {
+    color: var(--ink-muted);
+  }
+
+  .field input::-webkit-search-cancel-button {
+    display: none;
+  }
+
+  .close {
+    padding: 0.15rem 0.45rem;
+    border: 1px solid var(--rule-strong);
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    background: none;
+    font-family: var(--font-mono-stack);
+    font-size: 0.7rem;
+    color: var(--ink-muted);
+  }
+
+  .status:empty {
+    display: none;
+  }
+
+  .status {
+    padding: var(--space-xs) var(--space-m) 0;
+  }
+
+  .results {
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-2xs);
+    list-style: none;
+  }
+
+  .results:empty {
+    display: none;
+  }
+
+  .results :global(a) {
+    display: block;
+    padding: var(--space-xs) var(--space-s);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--ink);
+    outline-offset: -2px;
+  }
+
+  .results :global(a:hover),
+  .results :global(a:focus-visible) {
+    background: var(--accent-wash);
+  }
+
+  .results :global(.hit-title) {
+    display: block;
+    font-family: var(--font-display-stack);
+    font-size: var(--step-0);
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  .results :global(a:hover .hit-title),
+  .results :global(a:focus-visible .hit-title) {
+    color: var(--accent);
+  }
+
+  .results :global(.hit-excerpt) {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: var(--step--1);
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .results :global(mark) {
+    background: var(--mark);
+    color: inherit;
+  }
+
+  .hint {
+    padding: var(--space-2xs) var(--space-m);
+    border-top: 1px solid var(--rule);
+    font-size: 0.65rem;
+  }
+
+  @media (hover: none) {
+    .hint {
+      display: none;
+    }
+  }
+</style>

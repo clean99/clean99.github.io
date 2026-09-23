@@ -1,12 +1,9 @@
-packages:
-  - apps/*
-  - packages/*
-
-onlyBuiltDependencies:
-  - esbuild
-  - hexo-util
-  - sharp
 allowBuilds:
   esbuild: true
-  hexo-util: true
   sharp: true
+  "@resvg/resvg-js": true
+minimumReleaseAgeExclude:
+  - "@astrojs/markdown-satteri@0.4.2"
+  - astro@7.3.4
+  - satori@0.33.5
+  - prettier@3.9.9

@@ -1,0 +1,214 @@
+---
+import AreaFilter from "../AreaFilter.astro";
+import PostList from "../PostList.astro";
+import { allPosts } from "../../data/posts";
+import { writingCopy } from "../../lib/copy/writing";
+import { filterByArea, resolveArea } from "../../lib/filter";
+import { localizePath, t, type Lang } from "../../lib/i18n";
+import { collectionNode, yearNode } from "../../lib/listings";
+import { countByArea, groupByYear, postsForLang } from "../../lib/posts";
+import { breadcrumbNode } from "../../lib/seo";
+import { AREAS } from "../../lib/taxonomy";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const ui = t(lang);
+const copy = writingCopy(lang);
+
+const published = (await allPosts()).filter((post) => !post.draft);
+const notes = postsForLang(published, lang);
+const groups = groupByYear(notes);
+const areaCounts = countByArea(published, lang);
+const areas = AREAS.filter((area) => areaCounts[area] > 0);
+const selection = filterByArea(groups, resolveArea(Astro.url.searchParams.get("area"), areas));
+
+const path = localizePath("/writing/", lang);
+const tagsPath = localizePath("/tags/", lang);
+const jsonLd = [
+  collectionNode({
+    path,
+    lang,
+    name: copy.heading,
+    description: copy.description,
+    posts: notes
+  }),
+  breadcrumbNode([
+    { name: ui.breadcrumbHome, path: localizePath("/", lang) },
+    { name: ui.nav.writing, path }
+  ]),
+  ...groups.map((group) =>
+    yearNode({
+      path,
+      year: group.year,
+      lang,
+      name: copy.groupLabel(group.year),
+      posts: group.posts
+    })
+  )
+];
+---
+
+<BaseLayout
+  lang={lang}
+  title={copy.title}
+  description={copy.description}
+  path={path}
+  alternates={{ en: "/writing/", zh: "/zh/writing/" }}
+  jsonLd={jsonLd}
+  section="writing"
+>
+  <div class="wrap page-head">
+    <p class="eyebrow label">{copy.eyebrow}</p>
+    <h1>{copy.heading}</h1>
+    <p class="lede" data-writing-lede>
+      {copy.lead}
+    </p>
+  </div>
+
+  <div class="wrap index">
+    <div class="rail">
+      <AreaFilter
+        path="/writing/"
+        area={selection.area}
+        counts={areaCounts}
+        shown={selection.visible}
+        lang={lang}
+        label={copy.filterLabel}
+        allLabel={copy.allAreas}
+        countAll={copy.countAll}
+        countFiltered={copy.countFiltered}
+      />
+
+      {groups.length > 1 && (
+        <nav class="years" aria-label={copy.jumpTo}>
+          <p class="label">{copy.jumpTo}</p>
+          <ul role="list">
+            {groups.map((group) => (
+              <li data-year-link={group.year}>
+                <a href={`#year-${group.year}`}>
+                  <span class="year-num">{group.year}</span>
+                  <span class="year-count">{group.posts.length}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+
+      <a class="arrow-link topics" href={tagsPath}>
+        {copy.browseTopics}
+      </a>
+    </div>
+
+    <div class="ledger" data-area-groups>
+      {selection.groups.map((group) => (
+        <section class="year" aria-labelledby={`year-${group.year}`} data-area-group data-year={group.year}>
+          <div class="year-head">
+            <h2 id={`year-${group.year}`}>{group.year}</h2>
+            <p
+              class="label"
+              data-year-count
+              data-count-template={copy.countTemplate}
+              data-count-template-one={copy.countTemplateOne}
+            >
+              {copy.count(group.posts.length)}
+            </p>
+          </div>
+          <PostList posts={group.posts} lang={lang} dateStyle="monthDay" showArea />
+        </section>
+      ))}
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import "../../client/filter";
+</script>
+
+<style>
+  .index {
+    display: grid;
+    gap: var(--space-xl);
+    padding-bottom: var(--space-2xl);
+  }
+
+  /* A year is a section of the ledger: heading, rule, rows. */
+  .year + .year {
+    margin-top: var(--space-2xl);
+  }
+
+  .year-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding-bottom: var(--space-2xs);
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: var(--space-xs);
+  }
+
+  .year-head h2 {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-3);
+    font-weight: 400;
+    font-variant-numeric: lining-nums tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  /* The year is the anchor target for the jump list. */
+  .year {
+    scroll-margin-top: var(--space-l);
+  }
+
+  .years ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .years a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4em;
+    font-family: var(--font-mono-stack);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+  }
+
+  .year-count {
+    font-size: var(--step--2);
+    color: var(--ink-muted);
+  }
+
+  @media (min-width: 60rem) {
+    .index {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      gap: var(--space-xl) var(--space-xl);
+      align-items: start;
+    }
+
+    .rail {
+      position: sticky;
+      top: var(--space-m);
+    }
+  }
+
+  .rail {
+    display: grid;
+    gap: var(--space-m);
+    align-content: start;
+  }
+
+  .topics {
+    justify-self: start;
+  }
+</style>

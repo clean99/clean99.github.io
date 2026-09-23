@@ -1,0 +1,171 @@
+---
+import { tagsCopy } from "../../lib/copy/tags";
+import { weighTags } from "../../lib/filter";
+import { localizePath, t, type Lang } from "../../lib/i18n";
+import { tagIndexNode } from "../../lib/listings";
+import { collectTags, postsForLang } from "../../lib/posts";
+import { breadcrumbNode } from "../../lib/seo";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { allPosts } from "../../data/posts";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const ui = t(lang);
+const copy = tagsCopy(lang);
+
+const published = (await allPosts()).filter((post) => !post.draft);
+const tags = collectTags(published, lang);
+const notes = postsForLang(published, lang).length;
+const { lead, more } = weighTags(tags, lang === "zh" ? 6 : 8);
+
+const path = localizePath("/tags/", lang);
+const tagHref = (slug: string) => `${path}${slug}/`;
+const home = localizePath("/", lang);
+
+const jsonLd = [
+  tagIndexNode({ path, lang, name: copy.heading, description: copy.description, tags }),
+  breadcrumbNode([
+    { name: ui.breadcrumbHome, path: home },
+    { name: ui.nav.tags, path }
+  ])
+];
+---
+
+<BaseLayout
+  lang={lang}
+  title={copy.title}
+  description={copy.description}
+  path={path}
+  alternates={{ en: "/tags/", zh: "/zh/tags/" }}
+  jsonLd={jsonLd}
+  section="tags"
+>
+  <div class="wrap page-head">
+    <p class="eyebrow label">{copy.eyebrow}</p>
+    <h1>{copy.heading}</h1>
+    <p class="lede">{copy.lead}</p>
+    <p class="label total">{copy.total(tags.length, notes)}</p>
+  </div>
+
+  <div class="wrap index">
+    <section class="block" aria-labelledby="lead-title">
+      <div class="section-head">
+        <h2 id="lead-title">{copy.leadTitle}</h2>
+      </div>
+      <ul class="lead" role="list">
+        {lead.map((tag) => (
+          <li>
+            <a class="topic" href={tagHref(tag.slug)} data-astro-prefetch>
+              <span class="topic-name" style={`--weight: ${tag.weight}`}>
+                {tag.label}
+              </span>
+              <span class="topic-count label">{copy.count(tag.count)}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    {more.length > 0 && (
+      <section class="block" aria-labelledby="more-title">
+        <div class="section-head">
+          <h2 id="more-title">{copy.more}</h2>
+        </div>
+        <ul class="more" role="list">
+          {more.map((tag) => (
+            <li>
+              <a class="chip" href={tagHref(tag.slug)} data-astro-prefetch>
+                {tag.label}
+                <span class="chip-count">{tag.count}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .total {
+    margin-top: var(--space-m);
+  }
+
+  .index {
+    padding-bottom: var(--space-2xl);
+  }
+
+  .block + .block {
+    margin-top: var(--space-2xl);
+  }
+
+  /* Lead topics are the page's main navigation, so they read as a two-column
+     index rather than a grid of equally weighted words. */
+  .lead {
+    display: grid;
+    gap: 1px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    border: 1px solid var(--rule);
+    background: var(--rule);
+  }
+
+  .topic {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding: var(--space-s) var(--space-m);
+    background: var(--paper);
+    text-decoration: none;
+    transition: background-color 0.2s var(--ease-out);
+  }
+
+  .topic:hover {
+    background: var(--accent-wash);
+  }
+
+  .topic-name {
+    font-family: var(--font-display-stack);
+    /* Size each topic by what is behind it: an index of interests, not a cloud. */
+    font-size: calc(var(--step-0) + (var(--step-1) - var(--step-0)) * var(--weight, 0.5));
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .topic:hover .topic-name {
+    color: var(--accent);
+  }
+
+  .topic-count {
+    white-space: nowrap;
+  }
+
+  @media (min-width: 48rem) {
+    .lead {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .more {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .chip-count {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.7;
+  }
+
+  .chip:hover .chip-count {
+    opacity: 1;
+  }
+</style>

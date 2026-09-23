@@ -1,28 +1,33 @@
+# Generated build output and caches.
 node_modules
-public
 dist
-.next
-apps/blog/.next
-apps/blog/out
-apps/docs/storybook-static
-packages/*/storybook-static
-packages/*/storybook-static-*
+.astro
+.cache
 coverage
 playwright-report
 test-results
-pnpm-lock.yaml
-db.json
+.lighthouseci
+*.log
 
-# Legacy Hexo source and generated/site-adjacent assets are intentionally
-# outside the maintained monorepo formatting gate.
-_config*.yml
-.agents
+# Authored content is hand-formatted: Prettier must never reflow post or page
+# Markdown, and it must never touch generated or site-adjacent assets.
+content/**
+public
+data
+openspec
 output
 sketches
-source
-themes
-tools
-test
-scaffolds
-openspec
-tmp
+docs/*.docx
+docs/*.md
+*.local.json
+*.local.txt
+
+# Agent skill references and legacy Node tooling predate this formatter and use
+# their own style; reformatting them would churn files unrelated to the site.
+.agents
+tools/**
+test/**
+
+# Owned by other tooling.
+pnpm-lock.yaml
+db.json

@@ -235,7 +235,7 @@ test('article loader skips dirty and untracked posts unless explicitly included'
 
   const outDir = await mkdtemp(join(tmpdir(), 'social-growth-articles-'));
   try {
-    const postsDir = join(outDir, 'source/_posts');
+    const postsDir = join(outDir, 'content/posts');
     await mkdir(postsDir, { recursive: true });
     const trackedPost = `---
 title: Tracked Post
@@ -263,7 +263,7 @@ Draft body.
     await writeFile(join(postsDir, 'Dirty-Post-zh.md'), trackedPost.replace(/Tracked Post/g, 'Dirty Post').replace(/Tracked-Post/g, 'Dirty-Post'));
     await writeFile(join(postsDir, 'Untracked-Draft-zh.md'), untrackedPost);
     assert.equal(spawnSync('git', ['init'], { cwd: outDir, encoding: 'utf8' }).status, 0);
-    assert.equal(spawnSync('git', ['add', 'source/_posts/Tracked-Post-zh.md', 'source/_posts/Dirty-Post-zh.md'], { cwd: outDir, encoding: 'utf8' }).status, 0);
+    assert.equal(spawnSync('git', ['add', 'content/posts/Tracked-Post-zh.md', 'content/posts/Dirty-Post-zh.md'], { cwd: outDir, encoding: 'utf8' }).status, 0);
     assert.equal(spawnSync('git', [
       '-c', 'user.name=Test User',
       '-c', 'user.email=test@example.invalid',

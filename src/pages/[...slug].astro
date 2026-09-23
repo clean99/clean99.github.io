@@ -1,0 +1,42 @@
+---
+import type { GetStaticPaths } from "astro";
+import { render } from "astro:content";
+import { postIndex } from "../data/posts";
+import PostLayout from "../layouts/PostLayout.astro";
+import { adjacentPosts, findTranslation, relatedPosts } from "../lib/posts";
+import { SITE } from "../site.config";
+
+export const getStaticPaths = (async () => {
+  const { posts, entries } = await postIndex();
+  const published = posts.filter((post) => !post.draft);
+  return published.map((post) => ({
+    params: { slug: post.url.replace(/^\/|\/$/g, "") },
+    props: {
+      post,
+      entry: entries.get(post.id)!,
+      translation: findTranslation(published, post),
+      ...adjacentPosts(published, post),
+      related: relatedPosts(published, post, 3)
+    }
+  }));
+}) satisfies GetStaticPaths;
+
+const { post, entry, translation, older, newer, related } = Astro.props;
+const { Content, remarkPluginFrontmatter } = await render(entry);
+const toc = remarkPluginFrontmatter.toc ?? [];
+const hasMath = Boolean(remarkPluginFrontmatter.hasMath);
+const sourceUrl = `https://github.com/${SITE.repo}/blob/${SITE.branch}/${SITE.postsDir}/${post.id}.md`;
+---
+
+<PostLayout
+  post={post}
+  translation={translation}
+  toc={toc}
+  hasMath={hasMath}
+  older={older}
+  newer={newer}
+  related={related}
+  sourceUrl={sourceUrl}
+>
+  <Content />
+</PostLayout>

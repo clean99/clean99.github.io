@@ -1,0 +1,111 @@
+---
+import PostList from "../PostList.astro";
+import { tagsCopy } from "../../lib/copy/tags";
+import { localizePath, t, type Lang } from "../../lib/i18n";
+import { tagPageNode } from "../../lib/listings";
+import { groupByYear, type TagSummary } from "../../lib/posts";
+import { breadcrumbNode } from "../../lib/seo";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+interface Props {
+  lang: Lang;
+  tag: TagSummary;
+  /** Same topic in the other language, when that page exists. */
+  alternate?: string | undefined;
+}
+
+const { lang, tag, alternate } = Astro.props;
+const ui = t(lang);
+const copy = tagsCopy(lang);
+
+const index = localizePath("/tags/", lang);
+const path = `${index}${tag.slug}/`;
+const groups = groupByYear(tag.posts);
+const years = tag.posts.map((post) => post.date.getUTCFullYear());
+const span = years.length > 0 ? `${Math.min(...years)}–${Math.max(...years)}` : "";
+
+const heading = copy.tagHeading(tag.label);
+const description = copy.tagDescription(tag.label, tag.count);
+const title = copy.tagTitle(tag.label);
+
+const jsonLd = [
+  tagPageNode({ path, lang, name: heading, description, posts: tag.posts }),
+  breadcrumbNode([
+    { name: ui.breadcrumbHome, path: localizePath("/", lang) },
+    { name: ui.nav.tags, path: index },
+    { name: tag.label, path }
+  ])
+];
+---
+
+<BaseLayout
+  lang={lang}
+  title={title}
+  description={description}
+  path={path}
+  alternates={alternate ? { [lang]: path, [lang === "en" ? "zh" : "en"]: alternate } : { [lang]: path }}
+  jsonLd={jsonLd}
+  section="tags"
+>
+  <div class="wrap page-head">
+    <p class="eyebrow label">
+      <a href={index}>{copy.allTopics}</a>
+    </p>
+    <h1 class="tag-name">{heading}</h1>
+    <p class="lede">{copy.tagLede(tag.label, tag.count)}</p>
+    {span && <p class="label span">{span}</p>}
+  </div>
+
+  <div class="wrap ledger">
+    {groups.map((group) => (
+      <section class="year" aria-labelledby={`year-${group.year}`}>
+        <div class="year-head">
+          <h2 id={`year-${group.year}`}>{group.year}</h2>
+          <p class="label">{copy.count(group.posts.length)}</p>
+        </div>
+        <PostList posts={group.posts} lang={lang} dateStyle="monthDay" showArea />
+      </section>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .page-head .eyebrow a {
+    text-decoration: none;
+  }
+
+  .page-head h1 {
+    text-wrap: balance;
+  }
+
+  .span {
+    margin-top: var(--space-s);
+  }
+
+  .ledger {
+    padding-bottom: var(--space-2xl);
+  }
+
+  .year + .year {
+    margin-top: var(--space-2xl);
+  }
+
+  .year-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding-bottom: var(--space-2xs);
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: var(--space-xs);
+  }
+
+  .year-head h2 {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-3);
+    font-weight: 400;
+    font-variant-numeric: lining-nums tabular-nums;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+</style>

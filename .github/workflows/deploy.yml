@@ -1,18 +1,23 @@
-name: Deploy Hexo Blog
+name: Deploy Astro Blog
 
 on:
   push:
     branches:
       - dev
+  workflow_dispatch:
+
+# One deploy at a time; a newer push supersedes an in-flight run rather than
+# racing it onto the master branch.
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  verify:
+    name: Verify and build
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     env:
       HAS_CODEX_SETUP_TOKEN: ${{ secrets.CODEX_SETUP_TOKEN != '' }}
-
     steps:
       - name: Checkout dev branch
         uses: actions/checkout@v4
@@ -27,8 +32,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "pnpm"
+
+      # Content images are re-encoded on every build; the key is the content of
+      # content/img, so an image-free commit restores the whole cache.
+      - name: Cache encoded image variants
+        uses: actions/cache@v4
+        with:
+          path: .cache/images
+          key: images-${{ hashFiles('content/img/**') }}
+          restore-keys: |
+            images-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -48,15 +63,108 @@ jobs:
         env:
           CODEX_SETUP_DIR: .cache/codex-setup
 
-      - name: Generate static files
-        run: pnpm exec hexo clean && pnpm exec hexo generate
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Type-check
+        run: pnpm run check
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Check every legacy URL still resolves
+        run: pnpm run test:urls
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: pnpm run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload the built site
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  lighthouse:
+    name: Lighthouse
+    needs: verify
+    runs-on: ubuntu-latest
+    # Deploy does not wait for this job: a regression turns the check red without
+    # holding back a publish, and the reports below say which audit moved.
+    steps:
+      - name: Checkout dev branch
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download the built site
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Lighthouse CI (desktop)
+        run: pnpm run lhci
+
+      - name: Lighthouse CI (mobile)
+        if: ${{ !cancelled() }}
+        run: pnpm run lhci:mobile
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 7
+
+  deploy:
+    name: Publish to master
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download the built site
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
 
       - name: Deploy to master branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./dist
           publish_branch: master
           user_name: "github-actions[bot]"
           user_email: "github-actions[bot]@users.noreply.github.com"
-          commit_message: "Site updated: ${{ github.event.head_commit.message }}"
+          commit_message: "Site updated: ${{ github.event.head_commit.message || 'manual dispatch' }}"

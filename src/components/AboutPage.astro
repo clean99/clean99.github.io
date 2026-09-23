@@ -1,0 +1,312 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { allPosts } from "../data/posts";
+import { aboutCopy } from "../lib/copy/about";
+import { localizePath, t, type Lang } from "../lib/i18n";
+import { prosePage } from "../lib/pages";
+import { projectCards } from "../lib/projects";
+import { breadcrumbNode, profilePageNode } from "../lib/seo";
+import { AUTHOR } from "../site.config";
+import "../styles/prose.css";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const ui = t(lang);
+const copy = aboutCopy(lang);
+const page = await prosePage("about", lang);
+const path = localizePath("/about/", lang);
+
+const linksPath = localizePath("/links/", lang);
+const rssPath = localizePath("/atom.xml", lang);
+const workPath = localizePath("/projects/", lang);
+
+const cards = projectCards(await allPosts(), lang).slice(0, 4);
+
+const alternates = { en: "/about/", zh: "/zh/about/" };
+const jsonLd = [
+  profilePageNode({ path, lang, title: copy.title }),
+  breadcrumbNode([
+    { name: ui.breadcrumbHome, path: localizePath("/", lang) },
+    { name: ui.nav.about, path }
+  ])
+];
+---
+
+<BaseLayout
+  lang={lang}
+  title={ui.nav.about}
+  description={page.description ?? copy.lede}
+  path={path}
+  alternates={alternates}
+  jsonLd={jsonLd}
+  ogType="profile"
+  section="about"
+>
+  <div class="about">
+    <header class="page-head">
+      <p class="eyebrow label">{copy.eyebrow}</p>
+      <h1>{copy.title}</h1>
+      <p class="lede">{copy.lede}</p>
+    </header>
+
+    <aside class="panel" aria-label={copy.panelLabel}>
+      <p class="eyebrow label">{copy.panelLabel}</p>
+
+      <div class="identity">
+        <p class="identity-name">{copy.nameValue}</p>
+        <p class="identity-role label">{copy.roleValue}</p>
+      </div>
+
+      <dl class="facts">
+        <div>
+          <dt class="label">{copy.roleLabel}</dt>
+          <dd>{copy.roleValue}</dd>
+        </div>
+        <div>
+          <dt class="label">{copy.whereLabel}</dt>
+          <dd>{AUTHOR.worksFor.join(" · ")}</dd>
+        </div>
+        <div>
+          <dt class="label">{copy.focusLabel}</dt>
+          <dd>
+            <ul role="list" class="focus">
+              {AUTHOR.knowsAbout.slice(0, 4).map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      </dl>
+
+      <ul class="elsewhere" role="list" aria-label={copy.contactLabel}>
+        <li>
+          <a href={AUTHOR.github} rel="me">
+            <span class="label">{copy.elsewhere[0]!.label}</span>
+            <span class="value">{copy.elsewhere[0]!.value}</span>
+          </a>
+        </li>
+        <li>
+          <a href={`mailto:${AUTHOR.email}`}>
+            <span class="label">{copy.elsewhere[1]!.label}</span>
+            <span class="value">{copy.elsewhere[1]!.value}</span>
+          </a>
+        </li>
+        <li>
+          <a href={rssPath}>
+            <span class="label">{copy.rssLabel}</span>
+            <span class="value">{copy.elsewhere[2]!.value}</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <div class="body">
+      <div class="prose">
+        <page.Content />
+      </div>
+
+      {cards.length > 0 && (
+        <section class="work" aria-labelledby="about-work-title">
+          <div class="section-head">
+            <h2 id="about-work-title">{copy.workLabel}</h2>
+            <a class="arrow-link" href={workPath}>
+              {ui.allWork}
+            </a>
+          </div>
+          <ul class="work-list" role="list">
+            {cards.map((card) => (
+              <li>
+                <a href={card.post.url} data-astro-prefetch>
+                  <span class="work-title">{card.post.title}</span>
+                  <span class="label">{ui.readingTime(card.post.minutes)}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p class="work-more">
+            <a class="arrow-link" href={linksPath}>
+              {copy.linksLabel}
+            </a>
+          </p>
+        </section>
+      )}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .about {
+    width: min(100% - 2 * var(--gutter), var(--wide));
+    margin-inline: auto;
+    padding-top: var(--space-2xl);
+  }
+
+  .panel {
+    display: grid;
+    align-content: start;
+    gap: var(--space-m);
+    margin-bottom: var(--space-xl);
+    padding: var(--space-m);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+  }
+
+  .identity-name {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-1);
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .identity-role {
+    margin-top: 0.3rem;
+  }
+
+  .facts {
+    display: grid;
+    gap: var(--space-s);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--rule);
+  }
+
+  .facts dt {
+    margin-bottom: 0.2rem;
+  }
+
+  .facts dd {
+    font-size: var(--step--1);
+    line-height: 1.5;
+  }
+
+  .focus {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .focus li::before {
+    content: "◇ ";
+    color: var(--accent);
+  }
+
+  .elsewhere {
+    display: grid;
+    gap: 1px;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--rule);
+    background: var(--rule);
+  }
+
+  .elsewhere a {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding: var(--space-2xs) var(--space-s);
+    background: var(--paper);
+    text-decoration: none;
+    transition: background-color 0.2s var(--ease-out);
+  }
+
+  .elsewhere a:hover {
+    background: var(--accent-wash);
+  }
+
+  .elsewhere .value {
+    font-family: var(--font-mono-stack);
+    font-size: var(--step--2);
+    color: var(--ink-soft);
+    overflow-wrap: anywhere;
+  }
+
+  .page-head {
+    padding-block: 0 var(--space-l);
+  }
+
+  .page-head h1 {
+    /* 20ch of Fraunces 600, fixed in em so the fallback's narrower "0" cannot rewrap it on swap. */
+    max-width: 13.5em;
+  }
+
+  .work {
+    margin-top: var(--space-2xl);
+  }
+
+  .work-list {
+    display: grid;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .work-list li {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .work-list a {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem var(--space-m);
+    padding: var(--space-s) var(--space-2xs);
+    text-decoration: none;
+    color: var(--ink);
+    transition: background-color 0.2s var(--ease-out);
+  }
+
+  .work-list a:hover {
+    background: var(--accent-wash);
+  }
+
+  .work-title {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-0);
+    font-weight: 500;
+    line-height: 1.35;
+    text-wrap: balance;
+  }
+
+  .work-list a:hover .work-title {
+    color: var(--accent);
+  }
+
+  .work-more {
+    margin-top: var(--space-m);
+  }
+
+  @media (min-width: 64rem) {
+    .about {
+      display: grid;
+      grid-template-columns: minmax(0, var(--measure)) 17rem;
+      justify-content: center;
+      column-gap: var(--space-2xl);
+      align-items: start;
+    }
+
+    /* The heading and prose share column 1; the panel rides beside both. */
+    .page-head {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .body {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .panel {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      position: sticky;
+      top: var(--space-l);
+      margin-bottom: 0;
+    }
+  }
+</style>

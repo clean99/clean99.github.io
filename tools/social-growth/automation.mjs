@@ -213,10 +213,9 @@ export async function runSafeAutomationCycle({
   });
   await writePublishPreflight(preflight, preflightPath);
 
-  let imageBrief = null;
   let imageBriefOutPath = null;
   if (preflight.selected?.id) {
-    imageBrief = await buildImageBrief(preflight);
+    const imageBrief = await buildImageBrief(preflight);
     imageBriefOutPath = imageBriefPath(imageBrief, imageBriefDir);
     await writeImageBrief(imageBrief, imageBriefOutPath);
   }

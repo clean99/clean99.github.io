@@ -1,0 +1,153 @@
+---
+import { t, type Lang } from "../lib/i18n";
+import type { TocItem } from "../markdown/rehype-heading-anchors";
+
+interface Props {
+  items: readonly TocItem[];
+  lang: Lang;
+  /** `inline`: collapsible, above the article on narrow screens. `rail`: sticky sidebar on wide ones. */
+  variant: "inline" | "rail";
+}
+
+const { items, lang, variant } = Astro.props;
+const ui = t(lang);
+const top = Math.min(...items.map((item) => item.depth));
+const titleId = `toc-${variant}`;
+---
+
+{items.length >= 3 && (
+  <nav class:list={["toc", `toc-${variant}`]} aria-labelledby={titleId} data-toc data-pagefind-ignore>
+    {variant === "inline" ? (
+      <details>
+        <summary id={titleId} class="label">
+          {ui.toc}
+        </summary>
+        <ol role="list">
+          {items.map((item) => (
+            <li class:list={{ sub: item.depth > top }}>
+              <a href={`#${item.id}`}>{item.text}</a>
+            </li>
+          ))}
+        </ol>
+      </details>
+    ) : (
+      <>
+        <p id={titleId} class="label">
+          {ui.onThisPage}
+        </p>
+        <ol role="list">
+          {items.map((item) => (
+            <li class:list={{ sub: item.depth > top }}>
+              <a href={`#${item.id}`}>{item.text}</a>
+            </li>
+          ))}
+        </ol>
+      </>
+    )}
+  </nav>
+)}
+
+<script>
+  import "../client/toc";
+</script>
+
+<style>
+  .toc ol {
+    padding: 0;
+    list-style: none;
+  }
+
+  .toc a {
+    display: block;
+    text-decoration: none;
+    color: var(--ink-soft);
+    line-height: 1.4;
+  }
+
+  .toc a:hover {
+    color: var(--accent);
+  }
+
+  .toc-inline {
+    margin-bottom: var(--space-l);
+    border-block: 1px solid var(--rule);
+  }
+
+  .toc-inline summary {
+    display: flex;
+    justify-content: space-between;
+    padding-block: var(--space-xs);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .toc-inline summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .toc-inline summary::after {
+    content: "+";
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--accent);
+    transition: rotate 0.2s var(--ease-out);
+  }
+
+  .toc-inline details[open] summary::after {
+    rotate: 45deg;
+  }
+
+  .toc-inline ol {
+    padding-bottom: var(--space-s);
+    font-size: var(--step--1);
+  }
+
+  .toc-inline li + li {
+    margin-top: 0.45rem;
+  }
+
+  .toc-inline .sub {
+    padding-left: 1rem;
+  }
+
+  .toc-rail {
+    position: sticky;
+    top: var(--space-l);
+    max-height: calc(100dvh - 2 * var(--space-l));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .toc-rail .label {
+    margin-bottom: var(--space-xs);
+  }
+
+  .toc-rail ol {
+    border-left: 1px solid var(--rule);
+    font-size: 0.8125rem;
+  }
+
+  .toc-rail a {
+    margin-left: -1px;
+    padding: 0.3rem 0 0.3rem 0.9rem;
+    border-left: 2px solid transparent;
+    transition:
+      color 0.15s var(--ease-out),
+      border-color 0.15s var(--ease-out);
+  }
+
+  .toc-rail .sub a {
+    padding-left: 1.7rem;
+    font-size: 0.95em;
+  }
+
+  .toc a[aria-current] {
+    color: var(--ink);
+    border-left-color: var(--accent);
+  }
+
+  .toc-inline a[aria-current] {
+    color: var(--accent);
+  }
+</style>

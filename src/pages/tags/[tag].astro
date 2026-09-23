@@ -1,0 +1,15 @@
+---
+import type { GetStaticPaths } from "astro";
+import TagPage from "../../components/pages/TagPage.astro";
+import { allPosts } from "../../data/posts";
+import { tagRoutes } from "../../lib/tag-paths";
+
+export const getStaticPaths = (async () => {
+  const posts = (await allPosts()).filter((post) => !post.draft);
+  return tagRoutes(posts, "en");
+}) satisfies GetStaticPaths;
+
+const { tag, alternate } = Astro.props;
+---
+
+<TagPage lang="en" tag={tag} alternate={alternate} />

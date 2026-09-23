@@ -1,0 +1,131 @@
+---
+import CaseStudyImpact from "./CaseStudyImpact.astro";
+import { t, type Lang } from "../lib/i18n";
+import type { CaseStudy } from "../lib/posts";
+
+interface Props {
+  caseStudy: CaseStudy;
+  lang: Lang;
+}
+
+const { caseStudy, lang } = Astro.props;
+const ui = t(lang);
+
+interface Fact {
+  label: string;
+  value: string | undefined;
+}
+
+const candidates: Fact[] = [
+  { label: ui.role, value: caseStudy.role },
+  { label: ui.period, value: caseStudy.period },
+  { label: ui.team, value: caseStudy.team }
+];
+const facts = candidates.filter((fact): fact is { label: string; value: string } => Boolean(fact.value));
+---
+
+<aside class="case-card" aria-labelledby="case-study-title">
+  <p id="case-study-title" class="stamp label">
+    {ui.caseStudy}
+  </p>
+
+  {facts.length > 0 && (
+    <dl class="facts">
+      {facts.map((fact) => (
+        <div>
+          <dt class="label">{fact.label}</dt>
+          <dd>{fact.value}</dd>
+        </div>
+      ))}
+    </dl>
+  )}
+
+  {caseStudy.impact.length > 0 && (
+    <section class="impact" aria-label={ui.impact}>
+      <h2 class="label">{ui.impact}</h2>
+      <CaseStudyImpact items={caseStudy.impact} />
+    </section>
+  )}
+
+  {caseStudy.stack.length > 0 && (
+    <section class="stack" aria-label={ui.stack}>
+      <h2 class="label">{ui.stack}</h2>
+      <ul role="list">
+        {caseStudy.stack.map((item) => (
+          <li class="chip">{item}</li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {caseStudy.links.length > 0 && (
+    <ul class="links" role="list">
+      {caseStudy.links.map((link) => (
+        <li>
+          <a class="arrow-link" href={link.url}>
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  )}
+</aside>
+
+<style>
+  .case-card {
+    position: relative;
+    display: grid;
+    gap: var(--space-m);
+    margin-bottom: var(--space-l);
+    padding: var(--space-m) var(--space-m) var(--space-m) calc(var(--space-m) + 4px);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+  }
+
+  .case-card::before {
+    content: "";
+    position: absolute;
+    inset: -1px auto -1px -1px;
+    width: 4px;
+    border-radius: var(--radius) 0 0 var(--radius);
+    background: var(--accent);
+  }
+
+  .stamp {
+    color: var(--accent);
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: var(--space-s);
+  }
+
+  .facts dd {
+    margin-top: 0.2rem;
+    font-size: var(--step--1);
+    line-height: 1.45;
+  }
+
+  .impact h2,
+  .stack h2 {
+    margin-bottom: var(--space-2xs);
+    font-family: var(--font-mono-stack);
+    font-weight: 500;
+    font-variation-settings: normal;
+  }
+
+  .stack ul,
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem var(--space-s);
+    padding: 0;
+    list-style: none;
+  }
+
+  .stack ul {
+    gap: 0.4rem;
+  }
+</style>

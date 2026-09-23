@@ -1,0 +1,560 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CaseStudyImpact from "./CaseStudyImpact.astro";
+import { allPosts } from "../data/posts";
+import { localizePath, t, type Lang } from "../lib/i18n";
+import { projectsCopy } from "../lib/copy/projects";
+import { alsoWriting, projectCards, themeLinks } from "../lib/projects";
+import { breadcrumbNode } from "../lib/seo";
+import { AREA_LABELS } from "../lib/taxonomy";
+import { formatShortDate } from "../lib/dates";
+import { AUTHOR } from "../site.config";
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const ui = t(lang);
+const copy = projectsCopy(lang);
+const path = localizePath("/projects/", lang);
+
+const posts = await allPosts();
+const cards = projectCards(posts, lang, {
+  role: copy.roleLabel,
+  period: copy.periodLabel,
+  team: copy.teamLabel
+});
+const also = alsoWriting(cards, posts, lang, 6);
+const themes = themeLinks(posts, lang);
+
+const alternates = { en: "/projects/", zh: "/zh/projects/" };
+const jsonLd = [
+  breadcrumbNode([
+    { name: ui.breadcrumbHome, path: localizePath("/", lang) },
+    { name: ui.nav.projects, path }
+  ])
+];
+
+const stats = [
+  { label: copy.stats.projects, value: String(cards.length) },
+  { label: copy.stats.areas, value: String(themes.length) },
+  { label: copy.stats.langs, value: "EN / 中文" }
+];
+---
+
+<BaseLayout
+  lang={lang}
+  title={ui.nav.projects}
+  description={copy.lede}
+  path={path}
+  alternates={alternates}
+  jsonLd={jsonLd}
+  section="projects"
+>
+  <header class="wrap page-head">
+    <p class="eyebrow label">{copy.eyebrow}</p>
+    <h1>{copy.title}</h1>
+    <p class="lede">{copy.lede}</p>
+    <dl class="totals">
+      {stats.map((stat) => (
+        <div>
+          <dt class="label">{stat.label}</dt>
+          <dd>{stat.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </header>
+
+  <section class="wrap" aria-labelledby="work-title">
+    <div class="section-head">
+      <h2 id="work-title">{copy.workLabel}</h2>
+      <a class="arrow-link" href={localizePath("/writing/", lang)}>
+        {copy.writingLink}
+      </a>
+    </div>
+
+    {cards.length > 0 ? (
+      <ol class="work" role="list">
+        {cards.map((card, index) => (
+          <li class="card" data-area={card.post.area} data-case={String(card.caseStudy)}>
+            <p class="card-meta label">
+              <span class="index">{String(index + 1).padStart(2, "0")}</span>
+              <span>{AREA_LABELS[lang][card.post.area]}</span>
+              <span class={card.caseStudy ? "case" : "build"}>{card.caseStudy ? copy.caseBadge : copy.buildBadge}</span>
+              <span class="minutes">{ui.readingTime(card.post.minutes)}</span>
+            </p>
+
+            <h3>
+              <a href={card.post.url} data-astro-prefetch>
+                {card.post.title}
+              </a>
+            </h3>
+
+            {card.post.summary && (
+              <p class="summary">
+                <span class="visually-hidden">{copy.problemLabel}: </span>
+                {card.post.summary}
+              </p>
+            )}
+
+            {card.facts.length > 0 && (
+              <dl class="facts">
+                {card.facts.map((fact) => (
+                  <div>
+                    <dt class="label">{fact.label}</dt>
+                    <dd>{fact.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+
+            {card.impact.length > 0 && (
+              <CaseStudyImpact items={card.impact} label={copy.impactLabel} columns={index === 0 ? 2 : 1} />
+            )}
+
+            {card.stack.length > 0 && (
+              <ul class="stack" role="list" aria-label={copy.stackLabel}>
+                {card.stack.map((item) => (
+                  <li class="chip">{item}</li>
+                ))}
+              </ul>
+            )}
+
+            <p class="card-foot">
+              <span class="label read">{copy.readNote}</span>
+              <span class="card-date label">{formatShortDate(card.post.date)}</span>
+            </p>
+          </li>
+        ))}
+      </ol>
+    ) : (
+      <p class="empty">
+        {copy.note}{" "}
+        <a class="arrow-link" href={localizePath("/writing/", lang)}>
+          {copy.writingLink}
+        </a>
+      </p>
+    )}
+
+    <p class="note label">{copy.note}</p>
+  </section>
+
+  {also.length > 0 && (
+    <section class="wrap block" aria-labelledby="also-title">
+      <div class="section-head">
+        <h2 id="also-title">{copy.alsoTitle}</h2>
+        <a class="arrow-link" href={localizePath("/writing/", lang)}>
+          {copy.writingLink}
+        </a>
+      </div>
+      <ul class="also" role="list">
+        {also.map((entry) => (
+          <li>
+            <a href={entry.post.url} data-astro-prefetch>
+              <span class="also-title">{entry.post.title}</span>
+              <span class="also-meta label">
+                {entry.areaLabel}
+                <span class="dot" aria-hidden="true">
+                  ·
+                </span>
+                {ui.readingTime(entry.post.minutes)}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <section class="wrap block" aria-labelledby="next-title">
+    <div class="section-head">
+      <h2 id="next-title">{copy.nextTitle}</h2>
+    </div>
+    <p class="next-lede">{copy.nextLede}</p>
+    <ul class="next" role="list">
+      <li>
+        <a href={localizePath("/about/", lang)} data-astro-prefetch>
+          <span class="label">{copy.aboutLink}</span>
+          <span class="next-blurb">{ui.heroSecondary}</span>
+        </a>
+      </li>
+      <li>
+        <a href={localizePath("/writing/", lang)} data-astro-prefetch>
+          <span class="label">{copy.writingLink}</span>
+          <span class="next-blurb">{ui.recent}</span>
+        </a>
+      </li>
+      <li>
+        <a href={localizePath("/tags/", lang)} data-astro-prefetch>
+          <span class="label">{copy.topicsLink}</span>
+          <span class="next-blurb">{ui.allTags}</span>
+        </a>
+      </li>
+      <li>
+        <a href={`mailto:${AUTHOR.email}`}>
+          <span class="label">{copy.contactLink}</span>
+          <span class="next-blurb">{AUTHOR.email}</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-head {
+    max-width: 52rem;
+  }
+
+  .page-head h1 {
+    /* 22ch of Fraunces 600, fixed in em so the fallback's narrower "0" cannot rewrap it on swap. */
+    max-width: 14.85em;
+  }
+
+  :lang(zh) .page-head h1 {
+    max-width: 16em;
+  }
+
+  .page-head .lede {
+    max-width: 44rem;
+  }
+
+  .totals {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-s) var(--space-xl);
+    margin-top: var(--space-l);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--ink);
+  }
+
+  .totals div {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .totals dd {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-1);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  .work {
+    display: grid;
+    gap: var(--space-s);
+    padding: 0;
+    list-style: none;
+  }
+
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-m);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+    transition:
+      border-color 0.2s var(--ease-out),
+      box-shadow 0.2s var(--ease-out),
+      translate 0.2s var(--ease-out);
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: -1px auto -1px -1px;
+    width: 3px;
+    border-radius: var(--radius) 0 0 var(--radius);
+    background: var(--rule-strong);
+  }
+
+  .card[data-case="true"]::before {
+    background: var(--accent);
+  }
+
+  .card:hover {
+    border-color: var(--rule-strong);
+    box-shadow: var(--shadow-lift);
+    translate: 0 -2px;
+  }
+
+  .card:has(h3 a:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.9rem;
+  }
+
+  .index {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .case {
+    color: var(--accent);
+  }
+
+  .case::before {
+    content: "◆ ";
+  }
+
+  .minutes {
+    margin-left: auto;
+  }
+
+  .card h3 {
+    font-size: var(--step-2);
+    line-height: 1.18;
+  }
+
+  .card h3 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .card h3 a:focus-visible {
+    outline: none;
+  }
+
+  /* The whole card is the hit target; the heading link stays the only tab stop. */
+  .card h3 a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .card:hover h3 a {
+    color: var(--accent);
+  }
+
+  .summary {
+    max-width: 44rem;
+    font-size: var(--step-0);
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card-foot {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    margin-top: auto;
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--rule);
+  }
+
+  .card-date {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .facts {
+    display: grid;
+    gap: var(--space-2xs) var(--space-m);
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    padding: var(--space-xs) 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .facts dt {
+    margin-bottom: 0.15rem;
+  }
+
+  .facts dd {
+    font-size: var(--step--1);
+    line-height: 1.4;
+  }
+
+  .read {
+    color: var(--ink-muted);
+  }
+
+  .read::after {
+    content: " →";
+    display: inline-block;
+    transition: transform 0.2s var(--ease-out);
+  }
+
+  .card:hover .read {
+    color: var(--accent);
+  }
+
+  .card:hover .read::after {
+    transform: translateX(3px);
+  }
+
+  .note,
+  .empty {
+    margin-top: var(--space-m);
+    max-width: 46rem;
+    line-height: 1.7;
+  }
+
+  .empty {
+    font-size: var(--step-0);
+    color: var(--ink-soft);
+  }
+
+  .block {
+    margin-top: var(--space-2xl);
+  }
+
+  .also {
+    display: grid;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .also li {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .also a {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem var(--space-m);
+    padding: var(--space-s) var(--space-2xs);
+    text-decoration: none;
+    color: var(--ink);
+    transition: background-color 0.2s var(--ease-out);
+  }
+
+  .also a:hover {
+    background: var(--accent-wash);
+    color: var(--ink);
+  }
+
+  .also-title {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-1);
+    font-weight: 500;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+
+  .also a:hover .also-title {
+    color: var(--accent);
+  }
+
+  .also-meta {
+    display: flex;
+    gap: 0.4rem;
+    white-space: nowrap;
+  }
+
+  .dot {
+    color: var(--rule-strong);
+  }
+
+  .next-lede {
+    max-width: 40rem;
+    margin-bottom: var(--space-m);
+    color: var(--ink-soft);
+  }
+
+  .next {
+    display: grid;
+    gap: 1px;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--rule);
+    background: var(--rule);
+  }
+
+  .next li {
+    background: var(--paper);
+  }
+
+  .next a {
+    display: grid;
+    gap: 0.35rem;
+    padding: var(--space-m);
+    text-decoration: none;
+    color: var(--ink);
+    transition: background-color 0.2s var(--ease-out);
+  }
+
+  .next a:hover {
+    background: var(--accent-wash);
+  }
+
+  .next .label {
+    color: var(--accent);
+  }
+
+  .next-blurb {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-0);
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  @media (min-width: 48rem) {
+    .work {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card:first-child {
+      grid-column: 1 / -1;
+      padding: var(--space-l);
+    }
+
+    .card:first-child h3 {
+      /* 28ch of Fraunces 600, fixed in em so the fallback's narrower "0" cannot rewrap it on swap. */
+      max-width: 18.9em;
+      font-size: var(--step-3);
+      line-height: 1.1;
+    }
+
+    .card:first-child .summary {
+      max-width: 46rem;
+    }
+
+    /* After the full-width feature card the rest pair up; a leftover takes the row. */
+    .card:last-child:nth-child(even) {
+      grid-column: 1 / -1;
+    }
+
+    .also {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-xl);
+    }
+
+    .also a {
+      padding-inline: 0;
+    }
+
+    .also li:nth-last-child(-n + 2) {
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .next {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 47.99rem) {
+    .minutes {
+      margin-left: 0;
+    }
+  }
+</style>

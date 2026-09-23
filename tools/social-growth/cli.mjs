@@ -1685,11 +1685,11 @@ function runXBrowserProbe({
     cwd: process.cwd(),
     encoding: 'utf8',
   });
-  let parsed = null;
+  let parsed;
   try {
     parsed = JSON.parse(result.stdout || '{}');
   } catch {
-    parsed = null;
+    parsed = undefined;
   }
   return {
     skipped: false,
@@ -2594,11 +2594,11 @@ function runXBrowserRead({
     cwd: process.cwd(),
     encoding: 'utf8',
   });
-  let parsed = null;
+  let parsed;
   try {
     parsed = JSON.parse(result.stdout || '{}');
   } catch {
-    parsed = null;
+    parsed = undefined;
   }
   return {
     label,
@@ -2633,7 +2633,7 @@ function selectArticle(articles, options) {
 
   const article = articles.find((item) => item.lang === preferredLang) || articles[0];
   if (!article) {
-    throw new Error('No articles found in source/_posts');
+    throw new Error('No articles found in content/posts');
   }
   return article;
 }

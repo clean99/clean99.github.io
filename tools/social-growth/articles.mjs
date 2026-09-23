@@ -77,7 +77,7 @@ export function unquote(value) {
 }
 
 export async function loadArticles({
-  postsDir = path.join(process.cwd(), 'source/_posts'),
+  postsDir = path.join(process.cwd(), 'content/posts'),
   siteUrl = 'https://clean99.github.io',
   includeUntracked = false,
   gitCwd = process.cwd(),

@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { createMetricsTemplateFromQueue, formatMarkdownReport, METRIC_FIELDS } from './ledger.mjs';
 import { summarizeGrowthLedger } from './metrics.mjs';

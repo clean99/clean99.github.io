@@ -1,0 +1,206 @@
+---
+import SealMark from "./SealMark.astro";
+import { localizePath, t, type Lang } from "../lib/i18n";
+import { AUTHOR } from "../site.config";
+
+interface Props {
+  lang: Lang;
+  /** First year with a published note. */
+  since: number;
+}
+
+const { lang, since } = Astro.props;
+const ui = t(lang);
+const year = new Date().getFullYear();
+const other = lang === "en" ? "zh" : "en";
+
+/** One feed per language, plus the two places a reader can actually reach me. */
+const links = [
+  { href: localizePath("/atom.xml", lang), label: ui.rss, type: "application/atom+xml" },
+  { href: localizePath("/", other), label: ui.langSwitch, hreflang: other },
+  { href: AUTHOR.github, label: ui.github, rel: "me" },
+  { href: `mailto:${AUTHOR.email}`, label: ui.email }
+];
+
+const nav = [
+  { href: localizePath("/writing/", lang), label: ui.nav.writing },
+  { href: localizePath("/projects/", lang), label: ui.nav.projects },
+  { href: localizePath("/tags/", lang), label: ui.nav.tags },
+  { href: localizePath("/about/", lang), label: ui.nav.about },
+  { href: localizePath("/links/", lang), label: ui.links },
+  { href: localizePath("/ai-coding-lab/", lang), label: ui.nav.lab },
+  { href: "/llms.txt", label: "llms.txt", type: "text/plain" }
+];
+---
+
+<footer class="site-footer">
+  <div class="wrap grid">
+    <div class="sign">
+      <SealMark size={40} />
+      <p>
+        <span class="name">
+          {AUTHOR.name} <span lang="zh-CN">{AUTHOR.nativeName}</span>
+        </span>
+        <span class="label">
+          © {since}–{year}
+        </span>
+      </p>
+    </div>
+
+    <ul class="links" role="list">
+      {links.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            rel={"rel" in link ? link.rel : undefined}
+            type={"type" in link ? link.type : undefined}
+            hreflang={"hreflang" in link ? link.hreflang : undefined}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <nav class="footnav" aria-label={ui.primaryNav}>
+      <ul role="list">
+        {nav.map((item) => (
+          <li>
+            <a href={item.href} data-astro-prefetch>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <p class="colophon">{ui.footerNote}</p>
+    <a class="top arrow-link" href="#top">
+      {ui.backToTop}
+    </a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--space-2xl);
+    padding-block: var(--space-xl) var(--space-l);
+    border-top: 1px solid var(--ink);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-m) var(--space-l);
+    align-items: center;
+  }
+
+  .sign {
+    display: flex;
+    align-items: center;
+    gap: var(--space-s);
+  }
+
+  .sign p {
+    display: grid;
+    gap: 0.15rem;
+    line-height: 1.2;
+  }
+
+  .name {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-1);
+    font-weight: 600;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-m);
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono-stack);
+    font-size: var(--step--1);
+  }
+
+  .links a {
+    text-decoration: none;
+    color: var(--ink-soft);
+  }
+
+  .links a:hover {
+    color: var(--accent);
+  }
+
+  .footnav {
+    grid-column: 1 / -1;
+    padding-top: var(--space-xs);
+    border-top: 1px solid var(--rule);
+  }
+
+  .footnav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-m);
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono-stack);
+    font-size: var(--step--1);
+  }
+
+  .footnav a {
+    text-decoration: none;
+    color: var(--ink-muted);
+  }
+
+  .footnav a:hover {
+    color: var(--accent);
+  }
+
+  .colophon {
+    border-top: 0;
+    padding-top: 0;
+    grid-column: 1;
+  }
+
+  @media (max-width: 40rem) {
+    .footnav,
+    .colophon {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .colophon {
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--rule);
+    font-size: var(--step--1);
+    color: var(--ink-muted);
+  }
+
+  .top {
+    justify-self: end;
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--rule);
+    color: var(--ink-muted);
+  }
+
+  .top::after {
+    content: " ↑";
+  }
+
+  .top:hover::after {
+    transform: translateY(-3px);
+  }
+
+  @media (max-width: 40rem) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .top {
+      justify-self: start;
+      border-top: 0;
+      padding-top: 0;
+    }
+  }
+</style>

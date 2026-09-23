@@ -34,7 +34,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "pnpm"
 
       - name: Install dependencies
@@ -62,12 +62,12 @@ jobs:
       - name: Commit catalog changes
         if: env.HAS_CODEX_SETUP_TOKEN == 'true'
         run: |
-          if git diff --quiet -- source/ai-coding-lab/catalog.json; then
+          if git diff --quiet -- content/ai-coding-lab/catalog.json; then
             echo "Catalog unchanged."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add source/ai-coding-lab/catalog.json
+          git add content/ai-coding-lab/catalog.json
           git commit -m "Update AI skills catalog"
           git push origin dev

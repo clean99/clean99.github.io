@@ -1,0 +1,390 @@
+---
+import CaseStudyCard from "../components/CaseStudyCard.astro";
+import PostList from "../components/PostList.astro";
+import Toc from "../components/Toc.astro";
+import { formatLongDate, toIsoWithOffset } from "../lib/dates";
+import { HTML_LANG, localizePath, t } from "../lib/i18n";
+import type { Post } from "../lib/posts";
+import { blogPostingNode, breadcrumbNode, postOgImage } from "../lib/seo";
+import { AREA_LABELS } from "../lib/taxonomy";
+import type { TocItem } from "../markdown/rehype-heading-anchors";
+import BaseLayout from "./BaseLayout.astro";
+import "../styles/prose.css";
+
+interface Props {
+  post: Post;
+  translation?: Post | undefined;
+  toc: readonly TocItem[];
+  hasMath: boolean;
+  older?: Post | undefined;
+  newer?: Post | undefined;
+  related: readonly Post[];
+  sourceUrl: string;
+}
+
+const { post, translation, toc, hasMath, older, newer, related, sourceUrl } = Astro.props;
+const { lang } = post;
+const ui = t(lang);
+const areaLabel = AREA_LABELS[lang][post.area];
+const writingPath = localizePath("/writing/", lang);
+const updated = post.updated && post.updated.getTime() - post.date.getTime() > 86_400_000 ? post.updated : undefined;
+
+const alternates = { [lang]: post.url, ...(translation ? { [translation.lang]: translation.url } : {}) };
+const jsonLd = [
+  blogPostingNode(post, { translation }),
+  breadcrumbNode([
+    { name: ui.breadcrumbHome, path: localizePath("/", lang) },
+    { name: ui.nav.writing, path: writingPath },
+    { name: post.title, path: post.url }
+  ])
+];
+---
+
+<BaseLayout
+  lang={lang}
+  title={post.title}
+  description={post.description}
+  path={post.url}
+  alternates={alternates}
+  ogImage={postOgImage(post)}
+  ogType="article"
+  jsonLd={jsonLd}
+  section="writing"
+  article={{
+    published: post.date,
+    modified: post.updated,
+    section: areaLabel,
+    tags: post.tags.map((tag) => tag.label)
+  }}
+  markdownAlternate={`${post.url}index.md`}
+  hasMath={hasMath}
+>
+  <div class="progress" role="presentation"></div>
+
+  <div class="post-page">
+    <article class="post" data-pagefind-body>
+      <header class="post-head">
+        <p class="eyebrow label" data-pagefind-ignore>
+          <a href={`${writingPath}?area=${post.area}`}>{areaLabel}</a>
+          {post.caseStudy && <span class="case">{ui.caseStudy}</span>}
+        </p>
+        <h1 data-pagefind-meta="title">{post.title}</h1>
+        {post.summary && <p class="lede">{post.summary}</p>}
+        <div class="meta label" data-pagefind-ignore>
+          <span>
+            <span class="visually-hidden">{ui.published} </span>
+            <time datetime={toIsoWithOffset(post.date)}>{formatLongDate(post.date, lang)}</time>
+          </span>
+          {updated && (
+            <span>
+              {ui.updated} <time datetime={toIsoWithOffset(updated)}>{formatLongDate(updated, lang)}</time>
+            </span>
+          )}
+          <span>{ui.readingTime(post.minutes)}</span>
+          {translation && (
+            <a
+              class="translation"
+              href={translation.url}
+              hreflang={HTML_LANG[translation.lang]}
+              lang={HTML_LANG[translation.lang]}
+              title={ui.translationLabel}
+              data-astro-prefetch
+            >
+              {ui.translation}
+            </a>
+          )}
+          <button type="button" class="copy" data-copy-link data-copied={ui.copied}>
+            <span data-copy-label aria-live="polite">
+              {ui.copyLink}
+            </span>
+          </button>
+        </div>
+      </header>
+
+      {post.caseStudy && <CaseStudyCard caseStudy={post.caseStudy} lang={lang} />}
+      <div class="toc-slot-inline">
+        <Toc items={toc} lang={lang} variant="inline" />
+      </div>
+      <div class="prose">
+        <slot />
+      </div>
+
+      <footer class="post-foot" data-pagefind-ignore>
+        {post.tags.length > 0 && (
+          <ul class="tags" role="list" aria-label={ui.tags}>
+            {post.tags.map((tag) => (
+              <li>
+                <a class="chip" href={localizePath(`/tags/${tag.slug}/`, lang)} rel="tag">
+                  #{tag.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+        <a class="arrow-link source" href={sourceUrl}>
+          {ui.editOnGitHub}
+        </a>
+      </footer>
+    </article>
+
+    <aside class="toc-slot-rail">
+      <Toc items={toc} lang={lang} variant="rail" />
+    </aside>
+
+    {(older || newer) && (
+      <nav class="post-nav" aria-label={`${ui.previous} / ${ui.next}`}>
+        {older && (
+          <a class="older" href={older.url} rel="prev" data-astro-prefetch>
+            <span class="label">← {ui.previous}</span>
+            <span class="nav-title">{older.title}</span>
+          </a>
+        )}
+        {newer && (
+          <a class="newer" href={newer.url} rel="next" data-astro-prefetch>
+            <span class="label">{ui.next} →</span>
+            <span class="nav-title">{newer.title}</span>
+          </a>
+        )}
+      </nav>
+    )}
+
+    {related.length > 0 && (
+      <section class="related" aria-labelledby="related-title">
+        <div class="section-head">
+          <h2 id="related-title">{ui.related}</h2>
+          <a class="arrow-link" href={writingPath}>
+            {ui.allWriting}
+          </a>
+        </div>
+        <PostList posts={related} lang={lang} showSummary />
+      </section>
+    )}
+  </div>
+</BaseLayout>
+
+<script>
+  import "../client/copy";
+  import "../client/video";
+</script>
+
+<style>
+  .progress {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    height: 3px;
+    background: var(--accent);
+    transform-origin: 0 50%;
+    scale: 0 1;
+    pointer-events: none;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .progress {
+      animation: progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+
+  @supports not (animation-timeline: scroll()) {
+    .progress {
+      display: none;
+    }
+  }
+
+  @keyframes progress {
+    to {
+      scale: 1 1;
+    }
+  }
+
+  .post-page > * {
+    width: min(100% - 2 * var(--gutter), var(--measure));
+    margin-inline: auto;
+  }
+
+  .post-head {
+    padding-block: var(--space-2xl) var(--space-l);
+  }
+
+  .eyebrow {
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-s);
+  }
+
+  .eyebrow a {
+    text-decoration: none;
+    color: var(--accent);
+  }
+
+  .case::before {
+    content: "◆ ";
+    color: var(--accent);
+  }
+
+  h1 {
+    margin-top: var(--space-s);
+    font-size: var(--step-4);
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+  }
+
+  :lang(zh) h1 {
+    letter-spacing: 0;
+    line-height: 1.25;
+  }
+
+  .lede {
+    margin-top: var(--space-m);
+    font-size: var(--step-1);
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs) var(--space-m);
+    margin-top: var(--space-m);
+    padding-top: var(--space-s);
+    border-top: 1px solid var(--rule);
+  }
+
+  .meta time {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .translation {
+    text-decoration: none;
+    color: var(--accent);
+  }
+
+  .copy {
+    margin-left: auto;
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    background: none;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: var(--ink-soft);
+  }
+
+  .copy:hover,
+  .copy[data-state="copied"] {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .toc-slot-rail {
+    display: none;
+  }
+
+  .post-foot {
+    display: grid;
+    gap: var(--space-m);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-m);
+    border-top: 1px solid var(--rule);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .source {
+    justify-self: start;
+    color: var(--ink-muted);
+  }
+
+  .post-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-s);
+    margin-top: var(--space-xl);
+  }
+
+  .post-nav a {
+    display: grid;
+    gap: 0.35rem;
+    padding: var(--space-s);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition:
+      border-color 0.2s var(--ease-out),
+      background-color 0.2s var(--ease-out);
+  }
+
+  .post-nav a:hover {
+    border-color: var(--accent);
+    background: var(--accent-wash);
+  }
+
+  .newer {
+    grid-column: 2;
+    text-align: end;
+  }
+
+  .nav-title {
+    font-family: var(--font-display-stack);
+    font-size: var(--step-0);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  .related {
+    margin-top: var(--space-2xl);
+  }
+
+  @media (max-width: 40rem) {
+    .post-nav {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .newer {
+      grid-column: auto;
+    }
+
+    .copy {
+      margin-left: 0;
+    }
+  }
+
+  /* Wide screens: the table of contents moves to a sticky rail beside the text. */
+  @media (min-width: 75rem) {
+    .post-page {
+      display: grid;
+      grid-template-columns: minmax(0, var(--measure)) 14rem;
+      justify-content: center;
+      column-gap: var(--space-xl);
+      width: min(100% - 2 * var(--gutter), var(--wide));
+      margin-inline: auto;
+    }
+
+    .post-page > * {
+      grid-column: 1;
+      width: auto;
+      margin-inline: 0;
+    }
+
+    .post-page > .toc-slot-rail {
+      display: block;
+      grid-column: 2;
+      grid-row: 1;
+      padding-top: var(--space-2xl);
+    }
+
+    .toc-slot-inline {
+      display: none;
+    }
+  }
+</style>

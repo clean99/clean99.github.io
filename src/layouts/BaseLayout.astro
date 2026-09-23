@@ -1,0 +1,198 @@
+---
+import { Font } from "astro:assets";
+import SearchDialog from "../components/SearchDialog.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader, { type Section } from "../components/SiteHeader.astro";
+import { allPosts } from "../data/posts";
+import { toIsoWithOffset } from "../lib/dates";
+import { HTML_LANG, LANGS, OG_LOCALE, localizePath, normalizePath, otherLang, t, type Lang } from "../lib/i18n";
+import {
+  OG_SIZE,
+  absoluteUrl,
+  documentTitle,
+  hreflangAlternates,
+  jsonLdGraph,
+  personNode,
+  serializeJsonLd,
+  siteOgImage,
+  websiteNode
+} from "../lib/seo";
+import { THEME_COLOR, THEME_KEY } from "../lib/theme";
+import { AUTHOR } from "../site.config";
+import "../styles/global.css";
+
+interface Props {
+  lang: Lang;
+  /** Page name; the site name is appended. Omit on the home page. */
+  title?: string | undefined;
+  description?: string | undefined;
+  /** Canonical path. Defaults to the requested path. */
+  path?: string | undefined;
+  /** The same page in each language, for hreflang and the language switch. */
+  alternates?: Partial<Record<Lang, string>> | undefined;
+  ogImage?: string | undefined;
+  ogImageAlt?: string | undefined;
+  ogType?: "website" | "article" | "profile";
+  /** Page-specific JSON-LD nodes; the Person and WebSite nodes are always included. */
+  jsonLd?: readonly Record<string, unknown>[];
+  noindex?: boolean;
+  section?: Section | undefined;
+  article?:
+    | {
+        published: Date;
+        modified?: Date | undefined;
+        section?: string | undefined;
+        tags?: readonly string[] | undefined;
+      }
+    | undefined;
+  /** Plain-Markdown twin of this page, for agents and readers that prefer source. */
+  markdownAlternate?: string | undefined;
+  hasMath?: boolean;
+  /** Loads the hero's copy of the display face, whose fallback is tuned to the home title. */
+  heroFont?: boolean;
+}
+
+const {
+  lang,
+  title,
+  description,
+  alternates = {},
+  ogImage = siteOgImage(lang),
+  ogImageAlt,
+  ogType = "website",
+  jsonLd = [],
+  noindex = false,
+  section,
+  article,
+  markdownAlternate,
+  hasMath = false,
+  heroFont = false
+} = Astro.props;
+
+const ui = t(lang);
+const path = normalizePath(Astro.props.path ?? Astro.url.pathname);
+const canonical = absoluteUrl(path);
+const pageTitle = documentTitle(title, lang);
+const metaDescription = description ?? ui.siteDescription;
+const ogImageUrl = absoluteUrl(ogImage);
+const hreflang = hreflangAlternates({ ...alternates, [lang]: path });
+const alternateHref = alternates[otherLang(lang)];
+const graph = serializeJsonLd(jsonLdGraph([personNode(), websiteNode(lang), ...jsonLd]));
+
+const posts = (await allPosts()).filter((post) => !post.draft);
+const since = Math.min(...posts.map((post) => post.date.getUTCFullYear()));
+
+// Runs before first paint so a stored or OS dark theme never flashes light.
+// It also clears the `no-js` class the stylesheet uses to keep JavaScript-only
+// layout out of the no-script rendering.
+const themeScript = `(()=>{document.documentElement.classList.remove("no-js");let s;try{s=localStorage.getItem(${JSON.stringify(THEME_KEY)})}catch{}const d=s==="dark"||(s!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=d?"dark":"light"})()`;
+
+// Chromium prerenders same-site pages on hover intent; everything else falls back to Astro's prefetch.
+const speculationRules = JSON.stringify({
+  prerender: [
+    {
+      where: {
+        and: [
+          { href_matches: "/*" },
+          { not: { href_matches: ["/pagefind/*", "/*.xml", "/*.txt", "/*.md"] } },
+          { not: { selector_matches: "[rel~=nofollow], [download], [target]" } }
+        ]
+      },
+      eagerness: "moderate"
+    }
+  ]
+});
+---
+
+<!doctype html>
+<html lang={HTML_LANG[lang]} dir="ltr" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="theme-color" content={THEME_COLOR.light} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={THEME_COLOR.dark} media="(prefers-color-scheme: dark)" />
+    <script is:inline set:html={themeScript}></script>
+    <Font cssVariable="--font-display" preload={[{ weight: "400", style: "normal" }]} />
+    <Font cssVariable="--font-body" preload={[{ weight: "400", style: "normal" }]} />
+    <Font cssVariable="--font-mono" />
+    {heroFont && <Font cssVariable="--font-hero" />}
+
+    <meta name="description" content={metaDescription} />
+    <meta name="author" content={AUTHOR.name} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <link rel="canonical" href={canonical} />
+    {hreflang.map((alt) => (
+      <link rel="alternate" hreflang={alt.hreflang} href={alt.href} />
+    ))}
+    {
+      /* Both editions of the feed: a reader subscribed to one language should be
+         able to discover the other, and a crawler sees the pair. */
+      LANGS.map((l) => (
+        <link
+          rel="alternate"
+          type="application/atom+xml"
+          title={`${t(l).siteTitle} (${HTML_LANG[l]})`}
+          href={absoluteUrl(localizePath("/atom.xml", l))}
+        />
+      ))
+    }
+    {markdownAlternate && <link rel="alternate" type="text/markdown" href={markdownAlternate} />}
+    <link rel="sitemap" type="application/xml" href={absoluteUrl("/sitemap.xml")} />
+    {
+      /* The agent index, advertised the way llmstxt.org suggests: an alternate
+         representation of the page for a reader that prefers source text. */
+      !noindex && (
+        <link rel="alternate" type="text/plain" title="llms.txt" href={absoluteUrl(localizePath("/llms.txt", lang))} />
+      )
+    }
+    <link rel="me" href={AUTHOR.github} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    {hasMath && <link rel="stylesheet" href="/vendor/katex/katex.min.css" />}
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={ui.siteTitle} />
+    <meta property="og:title" content={title ?? ui.siteTitle} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={OG_LOCALE[lang]} />
+    {LANGS.filter((l) => l !== lang && alternates[l]).map((l) => (
+      <meta property="og:locale:alternate" content={OG_LOCALE[l]} />
+    ))}
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content={String(OG_SIZE.width)} />
+    <meta property="og:image:height" content={String(OG_SIZE.height)} />
+    <meta property="og:image:alt" content={ogImageAlt ?? title ?? ui.siteTitle} />
+    {article && (
+      <>
+        <meta property="article:published_time" content={toIsoWithOffset(article.published)} />
+        <meta property="article:modified_time" content={toIsoWithOffset(article.modified ?? article.published)} />
+        <meta property="article:author" content={absoluteUrl("/about/")} />
+        {article.section && <meta property="article:section" content={article.section} />}
+        {article.tags?.map((tag) => (
+          <meta property="article:tag" content={tag} />
+        ))}
+      </>
+    )}
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script is:inline type="application/ld+json" set:html={graph}></script>
+    <script is:inline type="speculationrules" set:html={speculationRules}></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">
+      {ui.skip}
+    </a>
+    <SiteHeader lang={lang} section={section} alternateHref={alternateHref} />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter lang={lang} since={since} />
+    <SearchDialog lang={lang} />
+  </body>
+</html>
