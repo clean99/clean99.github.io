@@ -445,8 +445,7 @@ export const OG_TOKENS = {
 export function sealDataUri(size: number): string {
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${SEAL_VIEWBOX}" width="${size}" height="${size}">` +
-    `<rect width="64" height="64" rx="9" fill="${OG_TOKENS.accent}"/>` +
-    `<rect x="4.5" y="4.5" width="55" height="55" rx="5.5" fill="none" stroke="${OG_TOKENS.paper}" stroke-width="2"/>` +
+    `<rect width="64" height="64" rx="2" fill="${OG_TOKENS.accent}"/>` +
     `<path fill="${OG_TOKENS.paper}" d="${FENG_PATH}"/></svg>`;
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
 }
