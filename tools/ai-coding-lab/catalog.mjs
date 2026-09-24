@@ -82,6 +82,7 @@ const INTERNAL_TERMS = [
   'boe',
   'eden',
   'whistle',
+  'seto',
   'om-workspace',
   'tiktok'
 ];

@@ -10,9 +10,10 @@ lang: zh
 i18n_key: Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure
 permalink: zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/
 case_study:
+  role: "负责人"
   period: "2026 Q2"
   team: "TikTok Shop 电商前端"
-  stack: [CDP Chrome, React, Seto sandbox, iframe, requestIdleCallback, WebSocket]
+  stack: [CDP Chrome, React, iframe sandbox, requestIdleCallback, WebSocket]
   impact:
     - "冷切换 p95 duration 从 `1829.8ms` 降到 `812.3ms`（`-55.6%`），p95 post-visible blocking 从 `1193.7ms` 降到 `8.7ms`（`-99.3%`），主要准备工作被移到点击前。"
     - "Scheduling route FMP 从 `14773ms` 到 `11926ms`，降低 `2847ms / 19.3%`：route chunks 从 `6785ms-15464ms` 才被发现改成 route-aware preload。"
@@ -34,7 +35,7 @@ Tab system 引入后，工作台不再只有一个前台页面。用户可以同
 | --- | --- | --- |
 | First Load / FMP | 用户第一次进入工作台或子应用时，只想看到当前页面，但网络和主线程可能在为未来路径、非当前子应用或低优 SDK 付费 | route FMP、关键资源瀑布、首屏 API。只有 blocker 前移、消失或缩短，并且最终 FMP 变好，才算收益 |
 | Hot Tab Switch | 用户点了已打开的 tab，页面可能已经显示，但还不能点击，或者可见后被 long task 卡住 | tab switch v3、post-visible blocking、long task。只看 shell visible 不算完成 |
-| Background Pressure | hidden tab、prewarm、SDK、WebSocket、埋点和监控任务可能在用户切换时抢前台主线程 | long task、frame gap、foreground lease、C02 stress gate。后台任务必须服从前台 tab |
+| Background Pressure | hidden tab、prewarm、SDK、WebSocket、埋点和监控任务可能在用户切换时抢前台主线程 | long task、frame gap、foreground lease、本地压测 gate。后台任务必须服从前台 tab |
 
 业务目标和技术目标分开看：
 
@@ -77,15 +78,15 @@ Tab system 引入后，工作台不再只有一个前台页面。用户可以同
 | Scheduling | route chunks 发现太晚，覆盖最终 FMP 窗口 | route FMP `14773ms` | `11926ms` | `-2847ms / -19.3%` | strict preview waterfall；route chunks 从晚发现改成 route-aware preload |
 | Official Forecast | route-critical CSS 到最后才被发现 | route FMP `14271ms` | `11612ms` | `-2659ms / -18.6%` | strict preview waterfall；CSS 从约 13.8s 提前到约 1.9s |
 | Workspace FMP cleanup | host uploader 在所有主路径首屏前启动 | pre-FMP count `7/7 routes` | `0/7 routes` | 主跑 6/7 路径改善，平均约 `-1037ms` | strict FMP loop；作为 cleanup pattern 说明 |
-| Seto entry fanout | 非当前 Seto entry 抢当前 route 的首屏资源 | affected routes `5` | `0` | 平均约 `-366ms` vs previous accepted run | strict FMP loop；非当前 Seto entry 后移 |
+| 沙箱 entry fanout | 非当前沙箱 entry 抢当前 route 的首屏资源 | affected routes `5` | `0` | 平均约 `-366ms` vs previous accepted run | strict FMP loop；非当前沙箱 entry 后移 |
 | Cold tab switch | 用户点击后才加载 runtime 和恢复视图 | p95 duration `1829.8ms` | `812.3ms` | `-55.6%` | strict tab-switch probe；idle prewarm |
 | Cold tab switch | frame 已经 visible，但用户仍被阻塞 | p95 post-visible blocking `1193.7ms` | `8.7ms` | `-99.3%` | strict tab-switch probe；blocking 从点击后移到点击前 |
 | Spike control | hidden prewarm 和后台 SDK 抢前台主线程 | A1 p95 duration `1700.1ms` | `703.1ms` | `-58.6%` | strict tab-switch probe；切换中暂停 hidden prewarm |
-| Background pressure | 后台 SDK 未来可能制造新的切换卡顿 | max long task present risk | max post-visible long task = 0 | guardrail, not preview-environment main win | local C02 stress gate；Notification/WebSocket/Tea/Slardar 进入 scheduler |
+| Background pressure | 后台 SDK 未来可能制造新的切换卡顿 | max long task present risk | max post-visible long task = 0 | guardrail, not preview-environment main win | 本地压测 gate；Notification/WebSocket/埋点/监控 进入 scheduler |
 
 注意两点：
 
-1. 严格 preview FMP、strict tab-switch、本地 C02 gate 不混在一起算总收益。
+1. 严格 preview FMP、strict tab-switch、本地压测 gate 不混在一起算总收益。
 1. “移动了资源”不自动等于收益。只有用户指标变好，并且图里能解释原因，才算保留。
 
 ## 测量口径
@@ -93,7 +94,7 @@ Tab system 引入后，工作台不再只有一个前台页面。用户可以同
 FMP 严格对比使用同一套环境：
 
 - authenticated preview environment；
-- target preview-lane headers；
+- target preview-environment headers；
 - browser cache disabled；
 - CPU 4x throttle；
 - 4G network throttle；
@@ -119,11 +120,11 @@ Tab switch 使用 v3 指标，不再只看“点击后 frame 显示用了多久�
 
 | Harness | 怎么跑 | 采集什么 | 接受或拒绝什么 |
 | --- | --- | --- | --- |
-| Strict preview FMP profiler | 登录态 CDP Chrome；target preview route；target preview-lane headers；禁用缓存；CPU 4x；4G；每次从 clean root-tab 开始；30s capture | route FMP、subapp load-start、关键资源瀑布、pre-FMP resource count | 只有同一路由、同一 marker 的 previous/current delta 变好，并且瀑布能解释 blocker 前移、消失或缩短，才算 FMP 收益；资源变“干净”但 FMP 变差就拒绝 |
-| Strict tab-switch probe | CDP 驱动真实 tab 激活；样本覆盖 Workstream native、Workstream 内 Seto/Supervisor、其它已打开 tab；v3 从真实 input timestamp 开始，等到 visible 后稳定帧/quiet window | `inputDelayMs`、`shellVisibleMs`、`interactiveReadyMs`、`postVisibleBlockingMs`、`postVisibleJankMs`、frame gap、long task | 只看 frame visible 不算热切换收益。p95/max、可见后阻塞和 worst sample 都改善，才接受；单次漂亮样本不够，需要重复 strict profile |
+| Strict preview FMP profiler | 登录态 CDP Chrome；target preview route；target preview-environment headers；禁用缓存；CPU 4x；4G；每次从 clean root-tab 开始；30s capture | route FMP、subapp load-start、关键资源瀑布、pre-FMP resource count | 只有同一路由、同一 marker 的 previous/current delta 变好，并且瀑布能解释 blocker 前移、消失或缩短，才算 FMP 收益；资源变“干净”但 FMP 变差就拒绝 |
+| Strict tab-switch probe | CDP 驱动真实 tab 激活；样本覆盖 Workstream native、Workstream 内沙箱/Supervisor、其它已打开 tab；v3 从真实 input timestamp 开始，等到 visible 后稳定帧/quiet window | `inputDelayMs`、`shellVisibleMs`、`interactiveReadyMs`、`postVisibleBlockingMs`、`postVisibleJankMs`、frame gap、long task | 只看 frame visible 不算热切换收益。p95/max、可见后阻塞和 worst sample 都改善，才接受；单次漂亮样本不够，需要重复 strict profile |
 | Local stress gate | workspace tab-switch stress spec；mocked backend + 真实浏览器；20 个打开 tab、5 个 hot workstream cache、overlay containment、后台 SDK/预热任务同时存在 | hot switch summary、post-visible blocking、long task、warm-pool count、cache miss、overlay hit-test | 这是防回归 gate，不当作 preview 主收益。它要求没有新的 post-visible long task，warm-pool 上限仍成立，hidden tab 和 overlay 不抢前台交互 |
 
-E2E 用例保护的是“优化没有破坏 tab system 的正确性”。mock-off 集成用例通过 preview-lane routing 连接真实后端，不把 mock 数据误当成 preview 结果。
+E2E 用例保护的是“优化没有破坏 tab system 的正确性”。mock-off 集成用例通过 preview-environment routing 连接真实后端，不把 mock 数据误当成 preview 结果。
 
 | 用例 | 验证的问题 | 它防住的性能回归 |
 | --- | --- | --- |
@@ -142,11 +143,11 @@ E2E 用例保护的是“优化没有破坏 tab system 的正确性”。mock-of
 
 | 类别 | 问题 | blocker / 原因 | 方案 | 证据 / 收益 | 防误判 |
 | --- | --- | --- | --- | --- | --- |
-| Measurement contract | 旧 tab switch duration 看起来很快，但用户仍可能看见后点不动；FMP 实验如果只看资源数量，也会把伪收益当收益 | shell visible 和 interactive 混在一起；本地 gate、preview FMP、strict switch 口径不同 | FMP 看最终首屏 marker；tab switch v3 看 input、visible、interactive、post-visible blocking；C02 只做防回归 | 后续优化都能定位到 blocker 前移/消失/缩短，或 post-visible blocking 降低 | measurement repair 本身不算性能收益 |
-| Critical-path reduction | 当前页面还没首屏，网络和主线程却在服务未来路径 | Workstream list、host uploader、AIS、非当前 Seto entry fanout 进入 pre-FMP | 当前 route 首屏前只保留必要工作；其它 SDK 和非当前 runtime 到 first-screen ready 后再调度 | `/workspace/api/workstream/list` 在 6/7 root-subapp 路径从 pre-FMP 移出；host uploader `7/7 -> 0/7`；Seto fanout affected routes `5 -> 0` | 只延后不属于当前首屏的工作；资源移走但 FMP 变差就回滚 |
+| Measurement contract | 旧 tab switch duration 看起来很快，但用户仍可能看见后点不动；FMP 实验如果只看资源数量，也会把伪收益当收益 | shell visible 和 interactive 混在一起；本地 gate、preview FMP、strict switch 口径不同 | FMP 看最终首屏 marker；tab switch v3 看 input、visible、interactive、post-visible blocking；本地压测 gate 只做防回归 | 后续优化都能定位到 blocker 前移/消失/缩短，或 post-visible blocking 降低 | measurement repair 本身不算性能收益 |
+| Critical-path reduction | 当前页面还没首屏，网络和主线程却在服务未来路径 | Workstream list、host uploader、AIS、非当前沙箱 entry fanout 进入 pre-FMP | 当前 route 首屏前只保留必要工作；其它 SDK 和非当前 runtime 到 first-screen ready 后再调度 | `/workspace/api/workstream/list` 在 6/7 root-subapp 路径从 pre-FMP 移出；host uploader `7/7 -> 0/7`；沙箱 fanout affected routes `5 -> 0` | 只延后不属于当前首屏的工作；资源移走但 FMP 变差就回滚 |
 | Route-critical early start | 真正挡首屏的 route 资源太晚被发现 | Scheduling chunks 在 `6785ms-15464ms` 才出现；Official Forecast CSS 到 `13789ms-14988ms` 才出现 | 对 route-critical 资源做定向提前发现：Scheduling route chunks、Official Forecast CSS | Scheduling FMP `14773ms -> 11926ms`；Official Forecast FMP `14271ms -> 11612ms` | 不是 preload 越多越好，只提前证明挡首屏的资源 |
-| Runtime cache | 用户切回 tab 后希望马上可操作，但不能无限保活所有 runtime | 冷切换时点击后才加载 runtime、恢复视图、等待 iframe/subapp ready | opened tabs、hot runtime、view cache 分层；WarmPool 保最近工作集；IdlePrewarm 在首屏后准备可能切回的 runtime | cold switch p95 `1829.8ms -> 812.3ms`；post-visible blocking `1193.7ms -> 8.7ms` | hot 不是 opened；Seto sandbox 更重，预热要更谨慎 |
-| Main-thread scheduling | 用户切换时，hidden prewarm 或 SDK 初始化抢前台主线程 | async import 检查时安全，bundle 下载完后前台可能已经在切换 | foreground-aware scheduler；import 前、import 后、init 前、render/open 前都 re-check | A1 p95 `1700.1ms -> 703.1ms`；C02 gate max post-visible long task = 0 | Notification/WebSocket/Tea/Slardar 作为 guardrail，不夸成 preview FMP 主收益 |
+| Runtime cache | 用户切回 tab 后希望马上可操作，但不能无限保活所有 runtime | 冷切换时点击后才加载 runtime、恢复视图、等待 iframe/subapp ready | opened tabs、hot runtime、view cache 分层；WarmPool 保最近工作集；IdlePrewarm 在首屏后准备可能切回的 runtime | cold switch p95 `1829.8ms -> 812.3ms`；post-visible blocking `1193.7ms -> 8.7ms` | hot 不是 opened；iframe 沙箱更重，预热要更谨慎 |
+| Main-thread scheduling | 用户切换时，hidden prewarm 或 SDK 初始化抢前台主线程 | async import 检查时安全，bundle 下载完后前台可能已经在切换 | foreground-aware scheduler；import 前、import 后、init 前、render/open 前都 re-check | A1 p95 `1700.1ms -> 703.1ms`；本地压测 gate max post-visible long task = 0 | Notification/WebSocket/埋点/监控 作为 guardrail，不夸成 preview FMP 主收益 |
 | Reject false wins | 瀑布更干净或 frame 更快 visible，不代表用户更快 | 资源数量、shell visible、局部 memo 都可能制造漂亮但错误的数字 | 把资源移动当 hypothesis；strict profile 变差就回滚 | Swimlane chunk 平均 FMP `+1217ms` 回滚；all-hot strict p95 到 `1792.0ms` 且有 `517ms` post-visible long task | 用户指标优先，causality 其次，资源形态只作为解释 |
 
 ## 第一类：First Load / FMP
@@ -157,13 +158,13 @@ E2E 用例保护的是“优化没有破坏 tab system 的正确性”。mock-of
 
 ![critical path cleanup](/img/workspace-v2-tab-system-performance/critical-path-cleanup.png)
 
-图 P2：Critical-path cleanup waterfall。它是基于严格 FMP loop 的模式图，用来解释 cleanup pattern：host uploader 从 7/7 pre-FMP 路径移到 0/7，非当前 Seto entry fanout 在受影响路径从 5 移到 0。图里的 example route 不是单一路由精确 trace，精确 route delta 见后面的 Scheduling 和 Official Forecast。
+图 P2：Critical-path cleanup waterfall。它是基于严格 FMP loop 的模式图，用来解释 cleanup pattern：host uploader 从 7/7 pre-FMP 路径移到 0/7，非当前沙箱 entry fanout 在受影响路径从 5 移到 0。图里的 example route 不是单一路由精确 trace，精确 route delta 见后面的 Scheduling 和 Official Forecast。
 
 | 改动 | 首屏前的 blocker | 变化 | 收益口径 |
 | --- | --- | --- | --- |
 | 移除 pre-FMP `/workspace/api/workstream/list` 刷新 | root-subapp 首屏不需要 Workstream list，却在进入瀑布 | 6/7 root-subapp 路径 pre-FMP count 降到 0 | 主跑 4/7 路径改善，平均约 `-1051ms` |
 | 延后 AIS / uploader | host-owned `lib-uploader` 在 7/7 路径 pre-FMP | `7/7 -> 0/7` | 7 条主路径中 6 条改善，平均约 `-1037ms` |
-| 延后非当前 Seto entry fanout | app `10218` manifest 和 `static/js/entry.*` 抢当前 route | affected routes `5 -> 0` | 平均约 `-366ms` vs previous accepted run |
+| 延后非当前沙箱 entry fanout | 沙箱 app manifest 和 `static/js/entry.*` 抢当前 route | affected routes `5 -> 0` | 平均约 `-366ms` vs previous accepted run |
 
 实现思路：
 ```typescript
@@ -172,7 +173,7 @@ E2E 用例保护的是“优化没有破坏 tab system 的正确性”。mock-of
 afterFirstScreenReady(() => {
   scheduleLowPrioritySdkInit();
   scheduleUploaderInit();
-  scheduleNonCurrentSetoPreload();
+  scheduleNonCurrentSandboxPreload();
 });
 
 ```
@@ -209,7 +210,7 @@ if (currentRouteMatches('/scheduling/schedule')) {
 
 - route chunks 和首屏 data 不是必须串行；
 - 提前启动 route chunks 后，它可以和 shell/data 并行；
-- FMP 剩余时间主要是 Seto runtime、数据和渲染，不再是“浏览器晚发现代码”。
+- FMP 剩余时间主要是沙箱 runtime、数据和渲染，不再是“浏览器晚发现代码”。
 
 ### 3. Official Forecast：CSS 是 route-critical，不能等到最后
 
@@ -265,10 +266,10 @@ if (currentRouteMatches('/scheduling/official_forecast')) {
 实现策略：
 ```typescript
 // 挂载在首屏 ready 之后。
-// native runtime 较轻，可以更早排队；Seto sandbox 更重，需要更谨慎。
+// native runtime 较轻，可以更早排队；iframe 沙箱更重，需要更谨慎。
 afterFirstScreenReady(() => {
   queuePrewarm(nativeTabs, { delay: 1000 });
-  queuePrewarm(setoTabs, { delay: 3000, primeLifecycle: true });
+  queuePrewarm(sandboxTabs, { delay: 3000, primeLifecycle: true });
 });
 
 ```
@@ -281,7 +282,7 @@ afterFirstScreenReady(() => {
 
 ### 2. Runtime-aware prewarm
 
-这里的取舍是：所有 runtime 立刻预热最简单，但 Seto sandbox 更重，容易把后台优化变成前台压力。最终策略是 native 更早，Seto 更谨慎。
+这里的取舍是：所有 runtime 立刻预热最简单，但 iframe 沙箱更重，容易把后台优化变成前台压力。最终策略是 native 更早，沙箱更谨慎。
 
 | 场景 | p95 duration | visibleToReady | postVisibleBlocking |
 | --- | --- | --- | --- |
@@ -293,7 +294,7 @@ afterFirstScreenReady(() => {
 
 ### 3. 暂停 hidden prewarm，消掉前台 spike
 
-问题是：用户切到 Supervisor 时，hidden/background Audit Workbench、xlsx、Slardar 等任务同时抢主线程。方案是给前台 tab 一个 lease：只要前台正在切换或还没稳定，后台任务必须让路。
+问题是：用户切到 Supervisor 时，hidden/background Audit Workbench、xlsx、监控等任务同时抢主线程。方案是给前台 tab 一个 lease：只要前台正在切换或还没稳定，后台任务必须让路。
 ```typescript
 // 所有 hidden prewarm 和后台 SDK 任务执行前都要检查。
 // async import 之后也要重查，因为下载期间前台状态可能已经变了。
@@ -317,7 +318,7 @@ function shouldRunBackgroundTask(tabId) {
 
 ## 第三类：Background Pressure
 
-问题是：hidden tab 仍然可能活着，Notification、WebSocket、Tea、Slardar、visit、storage health、AIS 这些任务如果按普通单页应用的方式启动，会在用户切换时制造新的 long task。方案是统一进入 foreground-aware scheduler。
+问题是：hidden tab 仍然可能活着，Notification、WebSocket、埋点、监控、visit、storage health、AIS 这些任务如果按普通单页应用的方式启动，会在用户切换时制造新的 long task。方案是统一进入 foreground-aware scheduler。
 ```typescript
 // 后台任务不能直接执行，必须先进入统一仲裁。
 function scheduleWorkspaceBackgroundTask(task, options) {
@@ -350,11 +351,11 @@ async function safeLoadSdk() {
 
 | 后台任务 | 改动 | 证据口径 |
 | --- | --- | --- |
-| MF preload | `getEntries` 前后都 re-check foreground 状态 | 本地 C02：p95 visual 约 `31.2ms`，postVisibleBlocking 约 `7.8ms`，max long task = 0 |
-| Notification SDK | `lib-kefu-notify` 约 `657.2KB gzip`，import/open/render 前后都 re-check | 本地 C02：postVisibleBlocking 约 `7.1ms`，max long task = 0 |
-| WebSocket | import、init、register 前后进入 scheduler | 本地 C02：visual `42.1ms -> 36.6ms`，约 `-13.1%` |
-| Tea | flush queue 分批、让出前台 | 本地 C02：visual `31.5ms -> 29.5ms`，约 `-6.3%` |
-| Slardar / visit / storage health / AIS | 首屏后、idle、foreground-aware | guardrail；不宣称 preview 主收益 |
+| MF preload | `getEntries` 前后都 re-check foreground 状态 | 本地压测 gate：p95 visual 约 `31.2ms`，postVisibleBlocking 约 `7.8ms`，max long task = 0 |
+| Notification SDK | Notification bundle 约 `657.2KB gzip`，import/open/render 前后都 re-check | 本地压测 gate：postVisibleBlocking 约 `7.1ms`，max long task = 0 |
+| WebSocket | import、init、register 前后进入 scheduler | 本地压测 gate：visual `42.1ms -> 36.6ms`，约 `-13.1%` |
+| 埋点 | flush queue 分批、让出前台 | 本地压测 gate：visual `31.5ms -> 29.5ms`，约 `-6.3%` |
+| 监控 / visit / storage health / AIS | 首屏后、idle、foreground-aware | guardrail；不宣称 preview 主收益 |
 
 这些改动的价值是防止未来某个 SDK 变成新的 tab-switch 卡顿源。它们是系统稳定性的底座，不应该被夸成 FMP 主收益。
 
@@ -364,7 +365,7 @@ async function safeLoadSdk() {
 | --- | --- | --- |
 | Swimlane chunk 移出 pre-FMP | 瀑布更干净，pre-FMP count 下降 | 平均 FMP `+1217ms`，用户指标变差，回滚 |
 | 全量 optimistic focus / all-hot 激活 | 理论上 frame 更快 visible | strict p95 到 `1792.0ms`，出现 `517ms` post-visible long task，回滚 |
-| 广泛 Seto prewarm / hidden layout-visible | 希望提前完成 sandbox 工作 | 容易抢前台 CPU，收益不稳定，未作为主方案 |
+| 广泛沙箱 prewarm / hidden layout-visible | 希望提前完成 sandbox 工作 | 容易抢前台 CPU，收益不稳定，未作为主方案 |
 | 小组件 memo / 局部缓存实验 | 看起来能减少 render | 本地 p95 变差或没有严格收益，不保留 |
 | 只看旧 tab switch duration | 数字能到几十毫秒 | 漏掉 input queue 和 post-visible blocking，指标本身不可信 |
 
@@ -374,7 +375,7 @@ async function safeLoadSdk() {
 1. **再定资源归属。** 当前首屏需要的资源前移；不属于当前首屏的资源延后；未来可能需要的资源只能 idle prewarm。
 1. **画因果图再写结论。** 图里必须能看到 blocker 前移、消失、缩短或移到 FMP 后。
 1. **接受失败。** 资源移动但 FMP 变差，就回滚。
-1. **本地 gate 和 preview 收益分开写。** 本地 C02 是防回归，不是线上收益。
+1. **本地 gate 和 preview 收益分开写。** 本地压测 gate 是防回归，不是线上收益。
 
 最后真正起作用的不是某个单点技巧，而是三条比较朴素的规则：
 

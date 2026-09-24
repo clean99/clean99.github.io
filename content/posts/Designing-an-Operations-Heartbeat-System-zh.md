@@ -3,7 +3,7 @@ title: "运营管理心跳系统设计"
 date: 2026-06-19 12:00:00
 tags: [Software Engineering, reliability, fault-tolerance]
 area: engineering
-summary: "从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/IES 拆分，一步步推导运营管理心跳系统的设计。"
+summary: "从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/主业务线拆分，一步步推导运营管理心跳系统的设计。"
 featured: true
 audience: [public, interviewers]
 lang: zh
@@ -14,9 +14,9 @@ case_study:
   stack: [Redis, MQ, DBus, binlog, Elasticsearch, WebSocket, RPC]
   impact:
     - "我维护的 HCM/Heartbeat 链路服务 47,149 个 agent、7,000 个 skill group、约 4,000 QPS 和 141 个上游调用方。"
-    - "TT/IES 拆分后，旧 HCM 侧减少约 3,000 个 agent 和约 2,000 QPS，TT 的心跳、状态提交和路由在 TT 内闭环。"
-    - "US-TTP 一次事故里，binlog 到 HCM MQ 链路堆积约 300k 条消息，依赖 ES 的 handler 阻塞了共享消费；事后补了 handler 维度耗时指标，并把 binlog 直接发 RMQ 的工作状态链路列入改造。"
-    - "GCP -> NO1A 切流后，keyup/keydown 事件没有稳定进入 Heartbeat，正常工作的 agent 被判成 abnormal；之后在状态计算前加了输入健康指标和自动规则降级。"
+    - "TT 与主业务线拆分后，旧 HCM 侧减少约 3,000 个 agent 和约 2,000 QPS，TT 的心跳、状态提交和路由在 TT 内闭环。"
+    - "美区一次事故里，binlog 到 HCM MQ 链路堆积约 300k 条消息，依赖 ES 的 handler 阻塞了共享消费；事后补了 handler 维度耗时指标，并把 binlog 直接发 RMQ 的工作状态链路列入改造。"
+    - "一次跨 region 切流后，keyup/keydown 事件没有稳定进入 Heartbeat，正常工作的 agent 被判成 abnormal；之后在状态计算前加了输入健康指标和自动规则降级。"
   links: []
 permalink: zh/2026/06/19/Designing-an-Operations-Heartbeat-System/
 ---
@@ -282,7 +282,7 @@ HCM 消费异常候选后，会重新读取当前状态，然后做二次判断�
 }
 ```
 
-这段配置同时影响状态变更和通知。Compute 的 TCC、Redis 队列和 HCM 规则共同约束最终行为。
+这段配置同时影响状态变更和通知。Compute 的动态配置、Redis 队列和 HCM 规则共同约束最终行为。
 
 这套设计里，HCM 的职责很清楚：
 
@@ -328,7 +328,7 @@ HCM UpdateWorkStatus
 
 我们踩过这个坑。
 
-一次 US-TTP 事故里，WFM 的 Omni-channel view 没有反映实时状态。排查时 HCM DB 里的 agent 已经 offline，HCM 到 WFM 的消息看起来也发成功了。
+一次美区事故里，WFM 的 Omni-channel view 没有反映实时状态。排查时 HCM DB 里的 agent 已经 offline，HCM 到 WFM 的消息看起来也发成功了。
 
 最后问题出在更前面：binlog 到 HCM MQ 链路堆了约 300k 条消息。work status handler 没有变慢，另一个依赖 ES 的 handler 超时了。多个 handler 共用一条消费链路，慢 handler 把其他状态传播一起拖住了。
 
@@ -440,9 +440,9 @@ HCM 是最后一道保护。
 | HCM 二次校验 | 重复或过期候选不能写出旧状态 | 防御式写校验 |
 | 流量 / mirror / emit 三套开关 | 请求、事件复制、写权限切换节奏不同 | 正交控制面 |
 
-## 问题 9：TT 和 IES 拆分时，怎么不打断老链路？
+## 问题 9：TT 和主业务线拆分时，怎么不打断老链路？
 
-HCM/Heartbeat 后来同时服务 IES 和 TT 侧业务。两边共用 HCM、Heartbeat、DB、MQ 和 routing 更新链路时，发布、容量和容灾都会绑在一起。
+HCM/Heartbeat 后来同时服务主业务线（下文图和代码里记作 Main）和 TT 侧业务。两边共用 HCM、Heartbeat、DB、MQ 和 routing 更新链路时，发布、容量和容灾都会绑在一起。
 
 TT 内容侧要拆出去，最简单的做法是新建 TT HCM、TT Heartbeat、TT DB 和 TT MQ，然后让上游一次性切走。
 
@@ -450,17 +450,17 @@ TT 内容侧要拆出去，最简单的做法是新建 TT HCM、TT Heartbeat、T
 
 所以第一阶段先做共存。
 
-![版本 7：TT 拆分先进入共存阶段](/img/hcm-heartbeat-design/v7-tt-ies-coexistence.png)
+![版本 7：TT 拆分先进入共存阶段](/img/hcm-heartbeat-design/v7-split-coexistence.png)
 
-图 8：TT upstream 先迁到 TT HCM，写入事实仍由 IES HCM 承担。图片由 gpt-image-2 生成。dsyncer 和转发逻辑保留回滚空间。
+图 8：TT upstream 先迁到 TT HCM，写入事实仍由主业务线 HCM（Main HCM）承担。图片由 gpt-image-2 生成。dsyncer 和转发逻辑保留回滚空间。
 
 第一阶段的链路是：
 
 ```text
 TT upstream
 -> TT HCM
--> forward RPC to IES HCM
--> IES DB
+-> forward RPC to Main HCM
+-> Main DB
 -> dsyncer
 -> TT DB
 ```
@@ -474,21 +474,21 @@ agent_id
 -> agent_skill_group_rel
 -> skill_group
 -> access_party
--> TT or IES
+-> TT or Main
 ```
 
 判断结果写 Redis cache。cache miss 时查 DB，拿到 access party 后再写回。工作状态、agent-skillgroup 关系和 routing 更新都可以按这个结果过滤。
 
-这层改造带来的好处是可回滚。TT HCM 出问题，可以继续走 IES 原链路。filter 出问题，也可以通过配置关掉转发，先保住旧路径。
+这层改造带来的好处是可回滚。TT HCM 出问题，可以继续走主业务线原链路。filter 出问题，也可以通过配置关掉转发，先保住旧路径。
 
 版本 7 是迁移桥：
 
 | 节点 / 改动 | 解决的问题 | 软件工程概念 |
 | --- | --- | --- |
 | TT HCM 入口 | 上游可以先迁入口，不必一次切完写链路 | 绞杀者模式 |
-| 转发 RPC 到 IES HCM | 第一阶段仍由旧事实源写状态 | 兼容适配器 |
+| 转发 RPC 到主业务线 HCM | 第一阶段仍由旧事实源写状态 | 兼容适配器 |
 | dsyncer | TT 侧先建立本地读模型，写入仍留在旧路径 | 数据复制 |
-| ownership filter | TT 和 IES 数据要按 agent 归属拆开 | 按领域归属路由 |
+| ownership filter | TT 和主业务线数据要按 agent 归属拆开 | 按领域归属路由 |
 | Redis ownership cache | 归属判断是高频读 | read-through cache |
 | 配置开关 | 迁移出问题要能不发版回滚 | feature flag / 回滚杠杆 |
 
@@ -498,17 +498,17 @@ agent_id
 
 第二阶段要把写入、事件、MQ 和 routing 更新都拆开：
 
-![版本 8：迁移后隔离 TT 和 IES](/img/hcm-heartbeat-design/v8-tt-ies-isolation.png)
+![版本 8：迁移后隔离两侧](/img/hcm-heartbeat-design/v8-split-isolation.png)
 
-图 9：拆分完成后，TT 和 IES 各自拥有 upstream、HCM、DB、MQ 和 routing 更新链路。图片由 gpt-image-2 生成。
+图 9：拆分完成后，TT 和主业务线各自拥有 upstream、HCM、DB、MQ 和 routing 更新链路。图片由 gpt-image-2 生成。
 
 拆分动作包括：
 
-1. TT HCM 停止把 RPC 转发到 IES HCM。
-2. IES 到 TT 的 dsyncer 停止。
-3. IES heartbeat/MQ 停止消费 TT agent 消息。
+1. TT HCM 停止把 RPC 转发到主业务线 HCM。
+2. 主业务线到 TT 的 dsyncer 停止。
+3. 主业务线 heartbeat/MQ 停止消费 TT agent 消息。
 4. TT routing 只消费 TT 侧状态更新。
-5. IES routing 只消费 IES 侧状态更新。
+5. 主业务线 routing 只消费本侧状态更新。
 
 拆完后，旧 HCM 侧减少约 3,000 个 agent 和约 2,000 QPS。
 
@@ -517,17 +517,17 @@ agent_id
 - TT agent 的心跳只进入 TT 侧。
 - TT agent 的状态只由 TT HCM 提交。
 - TT 状态变化只进 TT routing/WFM/data 链路。
-- IES 侧保留原有路径，不被 TT 发布和切流影响。
+- 主业务线保留原有路径，不被 TT 发布和切流影响。
 
-这时 TT/IES 拆分才算完成。
+这时 TT 与主业务线的拆分才算完成。
 
 版本 8 是把迁移桥拆掉：
 
 | 节点 / 改动 | 解决的问题 | 软件工程概念 |
 | --- | --- | --- |
-| 停止转发 | TT 写入不再依赖 IES 可用性 | 服务归属 |
+| 停止转发 | TT 写入不再依赖主业务线可用性 | 服务归属 |
 | 停止 dsyncer | 临时同步链路不能永久留在系统里 | 迁移产物下线 |
-| TT / IES 独立 MQ | 事件要留在自己的业务边界内 | bounded context |
+| TT / 主业务线独立 MQ | 事件要留在自己的业务边界内 | bounded context |
 | 独立 routing 消费者 | 路由更新不能跨 ownership 边界 | 消费者归属 |
 | 闭合性校验 | 拆分完成要证明事实和副作用都在本侧闭合 | 不变量验证 |
 
@@ -535,7 +535,7 @@ agent_id
 
 状态计算依赖输入事件。后端 RPC 全绿，只能说明后端还活着，说明不了用户动作真的进了 Heartbeat。
 
-GCP -> NO1A 切流后，出现过 agent 频繁 abnormal。人还在工作台操作，系统却判断他长时间没动作。最后查到的问题在工作台长链路配置：`keyup` / `keydown` 事件没有稳定进入 Heartbeat。
+一次跨 region 切流后，出现过 agent 频繁 abnormal。人还在工作台操作，系统却判断他长时间没动作。最后查到的问题在工作台长链路配置：`keyup` / `keydown` 事件没有稳定进入 Heartbeat。
 
 HCM 错误率覆盖不到这段输入链路。状态计算前面要加一层输入健康检查。
 
@@ -574,7 +574,7 @@ HCM 错误率覆盖不到这段输入链路。状态计算前面要加一层输�
 
 ## 问题 12：HCM 已经写状态，下游还是旧状态怎么办？
 
-状态提交成功以后，下游还要拿到同一个事实。这里出过一个很典型的事故：US-TTP ES down 时，WFM 的 Omni-channel view 没有反映实时状态。
+状态提交成功以后，下游还要拿到同一个事实。这里出过一个很典型的事故：美区 ES down 时，WFM 的 Omni-channel view 没有反映实时状态。
 
 排查时，HCM DB 里的 agent 已经 offline，HCM 到 WFM 的消息看起来也发成功了。最后发现 binlog 到 HCM MQ 堆了约 300k 条消息。work status handler 本身没慢，另一个依赖 ES 的 handler 超时了。多个 handler 共用一条消费链路，慢 handler 把工作状态传播拖住了。
 
@@ -762,7 +762,7 @@ Agent UI
 - Outbox 和 handler 隔离保护工作状态传播。
 - quota、cache、bulkhead 和 circuit breaker 保护热读接口。
 - query gate 控制复杂查询发布。
-- TT/IES ownership 控制 agent、skill group、MQ 和 routing 更新归属。
+- TT/主业务线 ownership 控制 agent、skill group、MQ 和 routing 更新归属。
 
 这个设计看起来比第一版复杂很多。每一层都是被上一个问题推出来的：
 
@@ -776,10 +776,10 @@ Agent UI
 | V5 | 跨 region 切流时事件怎么不断 | MQ mirror |
 | V6 | mirror 之后重复事件怎么处理 | `active_idc` + dedupe + HCM recheck |
 | V7 | TT 拆分怎么保留回滚路径 | TT HCM 转发 + ownership filter + dsyncer |
-| V8 | 怎么把 TT/IES 真正拆开 | 独立 HCM/DB/MQ/routing 链路 |
+| V8 | 怎么把 TT 和主业务线真正拆开 | 独立 HCM/DB/MQ/routing 链路 |
 | V9 | 前端动作没进来怎么发现 | input health + synthetic action |
 | V10 | 下游状态被慢 handler 拖住怎么办 | handler isolation + outbox + DLQ |
 | V11 | 热读接口把 HCM 打爆怎么办 | quota + cache + bulkhead + load shedding |
 | V12 | 查询改动怎么安全上线 | feature flag + shadow query + auto rollback |
 
-最开始的问题只是“这个人还在不在线”。最后系统回答的是一组更具体的问题：这个 agent 最近有没有动作，输入事件链路是否健康，当前有没有任务，属于哪个 skill group，规则是否覆盖他，哪个 region 可以发异常，状态能不能提交，下游是否拿到了同一个事实，热读接口是否在预算内，查询发布是否能回滚，TT 和 IES 的 ownership 是否已经分开。
+最开始的问题只是“这个人还在不在线”。最后系统回答的是一组更具体的问题：这个 agent 最近有没有动作，输入事件链路是否健康，当前有没有任务，属于哪个 skill group，规则是否覆盖他，哪个 region 可以发异常，状态能不能提交，下游是否拿到了同一个事实，热读接口是否在预算内，查询发布是否能回滚，TT 和主业务线的 ownership 是否已经分开。

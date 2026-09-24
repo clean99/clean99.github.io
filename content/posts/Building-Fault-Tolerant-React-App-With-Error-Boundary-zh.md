@@ -117,4 +117,4 @@ export default withErrorBoundary<ComponentAProps>(ComponentA);
 功能特性：
 
 1. 错误处理与降级展示：捕获错误并向用户展示降级内容（可自定义），而不影响其他模块。
-2. 错误上报：将带有组件名称和错误信息的日志上报到 slardar，以便调试。
+2. 错误上报：将带有组件名称和错误信息的日志上报到监控平台，以便调试。

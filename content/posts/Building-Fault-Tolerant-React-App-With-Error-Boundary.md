@@ -119,4 +119,4 @@ export default withErrorBoundary<ComponentAProps>(ComponentA);
 Features:
 
 1. Handling Error & Fallback: Catch error and display a fallback(can customize) to user without affecting other modules.
-2. Report error: log to slardar with component name and error message for debugging.
+2. Report error: log to the monitoring service with component name and error message for debugging.
