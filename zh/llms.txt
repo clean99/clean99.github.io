@@ -1,6 +1,6 @@
-# 许峰 Koh Hom — 工程师现场笔记
+# 许峰 Koh Hom — 前端工程笔记
 
-> 许峰（Koh Hom）的工程现场笔记：浏览器级标签页系统、Web 性能、测试与 AI Agent 的项目复盘和长文。
+> 许峰（Koh Hom）的前端工程笔记：浏览器级标签页系统、Web 性能、测试和 AI Agent 的项目复盘与文章。
 
 ## 项目复盘
 
@@ -42,6 +42,6 @@
 
 ## 关于
 
-- [Koh Hom](https://clean99.github.io/zh/about/): Software Engineer. 许峰（Koh Hom）的工程现场笔记：浏览器级标签页系统、Web 性能、测试与 AI Agent 的项目复盘和长文。
+- [Koh Hom](https://clean99.github.io/zh/about/): Software Engineer. 许峰（Koh Hom）的前端工程笔记：浏览器级标签页系统、Web 性能、测试和 AI Agent 的项目复盘与文章。
 - [全部文章](https://clean99.github.io/zh/writing/): 全部笔记，按时间倒序。
-- [Full archive (all posts, both languages)](https://clean99.github.io/llms-full.txt): 同一份索引，附全部已发布文章的 Markdown 全文。
+- [Full archive (all posts, both languages)](https://clean99.github.io/llms-full.txt): 本索引的完整版，附上全部已发布文章的 Markdown 全文。

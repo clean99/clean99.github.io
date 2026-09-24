@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="zh-CN">
-  <title>许峰 Koh Hom — 工程师现场笔记</title>
-  <subtitle>许峰（Koh Hom）的工程现场笔记：浏览器级标签页系统、Web 性能、测试与 AI Agent 的项目复盘和长文。</subtitle>
+  <title>许峰 Koh Hom — 前端工程笔记</title>
+  <subtitle>许峰（Koh Hom）的前端工程笔记：浏览器级标签页系统、Web 性能、测试和 AI Agent 的项目复盘与文章。</subtitle>
   <id>https://clean99.github.io/zh/atom.xml</id>
   <updated>2026-07-02T09:30:00.000Z</updated>
   <link rel="self" type="application/atom+xml" href="https://clean99.github.io/zh/atom.xml"/>
