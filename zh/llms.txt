@@ -1,0 +1,47 @@
+# 许峰 Koh Hom — 工程师现场笔记
+
+> 许峰（Koh Hom）的工程现场笔记：浏览器级标签页系统、Web 性能、测试与 AI Agent 的项目复盘和长文。
+
+## 项目复盘
+
+- [从工程视角理解电商增长数据的本质](https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/index.md): 最近转进 TikTok Shop 一个做电商增长的新组，由于自己之前没有接触过增长工程师这个专业，所以借着团队内现有项目和 GPT 学了一轮，我了解到了数据在增长工程里几乎是最重要的东西，以下是我的学习增长数据心得，本文纯…
+- [运营管理心跳系统设计](https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/index.md): 从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/主业务线拆分，一步步推导运营管理心跳系统的设计。
+- [Workspace v2 Tab System 性能优化：让热切换、冷启动和后台任务各走各的路](https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/index.md): 一次 Workspace tab 性能复盘：把首屏、热切换、后台压力拆开测，用 profiling、E2E gate 和回滚记录挡住假收益。
+- [Workspace v2 Tab System：把浏览器标签页带进工作空间](https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/index.md): Workspace v2 要做的不是多画一排 tab。用户会同时打开多个业务对象，刷新和分享链接还要回到正确页面；后台 runtime 不能偷偷改 URL、弹层、事件或前台 CPU。最后真正要解决的是 ownership：intent、URL、tab 状态、runtime c…
+- [用 harness 让 AI 做性能优化：goal-driven loop 和 ledger](https://clean99.github.io/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/index.md): 我做了一个性能优化 skill，把 AI Agent 从“可以试试懒加载”这类建议，拉进 harness、目标和 ledger 组成的循环里一轮轮跑。在一次 Workspace 优化里，strict profile 看到 Workstream 5089ms -> 2519ms、Report Center 10…
+
+## 文章
+
+- [当输入 let a = 1; 的时候，解释器发生了什么？](https://clean99.github.io/zh/2026/06/11/What-Happens-When-You-Type-Let-A-Equals-1/index.md): 我以前也把 let a = 1 想成过 new Number(1) 的简写。这个模型能解释一个现象：为什么 a.toString() 可以跑。
+- [JavaScript GC 机制：分代、宿主和常见泄漏](https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/index.md): 今天继续补 JavaScript 运行机制时，我发现 GC 很容易被说成一句空话：对象不用了，引擎会自动回收。
+- [JavaScript 的运行机制：从源码到 JIT 优化](https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/index.md): 今天重学 JavaScript 时，我卡在一个看起来很基础的问题上：我们说 JS “运行”时，它到底已经被编译到了哪一步？
+- [Agent Skills 探索实录 — AI Agent 时代的函数式蓝图](https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/index.md): Skill 就是跑在大模型上的函数——封装固定流程、定义输入输出、支持跨 Agent 复用。本文从第一性原理出发，拆解 Skill 的本质、设计原则和工程实践，帮你把零散的 Prompt 经验沉淀为可复用的能力单元。
+- [Vibe Coding vs Spec-Driven Coding — AI Coding 的演化之路](https://clean99.github.io/zh/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/index.md): Vibe Coding（氛围编码）让 AI 自由发挥，速度快但不可控；Spec-Driven Coding 通过持久化的规范文件约束 AI 行为，实现可预测、可追溯的输出。本文用 OpenSpec + Claude Code 的实践经验，拆解两种模式的差异和适用场景。
+- [从第一性原理理解 SEO —— 一次博客全面改造的深度复盘](https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/index.md): 大多数 SEO 指南都是清单式的：加这个 meta 标签、装那个插件、改这个配置。但清单无法帮你理解 为什么 ——不理解为什么，你永远不知道自己遗漏了什么。
+- [使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践）](https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/index.md): 本文将展示如何利用 error boundary 的最佳实践来构建一个健壮且容错的 React 应用，包括：何时使用 Error Boundary、构建带有错误处理和错误上报功能的 Error Boundary HOC。
+- [React 运行时性能优化](https://clean99.github.io/zh/2024/04/16/React-Performance-Optimization/index.md): 优化 React 应用的性能，主要有两个方向： 渲染（Rendering）：渲染过程是 React 应用中开销最大的部分之一（包含 Diff 计算）。 计算（Calculation）：受限于浏览器的有限资源，浏览器并不适合执行重计算任务。
+- [React 服务器组件内部原理（源码解析）](https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/index.md): React 服务器组件是 React 的一项新特性，它允许服务端与客户端（浏览器）协同渲染 React 应用。简而言之，它将部分渲染工作移交给服务端，以提升整体性能。
+- [通过实现一个简易版 useState 来学习 React Hooks 的工作原理](https://clean99.github.io/zh/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/index.md): 你在面试中有没有被问到过这样的问题？ 为什么 React Hook 不能写在条件语句或循环语句中？
+- [如何设计优秀的测试用例](https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/index.md): 软件测试是一件困难的事情。好的测试用例可以帮助你提升代码的可维护性和稳定性，而糟糕的测试用例不仅无法带来收益，某些情况下甚至会拖慢你的开发进程。
+- [Tailwind CSS 背后的软件工程理念（与 StyleX 对比）](https://clean99.github.io/zh/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/index.md): 本文将向你展示 TailwindCSS 如何通过在特定场景下更好地组织代码，真正提升我们的生产力和项目的可维护性。
+- [Web 性能优化策略与实践](https://clean99.github.io/zh/2024/04/10/Web-Performance-Optimization/index.md): Web 性能优化至关重要，实现方式也多种多样。这是我优化公司项目的笔记，总结出了几种可以在不同情况下应用的通用策略：
+- [从零构建 Redux（Redux 源码解读）](https://clean99.github.io/zh/2023/11/28/build-a-redux-from-scratch/index.md): 状态不过是一个 getter/setter。
+- [从零到一打造基于 GPT 的客服聊天机器人 — 算法篇](https://clean99.github.io/zh/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/index.md): 本文介绍如何运用 OpenAI 的多种技术，打造一个能够回答用户问题并与其进行交互的智能 GPT 客服聊天机器人。
+- [在开发周期中应用自动化测试](https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/index.md): 测试是任何软件开发流程中的关键环节。确保应用程序按预期运行、没有缺陷，是向终端用户交付高质量产品的基本要求。本节将探讨测试在开发周期中的重要性，并重点介绍自动化测试流程的优势。
+- [代码复杂度度量指标介绍：认知复杂度](https://clean99.github.io/zh/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/index.md): 当我们说某人的代码质量不好时，大多数情况下，我们真正的意思是代码难以理解。许多开发者宁愿从零开始一个新项目，也不愿在遗留项目上添加功能，因为理解代码的心智成本远高于创造新事物的成本。随着项目功能的增加，代码…
+- [使用模块化设计与 ChatGPT 生成代码](https://clean99.github.io/zh/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/index.md): 你可以在这个 codesandbox 中找到本文的所有代码。
+- [我如何在日常工作与学习中使用 ChatGPT？](https://clean99.github.io/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/index.md): ChatGPT 自发布以来就获得了广泛关注，已成为许多专业人士的常用工具。尽管它已被广泛讨论，但探索 ChatGPT 如何在我们的日常工作中发挥作用仍然很重要。在这篇文章中，我将分享一些我认为特别实用的 ChatGPT 应用场景。
+- [Github Copilot 值得订阅吗？](https://clean99.github.io/zh/2022/12/18/Does-Github-Copilot-Worth-It/index.md): 我个人使用 Copilot 加速编程已经有很长一段时间了。我发现了一些 GitHub Copilot 能给我带来很大帮助的使用场景。对我来说，Copilot 至少将我的编程效率提升了 30%。所以，用一杯咖啡的价格（每月 10 美元）来订阅它对我来…
+- [测试如何加速你的开发](https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/index.md): 作为前端开发者，我们大多数人都不喜欢写测试，因为"它会拖慢开发进度"。我以前也不写测试，我能理解你在为一个"快速迭代"的前端项目编写测试时的痛苦。但我确实想告诉你，在大多数情况下，测试可以加速你的开发，而不是拖慢…
+- [React 测试中的常见错误](https://clean99.github.io/zh/2022/07/24/Some-Common-Mistakes-in-React-Testing/index.md): 大多数前端开发者（至少是我遇到的那些）不喜欢写测试。我问过他们原因，答案很简单：我们没有时间做这件事！ 好吧，我想告诉你，用正确的方式写测试会显著提升你的开发效率（尤其是从长远来看），而不是浪费你的时间。
+- [测试最佳实践：TDD](https://clean99.github.io/zh/2022/07/24/Testing-Best-Practice-Tdd/index.md): 通常，在科学和工程领域对现象建模时，我们从简化的、不完整的模型开始。随着我们对细节的深入研究，这些简单模型变得不再适用，必须被更精细的模型所取代。 --《计算机程序的构造和解释》
+- [SICPJS 第二章：用数据构建抽象](https://clean99.github.io/zh/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/index.md): 复合数据（Compound data）：就像复合函数一样，我们增强了语言的表达能力，并提升了设计程序时所处的概念层次。 将数据粘合在一起（Glue data together）：复合数据将数据粘合在一起，从而降低系统的复杂度。 数据抽象（Data ab…
+- [用 NodeJS 构建一个玩具浏览器](https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/index.md): 没错，我又给自己挖了一个坑。我看到了一本名为《Web Browser Engineering》的有趣书籍，它教如何用 Python 构建一个浏览器。由于我现在正在学习 SICPJS，并将在课程结束时构建一个编译器，我认为这两门课程可能有些关联。我…
+- [SICPJS 第一章：用函数构建抽象](https://clean99.github.io/zh/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/index.md): 计算过程（computational process，巫师脑中的精灵）：一种思想，看不见也摸不到，但能解决问题并驱动现实世界。 程序（program，巫师的咒语）：通过编程语言规定计算过程，操纵另一种抽象事物——数据。 程序员（programmer，巫师的…
+- [SICPJS——我的思考与学习计划 / 目录](https://clean99.github.io/zh/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/index.md): 心灵在对简单观念发挥其能力时，主要有以下三种行为： 将几个简单观念组合成一个复合观念，由此构成所有复杂观念。 其次，将两个观念——无论简单还是复杂——并列在一起，同时审视，而不将其合并为一，由此获得所有关系的观念…
+
+## 关于
+
+- [Koh Hom](https://clean99.github.io/zh/about/): Software Engineer. 许峰（Koh Hom）的工程现场笔记：浏览器级标签页系统、Web 性能、测试与 AI Agent 的项目复盘和长文。
+- [全部文章](https://clean99.github.io/zh/writing/): 全部笔记，按时间倒序。
+- [Full archive (all posts, both languages)](https://clean99.github.io/llms-full.txt): 同一份索引，附全部已发布文章的 Markdown 全文。

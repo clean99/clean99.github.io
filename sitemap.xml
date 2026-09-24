@@ -1,941 +1,861 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  
-  <url>
-    <loc>https://clean99.github.io/404</loc>
-    
-    <lastmod>2026-07-03</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2026/07/02/Ecommerce-Growth-Data-Engineering/</loc>
-    
-    <lastmod>2026-07-02</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/</loc>
-    
-    <lastmod>2026-07-02</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/</loc>
-    
-    <lastmod>2026-06-19</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/</loc>
-    
-    <lastmod>2026-06-19</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2026/06/11/What-Happens-When-You-Type-Let-A-Equals-1/</loc>
-    
-    <lastmod>2026-06-11</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/ai-coding-lab/</loc>
-    
-    <lastmod>2026-06-09</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/ai-coding-lab/</loc>
-    
-    <lastmod>2026-06-09</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/</loc>
-    
-    <lastmod>2026-06-08</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/</loc>
-    
-    <lastmod>2026-06-08</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/</loc>
-    
-    <lastmod>2026-06-05</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/</loc>
-    
-    <lastmod>2026-06-05</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/About/</loc>
-    
-    <lastmod>2026-05-19</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/interviewers/</loc>
-    
-    <lastmod>2026-05-19</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/projects/</loc>
-    
-    <lastmod>2026-05-19</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/writing/</loc>
-    
-    <lastmod>2026-05-19</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/About/</loc>
-    
-    <lastmod>2026-05-19</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/interviewers/</loc>
-    
-    <lastmod>2026-05-19</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/writing/</loc>
-    
-    <lastmod>2026-05-19</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/projects/</loc>
-    
-    <lastmod>2026-05-19</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/</loc>
-    
-    <lastmod>2026-05-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/</loc>
-    
-    <lastmod>2026-05-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/</loc>
-    
-    <lastmod>2026-05-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/</loc>
-    
-    <lastmod>2026-05-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/</loc>
-    
-    <lastmod>2026-05-16</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/</loc>
-    
-    <lastmod>2026-05-16</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/</loc>
-    
-    <lastmod>2026-03-23</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/</loc>
-    
-    <lastmod>2026-03-23</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
-    
-    <lastmod>2026-03-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
-    
-    <lastmod>2026-03-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/</loc>
-    
-    <lastmod>2026-03-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/</loc>
-    
-    <lastmod>2026-03-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/</loc>
-    
-    <lastmod>2024-05-06</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/</loc>
-    
-    <lastmod>2024-05-06</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2024/04/16/React-Performance-Optimization/</loc>
-    
-    <lastmod>2024-04-16</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2024/04/16/React-Performance-Optimization/</loc>
-    
-    <lastmod>2024-04-16</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2024/04/10/React-Server-Component-Internals/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2024/04/10/Web-Performance-Optimization/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2024/04/10/Web-Performance-Optimization/</loc>
-    
-    <lastmod>2024-04-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2023/11/28/build-a-redux-from-scratch/</loc>
-    
-    <lastmod>2023-11-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2023/11/28/build-a-redux-from-scratch/</loc>
-    
-    <lastmod>2023-11-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/</loc>
-    
-    <lastmod>2023-06-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/</loc>
-    
-    <lastmod>2023-06-10</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/</loc>
-    
-    <lastmod>2023-04-01</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/</loc>
-    
-    <lastmod>2023-04-01</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/</loc>
-    
-    <lastmod>2023-03-04</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/</loc>
-    
-    <lastmod>2023-03-04</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/</loc>
-    
-    <lastmod>2023-02-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/</loc>
-    
-    <lastmod>2023-02-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/</loc>
-    
-    <lastmod>2023-02-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/</loc>
-    
-    <lastmod>2023-02-22</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2022/12/18/Does-Github-Copilot-Worth-It/</loc>
-    
-    <lastmod>2022-12-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/</loc>
-    
-    <lastmod>2022-12-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/</loc>
-    
-    <lastmod>2022-08-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/</loc>
-    
-    <lastmod>2022-08-18</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2022/07/24/Some-Common-Mistakes-in-React-Testing/</loc>
-    
-    <lastmod>2022-07-24</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/</loc>
-    
-    <lastmod>2022-07-24</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2022/07/24/Testing-Best-Practice-Tdd/</loc>
-    
-    <lastmod>2022-07-24</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2022/07/24/Testing-Best-Practice-Tdd/</loc>
-    
-    <lastmod>2022-07-24</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/</loc>
-    
-    <lastmod>2022-05-02</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/</loc>
-    
-    <lastmod>2022-05-02</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/</loc>
-    
-    <lastmod>2022-04-27</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/</loc>
-    
-    <lastmod>2022-04-27</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/</loc>
-    
-    <lastmod>2022-04-25</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/</loc>
-    
-    <lastmod>2022-04-25</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
-    
-    <lastmod>2022-04-24</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
-    
-    <lastmod>2022-04-24</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/Works/</loc>
-    
-    <lastmod>2022-04-24</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/Works/</loc>
-    
-    <lastmod>2022-04-24</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/Links/</loc>
-    
-    <lastmod>2021-06-15</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/zh/Links/</loc>
-    
-    <lastmod>2021-06-15</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://clean99.github.io/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/"/>
   </url>
-
-  
   <url>
-    <loc>https://clean99.github.io/tags/Frontend/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/Software-Engineering/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/writing/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/writing/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/writing/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/writing/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/Web-Performance/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/writing/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/writing/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/writing/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/writing/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/SEO/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/projects/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/projects/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/projects/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/projects/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/AI/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/projects/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/projects/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/projects/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/projects/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/Claude-Code/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/about/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/about/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/about/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/about/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/Agent/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/about/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/about/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/about/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/about/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/Skills/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/links/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/links/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/links/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/links/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/testing/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/links/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/links/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/links/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/links/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/software-engineering/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/ai-coding-lab/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/ai-coding-lab/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/ai-coding-lab/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/ai-coding-lab/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/sdlc/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/ai-coding-lab/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/ai-coding-lab/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/ai-coding-lab/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/ai-coding-lab/"/>
   </url>
-  
+  <url>
+    <loc>https://clean99.github.io/tags/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/</loc>
+    <lastmod>2026-03-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/</loc>
+    <lastmod>2026-03-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/</loc>
+    <lastmod>2026-03-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/</loc>
+    <lastmod>2026-03-23</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/</loc>
+    <lastmod>2023-04-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/</loc>
+    <lastmod>2023-04-01</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/</loc>
+    <lastmod>2026-05-16</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/</loc>
+    <lastmod>2026-05-16</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2023/11/28/build-a-redux-from-scratch/</loc>
+    <lastmod>2023-11-28</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/11/28/build-a-redux-from-scratch/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/11/28/build-a-redux-from-scratch/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/11/28/build-a-redux-from-scratch/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2023/11/28/build-a-redux-from-scratch/</loc>
+    <lastmod>2023-11-28</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/11/28/build-a-redux-from-scratch/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/11/28/build-a-redux-from-scratch/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/11/28/build-a-redux-from-scratch/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/</loc>
+    <lastmod>2022-04-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/</loc>
+    <lastmod>2022-04-27</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/04/27/Build-a-Toy-Browser-with-NodeJS/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/</loc>
+    <lastmod>2024-05-06</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/</loc>
+    <lastmod>2024-05-06</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/</loc>
+    <lastmod>2023-06-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/</loc>
+    <lastmod>2023-06-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/</loc>
+    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/</loc>
+    <lastmod>2026-06-19</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/</loc>
+    <lastmod>2022-12-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/12/18/Does-Github-Copilot-Worth-It/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2022/12/18/Does-Github-Copilot-Worth-It/</loc>
+    <lastmod>2022-12-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/12/18/Does-Github-Copilot-Worth-It/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2026/07/02/Ecommerce-Growth-Data-Engineering/</loc>
+    <lastmod>2026-07-02</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/07/02/Ecommerce-Growth-Data-Engineering/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/07/02/Ecommerce-Growth-Data-Engineering/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/</loc>
+    <lastmod>2026-07-02</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/07/02/Ecommerce-Growth-Data-Engineering/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/07/02/Ecommerce-Growth-Data-Engineering/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/</loc>
+    <lastmod>2023-02-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/</loc>
+    <lastmod>2023-02-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/</loc>
+    <lastmod>2022-08-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/</loc>
+    <lastmod>2022-08-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/08/18/How-Testing-Speeds-Up-Your-Development/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/</loc>
+    <lastmod>2024-04-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/</loc>
+    <lastmod>2024-04-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/10/How-to-Design-GOOD-Test-Cases/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/</loc>
+    <lastmod>2023-03-04</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/</loc>
+    <lastmod>2023-03-04</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/</loc>
+    <lastmod>2026-06-08</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/</loc>
+    <lastmod>2026-06-08</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/</loc>
+    <lastmod>2024-04-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/</loc>
+    <lastmod>2024-04-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/</loc>
+    <lastmod>2026-06-05</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/</loc>
+    <lastmod>2026-06-05</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2024/04/16/React-Performance-Optimization/</loc>
+    <lastmod>2024-04-16</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/16/React-Performance-Optimization/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/16/React-Performance-Optimization/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/16/React-Performance-Optimization/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2024/04/16/React-Performance-Optimization/</loc>
+    <lastmod>2024-04-16</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/16/React-Performance-Optimization/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/16/React-Performance-Optimization/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/16/React-Performance-Optimization/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2024/04/10/React-Server-Component-Internals/</loc>
+    <lastmod>2024-04-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/React-Server-Component-Internals/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/React-Server-Component-Internals/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/</loc>
+    <lastmod>2024-04-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/React-Server-Component-Internals/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/10/React-Server-Component-Internals/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/React-Server-Component-Internals/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/</loc>
+    <lastmod>2022-04-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/</loc>
+    <lastmod>2022-04-25</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/</loc>
+    <lastmod>2022-05-02</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/</loc>
+    <lastmod>2022-05-02</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
+    <lastmod>2022-04-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/</loc>
+    <lastmod>2022-04-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/</loc>
+    <lastmod>2022-07-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/07/24/Some-Common-Mistakes-in-React-Testing/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2022/07/24/Some-Common-Mistakes-in-React-Testing/</loc>
+    <lastmod>2022-07-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/07/24/Some-Common-Mistakes-in-React-Testing/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2022/07/24/Testing-Best-Practice-Tdd/</loc>
+    <lastmod>2022-07-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/07/24/Testing-Best-Practice-Tdd/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/07/24/Testing-Best-Practice-Tdd/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/07/24/Testing-Best-Practice-Tdd/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2022/07/24/Testing-Best-Practice-Tdd/</loc>
+    <lastmod>2022-07-24</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2022/07/24/Testing-Best-Practice-Tdd/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2022/07/24/Testing-Best-Practice-Tdd/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2022/07/24/Testing-Best-Practice-Tdd/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/</loc>
+    <lastmod>2024-04-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/</loc>
+    <lastmod>2024-04-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/</loc>
+    <lastmod>2023-02-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/</loc>
+    <lastmod>2023-02-22</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
+    <lastmod>2026-03-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/</loc>
+    <lastmod>2026-03-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2024/04/10/Web-Performance-Optimization/</loc>
+    <lastmod>2024-04-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/Web-Performance-Optimization/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/10/Web-Performance-Optimization/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/Web-Performance-Optimization/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2024/04/10/Web-Performance-Optimization/</loc>
+    <lastmod>2024-04-10</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2024/04/10/Web-Performance-Optimization/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2024/04/10/Web-Performance-Optimization/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2024/04/10/Web-Performance-Optimization/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2026/06/11/What-Happens-When-You-Type-Let-A-Equals-1/</loc>
+    <lastmod>2026-06-11</lastmod>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/</loc>
+    <lastmod>2026-05-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/</loc>
+    <lastmod>2026-05-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/</loc>
+    <lastmod>2026-05-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/</loc>
+    <lastmod>2026-05-18</lastmod>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/agent/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/agent/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/agent/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/agent/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/agent/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/agent/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/agent/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/agent/"/>
+  </url>
   <url>
     <loc>https://clean99.github.io/tags/agile/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/agile/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/agile/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/agile/"/>
   </url>
-  
+  <url>
+    <loc>https://clean99.github.io/zh/tags/agile/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/agile/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/agile/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/agile/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/ai/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/ai/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/ai/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/ai/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/ai/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/ai/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/ai/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/ai/"/>
+  </url>
   <url>
     <loc>https://clean99.github.io/tags/browser/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/browser/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/browser/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/browser/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/frontend/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/tags/browser/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/browser/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/browser/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/browser/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/react/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/tags/chatgpt/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/chatgpt/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/chatgpt/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/chatgpt/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/error-handling/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/tags/chatgpt/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/chatgpt/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/chatgpt/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/chatgpt/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/error-boundary/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/tags/claude-code/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/claude-code/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/claude-code/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/claude-code/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/fault-tolerance/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/tags/claude-code/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/claude-code/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/claude-code/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/claude-code/"/>
   </url>
-  
-  <url>
-    <loc>https://clean99.github.io/tags/robustness/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/tags/reliability/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/tags/ChatGPT/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/tags/development/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/tags/copilot/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/tags/tdd/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/tags/Data/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://clean99.github.io/tags/Growth/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
   <url>
     <loc>https://clean99.github.io/tags/code-generation/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/code-generation/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/code-generation/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/code-generation/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/Testing/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/tags/code-generation/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/code-generation/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/code-generation/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/code-generation/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/JavaScript/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/tags/copilot/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/copilot/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/copilot/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/copilot/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/React/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/tags/copilot/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/copilot/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/copilot/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/copilot/"/>
   </url>
-  
+  <url>
+    <loc>https://clean99.github.io/tags/data/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/data/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/data/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/data/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/data/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/data/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/data/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/data/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/development/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/development/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/development/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/development/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/development/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/development/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/development/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/development/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/error-boundary/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/error-boundary/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/error-boundary/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/error-boundary/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/error-boundary/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/error-boundary/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/error-boundary/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/error-boundary/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/error-handling/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/error-handling/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/error-handling/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/error-handling/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/error-handling/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/error-handling/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/error-handling/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/error-handling/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/fault-tolerance/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/fault-tolerance/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/fault-tolerance/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/fault-tolerance/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/fault-tolerance/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/fault-tolerance/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/fault-tolerance/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/fault-tolerance/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/frontend/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/frontend/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/frontend/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/frontend/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/frontend/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/frontend/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/frontend/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/frontend/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/growth/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/growth/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/growth/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/growth/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/growth/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/growth/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/growth/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/growth/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/javascript/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/javascript/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/javascript/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/javascript/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/javascript/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/javascript/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/javascript/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/javascript/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/openspec/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/openspec/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/openspec/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/openspec/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/openspec/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/openspec/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/openspec/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/openspec/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/react/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/react/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/react/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/react/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/react/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/react/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/react/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/react/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/reliability/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/reliability/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/reliability/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/reliability/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/reliability/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/reliability/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/reliability/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/reliability/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/robustness/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/robustness/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/robustness/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/robustness/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/robustness/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/robustness/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/robustness/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/robustness/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/sdlc/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/sdlc/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/sdlc/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/sdlc/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/sdlc/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/sdlc/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/sdlc/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/sdlc/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/seo/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/seo/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/seo/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/seo/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/seo/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/seo/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/seo/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/seo/"/>
+  </url>
   <url>
     <loc>https://clean99.github.io/tags/sicpjs/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/sicpjs/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/sicpjs/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/sicpjs/"/>
   </url>
-  
   <url>
-    <loc>https://clean99.github.io/tags/OpenSpec/</loc>
-    <lastmod>2026-07-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
+    <loc>https://clean99.github.io/zh/tags/sicpjs/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/sicpjs/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/sicpjs/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/sicpjs/"/>
   </url>
-  
-
-  
+  <url>
+    <loc>https://clean99.github.io/tags/skills/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/skills/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/skills/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/skills/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/skills/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/skills/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/skills/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/skills/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/software-engineering/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/software-engineering/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/software-engineering/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/software-engineering/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/software-engineering/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/software-engineering/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/software-engineering/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/software-engineering/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/tdd/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/tdd/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/tdd/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/tdd/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/tdd/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/tdd/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/tdd/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/tdd/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/testing/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/testing/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/testing/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/testing/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/testing/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/testing/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/testing/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/testing/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/tags/web-performance/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/web-performance/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/web-performance/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/web-performance/"/>
+  </url>
+  <url>
+    <loc>https://clean99.github.io/zh/tags/web-performance/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://clean99.github.io/tags/web-performance/"/>
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/tags/web-performance/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://clean99.github.io/tags/web-performance/"/>
+  </url>
 </urlset>

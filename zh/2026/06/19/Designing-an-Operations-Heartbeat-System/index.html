@@ -1,308 +1,25 @@
-<!DOCTYPE html>
-<html lang="zh">
-
-<head>
-
-  <!-- Minima -->
-  <!-- Hexo theme created by @adisaktijrs -->
-
-  <!-- Basic Page Needs
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <meta charset="utf-8">
-
-  
-  <title>运营管理心跳系统设计 | Koh Hom — Software, AI, and Inner Practice</title>
-  
-  <link rel="sitemap" href="https://clean99.github.io/sitemap.xml" />
-  
-  <link rel="canonical" href="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/">
-  <link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
-  <link rel="alternate" hreflang="zh" href="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
-  <link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
-  <meta name="description" content="从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/IES 拆分，一步步推导运营管理心跳系统的设计。">
-  
-  <meta name="keywords" content="software engineering, frontend systems, AI agents, systems thinking, learning, inner practice, Koh Hom">
-  
-  <meta name="author" content="Koh Hom">
-  
-  <meta property="og:image" content="https://clean99.github.io/images/thumbnail.jpg">
-  <meta property="og:site_name" content="Koh Hom — Software, AI, and Inner Practice" />
-  
-  <meta property="og:type" content="article" />
-  <meta property="article:published_time" content="2026-06-19T04:00:00.000Z" />
-  <meta property="article:modified_time" content="2026-06-19T04:00:00.000Z" />
-  <meta property="article:author" content="Koh Hom" />
-  
-  <meta property="article:tag" content="Software Engineering" />
-  
-  <meta property="article:tag" content="fault-tolerance" />
-  
-  <meta property="article:tag" content="reliability" />
-  
-  
-  <meta property="og:title" content="运营管理心跳系统设计 | Koh Hom — Software, AI, and Inner Practice" />
-  <meta property="og:locale" content="zh_CN" />
-  <meta property="og:locale:alternate" content="en_US" />
-  <meta property="og:description" content="从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/IES 拆分，一步步推导运营管理心跳系统的设计。">
-  <meta property="og:url" content="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
-
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:site" content="@Clean993">
-  <meta name="twitter:creator" content="@Clean993">
-  <meta name="twitter:title" content="运营管理心跳系统设计 | Koh Hom — Software, AI, and Inner Practice">
-  <meta name="twitter:description" content="从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/IES 拆分，一步步推导运营管理心跳系统的设计。">
-  <meta name="twitter:image" content="https://clean99.github.io/images/thumbnail.jpg">
-  <meta name="twitter:url" content="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/" />
-
-  <!-- Mobile Specific Metas
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0FA0CE">
-
-  <!-- Preconnect to external origins
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
-  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
-
-  <!-- Preload fonts
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="preload" href="/fonts/dm-serif-display-v4-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/inter-v2-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
-
-  <!-- CSS
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  
-<link rel="stylesheet" href="/css/normalize.css">
-
-  
-<link rel="stylesheet" href="/css/skeleton.css">
-
-  
-  <link rel="stylesheet" href="/css/custom.css?v=20260703-01">
-  
-<link rel="stylesheet" href="/css/prism-dark.css">
-
-  
-<link rel="stylesheet" href="/css/prism-line-numbers.css">
-
-  <!-- User css -->
-  
-  
-<link rel="stylesheet" href="/css/user.css">
-
-  
-  
-
-  <!-- Favicon
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <link rel="icon" type="image/png" href="/images/favicon.png">
-
-  <!-- Custom Theme Color Style
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  <style>
-  a:not(.icon) {
-    text-decoration-color: #0FA0CE;
-    background-image: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0) 50%,
-      #0FA0CE 50%
-    );
-  }
-  blockquote {
-    border-left: 8px solid #0FA0CE;
-  }
-  .nanobar .bar {
-    background: #0FA0CE;
-  }
-  .button.button-primary:hover,
-  button.button-primary:hover,
-  input[type="submit"].button-primary:hover,
-  input[type="reset"].button-primary:hover,
-  input[type="button"].button-primary:hover,
-  .button.button-primary:focus,
-  button.button-primary:focus,
-  input[type="submit"].button-primary:focus,
-  input[type="reset"].button-primary:focus,
-  input[type="button"].button-primary:focus {
-    background-color: #0FA0CE;
-    border-color: #0FA0CE;
-  }
-  input[type="email"]:focus,
-  input[type="number"]:focus,
-  input[type="search"]:focus,
-  input[type="text"]:focus,
-  input[type="tel"]:focus,
-  input[type="url"]:focus,
-  input[type="password"]:focus,
-  textarea:focus,
-  select:focus {
-    border: 1px solid #0FA0CE;
-  }
-</style>
-
-  <!-- Google Analytics (With Privacy Settings On)
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-    <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRLPVVLS6T"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-  
-    gtag('config', 'G-QRLPVVLS6T');
-  </script>
-
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1736637551425497"
-     crossorigin="anonymous"></script>
-
-  
-  <script>
-    window.MathJax = {
-      tex: {
-        inlineMath: [['\\(', '\\)']],
-        displayMath: [['$$', '$$'], ['\\[', '\\]']],
-        processEscapes: true
-      },
-      options: {
-        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-      }
-    };
-  </script>
-  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
-  
-
-  <!-- JSON-LD Structured Data
-  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
-  
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"运营管理心跳系统设计","datePublished":"2026-06-19T04:00:00.000Z","dateModified":"2026-06-19T04:00:00.000Z","author":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io/About/"},"publisher":{"@type":"Person","name":"Koh Hom","url":"https://clean99.github.io"},"url":"https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/","mainEntityOfPage":"https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/","inLanguage":"zh-CN","description":"运营管理系统里有一个很基础的问题：怎么知道一个运营现在是否在线？ 最小实现很简单。前端每隔几秒发一个心跳包，服务端保存 last_seen_at。如果超过一段时间没有收到心跳，就把这个人标成离线。 这个版本能点亮一个在线灯。要支撑派单、排班、监控和工时统计，它还差很多上下文。运营是否在线，需要同时看他是否有任务、属于哪个技能组、当前状态能不能接单、是否在灰度规则里、异常状态是否已经通知过、下游系统","keywords":["Software Engineering","fault-tolerance","reliability"]}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://clean99.github.io"},{"@type":"ListItem","position":2,"name":"运营管理心跳系统设计","item":"https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/"}]}</script>
-  
-
-  <!-- Language detection and redirect (only on first visit, non-blocking for returning users) -->
-  <script>
-  (function() {
-    var stored = localStorage.getItem('preferredLang');
-    if (stored) return;
-    var path = window.location.pathname;
-    var isZhPath = path === '/zh' || path.indexOf('/zh/') === 0;
-    if (isZhPath) {
-      localStorage.setItem('preferredLang', 'zh');
-      return;
-    }
-    if (path !== '/') return;
-    var bl = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-    stored = bl.indexOf('zh') === 0 ? 'zh' : 'en';
-    localStorage.setItem('preferredLang', stored);
-    if (stored === 'zh') {
-      window.location.replace('/zh/' + window.location.search + window.location.hash);
-    }
-  })();
-  </script>
-
-<meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Koh Hom — Software, AI, and Inner Practice" type="application/atom+xml">
-</head>
-
-<body>
-  <div class="container">
-    <div class="row">
-      <div>
-
-        <header class="site-header">
-  <div class="site-header__top">
-    <div class="site-actions">
-      <button class="theme-toggle" type="button" onclick="setDarkMode(!document.body.classList.contains('darkmode'))" aria-label="Toggle color theme">
-        <span id="themeIcon" aria-hidden="true">◐</span>
-      </button>
-      <a
-        href="/2026/06/19/Designing-an-Operations-Heartbeat-System/"
-        class="language-switch"
-        onclick="localStorage.setItem('preferredLang', 'en')"
-        aria-label="Read in English"
-      >
-        <span class="language-switch__full">EN</span>
-        <span class="language-switch__short" aria-hidden="true">EN</span>
-      </a>
-    </div>
-  </div>
-
-  <nav class="site-nav" aria-label="Primary navigation">
-    <a href="/zh/">首页</a>
-    
-      
-        
-        <a href="/zh/writing">写作</a>
-      
-    
-      
-        
-        <a href="/zh/projects">项目</a>
-      
-    
-      
-        
-        <a href="/zh/ai-coding-lab">AI Skills</a>
-      
-    
-      
-        
-        <a href="/zh/interviewers">面试官入口</a>
-      
-    
-      
-        
-        <a href="/zh/About">关于</a>
-      
-    
-  </nav>
-</header>
-
-<script>
-  if (localStorage.getItem('preferredTheme') === 'dark') {
-    setDarkMode(true);
-  }
-  function setDarkMode(isDark) {
-    document.body.classList.toggle('darkmode', isDark);
-    var icon = document.getElementById('themeIcon');
-    if (icon) icon.textContent = isDark ? '◑' : '◐';
-    if (isDark) {
-      localStorage.setItem('preferredTheme', 'dark');
-    } else {
-      localStorage.removeItem('preferredTheme');
-    }
-  }
-</script>
-
-        <div class="trans">
-            <article itemscope itemtype="https://schema.org/BlogPosting">
-    <header>
-      <h2 itemprop="headline">运营管理心跳系统设计</h2>
-      
-      <p style="margin-bottom: 0.5rem;">
-        <a href="/2026/06/19/Designing-an-Operations-Heartbeat-System/" style="font-size: 0.85em;" onclick="localStorage.setItem('preferredLang', 'en')">
-          Read in English
-        </a>
-      </p>
-      
-      <meta itemprop="author" content="Koh Hom">
-      <meta itemprop="datePublished" content="2026-06-19T04:00:00.000Z">
-      <meta itemprop="dateModified" content="2026-06-19T04:00:00.000Z">
-    </header>
-    <div itemprop="articleBody">
-      <p>运营管理系统里有一个很基础的问题：怎么知道一个运营现在是否在线？</p>
+<!DOCTYPE html><html lang="zh-CN" dir="ltr" class="no-js"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>运营管理心跳系统设计 · Koh Hom</title><meta name="theme-color" content="#f4f1ea" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#121110" media="(prefers-color-scheme: dark)"><script>(()=>{document.documentElement.classList.remove("no-js");let s;try{s=localStorage.getItem("theme")}catch{}const d=s==="dark"||(s!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.dataset.theme=d?"dark":"light"})()</script><style>@font-face{font-family:Fraunces-fe5ecdc9ad8f9879;src:url("/_astro/fonts/eb3befa28ec9e972.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:100 900;font-style:normal;}@font-face{font-family:Fraunces-fe5ecdc9ad8f9879;src:url("/_astro/fonts/2873b82e9bb03bc9.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:100 900;font-style:italic;}:root{--font-display:Fraunces-fe5ecdc9ad8f9879,"Fraunces Fallback",Georgia,"Songti SC","Noto Serif CJK SC","Source Han Serif SC",STSong,SimSun,serif;}</style> <link rel="preload" href="/_astro/fonts/eb3befa28ec9e972.woff2" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:Newsreader-2535da74cbb5e944;src:url("/_astro/fonts/7e65589389f58818.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:100 900;font-style:normal;}@font-face{font-family:Newsreader-2535da74cbb5e944;src:url("/_astro/fonts/3eb38f47b85860e0.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:100 900;font-style:italic;}:root{--font-body:Newsreader-2535da74cbb5e944,"Newsreader Fallback",Georgia,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei",serif;}</style> <link rel="preload" href="/_astro/fonts/7e65589389f58818.woff2" as="font" type="font/woff2" crossorigin><style>@font-face{font-family:"JetBrains Mono-b54ec4cfbb7d43a5";src:url("/_astro/fonts/b2492282eaa8436c.woff2") format("woff2");font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;font-weight:100 900;font-style:normal;}@font-face{font-family:"JetBrains Mono-b54ec4cfbb7d43a5 fallback: Courier New";src:local("Courier New");font-display:swap;font-weight:100 900;font-style:normal;size-adjust:99.9837%;ascent-override:102.0166%;descent-override:30.0049%;}:root{--font-mono:"JetBrains Mono-b54ec4cfbb7d43a5","JetBrains Mono-b54ec4cfbb7d43a5 fallback: Courier New",ui-monospace,SFMono-Regular,Menlo,"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Source Han Sans SC","Microsoft YaHei",monospace;}</style> <meta name="description" content="从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/主业务线拆分，一步步推导运营管理心跳系统的设计。"><meta name="author" content="Koh Hom"><link rel="canonical" href="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/"><link rel="alternate" hreflang="en" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/"><link rel="alternate" hreflang="zh-CN" href="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/"><link rel="alternate" hreflang="x-default" href="https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/"><link rel="alternate" type="application/atom+xml" title="Koh Hom — Engineer's Field Notes (en)" href="https://clean99.github.io/atom.xml"><link rel="alternate" type="application/atom+xml" title="许峰 Koh Hom — 工程师现场笔记 (zh-CN)" href="https://clean99.github.io/zh/atom.xml"><link rel="alternate" type="text/markdown" href="/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/index.md"><link rel="sitemap" type="application/xml" href="https://clean99.github.io/sitemap.xml"><link rel="alternate" type="text/plain" title="llms.txt" href="https://clean99.github.io/zh/llms.txt"><link rel="me" href="https://github.com/clean99"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="icon" href="/favicon.ico" sizes="32x32"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/manifest.webmanifest"><meta property="og:type" content="article"><meta property="og:site_name" content="许峰 Koh Hom — 工程师现场笔记"><meta property="og:title" content="运营管理心跳系统设计"><meta property="og:description" content="从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/主业务线拆分，一步步推导运营管理心跳系统的设计。"><meta property="og:url" content="https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/"><meta property="og:locale" content="zh_CN"><meta property="og:locale:alternate" content="en_US"><meta property="og:image" content="https://clean99.github.io/og/zh/Designing-an-Operations-Heartbeat-System.png"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="运营管理心跳系统设计"><meta property="article:published_time" content="2026-06-19T12:00:00+08:00"><meta property="article:modified_time" content="2026-06-19T12:00:00+08:00"><meta property="article:author" content="https://clean99.github.io/about/"><meta property="article:section" content="工程"><meta property="article:tag" content="软件工程"><meta property="article:tag" content="可靠性"><meta property="article:tag" content="容错"><meta name="twitter:card" content="summary_large_image"><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Person","@id":"https://clean99.github.io/#person","name":"Koh Hom","alternateName":["许峰","Xu Feng"],"url":"https://clean99.github.io/about/","email":"mailto:xff9924@gmail.com","jobTitle":"Software Engineer","knowsAbout":["Frontend architecture","Web performance","React","Software testing","AI agents","AI-assisted software engineering"],"sameAs":["https://github.com/clean99"]},{"@type":"WebSite","@id":"https://clean99.github.io/#website","url":"https://clean99.github.io/zh/","name":"许峰 Koh Hom — 工程师现场笔记","description":"许峰（Koh Hom）的工程现场笔记：浏览器级标签页系统、Web 性能、测试与 AI Agent 的项目复盘和长文。","inLanguage":["en","zh-CN"],"author":{"@id":"https://clean99.github.io/#person"},"publisher":{"@id":"https://clean99.github.io/#person"}},{"@type":"BlogPosting","@id":"https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/#article","url":"https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/","mainEntityOfPage":"https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/","headline":"运营管理心跳系统设计","description":"从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/主业务线拆分，一步步推导运营管理心跳系统的设计。","datePublished":"2026-06-19T12:00:00+08:00","dateModified":"2026-06-19T12:00:00+08:00","inLanguage":"zh-CN","image":["https://clean99.github.io/og/zh/Designing-an-Operations-Heartbeat-System.png"],"articleSection":"工程","keywords":["软件工程","可靠性","容错"],"timeRequired":"PT16M","author":{"@id":"https://clean99.github.io/#person"},"publisher":{"@id":"https://clean99.github.io/#person"},"isPartOf":{"@id":"https://clean99.github.io/#website"},"translationOfWork":{"@id":"https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/#article"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"首页","item":"https://clean99.github.io/zh/"},{"@type":"ListItem","position":2,"name":"文章","item":"https://clean99.github.io/zh/writing/"},{"@type":"ListItem","position":3,"name":"运营管理心跳系统设计","item":"https://clean99.github.io/zh/2026/06/19/Designing-an-Operations-Heartbeat-System/"}]}]}</script><script type="speculationrules">{"prerender":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/pagefind/*","/*.xml","/*.txt","/*.md"]}},{"not":{"selector_matches":"[rel~=nofollow], [download], [target]"}}]},"eagerness":"moderate"}]}</script><style>.impact[data-astro-cid-d7cucacy]{gap:.45rem;padding:0;list-style:none;display:grid}.impact[data-astro-cid-d7cucacy][data-columns="2"]{column-gap:var(--space-l)}.impact[data-astro-cid-d7cucacy] li[data-astro-cid-d7cucacy]{font-size:var(--step--1);font-variant-numeric:tabular-nums;padding-left:1.15rem;line-height:1.55;position:relative}.impact[data-astro-cid-d7cucacy] li[data-astro-cid-d7cucacy]:before{content:"";background:var(--accent);width:.42rem;height:.42rem;position:absolute;top:.58em;left:0;rotate:45deg}.impact[data-astro-cid-d7cucacy] code[data-astro-cid-d7cucacy]{background:var(--accent-wash);font-family:var(--font-mono-stack);overflow-wrap:anywhere;border-radius:3px;padding:.05em .3em;font-size:.92em}@media (width>=48rem){.impact[data-astro-cid-d7cucacy][data-columns="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.case-card[data-astro-cid-4dw4sxam]{gap:var(--space-m);margin-bottom:var(--space-l);padding:var(--space-m) var(--space-m) var(--space-m) calc(var(--space-m) + 4px);border:1px solid var(--rule-strong);border-radius:var(--radius);background:var(--paper-raised);display:grid;position:relative}.case-card[data-astro-cid-4dw4sxam]:before{content:"";border-radius:var(--radius) 0 0 var(--radius);background:var(--accent);width:4px;position:absolute;inset:-1px auto -1px -1px}.stamp[data-astro-cid-4dw4sxam]{color:var(--accent)}.facts[data-astro-cid-4dw4sxam]{gap:var(--space-s);grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));display:grid}.facts[data-astro-cid-4dw4sxam] dd[data-astro-cid-4dw4sxam]{font-size:var(--step--1);margin-top:.2rem;line-height:1.45}.impact[data-astro-cid-4dw4sxam] h2[data-astro-cid-4dw4sxam],.stack[data-astro-cid-4dw4sxam] h2[data-astro-cid-4dw4sxam]{margin-bottom:var(--space-2xs);font-family:var(--font-mono-stack);font-variation-settings:normal;font-weight:500}.stack[data-astro-cid-4dw4sxam] ul[data-astro-cid-4dw4sxam],.links[data-astro-cid-4dw4sxam]{gap:.4rem var(--space-s);flex-wrap:wrap;padding:0;list-style:none;display:flex}.stack[data-astro-cid-4dw4sxam] ul[data-astro-cid-4dw4sxam]{gap:.4rem}.toc[data-astro-cid-7k3pnqyz] ol[data-astro-cid-7k3pnqyz]{padding:0;list-style:none}.toc[data-astro-cid-7k3pnqyz] a[data-astro-cid-7k3pnqyz]{color:var(--ink-soft);line-height:1.4;text-decoration:none;display:block}.toc[data-astro-cid-7k3pnqyz] a[data-astro-cid-7k3pnqyz]:hover{color:var(--accent)}.toc-inline[data-astro-cid-7k3pnqyz]{margin-bottom:var(--space-l);border-block:1px solid var(--rule)}.toc-inline[data-astro-cid-7k3pnqyz] summary[data-astro-cid-7k3pnqyz]{padding-block:var(--space-xs);cursor:pointer;justify-content:space-between;list-style:none;display:flex}.toc-inline[data-astro-cid-7k3pnqyz] summary[data-astro-cid-7k3pnqyz]::-webkit-details-marker{display:none}.toc-inline[data-astro-cid-7k3pnqyz] summary[data-astro-cid-7k3pnqyz]:after{content:"+";color:var(--accent);transition:rotate .2s var(--ease-out);font-size:1rem;line-height:1}.toc-inline[data-astro-cid-7k3pnqyz] details[data-astro-cid-7k3pnqyz][open] summary[data-astro-cid-7k3pnqyz]:after{rotate:45deg}.toc-inline[data-astro-cid-7k3pnqyz] ol[data-astro-cid-7k3pnqyz]{padding-bottom:var(--space-s);font-size:var(--step--1)}.toc-inline[data-astro-cid-7k3pnqyz] li[data-astro-cid-7k3pnqyz]+li[data-astro-cid-7k3pnqyz]{margin-top:.45rem}.toc-inline[data-astro-cid-7k3pnqyz] .sub[data-astro-cid-7k3pnqyz]{padding-left:1rem}.toc-rail[data-astro-cid-7k3pnqyz]{top:var(--space-l);max-height:calc(100dvh - 2 * var(--space-l));overscroll-behavior:contain;scrollbar-width:thin;position:sticky;overflow-y:auto}.toc-rail[data-astro-cid-7k3pnqyz] .label[data-astro-cid-7k3pnqyz]{margin-bottom:var(--space-xs)}.toc-rail[data-astro-cid-7k3pnqyz] ol[data-astro-cid-7k3pnqyz]{border-left:1px solid var(--rule);font-size:.8125rem}.toc-rail[data-astro-cid-7k3pnqyz] a[data-astro-cid-7k3pnqyz]{transition:color .15s var(--ease-out), border-color .15s var(--ease-out);border-left:2px solid #0000;margin-left:-1px;padding:.3rem 0 .3rem .9rem}.toc-rail[data-astro-cid-7k3pnqyz] .sub[data-astro-cid-7k3pnqyz] a[data-astro-cid-7k3pnqyz]{padding-left:1.7rem;font-size:.95em}.toc[data-astro-cid-7k3pnqyz] a[data-astro-cid-7k3pnqyz][aria-current]{color:var(--ink);border-left-color:var(--accent)}.toc-inline[data-astro-cid-7k3pnqyz] a[data-astro-cid-7k3pnqyz][aria-current]{color:var(--accent)}.progress[data-astro-cid-ssdmjifj]{z-index:50;background:var(--accent);transform-origin:0;pointer-events:none;height:3px;position:fixed;inset:0 0 auto;scale:0 1}@supports (animation-timeline:scroll()){.progress[data-astro-cid-ssdmjifj]{animation:linear both progress scroll(root)}}@supports not (animation-timeline:scroll()){.progress[data-astro-cid-ssdmjifj]{display:none}}@keyframes progress{to{scale:1}}.post-page[data-astro-cid-ssdmjifj]>[data-astro-cid-ssdmjifj]{width:min(100% - 2 * var(--gutter), var(--measure));margin-inline:auto}.post-head[data-astro-cid-ssdmjifj]{padding-block:var(--space-2xl) var(--space-l)}.eyebrow[data-astro-cid-ssdmjifj]{gap:var(--space-2xs) var(--space-s);flex-wrap:wrap}.eyebrow[data-astro-cid-ssdmjifj] a[data-astro-cid-ssdmjifj]{color:var(--accent);text-decoration:none}.case[data-astro-cid-ssdmjifj]:before{content:"◆ ";color:var(--accent)}h1[data-astro-cid-ssdmjifj]{margin-top:var(--space-s);font-size:var(--step-4);letter-spacing:-.02em;line-height:1.08}[data-astro-cid-ssdmjifj]:lang(zh) h1[data-astro-cid-ssdmjifj]{letter-spacing:0;line-height:1.25}.lede[data-astro-cid-ssdmjifj]{margin-top:var(--space-m);font-size:var(--step-1);color:var(--ink-soft);line-height:1.5}.meta[data-astro-cid-ssdmjifj]{align-items:center;gap:var(--space-2xs) var(--space-m);margin-top:var(--space-m);padding-top:var(--space-s);border-top:1px solid var(--rule);flex-wrap:wrap;display:flex}.meta[data-astro-cid-ssdmjifj] time[data-astro-cid-ssdmjifj]{font-variant-numeric:tabular-nums}.translation[data-astro-cid-ssdmjifj]{color:var(--accent);text-decoration:none}.copy[data-astro-cid-ssdmjifj]{border:1px solid var(--rule-strong);font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--ink-soft);background:0 0;border-radius:999px;margin-left:auto;padding:.2rem .6rem}.copy[data-astro-cid-ssdmjifj]:hover,.copy[data-astro-cid-ssdmjifj][data-state=copied]{border-color:var(--accent);color:var(--accent)}.toc-slot-rail[data-astro-cid-ssdmjifj]{display:none}.post-foot[data-astro-cid-ssdmjifj]{gap:var(--space-m);margin-top:var(--space-xl);padding-top:var(--space-m);border-top:1px solid var(--rule);display:grid}.tags[data-astro-cid-ssdmjifj]{flex-wrap:wrap;gap:.5rem;padding:0;list-style:none;display:flex}.source[data-astro-cid-ssdmjifj]{color:var(--ink-muted);justify-self:start}.post-nav[data-astro-cid-ssdmjifj]{gap:var(--space-s);margin-top:var(--space-xl);grid-template-columns:repeat(2,minmax(0,1fr));display:grid}.post-nav[data-astro-cid-ssdmjifj] a[data-astro-cid-ssdmjifj]{padding:var(--space-s);border:1px solid var(--rule);border-radius:var(--radius);transition:border-color .2s var(--ease-out), background-color .2s var(--ease-out);gap:.35rem;text-decoration:none;display:grid}.post-nav[data-astro-cid-ssdmjifj] a[data-astro-cid-ssdmjifj]:hover{border-color:var(--accent);background:var(--accent-wash)}.newer[data-astro-cid-ssdmjifj]{text-align:end;grid-column:2}.nav-title[data-astro-cid-ssdmjifj]{font-family:var(--font-display-stack);font-size:var(--step-0);color:var(--ink);text-wrap:balance;font-weight:600;line-height:1.3}.related[data-astro-cid-ssdmjifj]{margin-top:var(--space-2xl)}@media (width<=40rem){.post-nav[data-astro-cid-ssdmjifj]{grid-template-columns:minmax(0,1fr)}.newer[data-astro-cid-ssdmjifj]{grid-column:auto}.copy[data-astro-cid-ssdmjifj]{margin-left:0}}@media (width>=75rem){.post-page[data-astro-cid-ssdmjifj]{grid-template-columns:minmax(0, var(--measure)) 14rem;justify-content:center;column-gap:var(--space-xl);width:min(100% - 2 * var(--gutter), var(--wide));margin-inline:auto;display:grid}.post-page[data-astro-cid-ssdmjifj]>[data-astro-cid-ssdmjifj]{grid-column:1;width:auto;margin-inline:0}.post-page[data-astro-cid-ssdmjifj]>.toc-slot-rail[data-astro-cid-ssdmjifj]{padding-top:var(--space-2xl);grid-area:1/2;display:block}.toc-slot-inline[data-astro-cid-ssdmjifj]{display:none}}
+.ledger[data-astro-cid-oxezsu4a]{border-top:1px solid var(--rule);padding:0;list-style:none}.row[data-astro-cid-oxezsu4a]{gap:var(--space-2xs) var(--space-m);padding:var(--space-s) var(--space-2xs);border-bottom:1px solid var(--rule);transition:background-color .2s var(--ease-out);grid-template-columns:6.5rem minmax(0,1fr) auto;align-items:baseline;display:grid;position:relative}.row[data-astro-cid-oxezsu4a]:hover,.row[data-astro-cid-oxezsu4a]:focus-within{background:var(--accent-wash)}.date[data-astro-cid-oxezsu4a]{font-variant-numeric:tabular-nums}.title[data-astro-cid-oxezsu4a]{font-family:var(--font-display-stack);font-size:var(--step-1);text-wrap:balance;color:var(--ink);font-weight:500;line-height:1.3;text-decoration:none}.title[data-astro-cid-oxezsu4a]:after{content:"";position:absolute;inset:0}.row[data-astro-cid-oxezsu4a]:hover .title[data-astro-cid-oxezsu4a]{color:var(--accent)}.title[data-astro-cid-oxezsu4a]:focus-visible{outline:none}.row[data-astro-cid-oxezsu4a]:has(.title:focus-visible){outline:2px solid var(--accent);outline-offset:-2px}.summary[data-astro-cid-oxezsu4a]{max-width:42rem;font-size:var(--step--1);color:var(--ink-soft);-webkit-line-clamp:2;-webkit-box-orient:vertical;margin-top:.35rem;line-height:1.6;display:-webkit-box;overflow:hidden}.meta[data-astro-cid-oxezsu4a]{white-space:nowrap;flex-wrap:wrap;justify-content:end;gap:.35rem .9rem;display:flex}.case[data-astro-cid-oxezsu4a]{color:var(--accent)}.case[data-astro-cid-oxezsu4a]:before{content:"◆ "}@media (width<=40rem){.row[data-astro-cid-oxezsu4a]{grid-template-columns:minmax(0,1fr);gap:.3rem;padding-inline:0}.date[data-astro-cid-oxezsu4a]{order:-1}.meta[data-astro-cid-oxezsu4a]{justify-content:start}}
+.prose{--flow:1.25em;color:var(--ink)}.prose>*+*{margin-top:var(--flow)}.prose :where(h2,h3,h4,h5,h6){scroll-margin-top:var(--space-l);position:relative}.prose h2{font-size:var(--step-2);letter-spacing:-.01em;margin-top:2.4em}.prose h3{font-size:var(--step-1);margin-top:2em}.prose :where(h4,h5,h6){font-size:var(--step-0);font-family:var(--font-body-stack);margin-top:1.8em;font-weight:700}.prose :where(h2,h3,h4,h5,h6)+*{margin-top:.75em}.heading-anchor{color:var(--ink-muted);opacity:0;transition:opacity .15s var(--ease-out);margin-left:.35em;text-decoration:none}.heading-anchor:before{content:"§";font-family:var(--font-body-stack);font-weight:400}:where(h2,h3,h4,h5,h6):hover>.heading-anchor,.heading-anchor:focus-visible{opacity:1}@media (hover:none){.heading-anchor{opacity:.45}}.prose a{color:var(--accent);text-decoration-color:color-mix(in oklab, var(--accent) 40%, transparent)}.prose a:hover{color:var(--accent-strong);text-decoration-color:currentColor}.prose a.external:after{content:"↗";vertical-align:.15em;margin-left:.1em;font-size:.75em;text-decoration:none;display:inline-block}.prose strong{font-weight:700}.prose mark{background:linear-gradient(to top, var(--mark) 0 55%, transparent 55%);color:inherit;padding-inline:.05em}.prose :where(ul,ol){padding-left:1.4em}.prose li+li,.prose li>:where(ul,ol){margin-top:.4em}.prose ul>li::marker{color:var(--accent)}.prose ol>li::marker{font-family:var(--font-mono-stack);color:var(--ink-muted);font-size:.85em}.prose li>p+p{margin-top:.6em}.prose li:has(>input[type=checkbox]){margin-left:-1.4em;list-style:none}.prose input[type=checkbox]{accent-color:var(--accent);margin-right:.4em}.prose blockquote{border-left:3px solid var(--accent);color:var(--ink-soft);padding:.1em 0 .1em 1.25em;font-style:italic}.prose blockquote>*+*{margin-top:.8em}:lang(zh) .prose blockquote{font-style:normal}.prose hr{text-align:center;border:0;height:1em;margin-block:3em;overflow:visible}.prose hr:before{content:"⁂";color:var(--accent);letter-spacing:.4em;font-size:1.1em}.prose :not(pre)>code{background:var(--paper-sunk);overflow-wrap:anywhere;border-radius:3px;padding:.1em .35em;font-size:.82em}.prose a code{color:inherit}.prose kbd{border:1px solid var(--rule-strong);border-bottom-width:2px;border-radius:3px;padding:.05em .4em;font-size:.8em}.prose .expressive-code{margin-top:1.6em;margin-bottom:1.6em}@media (width<=47.99rem){.prose .expressive-code{margin-inline:calc(-1 * var(--gutter))}.prose .expressive-code .frame{border-radius:0}}.table-scroll{overscroll-behavior-x:contain;border-block:1px solid var(--ink);background:linear-gradient(to right, var(--paper) 30%, transparent) left / 2rem 100% no-repeat local, linear-gradient(to left, var(--paper) 30%, transparent) right / 2rem 100% no-repeat local, radial-gradient(farthest-side at 0 50%, #0000001f, transparent) left / .6rem 100% no-repeat scroll, radial-gradient(farthest-side at 100% 50%, #0000001f, transparent) right / .6rem 100% no-repeat scroll;overflow-x:auto}.prose table{border-collapse:collapse;font-variant-numeric:tabular-nums;width:100%;font-size:.88em;line-height:1.5}.prose :where(th,td){text-align:left;vertical-align:top;border-bottom:1px solid var(--rule);min-width:8ch;padding:.6em .9em}.prose th{font-family:var(--font-mono-stack);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);border-bottom-color:var(--rule-strong);white-space:nowrap;font-size:.78em;font-weight:600}:lang(zh) .prose th{text-transform:none}.prose tr:last-child>td{border-bottom:0}.prose :where(th,td)[align=right]{text-align:right}.prose :where(th,td)[align=center]{text-align:center}.prose .figure,.prose figure{margin-block:2em}.prose .figure img,.prose figure img{border-radius:var(--radius);background:var(--paper-sunk);margin-inline:auto}.prose figcaption{font-size:var(--step--1);color:var(--ink-muted);text-align:center;margin-top:.75em;line-height:1.5}.prose p>img{vertical-align:middle;display:inline-block}.prose .math-display,.prose .katex-display{padding-block:.25em;overflow:auto hidden}.prose .katex{font-size:1.05em}.video{margin-block:2em}.video-facade{aspect-ratio:16/9;border-radius:var(--radius);background:#000;display:block;position:relative;overflow:hidden}.video-facade img{object-fit:cover;opacity:.85;width:100%;height:100%;transition:opacity .2s var(--ease-out)}.video-facade:hover img{opacity:1}.video-play{background:var(--accent);border-radius:.8rem;width:4.5rem;height:3.25rem;position:absolute;inset:50% auto auto 50%;translate:-50% -50%;box-shadow:0 8px 24px #00000059}.video-play:before{content:"";border-style:solid;border-width:.7rem 0 .7rem 1.15rem;border-color:transparent transparent transparent var(--on-accent);position:absolute;inset:50% auto auto 54%;translate:-50% -50%}.video iframe{aspect-ratio:16/9;border-radius:var(--radius);border:0;width:100%;display:block}.prose .footnotes{border-top:1px solid var(--rule);font-size:var(--step--1);color:var(--ink-soft);margin-top:3em;padding-top:1em}.prose .footnotes h2{font-size:var(--step--1);font-family:var(--font-mono-stack);text-transform:uppercase;letter-spacing:.08em;margin-top:0}.prose sup a{font-family:var(--font-mono-stack);font-size:.8em;text-decoration:none}.prose details{border:1px solid var(--rule);border-radius:var(--radius);background:var(--paper-raised);padding:.8em 1em}.prose summary{cursor:pointer;font-weight:600}
+.search[data-astro-cid-e66w4awt]{width:min(100% - 2 * var(--gutter), 40rem);border:1px solid var(--rule-strong);background:var(--paper-raised);max-height:min(80dvh,44rem);color:var(--ink);box-shadow:var(--shadow-lift), 0 30px 80px -30px #00000073;border-radius:6px;margin:12dvh auto auto;padding:0;overflow:hidden}.search[data-astro-cid-e66w4awt][open]{animation:rise .18s var(--ease-out)}.search[data-astro-cid-e66w4awt]::backdrop{backdrop-filter:blur(3px);background:#14100c61}@keyframes rise{0%{opacity:0;translate:0 8px}}.panel[data-astro-cid-e66w4awt]{max-height:inherit;flex-direction:column;display:flex}.field[data-astro-cid-e66w4awt]{align-items:center;gap:var(--space-xs);padding:var(--space-s) var(--space-m);border-bottom:1px solid var(--rule);color:var(--ink-muted);display:flex}.field[data-astro-cid-e66w4awt] input[data-astro-cid-e66w4awt]{min-width:0;font-family:var(--font-body-stack);font-size:var(--step-1);color:var(--ink);background:0 0;border:0;outline:none;flex:1;padding:.25rem 0}.field[data-astro-cid-e66w4awt] input[data-astro-cid-e66w4awt]::placeholder{color:var(--ink-muted)}.field[data-astro-cid-e66w4awt] input[data-astro-cid-e66w4awt]::-webkit-search-cancel-button{display:none}.close[data-astro-cid-e66w4awt]{border:1px solid var(--rule-strong);font-family:var(--font-mono-stack);color:var(--ink-muted);background:0 0;border-bottom-width:2px;border-radius:3px;padding:.15rem .45rem;font-size:.7rem}.status[data-astro-cid-e66w4awt]:empty{display:none}.status[data-astro-cid-e66w4awt]{padding:var(--space-xs) var(--space-m) 0}.results[data-astro-cid-e66w4awt]{overscroll-behavior:contain;padding:var(--space-2xs);flex:1;list-style:none;overflow-y:auto}.results[data-astro-cid-e66w4awt]:empty{display:none}.results[data-astro-cid-e66w4awt] a{padding:var(--space-xs) var(--space-s);border-radius:var(--radius);color:var(--ink);outline-offset:-2px;text-decoration:none;display:block}.results[data-astro-cid-e66w4awt] a:hover,.results[data-astro-cid-e66w4awt] a:focus-visible{background:var(--accent-wash)}.results[data-astro-cid-e66w4awt] .hit-title{font-family:var(--font-display-stack);font-size:var(--step-0);font-weight:600;line-height:1.3;display:block}.results[data-astro-cid-e66w4awt] a:hover .hit-title,.results[data-astro-cid-e66w4awt] a:focus-visible .hit-title{color:var(--accent)}.results[data-astro-cid-e66w4awt] .hit-excerpt{font-size:var(--step--1);color:var(--ink-soft);margin-top:.25rem;line-height:1.5;display:block}.results[data-astro-cid-e66w4awt] mark{background:var(--mark);color:inherit}.hint[data-astro-cid-e66w4awt]{padding:var(--space-2xs) var(--space-m);border-top:1px solid var(--rule);font-size:.65rem}@media (hover:none){.hint[data-astro-cid-e66w4awt]{display:none}}.seal[data-astro-cid-v3e57phd]{flex:none}.site-footer[data-astro-cid-nns7i3if]{margin-top:var(--space-2xl);padding-block:var(--space-xl) var(--space-l);border-top:1px solid var(--ink)}.grid[data-astro-cid-nns7i3if]{gap:var(--space-m) var(--space-l);grid-template-columns:1fr auto;align-items:center;display:grid}.sign[data-astro-cid-nns7i3if]{align-items:center;gap:var(--space-s);display:flex}.sign[data-astro-cid-nns7i3if] p[data-astro-cid-nns7i3if]{gap:.15rem;line-height:1.2;display:grid}.name[data-astro-cid-nns7i3if]{font-family:var(--font-display-stack);font-size:var(--step-1);font-weight:600}.links[data-astro-cid-nns7i3if]{gap:var(--space-2xs) var(--space-m);font-family:var(--font-mono-stack);font-size:var(--step--1);flex-wrap:wrap;padding:0;list-style:none;display:flex}.links[data-astro-cid-nns7i3if] a[data-astro-cid-nns7i3if]{color:var(--ink-soft);text-decoration:none}.links[data-astro-cid-nns7i3if] a[data-astro-cid-nns7i3if]:hover{color:var(--accent)}.footnav[data-astro-cid-nns7i3if]{padding-top:var(--space-xs);border-top:1px solid var(--rule);grid-column:1/-1}.footnav[data-astro-cid-nns7i3if] ul[data-astro-cid-nns7i3if]{gap:var(--space-2xs) var(--space-m);font-family:var(--font-mono-stack);font-size:var(--step--1);flex-wrap:wrap;padding:0;list-style:none;display:flex}.footnav[data-astro-cid-nns7i3if] a[data-astro-cid-nns7i3if]{color:var(--ink-muted);text-decoration:none}.footnav[data-astro-cid-nns7i3if] a[data-astro-cid-nns7i3if]:hover{color:var(--accent)}.colophon[data-astro-cid-nns7i3if]{border-top:0;grid-column:1;padding-top:0}@media (width<=40rem){.footnav[data-astro-cid-nns7i3if],.colophon[data-astro-cid-nns7i3if]{grid-column:1/-1}}.colophon[data-astro-cid-nns7i3if]{padding-top:var(--space-s);border-top:1px solid var(--rule);font-size:var(--step--1);color:var(--ink-muted)}.top[data-astro-cid-nns7i3if]{padding-top:var(--space-s);border-top:1px solid var(--rule);color:var(--ink-muted);justify-self:end}.top[data-astro-cid-nns7i3if]:after{content:" ↑"}.top[data-astro-cid-nns7i3if]:hover:after{transform:translateY(-3px)}@media (width<=40rem){.grid[data-astro-cid-nns7i3if]{grid-template-columns:1fr}.top[data-astro-cid-nns7i3if]{border-top:0;justify-self:start;padding-top:0}}.site-header[data-astro-cid-fzpbxy5g]{z-index:10;border-bottom:1px solid var(--rule);background:color-mix(in oklab, var(--paper) 88%, transparent);position:relative}.site-header[data-astro-cid-fzpbxy5g]:after{content:"";border-bottom:1px solid var(--rule);pointer-events:none;position:absolute;inset:auto 0 -4px}.bar[data-astro-cid-fzpbxy5g]{align-items:center;column-gap:var(--space-m);grid-template-columns:auto 1fr auto;grid-template-areas:"brand nav tools";min-height:4.25rem;display:grid}.brand[data-astro-cid-fzpbxy5g]{color:var(--ink);grid-area:brand;align-items:center;gap:.7rem;text-decoration:none;display:flex}.brand[data-astro-cid-fzpbxy5g]:hover{color:var(--ink)}.brand[data-astro-cid-fzpbxy5g] .brand-seal{transition:rotate .35s var(--ease-out)}.brand[data-astro-cid-fzpbxy5g]:hover .brand-seal{rotate:-6deg}.brand-text[data-astro-cid-fzpbxy5g]{line-height:1.1;display:grid}.brand-name[data-astro-cid-fzpbxy5g]{font-family:var(--font-display-stack);letter-spacing:-.01em;font-variation-settings:"SOFT" 50, "WONK" 1;font-size:1.2rem;font-weight:600}.brand-tagline[data-astro-cid-fzpbxy5g]{margin-top:.2rem;font-size:.625rem}.nav[data-astro-cid-fzpbxy5g]{grid-area:nav;justify-self:end}.nav[data-astro-cid-fzpbxy5g] ul[data-astro-cid-fzpbxy5g]{gap:var(--space-3xs);padding:0;list-style:none;display:flex}.nav[data-astro-cid-fzpbxy5g] a[data-astro-cid-fzpbxy5g]{font-family:var(--font-mono-stack);font-size:var(--step--1);letter-spacing:.02em;color:var(--ink-soft);padding:.45rem .7rem;text-decoration:none;display:block;position:relative}.nav[data-astro-cid-fzpbxy5g] a[data-astro-cid-fzpbxy5g]:after{content:"";background:var(--accent);transform-origin:0;height:2px;transition:scale .25s var(--ease-out);position:absolute;inset:auto .7rem .2rem;scale:0 1}.nav[data-astro-cid-fzpbxy5g] a[data-astro-cid-fzpbxy5g]:hover{color:var(--ink)}.nav[data-astro-cid-fzpbxy5g] a[data-astro-cid-fzpbxy5g]:hover:after,.nav[data-astro-cid-fzpbxy5g] a[data-astro-cid-fzpbxy5g][aria-current]:after{scale:1}.nav[data-astro-cid-fzpbxy5g] a[data-astro-cid-fzpbxy5g][aria-current]{color:var(--ink)}.nav[data-astro-cid-fzpbxy5g] .nav-lang[data-astro-cid-fzpbxy5g]{margin-left:var(--space-2xs);padding-left:var(--space-s);border-left:1px solid var(--rule);align-items:center;display:flex}.nav[data-astro-cid-fzpbxy5g] .nav-lang[data-astro-cid-fzpbxy5g] a[data-astro-cid-fzpbxy5g]{color:var(--ink-muted);padding-inline:.5rem}.nav[data-astro-cid-fzpbxy5g] .nav-lang[data-astro-cid-fzpbxy5g] a[data-astro-cid-fzpbxy5g]:after{content:none}.nav[data-astro-cid-fzpbxy5g] .nav-lang[data-astro-cid-fzpbxy5g] a[data-astro-cid-fzpbxy5g]:hover{color:var(--ink)}.tools[data-astro-cid-fzpbxy5g]{align-items:center;gap:var(--space-3xs);padding-left:var(--space-s);border-left:1px solid var(--rule);grid-area:tools;display:flex}.tool[data-astro-cid-fzpbxy5g]{border-radius:var(--radius);min-width:2.5rem;height:2.5rem;color:var(--ink-soft);font-family:var(--font-mono-stack);font-size:var(--step--1);transition:color .15s var(--ease-out), border-color .15s var(--ease-out), background-color .15s var(--ease-out);background:0 0;border:1px solid #0000;justify-content:center;align-items:center;gap:.45rem;padding:0 .6rem;text-decoration:none;display:inline-flex}.tool[data-astro-cid-fzpbxy5g]:hover{color:var(--ink);border-color:var(--rule-strong);background:var(--paper-raised)}.search-trigger[data-astro-cid-fzpbxy5g]{border-color:var(--rule)}.search-kbd[data-astro-cid-fzpbxy5g]{border:1px solid var(--rule-strong);min-width:1.35rem;height:1.35rem;color:var(--ink-muted);border-bottom-width:2px;border-radius:3px;place-items:center;font-size:.7rem;display:inline-grid}.lang-switch[data-astro-cid-fzpbxy5g]{font-size:.8rem}.icon-sun[data-astro-cid-fzpbxy5g]{display:none}[data-theme=dark] .icon-sun[data-astro-cid-fzpbxy5g]{display:block}[data-theme=dark] .icon-moon[data-astro-cid-fzpbxy5g]{display:none}@media (width<=55.99rem){.bar[data-astro-cid-fzpbxy5g]{min-height:0;padding-top:var(--space-xs);grid-template-columns:1fr auto;grid-template-areas:"brand tools""nav nav"}.tools[data-astro-cid-fzpbxy5g]{border-left:0;padding-left:0}.nav[data-astro-cid-fzpbxy5g]{margin-top:var(--space-2xs);justify-self:stretch;margin-inline:-.7rem}.nav[data-astro-cid-fzpbxy5g] ul[data-astro-cid-fzpbxy5g]{justify-content:space-between}.search-label[data-astro-cid-fzpbxy5g],.search-kbd[data-astro-cid-fzpbxy5g]{display:none}.search-trigger[data-astro-cid-fzpbxy5g]{border-color:#0000}}@media (width<=27.99rem){.brand-tagline[data-astro-cid-fzpbxy5g]{display:none}}:root{color-scheme:light;--paper:#f4f1ea;--paper-raised:#faf8f3;--paper-sunk:#ebe6db;--ink:#1c1a17;--ink-soft:#45403a;--ink-muted:#686157;--rule:#dcd5c8;--rule-strong:#b8ae9d;--accent:#b8321f;--accent-strong:#93240f;--on-accent:#fbf6ee;--accent-wash:#b8321f14;--seal-red:#b8321f;--seal-paper:#f4f1ea;--mark:#ecc45473;--selection:#b8321f2e;--grain-opacity:.35;--shadow-lift:0 1px 0 #1c1a170a, 0 12px 32px -18px #3a281659;--font-display-stack:var(--font-display);--font-body-stack:var(--font-body);--font-mono-stack:var(--font-mono);--step--2:.75rem;--step--1:clamp(.8125rem, .79rem + .1vw, .875rem);--step-0:clamp(1.0625rem, 1.02rem + .21vw, 1.1875rem);--step-1:clamp(1.25rem, 1.18rem + .35vw, 1.5rem);--step-2:clamp(1.5rem, 1.36rem + .62vw, 1.95rem);--step-3:clamp(1.875rem, 1.6rem + 1.25vw, 2.75rem);--step-4:clamp(2.25rem, 1.8rem + 2.2vw, 3.75rem);--step-5:clamp(2.75rem, 1.9rem + 4.2vw, 5.5rem);--space-3xs:.25rem;--space-2xs:.5rem;--space-xs:.75rem;--space-s:1rem;--space-m:1.5rem;--space-l:2.25rem;--space-xl:3.5rem;--space-2xl:clamp(4rem, 3rem + 5vw, 7rem);--gutter:1.25rem;--measure:45rem;--wide:74rem;--radius:4px;--ease-out:cubic-bezier(.2, .7, .2, 1)}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){color-scheme:dark;--paper:#121110;--paper-raised:#1a1917;--paper-sunk:#0c0b0a;--ink:#ece6da;--ink-soft:#c7bfb1;--ink-muted:#9a9185;--rule:#2b2824;--rule-strong:#4a433a;--accent:#ff7a59;--accent-strong:#ffa184;--on-accent:#1a0e0a;--accent-wash:#ff7a591a;--seal-red:#c23a24;--seal-paper:#f6eee2;--mark:#ecc45447;--selection:#ff7a5947;--grain-opacity:.18;--shadow-lift:0 1px 0 #0000004d, 0 16px 40px -20px #000c}}:root[data-theme=dark]{color-scheme:dark;--paper:#121110;--paper-raised:#1a1917;--paper-sunk:#0c0b0a;--ink:#ece6da;--ink-soft:#c7bfb1;--ink-muted:#9a9185;--rule:#2b2824;--rule-strong:#4a433a;--accent:#ff7a59;--accent-strong:#ffa184;--on-accent:#1a0e0a;--accent-wash:#ff7a591a;--seal-red:#c23a24;--seal-paper:#f6eee2;--mark:#ecc45447;--selection:#ff7a5947;--grain-opacity:.18;--shadow-lift:0 1px 0 #0000004d, 0 16px 40px -20px #000c}@font-face{font-family:Fraunces Fallback;src:local(Times New Roman),local(TimesNewRomanPSMT),local(Liberation Serif),local(Tinos);font-style:normal;font-weight:100 449;size-adjust:115.6%;ascent-override:84.6%;descent-override:22.06%;line-gap-override:0%}@font-face{font-family:Fraunces Fallback;src:local(Times New Roman),local(TimesNewRomanPSMT),local(Liberation Serif),local(Tinos);font-style:normal;font-weight:450 549;size-adjust:117.3%;ascent-override:83.38%;descent-override:21.74%;line-gap-override:0%}@font-face{font-family:Fraunces Fallback;src:local(Times New Roman Bold),local(TimesNewRomanPS-BoldMT),local(Liberation Serif Bold),local(Tinos Bold);font-style:normal;font-weight:550 900;size-adjust:112.2%;ascent-override:87.17%;descent-override:22.73%;line-gap-override:0%}@font-face{font-family:Fraunces Fallback;src:local(Times New Roman Italic),local(TimesNewRomanPS-ItalicMT),local(Liberation Serif Italic),local(Tinos Italic);font-style:italic;font-weight:100 549;size-adjust:109.4%;ascent-override:89.4%;descent-override:23.31%;line-gap-override:0%}@font-face{font-family:Fraunces Fallback;src:local(Times New Roman Bold Italic),local(TimesNewRomanPS-BoldItalicMT),local(Liberation Serif Bold Italic),local(Tinos Bold Italic);font-style:italic;font-weight:550 900;size-adjust:111.5%;ascent-override:87.71%;descent-override:22.87%;line-gap-override:0%}@font-face{font-family:Newsreader Fallback;src:local(Times New Roman),local(TimesNewRomanPSMT),local(Liberation Serif),local(Tinos);font-style:normal;font-weight:100 549;size-adjust:104.5%;ascent-override:70.33%;descent-override:25.36%;line-gap-override:0%}@font-face{font-family:Newsreader Fallback;src:local(Times New Roman Bold),local(TimesNewRomanPS-BoldMT),local(Liberation Serif Bold),local(Tinos Bold);font-style:normal;font-weight:550 900;size-adjust:103.6%;ascent-override:70.95%;descent-override:25.58%;line-gap-override:0%}@font-face{font-family:Newsreader Fallback;src:local(Times New Roman Italic),local(TimesNewRomanPS-ItalicMT),local(Liberation Serif Italic),local(Tinos Italic);font-style:italic;font-weight:100 549;size-adjust:98.9%;ascent-override:74.32%;descent-override:26.79%;line-gap-override:0%}@font-face{font-family:Newsreader Fallback;src:local(Times New Roman Bold Italic),local(TimesNewRomanPS-BoldItalicMT),local(Liberation Serif Bold Italic),local(Tinos Bold Italic);font-style:italic;font-weight:550 900;size-adjust:104.2%;ascent-override:70.54%;descent-override:25.43%;line-gap-override:0%}@font-face{font-family:Fraunces Hero Fallback;src:local(Times New Roman),local(TimesNewRomanPSMT),local(Liberation Serif),local(Tinos);font-style:normal;font-weight:100 549;size-adjust:118.5%;ascent-override:82.53%;descent-override:21.52%;line-gap-override:0%}@font-face{font-family:Fraunces Hero Fallback;src:local(Times New Roman Italic),local(TimesNewRomanPS-ItalicMT),local(Liberation Serif Italic),local(Tinos Italic);font-style:italic;font-weight:100 549;size-adjust:109.5%;ascent-override:89.32%;descent-override:23.29%;line-gap-override:0%}@view-transition{navigation:auto}*,:before,:after{box-sizing:border-box}*{margin:0}html{-webkit-text-size-adjust:none;text-size-adjust:none;scroll-padding-top:var(--space-l);background-color:var(--paper);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .38 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:220px}@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}body{min-height:100dvh;color:var(--ink);font-family:var(--font-body-stack);font-size:var(--step-0);font-optical-sizing:auto;font-kerning:normal;font-variant-ligatures:common-ligatures;text-rendering:optimizelegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;hanging-punctuation:first allow-end last;flex-direction:column;line-height:1.65;display:flex}:lang(zh) body,body:lang(zh){letter-spacing:.01em;line-height:1.85}html:before{content:"";z-index:-1;pointer-events:none;background:var(--paper);opacity:calc(1 - var(--grain-opacity));position:fixed;inset:0}::selection{background:var(--selection)}img,picture,video,canvas,svg{max-width:100%;display:block}img{height:auto}input,button,textarea,select{font:inherit;color:inherit}button{cursor:pointer}p,h1,h2,h3,h4,h5,h6,li,dd,figcaption,blockquote{overflow-wrap:break-word}h1,h2,h3,h4{font-family:var(--font-display-stack);text-wrap:balance;font-variation-settings:"SOFT" 30, "WONK" 0;font-weight:600;line-height:1.15}p,li{text-wrap:pretty}a{color:inherit;text-underline-offset:.18em;text-decoration-thickness:.06em;text-decoration-color:color-mix(in oklab, currentColor 35%, transparent);transition:color .15s var(--ease-out), text-decoration-color .15s var(--ease-out)}a:hover{color:var(--accent);text-decoration-color:currentColor}:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}code,kbd,samp,pre{font-family:var(--font-mono-stack);font-size:.88em}hr{border:0;border-top:1px solid var(--rule)}.visually-hidden{clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;position:absolute!important;overflow:hidden!important}.skip-link{top:var(--space-s);left:var(--space-s);z-index:100;padding:var(--space-2xs) var(--space-s);background:var(--ink);color:var(--paper);font-family:var(--font-mono-stack);font-size:var(--step--1);text-decoration:none;position:absolute;transform:translateY(-200%)}.skip-link:focus{color:var(--paper);transform:none}.wrap{width:min(100% - 2 * var(--gutter), var(--wide));margin-inline:auto}.measure{width:min(100% - 2 * var(--gutter), var(--measure));margin-inline:auto}main{flex:1}.label{font-family:var(--font-mono-stack);font-size:var(--step--2);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);font-weight:500}:lang(zh) .label{letter-spacing:.12em}.eyebrow{align-items:center;gap:var(--space-2xs);display:inline-flex}.eyebrow:before{content:"";background:var(--accent);width:1.5rem;height:1px}.page-head{padding-block:var(--space-2xl) var(--space-xl)}.page-head h1{font-size:var(--step-4);letter-spacing:-.02em;margin-top:var(--space-s)}.page-head .lede{margin-top:var(--space-m);max-width:38rem;font-size:var(--step-1);color:var(--ink-soft);line-height:1.5}.section-head{justify-content:space-between;align-items:baseline;gap:var(--space-s);padding-bottom:var(--space-xs);border-bottom:1px solid var(--ink);margin-bottom:var(--space-m);display:flex}.section-head h2{font-size:var(--step-2)}.arrow-link{font-family:var(--font-mono-stack);font-size:var(--step--1);white-space:nowrap;text-decoration:none}.arrow-link:after{content:"→";transition:transform .2s var(--ease-out);margin-left:.35em;display:inline-block}.arrow-link:hover:after{transform:translate(3px)}.chip{border:1px solid var(--rule-strong);font-family:var(--font-mono-stack);font-size:var(--step--2);letter-spacing:.02em;color:var(--ink-soft);white-space:nowrap;border-radius:999px;align-items:center;gap:.35em;padding:.1rem .55rem;line-height:1.7;text-decoration:none;display:inline-flex}a.chip:hover{border-color:var(--accent);color:var(--accent)}.chip[aria-current=page],.chip[aria-pressed=true]{background:var(--ink);border-color:var(--ink);color:var(--paper)}@media (prefers-reduced-motion:reduce){*,:before,:after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}@view-transition{navigation:none}}::view-transition-old(root),::view-transition-new(root){animation-duration:.18s}@media print{html{background:#fff}html:before,.site-header,.site-footer,.toc,.post-nav,.heading-anchor{display:none!important}}
+</style><script type="module" src="/_astro/page.BDh2vuYI.js"></script></head> <body> <a class="skip-link" href="#main"> 跳到正文 </a> <header class="site-header" data-astro-cid-fzpbxy5g> <div class="wrap bar" data-astro-cid-fzpbxy5g> <a class="brand" href="/zh/" data-astro-cid-fzpbxy5g> <svg class="seal brand-seal" viewBox="0 0 64 64" width="30px" height="30px" aria-hidden="true" focusable="false" data-astro-cid-v3e57phd> <rect width="64" height="64" rx="9" fill="var(--seal-red, #b8321f)" data-astro-cid-v3e57phd></rect> <rect x="4.5" y="4.5" width="55" height="55" rx="5.5" fill="none" stroke="var(--seal-paper, #f4f1ea)" stroke-width="2" data-astro-cid-v3e57phd></rect> <path fill="var(--seal-paper, #f4f1ea)" d="M33.8 10.3L42.0 11.5Q42.0 11.9 41.6 12.1Q41.3 12.3 40.4 12.3L40.4 12.3Q39.6 14.0 38.6 15.7L38.6 15.7L42.6 15.7L45.9 12.6L51.2 17.1Q50.9 17.5 50.6 17.6Q50.2 17.7 49.4 17.8L49.4 17.8Q47.6 21.4 44.6 24.2L44.6 24.2Q45.3 24.4 46.1 24.6L46.1 24.6Q50.0 25.6 54 26.1L54 26.1L54.0 26.6Q52.3 27.0 51.2 28.4Q50.2 29.8 49.8 31.9L49.8 31.9Q47.9 31.3 46.2 30.5L46.2 30.5L47.0 31.1Q47.8 31.8 49.0 32.7Q50.1 33.6 50.9 34.4L50.9 34.4Q50.8 35.1 49.7 35.1L49.7 35.1L42.6 35.1L42.6 39.4L43.5 39.4L46.0 36.1L46.8 36.7Q47.6 37.3 48.7 38.2Q49.8 39.1 50.6 39.9L50.6 39.9Q50.6 40.3 50.2 40.5Q49.9 40.7 49.4 40.7L49.4 40.7L42.6 40.7L42.6 45.0L45.6 45.0L48.4 41.3L49.3 41.9Q50.2 42.7 51.4 43.7Q52.6 44.7 53.5 45.5L53.5 45.5Q53.4 46.3 52.3 46.3L52.3 46.3L42.6 46.3L42.6 52.2Q42.6 52.4 41.8 52.7Q41.1 53.1 40.0 53.4Q38.9 53.7 37.7 53.7L37.7 53.7L36.6 53.7L36.6 46.3L28.1 46.3L27.8 45.0L36.6 45.0L36.6 40.7L30.3 40.7L30.0 39.4L36.6 39.4L36.6 35.1L29.6 35.1L29.2 33.9L36.6 33.9L36.6 29.7L44.1 30.4Q44.0 30.8 43.7 31.1Q43.4 31.4 42.6 31.5L42.6 31.5L42.6 33.9L43.6 33.9L46.2 30.5Q44.4 29.7 42.7 28.7L42.7 28.7Q41.6 28.1 40.5 27.3L40.5 27.3Q35.5 30.5 28.5 32.0L28.5 32.0L28.2 31.5Q33.9 28.9 37.8 24.8L37.8 24.8Q37.8 24.8 37.8 24.8L37.8 24.8Q37.5 24.5 37.2 24.1L37.2 24.1Q35.9 22.6 34.9 20.6L34.9 20.6Q34.3 21.2 33.7 21.8L33.7 21.8Q31.6 23.9 29.0 25.4L29.0 25.4L28.6 25.1Q29.9 23.3 30.9 20.9Q32.0 18.4 32.7 15.7Q33.5 12.9 33.8 10.3L33.8 10.3ZM11.1 19.1L16.9 19.6Q16.9 20.0 16.6 20.2Q16.4 20.5 15.8 20.6L15.8 20.6L15.8 21.6L15.9 21.7L15.9 40.0Q16.4 40.0 17.0 39.9L17.0 39.9L17.0 11.6L23.5 12.2Q23.4 12.7 23.1 13.0Q22.8 13.3 22.0 13.4L22.0 13.4L22.0 39.7Q22.6 39.7 23.2 39.6L23.2 39.6L23.2 18.9L29.2 19.5Q29.2 19.8 28.9 20.1Q28.7 20.4 28.0 20.5L28.0 20.5L28.0 44.2Q28.0 44.4 27.4 44.7Q26.8 45.1 25.9 45.4Q25.0 45.6 24.1 45.6L24.1 45.6L23.2 45.6L23.2 41.4Q21.1 42.3 18.6 43.2L18.6 43.2Q16.3 44.0 13.8 44.9L13.8 44.9Q13.1 46.0 12.3 46.3L12.3 46.3L10 41.3Q10.7 40.8 10.9 40.3Q11.1 39.9 11.1 39.2L11.1 39.2L11.1 19.1ZM39.9 22.3L39.9 22.3Q41.7 19.7 42.8 16.9L42.8 16.9L37.8 16.9Q37.7 17.1 37.5 17.3L37.5 17.3Q36.8 18.4 35.9 19.5L35.9 19.5Q37.3 20.8 39.0 21.7L39.0 21.7Q39.4 22.0 39.9 22.3Z" data-astro-cid-v3e57phd></path> </svg> <span class="brand-text" data-astro-cid-fzpbxy5g> <span class="brand-name" data-astro-cid-fzpbxy5g>Koh Hom</span> <span class="brand-tagline label" data-astro-cid-fzpbxy5g>工程师现场笔记</span> </span> </a> <nav class="nav" aria-label="主导航" data-astro-cid-fzpbxy5g> <ul role="list" data-astro-cid-fzpbxy5g> <li data-astro-cid-fzpbxy5g> <a href="/zh/writing/" aria-current="true" data-astro-cid-fzpbxy5g> 文章 </a> </li><li data-astro-cid-fzpbxy5g> <a href="/zh/projects/" data-astro-cid-fzpbxy5g> 作品 </a> </li><li data-astro-cid-fzpbxy5g> <a href="/zh/tags/" data-astro-cid-fzpbxy5g> 主题 </a> </li><li data-astro-cid-fzpbxy5g> <a href="/zh/about/" data-astro-cid-fzpbxy5g> 关于 </a> </li> <li class="nav-lang" data-astro-cid-fzpbxy5g> <a class="lang-switch" href="/2026/06/19/Designing-an-Operations-Heartbeat-System/" hreflang="en" lang="en" title="阅读英文版本" data-astro-prefetch data-astro-cid-fzpbxy5g> EN <span class="visually-hidden" data-astro-cid-fzpbxy5g> — 阅读英文版本</span> </a> </li> </ul> </nav> <div class="tools" data-astro-cid-fzpbxy5g> <button class="tool search-trigger" type="button" data-search-open aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K /" aria-label="搜索" title="搜索" data-astro-cid-fzpbxy5g> <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false" data-astro-cid-fzpbxy5g> <circle cx="8.5" cy="8.5" r="5.75" fill="none" stroke="currentColor" stroke-width="1.6" data-astro-cid-fzpbxy5g></circle> <path d="m13 13 4.25 4.25" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-astro-cid-fzpbxy5g></path> </svg> <span class="search-label" aria-hidden="true" data-astro-cid-fzpbxy5g> 搜索 </span> <kbd class="search-kbd" aria-hidden="true" data-astro-cid-fzpbxy5g>
+/
+</kbd> </button> <button class="tool theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="深色模式" title="深色模式" data-astro-cid-fzpbxy5g> <svg class="icon-moon" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false" data-astro-cid-fzpbxy5g> <path d="M16.2 12.4A6.75 6.75 0 0 1 7.6 3.8a6.75 6.75 0 1 0 8.6 8.6Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" data-astro-cid-fzpbxy5g></path> </svg> <svg class="icon-sun" viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false" data-astro-cid-fzpbxy5g> <circle cx="10" cy="10" r="3.4" fill="none" stroke="currentColor" stroke-width="1.6" data-astro-cid-fzpbxy5g></circle> <path d="M10 1.8v2.1M10 16.1v2.1M1.8 10h2.1M16.1 10h2.1M4.2 4.2l1.5 1.5M14.3 14.3l1.5 1.5M4.2 15.8l1.5-1.5M14.3 5.7l1.5-1.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-astro-cid-fzpbxy5g></path> </svg> </button> </div> </div> </header><script type="module">var e=`theme`,t={light:`#f4f1ea`,dark:`#121110`};function n(e){return e===`light`||e===`dark`}function r(e,t){return n(e)?e:t?`dark`:`light`}function i(e){return e===`dark`?`light`:`dark`}function a(e,t){return e===(t?`dark`:`light`)?null:e}var o=document.documentElement,s=matchMedia(`(prefers-color-scheme: dark)`);function c(){try{return localStorage.getItem(e)}catch{return null}}function l(e){o.dataset.theme=e;for(let n of document.querySelectorAll(`meta[name="theme-color"]`))n.content=t[e];for(let t of document.querySelectorAll(`[data-theme-toggle]`))t.setAttribute(`aria-pressed`,String(e===`dark`))}l(r(c(),s.matches));for(let t of document.querySelectorAll(`[data-theme-toggle]`))t.addEventListener(`click`,()=>{let t=i(n(o.dataset.theme)?o.dataset.theme:r(c(),s.matches)),u=a(t,s.matches);try{u?localStorage.setItem(e,u):localStorage.removeItem(e)}catch{}l(t)});s.addEventListener(`change`,e=>{n(c())||l(e.matches?`dark`:`light`)});</script> <main id="main">  <div class="progress" role="presentation" data-astro-cid-ssdmjifj></div> <div class="post-page" data-astro-cid-ssdmjifj> <article class="post" data-pagefind-body data-astro-cid-ssdmjifj> <header class="post-head" data-astro-cid-ssdmjifj> <p class="eyebrow label" data-pagefind-ignore data-astro-cid-ssdmjifj> <a href="/zh/writing/?area=engineering" data-astro-cid-ssdmjifj>工程</a> <span class="case" data-astro-cid-ssdmjifj>项目复盘</span> </p> <h1 data-pagefind-meta="title" data-astro-cid-ssdmjifj>运营管理心跳系统设计</h1> <p class="lede" data-astro-cid-ssdmjifj>从用户动作、长链接入、Redis 时间窗口、HCM 状态提交、下游传播、跨 region 切流和 TT/主业务线拆分，一步步推导运营管理心跳系统的设计。</p> <div class="meta label" data-pagefind-ignore data-astro-cid-ssdmjifj> <span data-astro-cid-ssdmjifj> <span class="visually-hidden" data-astro-cid-ssdmjifj>发布于 </span> <time datetime="2026-06-19T12:00:00+08:00" data-astro-cid-ssdmjifj>2026 年 6 月 19 日</time> </span>  <span data-astro-cid-ssdmjifj>16 分钟阅读</span> <a class="translation" href="/2026/06/19/Designing-an-Operations-Heartbeat-System/" hreflang="en" lang="en" title="阅读英文版" data-astro-prefetch data-astro-cid-ssdmjifj> English </a> <button type="button" class="copy" data-copy-link data-copied="链接已复制" data-astro-cid-ssdmjifj> <span data-copy-label aria-live="polite" data-astro-cid-ssdmjifj> 复制链接 </span> </button> </div> </header> <aside class="case-card" aria-labelledby="case-study-title" data-astro-cid-4dw4sxam> <p id="case-study-title" class="stamp label" data-astro-cid-4dw4sxam> 项目复盘 </p> <dl class="facts" data-astro-cid-4dw4sxam> <div data-astro-cid-4dw4sxam> <dt class="label" data-astro-cid-4dw4sxam>角色</dt> <dd data-astro-cid-4dw4sxam>HCM 与心跳服务全栈负责人</dd> </div><div data-astro-cid-4dw4sxam> <dt class="label" data-astro-cid-4dw4sxam>时间</dt> <dd data-astro-cid-4dw4sxam>2024 Q3 – 2025 Q2</dd> </div> </dl> <section class="impact" aria-label="结果" data-astro-cid-4dw4sxam> <h2 class="label" data-astro-cid-4dw4sxam>结果</h2> <ul class="impact" role="list" data-columns="1" data-astro-cid-d7cucacy> <li data-astro-cid-d7cucacy>我维护的 HCM/Heartbeat 链路服务 47,149 个 agent、7,000 个 skill group、约 4,000 QPS 和 141 个上游调用方。</li><li data-astro-cid-d7cucacy>TT 与主业务线拆分后，旧 HCM 侧减少约 3,000 个 agent 和约 2,000 QPS，TT 的心跳、状态提交和路由在 TT 内闭环。</li><li data-astro-cid-d7cucacy>美区一次事故里，binlog 到 HCM MQ 链路堆积约 300k 条消息，依赖 ES 的 handler 阻塞了共享消费；事后补了 handler 维度耗时指标，并把 binlog 直接发 RMQ 的工作状态链路列入改造。</li><li data-astro-cid-d7cucacy>一次跨 region 切流后，keyup/keydown 事件没有稳定进入 Heartbeat，正常工作的 agent 被判成 abnormal；之后在状态计算前加了输入健康指标和自动规则降级。</li> </ul> </section> <section class="stack" aria-label="技术栈" data-astro-cid-4dw4sxam> <h2 class="label" data-astro-cid-4dw4sxam>技术栈</h2> <ul role="list" data-astro-cid-4dw4sxam> <li class="chip" data-astro-cid-4dw4sxam>Redis</li><li class="chip" data-astro-cid-4dw4sxam>MQ</li><li class="chip" data-astro-cid-4dw4sxam>DBus</li><li class="chip" data-astro-cid-4dw4sxam>binlog</li><li class="chip" data-astro-cid-4dw4sxam>Elasticsearch</li><li class="chip" data-astro-cid-4dw4sxam>WebSocket</li><li class="chip" data-astro-cid-4dw4sxam>RPC</li> </ul> </section>  </aside> <div class="toc-slot-inline" data-astro-cid-ssdmjifj> <nav class="toc toc-inline" aria-labelledby="toc-inline" data-toc data-pagefind-ignore data-astro-cid-7k3pnqyz> <details data-astro-cid-7k3pnqyz> <summary id="toc-inline" class="label" data-astro-cid-7k3pnqyz> 目录 </summary> <ol role="list" data-astro-cid-7k3pnqyz> <li data-astro-cid-7k3pnqyz> <a href="#问题-1怎么知道运营有没有活跃" data-astro-cid-7k3pnqyz>问题 1：怎么知道运营有没有活跃？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-2ui-到-heartbeat-的事件怎么可靠进入系统" data-astro-cid-7k3pnqyz>问题 2：UI 到 Heartbeat 的事件怎么可靠进入系统？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-3怎么把事件变成状态判断" data-astro-cid-7k3pnqyz>问题 3：怎么把事件变成状态判断？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-4怎么计算多久没有动作" data-astro-cid-7k3pnqyz>问题 4：怎么计算“多久没有动作”？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-5谁可以写最终状态" data-astro-cid-7k3pnqyz>问题 5：谁可以写最终状态？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-6下游怎么拿到一致的状态" data-astro-cid-7k3pnqyz>问题 6：下游怎么拿到一致的状态？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-7跨-region-切流时事件怎么不断" data-astro-cid-7k3pnqyz>问题 7：跨 region 切流时，事件怎么不断？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-8mirror-之后重复事件怎么处理" data-astro-cid-7k3pnqyz>问题 8：mirror 之后，重复事件怎么处理？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-9tt-和主业务线拆分时怎么不打断老链路" data-astro-cid-7k3pnqyz>问题 9：TT 和主业务线拆分时，怎么不打断老链路？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-10什么时候可以真的拆开" data-astro-cid-7k3pnqyz>问题 10：什么时候可以真的拆开？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-11前端动作没进来系统怎么发现" data-astro-cid-7k3pnqyz>问题 11：前端动作没进来，系统怎么发现？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-12hcm-已经写状态下游还是旧状态怎么办" data-astro-cid-7k3pnqyz>问题 12：HCM 已经写状态，下游还是旧状态怎么办？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-13热读接口把-hcm-打爆怎么办" data-astro-cid-7k3pnqyz>问题 13：热读接口把 HCM 打爆怎么办？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-14查询改动怎么安全上线" data-astro-cid-7k3pnqyz>问题 14：查询改动怎么安全上线？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#后续还要解决什么" data-astro-cid-7k3pnqyz>后续还要解决什么？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#最终设计" data-astro-cid-7k3pnqyz>最终设计</a> </li> </ol> </details> </nav><script type="module">function e(e,t){let n;for(let r of e)if(r.top<=t)n=r.id;else break;return n}var t=[...document.querySelectorAll(`[data-toc] a[href^="#"]`)],n=[...new Set(t.map(e=>decodeURIComponent(e.hash.slice(1))))].map(e=>document.getElementById(e)).filter(e=>e!==null),r=document.querySelector(`.toc-rail`),i,a=!1;function o(e){if(!r||!r.contains(e)||r.scrollHeight<=r.clientHeight)return;let t=e.offsetTop-r.offsetTop;(t<r.scrollTop||t+e.offsetHeight>r.scrollTop+r.clientHeight)&&(r.scrollTop=t-r.clientHeight/3)}function s(){a=!1;let r=e(n.map(e=>({id:e.id,top:e.getBoundingClientRect().top})),innerHeight*.3);if(r!==i){i=r;for(let e of t)r!==void 0&&decodeURIComponent(e.hash.slice(1))===r?(e.setAttribute(`aria-current`,`true`),o(e)):e.removeAttribute(`aria-current`)}}function c(){a||(a=!0,requestAnimationFrame(s))}n.length>0&&(addEventListener(`scroll`,c,{passive:!0}),addEventListener(`resize`,c,{passive:!0}),s());</script> </div> <div class="prose" data-astro-cid-ssdmjifj>  <p>运营管理系统里有一个很基础的问题：怎么知道一个运营现在是否在线？</p>
 <p>最小实现很简单。前端每隔几秒发一个心跳包，服务端保存 <code>last_seen_at</code>。如果超过一段时间没有收到心跳，就把这个人标成离线。</p>
 <p>这个版本能点亮一个在线灯。要支撑派单、排班、监控和工时统计，它还差很多上下文。运营是否在线，需要同时看他是否有任务、属于哪个技能组、当前状态能不能接单、是否在灰度规则里、异常状态是否已经通知过、下游系统是否已经拿到最新状态。</p>
-<p>我维护的 HCM&#x2F;Heartbeat 系统服务 47,149 个 agent、7,000 个 skill group、约 4,000 QPS 和 141 个上游调用方。这篇文章从一个最朴素的实现开始，一层一层把系统推出来。</p>
+<p>我维护的 HCM/Heartbeat 系统服务 47,149 个 agent、7,000 个 skill group、约 4,000 QPS 和 141 个上游调用方。这篇文章从一个最朴素的实现开始，一层一层把系统推出来。</p>
 <p>先看最终目标：</p>
-<p><img src="/img/hcm-heartbeat-design/v13-final-target.png" alt="最终目标：HCM 心跳状态平台"></p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v13-final-target.png" alt="最终目标：HCM 心跳状态平台" loading="lazy" decoding="async"></figure>
 <p>图 0：最终目标是一套状态平台。图片由 gpt-image-2 生成。用户动作先经过统一工作台 SDK、WS-API 和 Frontier 长链，再进入 Heartbeat、MQ、Compute、HCM 和下游状态传播链路。</p>
 <p>下面从 <code>last_seen_at</code> 开始，一步步把这张图搭出来。</p>
 <p>每加一层，都先问一个问题。</p>
-<h2 id="问题-1：怎么知道运营有没有活跃？"><a href="#问题-1：怎么知道运营有没有活跃？" class="headerlink" title="问题 1：怎么知道运营有没有活跃？"></a>问题 1：怎么知道运营有没有活跃？</h2><p>第一版可以直接写状态。</p>
-<p><img src="/img/hcm-heartbeat-design/v0-direct-write.png" alt="版本 0：收到心跳就直接写状态"></p>
+<h2 id="问题-1怎么知道运营有没有活跃">问题 1：怎么知道运营有没有活跃？<a class="heading-anchor" href="#问题-1怎么知道运营有没有活跃" aria-label="§ 问题 1：怎么知道运营有没有活跃？"></a></h2>
+<p>第一版可以直接写状态。</p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v0-direct-write.png" alt="版本 0：收到心跳就直接写状态" loading="lazy" decoding="async"></figure>
 <p>图 1：最朴素的心跳实现。图片由 gpt-image-2 生成。它可以记录最近心跳时间，但缺少任务数、技能组、业务规则和 region 信息。</p>
 <p>这个方案的数据结构大概是：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">agent_id</span><br><span class="line">last_seen_at</span><br><span class="line">status</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><style>.expressive-code{font-family:var(--ec-uiFontFml);font-size:var(--ec-uiFontSize);font-weight:var(--ec-uiFontWg);line-height:var(--ec-uiLineHt);text-size-adjust:none;-webkit-text-size-adjust:none}.expressive-code *:not(:is(svg, svg *)){all:revert;box-sizing:border-box}.expressive-code pre{display:flex;margin:0;padding:0;border:var(--ec-brdWd) solid var(--ec-brdCol);border-radius:calc(var(--ec-brdRad) + var(--ec-brdWd));background:var(--ec-codeBg)}.expressive-code pre:focus-visible{outline:3px solid var(--ec-focusBrd);outline-offset:-3px}.expressive-code pre > code{all:unset;display:block;flex:1 0 100%;padding:var(--ec-codePadBlk) 0;color:var(--ec-codeFg);font-family:var(--ec-codeFontFml);font-size:var(--ec-codeFontSize);font-weight:var(--ec-codeFontWg);line-height:var(--ec-codeLineHt)}.expressive-code pre{overflow-x:auto}.expressive-code pre.wrap .ec-line .code{white-space:pre-wrap;overflow-wrap:break-word;min-width:min(20ch, var(--ecMaxLine, 20ch))}.expressive-code pre.wrap .ec-line .code span.indent{white-space:pre}.expressive-code pre::-webkit-scrollbar,.expressive-code pre::-webkit-scrollbar-track{background-color:inherit;border-radius:calc(var(--ec-brdRad) + var(--ec-brdWd));border-top-left-radius:0;border-top-right-radius:0}.expressive-code pre::-webkit-scrollbar-thumb{background-color:var(--ec-sbThumbCol);border:4px solid transparent;background-clip:content-box;border-radius:10px}.expressive-code pre::-webkit-scrollbar-thumb:hover{background-color:var(--ec-sbThumbHoverCol)}.expressive-code pre::-webkit-scrollbar-corner{background:transparent}.expressive-code .ec-line{direction:ltr;unicode-bidi:isolate;display:grid;grid-template-areas:'gutter code';grid-template-columns:auto 1fr;position:relative}.expressive-code .ec-line .gutter{grid-area:gutter;color:var(--ec-gtrFg)}.expressive-code .ec-line .gutter > *{pointer-events:none;user-select:none;-webkit-user-select:none}.expressive-code .ec-line .gutter ~ .code{--ecLineBrdCol:var(--ec-gtrBrdCol)}.expressive-code .ec-line.highlight .gutter{color:var(--ec-gtrHlFg)}.expressive-code .ec-line .code{grid-area:code;position:relative;box-sizing:content-box;padding-inline-start:calc(var(--ecIndent, 0ch) + var(--ec-codePadInl) - var(--ecGtrBrdWd));padding-inline-end:var(--ec-codePadInl);text-indent:calc(var(--ecIndent, 0ch) * -1)}.expressive-code .ec-line .code::before,.expressive-code .ec-line .code::after,.expressive-code .ec-line .code :where(*){text-indent:0}.expressive-code .ec-line .code{--ecGtrBrdWd:var(--ec-gtrBrdWd);border-inline-start:var(--ecGtrBrdWd) solid var(--ecLineBrdCol, transparent)}.expressive-code .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0, 0, 0, 0);white-space:nowrap;border-width:0}.expressive-code .ec-line.mark{--tmLineBgCol:var(--ec-tm-markBg)}.expressive-code .ec-line.mark .code{--ecLineBrdCol:var(--ec-tm-markBrdCol)}.expressive-code .ec-line.ins{--tmLineBgCol:var(--ec-tm-insBg);--tmLabel:var(--ec-tm-insDiffIndContent)}.expressive-code .ec-line.ins .code{--ecLineBrdCol:var(--ec-tm-insBrdCol)}.expressive-code .ec-line.ins .code::before{color:var(--ec-tm-insDiffIndCol)}.expressive-code .ec-line.del{--tmLineBgCol:var(--ec-tm-delBg);--tmLabel:var(--ec-tm-delDiffIndContent)}.expressive-code .ec-line.del .code{--ecLineBrdCol:var(--ec-tm-delBrdCol)}.expressive-code .ec-line.del .code::before{color:var(--ec-tm-delDiffIndCol)}.expressive-code .ec-line.mark,.expressive-code .ec-line.ins,.expressive-code .ec-line.del{background:var(--tmLineBgCol)}.expressive-code .ec-line.mark .code,.expressive-code .ec-line.ins .code,.expressive-code .ec-line.del .code{--ecGtrBrdWd:var(--ec-tm-lineMarkerAccentWd)}.expressive-code .ec-line.mark .code::before,.expressive-code .ec-line.ins .code::before,.expressive-code .ec-line.del .code::before{display:block;position:absolute;left:0;box-sizing:border-box;content:var(--tmLabel, ' ');padding-inline-start:var(--ec-tm-lineDiffIndMargLeft);text-align:center;white-space:pre}.expressive-code .ec-line.mark.tm-label .code::before,.expressive-code .ec-line.ins.tm-label .code::before,.expressive-code .ec-line.del.tm-label .code::before{background:var(--ecLineBrdCol);padding:0 calc(var(--ec-tm-lineMarkerLabelPadInl) + var(--ec-tm-lineMarkerAccentWd)) 0 var(--ec-tm-lineMarkerLabelPadInl);color:var(--ec-tm-lineMarkerLabelCol)}.expressive-code .ec-line mark{--tmInlineBgCol:var(--ec-tm-markBg);--tmInlineBrdCol:var(--ec-tm-markBrdCol)}.expressive-code .ec-line ins{--tmInlineBgCol:var(--ec-tm-insBg);--tmInlineBrdCol:var(--ec-tm-insBrdCol)}.expressive-code .ec-line del{--tmInlineBgCol:var(--ec-tm-delBg);--tmInlineBrdCol:var(--ec-tm-delBrdCol)}.expressive-code .ec-line mark,.expressive-code .ec-line ins,.expressive-code .ec-line del{all:unset;display:inline-block;position:relative;--tmBrdL:var(--ec-tm-inlMarkerBrdWd);--tmBrdR:var(--ec-tm-inlMarkerBrdWd);--tmRadL:var(--ec-tm-inlMarkerBrdRad);--tmRadR:var(--ec-tm-inlMarkerBrdRad);margin-inline:0.025rem;padding-inline:var(--ec-tm-inlMarkerPad);border-radius:var(--tmRadL) var(--tmRadR) var(--tmRadR) var(--tmRadL);background:var(--tmInlineBgCol);background-clip:padding-box}.expressive-code .ec-line mark.open-start,.expressive-code .ec-line ins.open-start,.expressive-code .ec-line del.open-start{margin-inline-start:0;padding-inline-start:0;--tmBrdL:0px;--tmRadL:0}.expressive-code .ec-line mark.open-end,.expressive-code .ec-line ins.open-end,.expressive-code .ec-line del.open-end{margin-inline-end:0;padding-inline-end:0;--tmBrdR:0px;--tmRadR:0}.expressive-code .ec-line mark::before,.expressive-code .ec-line ins::before,.expressive-code .ec-line del::before{content:'';position:absolute;pointer-events:none;display:inline-block;inset:0;border-radius:var(--tmRadL) var(--tmRadR) var(--tmRadR) var(--tmRadL);border:var(--ec-tm-inlMarkerBrdWd) solid var(--tmInlineBrdCol);border-inline-width:var(--tmBrdL) var(--tmBrdR)}.expressive-code .frame{all:unset;position:relative;display:block;--header-border-radius:calc(var(--ec-brdRad) + var(--ec-brdWd));--tab-border-radius:calc(var(--ec-frm-edTabBrdRad) + var(--ec-brdWd));--button-spacing:0.4rem;--code-background:var(--ec-frm-edBg);border-radius:var(--header-border-radius);box-shadow:var(--ec-frm-frameBoxShdCssVal)}.expressive-code .frame .header{display:none;z-index:1;position:relative;border-radius:var(--header-border-radius) var(--header-border-radius) 0 0}.expressive-code .frame.has-title pre,.expressive-code .frame.has-title code,.expressive-code .frame.is-terminal pre,.expressive-code .frame.is-terminal code{border-top:none;border-top-left-radius:0;border-top-right-radius:0}.expressive-code .frame .title:empty:before{content:'\a0'}.expressive-code .frame.has-title:not(.is-terminal){--button-spacing:calc(1.9rem + 2 * (var(--ec-uiPadBlk) + var(--ec-frm-edActTabIndHt)))}.expressive-code .frame.has-title:not(.is-terminal) .title{position:relative;color:var(--ec-frm-edActTabFg);background:var(--ec-frm-edActTabBg);background-clip:padding-box;margin-block-start:var(--ec-frm-edTabsMargBlkStart);padding:calc(var(--ec-uiPadBlk) + var(--ec-frm-edActTabIndHt)) var(--ec-uiPadInl);border:var(--ec-brdWd) solid var(--ec-frm-edActTabBrdCol);border-radius:var(--tab-border-radius) var(--tab-border-radius) 0 0;border-bottom:none;overflow:hidden}.expressive-code .frame.has-title:not(.is-terminal) .title::after{content:'';position:absolute;pointer-events:none;inset:0;border-top:var(--ec-frm-edActTabIndHt) solid var(--ec-frm-edActTabIndTopCol);border-bottom:var(--ec-frm-edActTabIndHt) solid var(--ec-frm-edActTabIndBtmCol)}.expressive-code .frame.has-title:not(.is-terminal) .header{display:flex;background:linear-gradient(to top, var(--ec-frm-edTabBarBrdBtmCol) var(--ec-brdWd), transparent var(--ec-brdWd)),linear-gradient(var(--ec-frm-edTabBarBg), var(--ec-frm-edTabBarBg));background-repeat:no-repeat;padding-inline-start:var(--ec-frm-edTabsMargInlStart)}.expressive-code .frame.has-title:not(.is-terminal) .header::before{content:'';position:absolute;pointer-events:none;inset:0;border:var(--ec-brdWd) solid var(--ec-frm-edTabBarBrdCol);border-radius:inherit;border-bottom:none}.expressive-code .frame.is-terminal{--button-spacing:calc(1.9rem + var(--ec-brdWd) + 2 * var(--ec-uiPadBlk));--code-background:var(--ec-frm-trmBg)}.expressive-code .frame.is-terminal .header{display:flex;align-items:center;justify-content:center;padding-block:var(--ec-uiPadBlk);padding-block-end:calc(var(--ec-uiPadBlk) + var(--ec-brdWd));position:relative;font-weight:500;letter-spacing:0.025ch;color:var(--ec-frm-trmTtbFg);background:var(--ec-frm-trmTtbBg);border:var(--ec-brdWd) solid var(--ec-brdCol);border-bottom:none}.expressive-code .frame.is-terminal .header::before{content:'';position:absolute;pointer-events:none;left:var(--ec-uiPadInl);width:2.1rem;height:0.56rem;line-height:0;background-color:var(--ec-frm-trmTtbDotsFg);opacity:var(--ec-frm-trmTtbDotsOpa);-webkit-mask-image:var(--ec-frm-trmIcon);-webkit-mask-repeat:no-repeat;mask-image:var(--ec-frm-trmIcon);mask-repeat:no-repeat}.expressive-code .frame.is-terminal .header::after{content:'';position:absolute;pointer-events:none;inset:0;border-bottom:var(--ec-brdWd) solid var(--ec-frm-trmTtbBrdBtmCol)}.expressive-code .frame pre{background:var(--code-background)}.expressive-code .copy{display:flex;gap:0.25rem;flex-direction:row;position:absolute;inset-block-start:calc(var(--ec-brdWd) + var(--button-spacing));inset-inline-end:calc(var(--ec-brdWd) + var(--ec-uiPadInl) / 2)}@media (scripting: none){.expressive-code .copy{display:none}}.expressive-code .copy{direction:ltr;unicode-bidi:isolate}.expressive-code .copy button{position:relative;align-self:flex-end;margin:0;padding:0;border:none;border-radius:0.2rem;z-index:1;cursor:pointer;transition-property:opacity, background, border-color;transition-duration:0.2s;transition-timing-function:cubic-bezier(0.25, 0.46, 0.45, 0.94);width:2.5rem;height:2.5rem;background:var(--code-background);opacity:0.75}.expressive-code .copy button div{position:absolute;inset:0;border-radius:inherit;background:var(--ec-frm-inlBtnBg);opacity:var(--ec-frm-inlBtnBgIdleOpa);transition-property:inherit;transition-duration:inherit;transition-timing-function:inherit}.expressive-code .copy button::before{content:'';position:absolute;pointer-events:none;inset:0;border-radius:inherit;border:var(--ec-brdWd) solid var(--ec-frm-inlBtnBrd);opacity:var(--ec-frm-inlBtnBrdOpa)}.expressive-code .copy button::after{content:'';position:absolute;pointer-events:none;inset:0;background-color:var(--ec-frm-inlBtnFg);-webkit-mask-image:var(--ec-frm-copyIcon);-webkit-mask-repeat:no-repeat;mask-image:var(--ec-frm-copyIcon);mask-repeat:no-repeat;margin:0.475rem;line-height:0}.expressive-code .copy button:hover,.expressive-code .copy button:focus:focus-visible{opacity:1}.expressive-code .copy button:hover div,.expressive-code .copy button:focus:focus-visible div{opacity:var(--ec-frm-inlBtnBgHoverOrFocusOpa)}.expressive-code .copy button:active{opacity:1}.expressive-code .copy button:active div{opacity:var(--ec-frm-inlBtnBgActOpa)}.expressive-code .copy .feedback{--tooltip-arrow-size:0.35rem;--tooltip-bg:var(--ec-frm-tooltipSuccessBg);color:var(--ec-frm-tooltipSuccessFg);pointer-events:none;user-select:none;-webkit-user-select:none;position:relative;align-self:center;background-color:var(--tooltip-bg);z-index:99;padding:0.125rem 0.75rem;border-radius:0.2rem;margin-inline-end:var(--tooltip-arrow-size);opacity:0;transition-property:opacity, transform;transition-duration:0.2s;transition-timing-function:ease-in-out;transform:translate3d(0, 0.25rem, 0)}.expressive-code .copy .feedback::after{content:'';position:absolute;pointer-events:none;top:calc(50% - var(--tooltip-arrow-size));inset-inline-end:calc(-2 * (var(--tooltip-arrow-size) - 0.5px));border:var(--tooltip-arrow-size) solid transparent;border-inline-start-color:var(--tooltip-bg)}.expressive-code .copy .feedback.show{opacity:1;transform:translate3d(0, 0, 0)}@media (hover: hover){.expressive-code{}.expressive-code .copy button{opacity:0;width:2rem;height:2rem}.expressive-code .frame:hover .copy button:not(:hover),.expressive-code .frame:focus-within :focus-visible ~ .copy button:not(:hover),.expressive-code .frame .copy .feedback.show ~ button:not(:hover){opacity:0.75}}.expressive-code :nth-child(1 of .ec-line) .code{padding-inline-end:calc(2rem + var(--ec-codePadInl))}.expressive-code .gutter .ln{display:inline-flex;justify-content:flex-end;align-items:flex-start;box-sizing:content-box;min-width:var(--lnWidth, 2ch);padding-inline:2ch;color:var(--ec-lineNumbers-fg)}.highlight .expressive-code .gutter .ln{color:var(--ec-lineNumbers-hlFg)}:root,:root:not([data-theme="light"]) .expressive-code[data-theme="light"]{--ec-brdRad:4px;--ec-brdWd:1.5px;--ec-brdCol:var(--rule);--ec-codeFontFml:var(--font-mono-stack);--ec-codeFontSize:0.8125rem;--ec-codeFontWg:400;--ec-codeLineHt:1.65;--ec-codePadBlk:1rem;--ec-codePadInl:1.35rem;--ec-codeBg:#ffffff;--ec-codeFg:#393a34;--ec-codeSelBg:#22222218;--ec-gtrFg:#393a3493;--ec-gtrBrdCol:#393a3433;--ec-gtrBrdWd:1.5px;--ec-gtrHlFg:#4e4f47cf;--ec-uiFontFml:var(--font-mono-stack);--ec-uiFontSize:0.9rem;--ec-uiFontWg:400;--ec-uiLineHt:1.65;--ec-uiPadBlk:0.25rem;--ec-uiPadInl:1rem;--ec-uiSelBg:#f7f7f7;--ec-uiSelFg:#393a34;--ec-focusBrd:#00000000;--ec-sbThumbCol:#393a3410;--ec-sbThumbHoverCol:#393a3476;--ec-tm-lineMarkerAccentMarg:0rem;--ec-tm-lineMarkerAccentWd:0.15rem;--ec-tm-lineMarkerLabelPadInl:0.2rem;--ec-tm-lineMarkerLabelCol:white;--ec-tm-lineDiffIndMargLeft:0.3rem;--ec-tm-inlMarkerBrdWd:1.5px;--ec-tm-inlMarkerBrdRad:0.2rem;--ec-tm-inlMarkerPad:0.15rem;--ec-tm-insDiffIndContent:'+';--ec-tm-delDiffIndContent:'-';--ec-tm-markBg:#9fb6ff80;--ec-tm-markBrdCol:#5570b3d0;--ec-tm-insBg:#94c68480;--ec-tm-insBrdCol:#4e7e41d0;--ec-tm-insDiffIndCol:#3a692fd0;--ec-tm-delBg:#fea09280;--ec-tm-delBrdCol:#ae594fd0;--ec-tm-delDiffIndCol:#97453dd0;--ec-frm-shdCol:transparent;--ec-frm-frameBoxShdCssVal:none;--ec-frm-edActTabBg:#ffffff;--ec-frm-edActTabFg:#393a34;--ec-frm-edActTabBrdCol:transparent;--ec-frm-edActTabIndHt:1.5px;--ec-frm-edActTabIndTopCol:var(--accent);--ec-frm-edActTabIndBtmCol:#f0f0f0;--ec-frm-edTabsMargInlStart:0;--ec-frm-edTabsMargBlkStart:0;--ec-frm-edTabBrdRad:4px;--ec-frm-edTabBarBg:#ffffff;--ec-frm-edTabBarBrdCol:var(--rule);--ec-frm-edTabBarBrdBtmCol:#f0f0f0;--ec-frm-edBg:#ffffff;--ec-frm-trmTtbFg:#4e4f47;--ec-frm-trmTtbDotsFg:#4e4f47;--ec-frm-trmTtbDotsOpa:0.15;--ec-frm-trmTtbBg:#ffffff;--ec-frm-trmTtbBrdBtmCol:#f7f7f7;--ec-frm-trmBg:#ffffff;--ec-frm-inlBtnFg:#393a34;--ec-frm-inlBtnBg:#393a34;--ec-frm-inlBtnBgIdleOpa:0;--ec-frm-inlBtnBgHoverOrFocusOpa:0.2;--ec-frm-inlBtnBgActOpa:0.3;--ec-frm-inlBtnBrd:#393a34;--ec-frm-inlBtnBrdOpa:0.4;--ec-frm-tooltipSuccessBg:#378462;--ec-frm-tooltipSuccessFg:white;--ec-frm-copyIcon:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2024%2024'%20fill%3D'none'%20stroke%3D'black'%20stroke-width%3D'1.75'%3E%3Cpath%20d%3D'M3%2019a2%202%200%200%201-1-2V2a2%202%200%200%201%201-1h13a2%202%200%200%201%202%201'%2F%3E%3Crect%20x%3D'6'%20y%3D'5'%20width%3D'16'%20height%3D'18'%20rx%3D'1.5'%20ry%3D'1.5'%2F%3E%3C%2Fsvg%3E");--ec-frm-trmIcon:url("data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2060%2016'%20preserveAspectRatio%3D'xMidYMid%20meet'%3E%3Ccircle%20cx%3D'8'%20cy%3D'8'%20r%3D'8'%2F%3E%3Ccircle%20cx%3D'30'%20cy%3D'8'%20r%3D'8'%2F%3E%3Ccircle%20cx%3D'52'%20cy%3D'8'%20r%3D'8'%2F%3E%3C%2Fsvg%3E");--ec-lineNumbers-fg:inherit;--ec-lineNumbers-hlFg:inherit}.expressive-code .ec-line :where(span[style^='--']:not([class])),:root:not([data-theme="light"]) .expressive-code[data-theme="light"] .ec-line :where(span[style^='--']:not([class])){color:var(--0, inherit);background-color:var(--0bg, transparent);font-style:var(--0fs, inherit);font-weight:var(--0fw, inherit);text-decoration:var(--0td, inherit)}@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ec-codeBg:#121212;--ec-codeFg:#dbd7caee;--ec-codeSelBg:#eeeeee18;--ec-gtrFg:#dedcd56b;--ec-gtrBrdCol:#dedcd533;--ec-gtrHlFg:#bfbaaaac;--ec-uiSelBg:#181818;--ec-uiSelFg:#dbd7caee;--ec-sbThumbCol:#dedcd510;--ec-sbThumbHoverCol:#dedcd554;--ec-tm-markBg:#264a8980;--ec-tm-insBg:#26561c80;--ec-tm-insDiffIndCol:#7eb070d0;--ec-tm-delBg:#81322b80;--ec-tm-delDiffIndCol:#e68a7ed0;--ec-frm-edActTabBg:#121212;--ec-frm-edActTabFg:#dbd7caee;--ec-frm-edActTabIndBtmCol:#191919;--ec-frm-edTabBarBg:#121212;--ec-frm-edTabBarBrdBtmCol:#191919;--ec-frm-edBg:#121212;--ec-frm-trmTtbFg:#bfbaaa;--ec-frm-trmTtbDotsFg:#bfbaaa;--ec-frm-trmTtbBg:#121212;--ec-frm-trmTtbBrdBtmCol:#181818;--ec-frm-trmBg:#121212;--ec-frm-inlBtnFg:#dbd7caee;--ec-frm-inlBtnBg:#dbd7caee;--ec-frm-inlBtnBrd:#dbd7caee;--ec-frm-tooltipSuccessBg:#438166}:root:not([data-theme="light"]) .expressive-code .ec-line :where(span[style^='--']:not([class])){color:var(--1, inherit);background-color:var(--1bg, transparent);font-style:var(--1fs, inherit);font-weight:var(--1fw, inherit);text-decoration:var(--1td, inherit)}}:root[data-theme="dark"] .expressive-code:not([data-theme="light"]),.expressive-code[data-theme="dark"]{--ec-codeBg:#121212;--ec-codeFg:#dbd7caee;--ec-codeSelBg:#eeeeee18;--ec-gtrFg:#dedcd56b;--ec-gtrBrdCol:#dedcd533;--ec-gtrHlFg:#bfbaaaac;--ec-uiSelBg:#181818;--ec-uiSelFg:#dbd7caee;--ec-sbThumbCol:#dedcd510;--ec-sbThumbHoverCol:#dedcd554;--ec-tm-markBg:#264a8980;--ec-tm-insBg:#26561c80;--ec-tm-insDiffIndCol:#7eb070d0;--ec-tm-delBg:#81322b80;--ec-tm-delDiffIndCol:#e68a7ed0;--ec-frm-edActTabBg:#121212;--ec-frm-edActTabFg:#dbd7caee;--ec-frm-edActTabIndBtmCol:#191919;--ec-frm-edTabBarBg:#121212;--ec-frm-edTabBarBrdBtmCol:#191919;--ec-frm-edBg:#121212;--ec-frm-trmTtbFg:#bfbaaa;--ec-frm-trmTtbDotsFg:#bfbaaa;--ec-frm-trmTtbBg:#121212;--ec-frm-trmTtbBrdBtmCol:#181818;--ec-frm-trmBg:#121212;--ec-frm-inlBtnFg:#dbd7caee;--ec-frm-inlBtnBg:#dbd7caee;--ec-frm-inlBtnBrd:#dbd7caee;--ec-frm-tooltipSuccessBg:#438166}:root[data-theme="dark"] .expressive-code:not([data-theme="light"]) .ec-line :where(span[style^='--']:not([class])),.expressive-code[data-theme="dark"] .ec-line :where(span[style^='--']:not([class])){color:var(--1, inherit);background-color:var(--1bg, transparent);font-style:var(--1fs, inherit);font-weight:var(--1fw, inherit);text-decoration:var(--1td, inherit)}</style><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:12ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">agent_id</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">last_seen_at</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">status</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="agent_idlast_seen_atstatus"><div></div></button></div></figure></div>
 <p>前端每隔 N 秒发心跳。服务端更新 <code>last_seen_at</code>。定时任务扫描超时的人，把状态改成 <code>OFFLINE</code>。</p>
 <p>这个模型适合很轻的场景，比如显示一个在线灯。先不讨论任务数、技能组和规则，单看 UI 到 Heartbeat 的接入层，就已经有一组工程问题：</p>
 <ul>
@@ -315,276 +32,287 @@
 </ul>
 <p><code>last_seen_at</code> 只能提供一个时间戳。下一步要解决的是：怎么把浏览器动作变成可靠的事件流。</p>
 <p>所以第一版适合作为思维起点，生产系统还要继续往前推。</p>
-<h2 id="问题-2：UI-到-Heartbeat-的事件怎么可靠进入系统？"><a href="#问题-2：UI-到-Heartbeat-的事件怎么可靠进入系统？" class="headerlink" title="问题 2：UI 到 Heartbeat 的事件怎么可靠进入系统？"></a>问题 2：UI 到 Heartbeat 的事件怎么可靠进入系统？</h2><p>下一步先补 UI 到 Heartbeat 的接入层，再把事件放进 Raw MQ。</p>
-<p><img src="/img/hcm-heartbeat-design/v1-event-buffer.png" alt="版本 1：把工作台动作变成事件流"></p>
+<h2 id="问题-2ui-到-heartbeat-的事件怎么可靠进入系统">问题 2：UI 到 Heartbeat 的事件怎么可靠进入系统？<a class="heading-anchor" href="#问题-2ui-到-heartbeat-的事件怎么可靠进入系统" aria-label="§ 问题 2：UI 到 Heartbeat 的事件怎么可靠进入系统？"></a></h2>
+<p>下一步先补 UI 到 Heartbeat 的接入层，再把事件放进 Raw MQ。</p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v1-event-buffer.png" alt="版本 1：把工作台动作变成事件流" loading="lazy" decoding="async"></figure>
 <p>图 2：统一工作台先用 SDK、WS-API 和 Frontier 承接浏览器里的动作事件，再交给 Heartbeat 和 Raw MQ。图片由 gpt-image-2 生成。状态计算留到下一层。</p>
 <p>前端上报的内容不只有定时心跳，还有点击、输入、鼠标、URL 变化、打开工单、回复工单、完成工单、转交工单等动作。</p>
 <p>这些动作的含义不同，但它们有一个共同点：都只能说明“这个 agent 在某个时间点发生过动作”。</p>
 <p>在统一工作台里，UI 到 Heartbeat 之间还有一层长链通道：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Agent UI</span><br><span class="line">-&gt; Workbench SDK</span><br><span class="line">-&gt; WS-API</span><br><span class="line">-&gt; Frontier</span><br><span class="line">-&gt; Heartbeat Service</span><br><span class="line">-&gt; Raw MQ</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:20ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">Agent UI</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Workbench SDK</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> WS-API</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Frontier</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Heartbeat Service</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Raw MQ</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Agent UI-> Workbench SDK-> WS-API-> Frontier-> Heartbeat Service-> Raw MQ"><div></div></button></div></figure></div>
 <p>Workbench SDK 在一个 window 内维护一个长链接。业务模块按 <code>module + entity</code> 注册，<code>deviceID</code> 标识这条通道。<code>module + entity</code> 的粒度要控制好，粒度太细，切换 entity 时容易出现短暂未建联，推送就会掉在窗口外。</p>
-<p>WS-API 负责初始化长链、注册&#x2F;注销 module，也负责短链补偿。Frontier 负责长链通道。Frontier 异常时，端上可以通过短链轮询补未 ack 的消息，默认间隔是 30 秒，可以用配置调整。</p>
+<p>WS-API 负责初始化长链、注册/注销 module，也负责短链补偿。Frontier 负责长链通道。Frontier 异常时，端上可以通过短链轮询补未 ack 的消息，默认间隔是 30 秒，可以用配置调整。</p>
 <p>重复消息也在这一层先处理一遍。业务后端传 <code>ReqID</code>，SDK 保存最近一批 <code>ReqID</code> 做去重；RPC 推送服务生成 <code>msgID</code>，长链推送和短链补偿都按 <code>msgID</code> 做兜底去重。业务需要顺序时，可以带 <code>Index</code>，排序语义由业务自己维护。</p>
 <p>每个节点都对应一个明确的问题：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Workbench SDK</td>
-<td>一个页面里多个模块共用一条客户端通道</td>
-<td>连接池和客户端资源归属</td>
-</tr>
-<tr>
-<td><code>module + entity</code> 注册</td>
-<td>事件要路由到正确业务模块，同时避免每个模块开新链路</td>
-<td>命名空间和订阅边界</td>
-</tr>
-<tr>
-<td><code>deviceID</code></td>
-<td>后端推送需要识别一个稳定的浏览器窗口</td>
-<td>会话身份</td>
-</tr>
-<tr>
-<td>WS-API</td>
-<td>初始化、注册、注销、补偿需要统一入口</td>
-<td>控制面和数据投递分离</td>
-</tr>
-<tr>
-<td>Frontier</td>
-<td>长链投递交给专门的通道服务</td>
-<td>职责分离</td>
-</tr>
-<tr>
-<td>短链补偿</td>
-<td>长链异常时，最近消息还能补回来</td>
-<td>降级路径</td>
-</tr>
-<tr>
-<td><code>ReqID</code> &#x2F; <code>msgID</code> 去重</td>
-<td>长链和补偿可能送到同一条逻辑消息</td>
-<td>幂等</td>
-</tr>
-<tr>
-<td>Raw MQ</td>
-<td>用户动作突发和服务重启不能直接冲击 Compute</td>
-<td>背压和持久缓冲</td>
-</tr>
-<tr>
-<td>Heartbeat 接入服务</td>
-<td>浏览器协议细节不能泄漏到 Compute</td>
-<td>适配层边界</td>
-</tr>
-</tbody></table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td>Workbench SDK</td><td>一个页面里多个模块共用一条客户端通道</td><td>连接池和客户端资源归属</td></tr><tr><td><code>module + entity</code> 注册</td><td>事件要路由到正确业务模块，同时避免每个模块开新链路</td><td>命名空间和订阅边界</td></tr><tr><td><code>deviceID</code></td><td>后端推送需要识别一个稳定的浏览器窗口</td><td>会话身份</td></tr><tr><td>WS-API</td><td>初始化、注册、注销、补偿需要统一入口</td><td>控制面和数据投递分离</td></tr><tr><td>Frontier</td><td>长链投递交给专门的通道服务</td><td>职责分离</td></tr><tr><td>短链补偿</td><td>长链异常时，最近消息还能补回来</td><td>降级路径</td></tr><tr><td><code>ReqID</code> / <code>msgID</code> 去重</td><td>长链和补偿可能送到同一条逻辑消息</td><td>幂等</td></tr><tr><td>Raw MQ</td><td>用户动作突发和服务重启不能直接冲击 Compute</td><td>背压和持久缓冲</td></tr><tr><td>Heartbeat 接入服务</td><td>浏览器协议细节不能泄漏到 Compute</td><td>适配层边界</td></tr></tbody></table></div>
 <p>Raw MQ 里的事件是输入数据。</p>
 <p>如果消费端拿到一个 <code>keyup</code> 事件就直接把人标在线，拿不到事件就标异常，系统还是会误判。因为事件缺上下文：它不知道当前状态、任务数、技能组、业务线规则，也不知道这条异常是否已经处理过。</p>
 <p>接下来才轮到业务上下文问题：这个 agent 能不能接单，规则覆盖哪些 skill group，异常是否已经处理过，哪个 region 可以发状态变更。这些不是接入层的问题，要交给 Compute 和 HCM。</p>
 <p>这就需要下一层。</p>
-<h2 id="问题-3：怎么把事件变成状态判断？"><a href="#问题-3：怎么把事件变成状态判断？" class="headerlink" title="问题 3：怎么把事件变成状态判断？"></a>问题 3：怎么把事件变成状态判断？</h2><p>我们加一个 Compute 层。</p>
-<p><img src="/img/hcm-heartbeat-design/v2-compute-layer.png" alt="版本 2：加一层计算，把事件变成候选状态"></p>
+<h2 id="问题-3怎么把事件变成状态判断">问题 3：怎么把事件变成状态判断？<a class="heading-anchor" href="#问题-3怎么把事件变成状态判断" aria-label="§ 问题 3：怎么把事件变成状态判断？"></a></h2>
+<p>我们加一个 Compute 层。</p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v2-compute-layer.png" alt="版本 2：加一层计算，把事件变成候选状态" loading="lazy" decoding="async"></figure>
 <p>图 3：Compute 消费原始事件，回查 HCM 拿当前事实，再生成异常候选。图片由 gpt-image-2 生成。</p>
 <p>Compute 层只做一件事：把“事件”转成“候选状态变更”。</p>
 <p>常见的事件类型可以分成几组：</p>
-<table>
-<thead>
-<tr>
-<th>类型</th>
-<th>含义</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>1</code></td>
-<td>在线心跳</td>
-</tr>
-<tr>
-<td><code>2</code></td>
-<td>工作状态变化</td>
-</tr>
-<tr>
-<td><code>3-12</code></td>
-<td>打开、回复、完成、转交、升级工单等业务动作</td>
-</tr>
-<tr>
-<td><code>100-105</code></td>
-<td>点击、输入、鼠标、切状态、呼出、URL 变化</td>
-</tr>
-<tr>
-<td><code>3001</code></td>
-<td>no action 15 min 计算结果</td>
-</tr>
-<tr>
-<td><code>3002</code></td>
-<td>abnormal 15 min 计算结果</td>
-</tr>
-<tr>
-<td><code>3003</code></td>
-<td>not on app</td>
-</tr>
-<tr>
-<td><code>4000</code></td>
-<td>Rule Config V2 计算结果</td>
-</tr>
-</tbody></table>
-<p>Compute 收到原始事件后，不直接写状态。它先问 HCM：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GetWorkStatus(agent_id, tenant_id, channel)</span><br></pre></td></tr></table></figure>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="类型 · 含义"><table><thead><tr><th>类型</th><th>含义</th></tr></thead><tbody><tr><td><code>1</code></td><td>在线心跳</td></tr><tr><td><code>2</code></td><td>工作状态变化</td></tr><tr><td><code>3-12</code></td><td>打开、回复、完成、转交、升级工单等业务动作</td></tr><tr><td><code>100-105</code></td><td>点击、输入、鼠标、切状态、呼出、URL 变化</td></tr><tr><td><code>3001</code></td><td>no action 15 min 计算结果</td></tr><tr><td><code>3002</code></td><td>abnormal 15 min 计算结果</td></tr><tr><td><code>3003</code></td><td>not on app</td></tr><tr><td><code>4000</code></td><td>Rule Config V2 计算结果</td></tr></tbody></table></div>
+<p>Compute 收到原始事件后，不直接写状态。它先问 HCM：</p>
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:43ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">GetWorkStatus(agent_id, tenant_id, channel)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="GetWorkStatus(agent_id, tenant_id, channel)"><div></div></button></div></figure></div>
 <p>HCM 返回当前工作状态、任务数、技能组关系等信息。Compute 再结合规则判断这个 agent 是否进入异常候选。</p>
 <p>这一步的核心是把判断拆开：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">事件 + 当前事实 + 规则 = 候选</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:19ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">事件 + 当前事实 + 规则 = 候选</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="事件 + 当前事实 + 规则 = 候选"><div></div></button></div></figure></div>
 <p>候选只是待确认结果。比如一个 agent 在 10:00 后没有动作，Compute 在 10:10 认为他可能要转异常。但 10:10:01 他可能刚接到新任务。最终能不能改状态，还要由 HCM 再读一次事实。</p>
 <p>Compute 层的边界要硬。它负责算候选，不负责提交最终状态。</p>
 <p>版本 2 引入这些东西，各自有明确边界：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Compute</td>
-<td>原始事件需要业务解释，才能影响状态</td>
-<td>领域服务边界</td>
-</tr>
-<tr>
-<td><code>GetWorkStatus</code> 读取</td>
-<td>候选判断需要当前任务数、状态和技能组事实</td>
-<td>先读事实再决策</td>
-</tr>
-<tr>
-<td>候选状态变更</td>
-<td>计算层不能直接写最终事实</td>
-<td>命令暂存</td>
-</tr>
-<tr>
-<td>规则配置</td>
-<td>状态规则变化快于服务代码</td>
-<td>策略和代码分离</td>
-</tr>
-<tr>
-<td>HCM 二次校验</td>
-<td>Compute 产出候选后，事实可能已经变了</td>
-<td>乐观校验</td>
-</tr>
-</tbody></table>
-<h2 id="问题-4：怎么计算“多久没有动作”？"><a href="#问题-4：怎么计算“多久没有动作”？" class="headerlink" title="问题 4：怎么计算“多久没有动作”？"></a>问题 4：怎么计算“多久没有动作”？</h2><p>很多心跳规则都带时间窗口：</p>
-<table>
-<thead>
-<tr>
-<th>场景</th>
-<th>系统动作</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>ONLINE</code> 且 30 秒没有任务</td>
-<td>自动转成 <code>IDLE</code></td>
-</tr>
-<tr>
-<td><code>ONLINE / IDLE / BUSY</code> 超过 8 分钟无操作或不在工作台</td>
-<td>发提醒</td>
-</tr>
-<tr>
-<td><code>ONLINE / IDLE / BUSY</code> 超过 10 分钟无操作或不在工作台</td>
-<td>自动转成 <code>ABNORMAL</code></td>
-</tr>
-<tr>
-<td><code>ABNORMAL</code> 再持续 10 分钟无操作或不在工作台</td>
-<td>自动转成 <code>OFFLINE</code></td>
-</tr>
-</tbody></table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td>Compute</td><td>原始事件需要业务解释，才能影响状态</td><td>领域服务边界</td></tr><tr><td><code>GetWorkStatus</code> 读取</td><td>候选判断需要当前任务数、状态和技能组事实</td><td>先读事实再决策</td></tr><tr><td>候选状态变更</td><td>计算层不能直接写最终事实</td><td>命令暂存</td></tr><tr><td>规则配置</td><td>状态规则变化快于服务代码</td><td>策略和代码分离</td></tr><tr><td>HCM 二次校验</td><td>Compute 产出候选后，事实可能已经变了</td><td>乐观校验</td></tr></tbody></table></div>
+<h2 id="问题-4怎么计算多久没有动作">问题 4：怎么计算“多久没有动作”？<a class="heading-anchor" href="#问题-4怎么计算多久没有动作" aria-label="§ 问题 4：怎么计算“多久没有动作”？"></a></h2>
+<p>很多心跳规则都带时间窗口：</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="场景 · 系统动作"><table><thead><tr><th>场景</th><th>系统动作</th></tr></thead><tbody><tr><td><code>ONLINE</code> 且 30 秒没有任务</td><td>自动转成 <code>IDLE</code></td></tr><tr><td><code>ONLINE / IDLE / BUSY</code> 超过 8 分钟无操作或不在工作台</td><td>发提醒</td></tr><tr><td><code>ONLINE / IDLE / BUSY</code> 超过 10 分钟无操作或不在工作台</td><td>自动转成 <code>ABNORMAL</code></td></tr><tr><td><code>ABNORMAL</code> 再持续 10 分钟无操作或不在工作台</td><td>自动转成 <code>OFFLINE</code></td></tr></tbody></table></div>
 <p>最直觉的实现是给每个 agent 建一个 timer。</p>
 <p>这个方案很快会变麻烦。进程重启时 timer 丢失，扩缩容时 timer 分散到不同实例，跨 region 切流时还要处理 timer 归属。对几万个 agent 来说，进程内 timer 会把复杂度绑到实例生命周期上。</p>
 <p>我们用 Redis zset 表达时间窗口。</p>
-<p><img src="/img/hcm-heartbeat-design/v3-time-window.png" alt="版本 3：用 Redis zset 表达时间窗口"></p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v3-time-window.png" alt="版本 3：用 Redis zset 表达时间窗口" loading="lazy" decoding="async"></figure>
 <p>图 4：候选 agent 按事件时间写入 Redis zset。图片由 gpt-image-2 生成。Cron 扫描到期数据，再把异常消息送回状态更新流程。</p>
 <p>Redis 里维护几类队列：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">agent_no_action_for_8_min</span><br><span class="line">agent_no_action_for_10_min</span><br><span class="line">queue_agent_no_action_for_15_min</span><br><span class="line">agent_in_abnormal_status_more_then_10_min</span><br><span class="line">queue_agent_in_abnormal_status_more_then_15_min</span><br><span class="line">agent_not_on_app_for_5_min</span><br><span class="line">queue_agent_not_on_app</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:47ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">agent_no_action_for_8_min</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">agent_no_action_for_10_min</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">queue_agent_no_action_for_15_min</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">agent_in_abnormal_status_more_then_10_min</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">queue_agent_in_abnormal_status_more_then_15_min</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">agent_not_on_app_for_5_min</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">queue_agent_not_on_app</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="agent_no_action_for_8_minagent_no_action_for_10_minqueue_agent_no_action_for_15_minagent_in_abnormal_status_more_then_10_minqueue_agent_in_abnormal_status_more_then_15_minagent_not_on_app_for_5_minqueue_agent_not_on_app"><div></div></button></div></figure></div>
 <p>score 存事件时间戳。到期扫描时，用 <code>zrangebyscore</code> 取出 <code>now - threshold</code> 之前的 agent。</p>
 <p>这个结构有几个好处：</p>
-<table>
-<thead>
-<tr>
-<th>需求</th>
-<th>zset 怎么处理</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>按时间窗口判断</td>
-<td>score 存 timestamp</td>
-</tr>
-<tr>
-<td>Compute 重启后保留候选</td>
-<td>候选状态在 Redis</td>
-</tr>
-<tr>
-<td>多套规则同时存在</td>
-<td>不同规则拆到不同 zset</td>
-</tr>
-<tr>
-<td>避免重复提醒</td>
-<td>agent&#x2F;message&#x2F;rule 维度加锁</td>
-</tr>
-<tr>
-<td>支持灰度和回滚</td>
-<td>队列、规则、IDC 开关走配置</td>
-</tr>
-</tbody></table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="需求 · zset 怎么处理"><table><thead><tr><th>需求</th><th>zset 怎么处理</th></tr></thead><tbody><tr><td>按时间窗口判断</td><td>score 存 timestamp</td></tr><tr><td>Compute 重启后保留候选</td><td>候选状态在 Redis</td></tr><tr><td>多套规则同时存在</td><td>不同规则拆到不同 zset</td></tr><tr><td>避免重复提醒</td><td>agent/message/rule 维度加锁</td></tr><tr><td>支持灰度和回滚</td><td>队列、规则、IDC 开关走配置</td></tr></tbody></table></div>
 <p>Cron 每 2 秒扫一次队列。扫描之前先检查当前 IDC 是否允许发送，再抢一个短 TTL 的全局锁，避免多个实例重复发同一批异常消息。</p>
 <p>这里有个容易踩坑的点：业务窗口和防重锁时间要分开设置。</p>
-<p>比如 10 分钟无操作触发提醒，业务窗口是 600 秒，但 agent 维度的防重锁可以设成 840 秒。这样同一阶段可以减少刷屏，后续 <code>ABNORMAL -&gt; OFFLINE</code> 也还有计算机会。</p>
+<p>比如 10 分钟无操作触发提醒，业务窗口是 600 秒，但 agent 维度的防重锁可以设成 840 秒。这样同一阶段可以减少刷屏，后续 <code>ABNORMAL -> OFFLINE</code> 也还有计算机会。</p>
 <p>版本 3 引入的是时间窗口计算层：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>Redis zset</td>
-<td>几万个 timer 不应该绑在进程内存里</td>
-<td>状态外置</td>
-</tr>
-<tr>
-<td>timestamp score</td>
-<td>到期候选需要按时间高效扫描</td>
-<td>按时间建索引</td>
-</tr>
-<tr>
-<td>多条规则队列</td>
-<td>不同窗口和规则不能共享隐式状态</td>
-<td>工作分区</td>
-</tr>
-<tr>
-<td>Cron scanner</td>
-<td>到期任务要从请求流里拆出来执行</td>
-<td>定时 worker</td>
-</tr>
-<tr>
-<td>全局 TTL 锁</td>
-<td>多实例可能扫到同一批队列</td>
-<td>租约协调</td>
-</tr>
-<tr>
-<td>防重锁窗口</td>
-<td>重复提醒控制要和业务阈值分开</td>
-<td>幂等窗口</td>
-</tr>
-</tbody></table>
-<h2 id="问题-5：谁可以写最终状态？"><a href="#问题-5：谁可以写最终状态？" class="headerlink" title="问题 5：谁可以写最终状态？"></a>问题 5：谁可以写最终状态？</h2><p>Compute 算出来的是候选。最终状态只能由 HCM 写入。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td>Redis zset</td><td>几万个 timer 不应该绑在进程内存里</td><td>状态外置</td></tr><tr><td>timestamp score</td><td>到期候选需要按时间高效扫描</td><td>按时间建索引</td></tr><tr><td>多条规则队列</td><td>不同窗口和规则不能共享隐式状态</td><td>工作分区</td></tr><tr><td>Cron scanner</td><td>到期任务要从请求流里拆出来执行</td><td>定时 worker</td></tr><tr><td>全局 TTL 锁</td><td>多实例可能扫到同一批队列</td><td>租约协调</td></tr><tr><td>防重锁窗口</td><td>重复提醒控制要和业务阈值分开</td><td>幂等窗口</td></tr></tbody></table></div>
+<h2 id="问题-5谁可以写最终状态">问题 5：谁可以写最终状态？<a class="heading-anchor" href="#问题-5谁可以写最终状态" aria-label="§ 问题 5：谁可以写最终状态？"></a></h2>
+<p>Compute 算出来的是候选。最终状态只能由 HCM 写入。</p>
 <p>原因很简单：HCM 才拥有 agent、skill group、任务数、当前状态和状态变更日志。状态写入必须集中，否则下游系统会看到多个版本的事实。</p>
 <p>座席状态本身是一组枚举：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ONLINE(1000)</span><br><span class="line">TRAINING(1001)</span><br><span class="line">BREAK(1002)</span><br><span class="line">MEETING(1003)</span><br><span class="line">ABNORMAL(1004)</span><br><span class="line">IDLE(1005)</span><br><span class="line">LUNCH(1006)</span><br><span class="line">OFFLINE(1007)</span><br><span class="line">OTHER(1008)</span><br><span class="line">BUSY(1009)</span><br><span class="line">STANDBY(1010)</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:14ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">ONLINE(1000)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">TRAINING(1001)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">BREAK(1002)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">MEETING(1003)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">ABNORMAL(1004)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">IDLE(1005)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">LUNCH(1006)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">OFFLINE(1007)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">OTHER(1008)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">BUSY(1009)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">STANDBY(1010)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="ONLINE(1000)TRAINING(1001)BREAK(1002)MEETING(1003)ABNORMAL(1004)IDLE(1005)LUNCH(1006)OFFLINE(1007)OTHER(1008)BUSY(1009)STANDBY(1010)"><div></div></button></div></figure></div>
 <p>HCM 消费异常候选后，会重新读取当前状态，然后做二次判断：</p>
 <ol>
 <li>当前状态是否还匹配规则。</li>
@@ -594,9 +322,8 @@
 <li>这次异常是否已经通知或处理过。</li>
 </ol>
 <p>规则配置可以长这样：</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;access_party_ids&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">2</span><span class="punctuation">,</span> <span class="number">3</span><span class="punctuation">,</span> <span class="number">9</span><span class="punctuation">,</span> <span class="number">45</span><span class="punctuation">,</span> <span class="number">46</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;status&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">1000</span><span class="punctuation">,</span> <span class="number">1005</span><span class="punctuation">,</span> <span class="number">1009</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;no_heart_time_limit&quot;</span><span class="punctuation">:</span> <span class="number">600</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;status_to&quot;</span><span class="punctuation">:</span> <span class="number">1004</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;status_change_note&quot;</span><span class="punctuation">:</span> <span class="string">&quot;No action for 10min, automatically changes to abnormal.&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;notifies&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Lark&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;title&quot;</span><span class="punctuation">:</span> <span class="string">&quot;abnormal hint&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<p>这段配置同时影响状态变更和通知。Compute 的 TCC、Redis 队列和 HCM 规则共同约束最终行为。</p>
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="json" class="wrap" style="--ecMaxLine:82ch"><code><div class="ec-line"><div class="code"><span style="--0:#686868;--1:#8B8B8B">{</span></div></div><div class="ec-line" style="--ecIndent:2ch"><div class="code"><span class="indent">  </span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#786713;--1:#B8A965">access_party_ids</span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#686868;--1:#8B8B8B">:</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#686868;--1:#8B8B8B">[</span><span style="--0:#2C7181;--1:#4C9A91">2</span><span style="--0:#686868;--1:#8B8B8B">,</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#2C7181;--1:#4C9A91">3</span><span style="--0:#686868;--1:#8B8B8B">,</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#2C7181;--1:#4C9A91">9</span><span style="--0:#686868;--1:#8B8B8B">,</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#2C7181;--1:#4C9A91">45</span><span style="--0:#686868;--1:#8B8B8B">,</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#2C7181;--1:#4C9A91">46</span><span style="--0:#686868;--1:#8B8B8B">],</span></div></div><div class="ec-line" style="--ecIndent:2ch"><div class="code"><span class="indent">  </span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#786713;--1:#B8A965">status</span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#686868;--1:#8B8B8B">:</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#686868;--1:#8B8B8B">[</span><span style="--0:#2C7181;--1:#4C9A91">1000</span><span style="--0:#686868;--1:#8B8B8B">,</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#2C7181;--1:#4C9A91">1005</span><span style="--0:#686868;--1:#8B8B8B">,</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#2C7181;--1:#4C9A91">1009</span><span style="--0:#686868;--1:#8B8B8B">],</span></div></div><div class="ec-line" style="--ecIndent:2ch"><div class="code"><span class="indent">  </span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#786713;--1:#B8A965">no_heart_time_limit</span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#686868;--1:#8B8B8B">:</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#2C7181;--1:#4C9A91">600</span><span style="--0:#686868;--1:#8B8B8B">,</span></div></div><div class="ec-line" style="--ecIndent:2ch"><div class="code"><span class="indent">  </span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#786713;--1:#B8A965">status_to</span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#686868;--1:#8B8B8B">:</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#2C7181;--1:#4C9A91">1004</span><span style="--0:#686868;--1:#8B8B8B">,</span></div></div><div class="ec-line" style="--ecIndent:2ch"><div class="code"><span class="indent">  </span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#786713;--1:#B8A965">status_change_note</span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#686868;--1:#8B8B8B">:</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#96574AFD;--1:#C98A7DE4">"</span><span style="--0:#96574A;--1:#C98A7D">No action for 10min, automatically changes to abnormal.</span><span style="--0:#96574AFD;--1:#C98A7DE4">"</span><span style="--0:#686868;--1:#8B8B8B">,</span></div></div><div class="ec-line" style="--ecIndent:2ch"><div class="code"><span class="indent">  </span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#786713;--1:#B8A965">notifies</span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#686868;--1:#8B8B8B">:</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#686868;--1:#8B8B8B">[</span></div></div><div class="ec-line" style="--ecIndent:4ch"><div class="code"><span class="indent">    </span><span style="--0:#686868;--1:#8B8B8B">{</span></div></div><div class="ec-line" style="--ecIndent:6ch"><div class="code"><span class="indent">      </span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#786713;--1:#B8A965">type</span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#686868;--1:#8B8B8B">:</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#96574AFD;--1:#C98A7DE4">"</span><span style="--0:#96574A;--1:#C98A7D">Lark</span><span style="--0:#96574AFD;--1:#C98A7DE4">"</span><span style="--0:#686868;--1:#8B8B8B">,</span></div></div><div class="ec-line" style="--ecIndent:6ch"><div class="code"><span class="indent">      </span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#786713;--1:#B8A965">title</span><span style="--0:#786713FD;--1:#B8A965CD">"</span><span style="--0:#686868;--1:#8B8B8B">:</span><span style="--0:#393A34;--1:#DBD7CAEE"> </span><span style="--0:#96574AFD;--1:#C98A7DE4">"</span><span style="--0:#96574A;--1:#C98A7D">abnormal hint</span><span style="--0:#96574AFD;--1:#C98A7DE4">"</span></div></div><div class="ec-line" style="--ecIndent:4ch"><div class="code"><span class="indent">    </span><span style="--0:#686868;--1:#8B8B8B">}</span></div></div><div class="ec-line" style="--ecIndent:2ch"><div class="code"><span class="indent">  </span><span style="--0:#686868;--1:#8B8B8B">]</span></div></div><div class="ec-line"><div class="code"><span style="--0:#686868;--1:#8B8B8B">}</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="{  &#x22;access_party_ids&#x22;: [2, 3, 9, 45, 46],  &#x22;status&#x22;: [1000, 1005, 1009],  &#x22;no_heart_time_limit&#x22;: 600,  &#x22;status_to&#x22;: 1004,  &#x22;status_change_note&#x22;: &#x22;No action for 10min, automatically changes to abnormal.&#x22;,  &#x22;notifies&#x22;: [    {      &#x22;type&#x22;: &#x22;Lark&#x22;,      &#x22;title&#x22;: &#x22;abnormal hint&#x22;    }  ]}"><div></div></button></div></figure></div>
+<p>这段配置同时影响状态变更和通知。Compute 的动态配置、Redis 队列和 HCM 规则共同约束最终行为。</p>
 <p>这套设计里，HCM 的职责很清楚：</p>
 <ul>
 <li>拒绝过期候选。</li>
@@ -606,97 +333,101 @@
 <li>把状态变化交给下游传播链路。</li>
 </ul>
 <p>版本 4 的第一部分是建立状态权威：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>HCM 统一写状态</td>
-<td>多个写方会制造多个状态事实</td>
-<td>单写者 &#x2F; 事实源</td>
-</tr>
-<tr>
-<td>状态枚举</td>
-<td>调用方需要稳定的状态语义</td>
-<td>显式领域模型</td>
-</tr>
-<tr>
-<td>规则覆盖校验</td>
-<td>规则只覆盖指定状态、技能组和业务范围</td>
-<td>策略执行</td>
-</tr>
-<tr>
-<td>任务数二次校验</td>
-<td>Compute 产出候选后，派单事实可能已变化</td>
-<td>提交时一致性</td>
-</tr>
-<tr>
-<td>状态日志</td>
-<td>状态变化需要审计和下游回放上下文</td>
-<td>追加式历史</td>
-</tr>
-</tbody></table>
-<h2 id="问题-6：下游怎么拿到一致的状态？"><a href="#问题-6：下游怎么拿到一致的状态？" class="headerlink" title="问题 6：下游怎么拿到一致的状态？"></a>问题 6：下游怎么拿到一致的状态？</h2><p>状态写进 HCM DB 后，还要继续传播给下游。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td>HCM 统一写状态</td><td>多个写方会制造多个状态事实</td><td>单写者 / 事实源</td></tr><tr><td>状态枚举</td><td>调用方需要稳定的状态语义</td><td>显式领域模型</td></tr><tr><td>规则覆盖校验</td><td>规则只覆盖指定状态、技能组和业务范围</td><td>策略执行</td></tr><tr><td>任务数二次校验</td><td>Compute 产出候选后，派单事实可能已变化</td><td>提交时一致性</td></tr><tr><td>状态日志</td><td>状态变化需要审计和下游回放上下文</td><td>追加式历史</td></tr></tbody></table></div>
+<h2 id="问题-6下游怎么拿到一致的状态">问题 6：下游怎么拿到一致的状态？<a class="heading-anchor" href="#问题-6下游怎么拿到一致的状态" aria-label="§ 问题 6：下游怎么拿到一致的状态？"></a></h2>
+<p>状态写进 HCM DB 后，还要继续传播给下游。</p>
 <p>WFM、RouteQueue、数据侧和其他业务通常通过状态变更消息更新自己的视图。</p>
 <p>最终链路长这样：</p>
-<p><img src="/img/hcm-heartbeat-design/v4-final-pipeline.png" alt="最终链路：事件进入，状态由 HCM 提交，下游消费事实"></p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v4-final-pipeline.png" alt="最终链路：事件进入，状态由 HCM 提交，下游消费事实" loading="lazy" decoding="async"></figure>
 <p>图 5：最终链路保留了前面几个版本的组件，但职责被拆开：事件接收、候选计算、时间窗口、状态写入、状态传播。图片由 gpt-image-2 生成。</p>
 <p>状态传播走的是：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">HCM UpdateWorkStatus</span><br><span class="line">-&gt; status_table</span><br><span class="line">-&gt; DBus / binlog</span><br><span class="line">-&gt; status change MQ</span><br><span class="line">-&gt; WFM / Routing / Analytics</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:28ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">HCM UpdateWorkStatus</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> status_table</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> DBus / binlog</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> status change MQ</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> WFM / Routing / Analytics</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="HCM UpdateWorkStatus-> status_table-> DBus / binlog-> status change MQ-> WFM / Routing / Analytics"><div></div></button></div></figure></div>
 <p>这个设计让所有下游都从 DB 变更事实出发。代价是链路变长了，任何 binlog handler、事件分发、MQ 堆积或下游消费延迟，都会让用户看到旧状态。</p>
 <p>我们踩过这个坑。</p>
-<p>一次 US-TTP 事故里，WFM 的 Omni-channel view 没有反映实时状态。排查时 HCM DB 里的 agent 已经 offline，HCM 到 WFM 的消息看起来也发成功了。</p>
+<p>一次美区事故里，WFM 的 Omni-channel view 没有反映实时状态。排查时 HCM DB 里的 agent 已经 offline，HCM 到 WFM 的消息看起来也发成功了。</p>
 <p>最后问题出在更前面：binlog 到 HCM MQ 链路堆了约 300k 条消息。work status handler 没有变慢，另一个依赖 ES 的 handler 超时了。多个 handler 共用一条消费链路，慢 handler 把其他状态传播一起拖住了。</p>
 <p>这个事故之后，我们补了 handler 维度耗时指标，也把“消费 binlog 后直接发 RMQ，减少中间事件分发阻塞”列进改造项。</p>
 <p>这类问题在设计阶段就应该被问出来：哪个 handler 可以拖住主链路？哪个消费组有共享故障面？哪个指标能说明下游真的收到状态？</p>
 <p>版本 4 的第二部分是状态传播边界：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>status_table</code></td>
-<td>下游需要已提交事实，不能消费候选</td>
-<td>持久事实源</td>
-</tr>
-<tr>
-<td>DBus &#x2F; binlog</td>
-<td>消费者要跟随 DB 提交，又不能耦合写 RPC</td>
-<td>变更数据捕获</td>
-</tr>
-<tr>
-<td>status change MQ</td>
-<td>WFM 和 routing 要异步消费状态事实</td>
-<td>事件驱动传播</td>
-</tr>
-<tr>
-<td>handler 指标</td>
-<td>DB 写成功后，慢 handler 仍然可能拖住状态传播</td>
-<td>分段可观测</td>
-</tr>
-<tr>
-<td>消费隔离改造</td>
-<td>无关 handler 不能阻塞工作状态传播</td>
-<td>故障域隔离</td>
-</tr>
-</tbody></table>
-<h2 id="问题-7：跨-region-切流时，事件怎么不断？"><a href="#问题-7：跨-region-切流时，事件怎么不断？" class="headerlink" title="问题 7：跨 region 切流时，事件怎么不断？"></a>问题 7：跨 region 切流时，事件怎么不断？</h2><p>前面的链路在单 region 内已经能工作。新的问题来自容灾和切流。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td><code>status_table</code></td><td>下游需要已提交事实，不能消费候选</td><td>持久事实源</td></tr><tr><td>DBus / binlog</td><td>消费者要跟随 DB 提交，又不能耦合写 RPC</td><td>变更数据捕获</td></tr><tr><td>status change MQ</td><td>WFM 和 routing 要异步消费状态事实</td><td>事件驱动传播</td></tr><tr><td>handler 指标</td><td>DB 写成功后，慢 handler 仍然可能拖住状态传播</td><td>分段可观测</td></tr><tr><td>消费隔离改造</td><td>无关 handler 不能阻塞工作状态传播</td><td>故障域隔离</td></tr></tbody></table></div>
+<h2 id="问题-7跨-region-切流时事件怎么不断">问题 7：跨 region 切流时，事件怎么不断？<a class="heading-anchor" href="#问题-7跨-region-切流时事件怎么不断" aria-label="§ 问题 7：跨 region 切流时，事件怎么不断？"></a></h2>
+<p>前面的链路在单 region 内已经能工作。新的问题来自容灾和切流。</p>
 <p>Heartbeat 事件是状态计算的输入。切流时，如果流量调度先把请求打到目标 region，但目标 region 的 Raw MQ 里没有前一段时间的事件，Compute 会缺少时间窗口里的上下文。结果可能是 agent 刚切过去就被判断成无操作，或者异常计算延迟一段时间才恢复。</p>
 <p>所以跨 region 的第一层改造是 MQ mirror。</p>
-<p><img src="/img/hcm-heartbeat-design/v5-mq-mirror.png" alt="版本 5：跨 region mirror 心跳事件"></p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v5-mq-mirror.png" alt="版本 5：跨 region mirror 心跳事件" loading="lazy" decoding="async"></figure>
 <p>图 6：Raw MQ 在 region 之间做 mirror。图片由 gpt-image-2 生成。目标 region 在接管流量前，已经有一份可消费的事件流。</p>
 <p>这层解决的是事件连续性。</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Region A Raw MQ &lt;-&gt; Region B Raw MQ</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:35ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">Region A Raw MQ &#x3C;-> Region B Raw MQ</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Region A Raw MQ <-> Region B Raw MQ"><div></div></button></div></figure></div>
 <p>切流前，两个 region 都能拿到最近的心跳事件。真正调度流量时，目标 region 不需要从空队列开始计算。它已经能看到 agent 最近的点击、输入、心跳、工单动作和状态事件。</p>
 <p>切流 SOP 也围绕这条链路设计：</p>
 <ol>
@@ -710,572 +441,601 @@
 <p>事件重复本身还好，真正危险的是重复触发状态变更。比如同一条 no action 候选在两个 region 各发一次，HCM 可能收到两条异常消息，下游也可能收到两次状态变化。</p>
 <p>所以下一层要处理重复。</p>
 <p>版本 5 引入的是跨 region 事件连续性：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>MQ mirror</td>
-<td>目标 region 接流前要先拿到最近事件</td>
-<td>复制日志</td>
-</tr>
-<tr>
-<td><code>from_dc</code> 维度</td>
-<td>切流时要证明流量和事件进入了哪个 region</td>
-<td>可追踪来源</td>
-</tr>
-<tr>
-<td>lag &#x2F; 消费速率检查</td>
-<td>目标事件流追上前不能贸然接流</td>
-<td>就绪门禁</td>
-</tr>
-<tr>
-<td>小流量切片</td>
-<td>region 切换要先有可回滚的小步</td>
-<td>灰度切流</td>
-</tr>
-<tr>
-<td>删除调度配置回滚</td>
-<td>切流失败不应该依赖代码回滚</td>
-<td>运维控制面</td>
-</tr>
-</tbody></table>
-<h2 id="问题-8：mirror-之后，重复事件怎么处理？"><a href="#问题-8：mirror-之后，重复事件怎么处理？" class="headerlink" title="问题 8：mirror 之后，重复事件怎么处理？"></a>问题 8：mirror 之后，重复事件怎么处理？</h2><p>重复事件要分两段处理。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td>MQ mirror</td><td>目标 region 接流前要先拿到最近事件</td><td>复制日志</td></tr><tr><td><code>from_dc</code> 维度</td><td>切流时要证明流量和事件进入了哪个 region</td><td>可追踪来源</td></tr><tr><td>lag / 消费速率检查</td><td>目标事件流追上前不能贸然接流</td><td>就绪门禁</td></tr><tr><td>小流量切片</td><td>region 切换要先有可回滚的小步</td><td>灰度切流</td></tr><tr><td>删除调度配置回滚</td><td>切流失败不应该依赖代码回滚</td><td>运维控制面</td></tr></tbody></table></div>
+<h2 id="问题-8mirror-之后重复事件怎么处理">问题 8：mirror 之后，重复事件怎么处理？<a class="heading-anchor" href="#问题-8mirror-之后重复事件怎么处理" aria-label="§ 问题 8：mirror 之后，重复事件怎么处理？"></a></h2>
+<p>重复事件要分两段处理。</p>
 <p>第一段在发送侧：只有一个 region 能发送异常消息。</p>
 <p>第二段在状态侧：HCM 写状态前再读一次当前事实，做幂等判断。</p>
-<p><img src="/img/hcm-heartbeat-design/v6-region-dedupe.png" alt="版本 6：让 mirror 后的事件可以安全消费"></p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v6-region-dedupe.png" alt="版本 6：让 mirror 后的事件可以安全消费" loading="lazy" decoding="async"></figure>
 <p>图 7：mirror 保证事件连续，active region 和 dedupe lock 控制状态变更只提交一次。图片由 gpt-image-2 生成。</p>
 <p>Compute 可以在两个 region 都消费事件，但 Cron 扫描到期队列时会先检查 <code>active_idc</code>：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">active_idc = true  -&gt; can emit exception message</span><br><span class="line">active_idc = false -&gt; calculate only, no emit</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:48ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">active_idc = true  -> can emit exception message</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">active_idc = false -> calculate only, no emit</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="active_idc = true  -> can emit exception messageactive_idc = false -> calculate only, no emit"><div></div></button></div></figure></div>
 <p>发送前再加一层 dedupe lock。锁的粒度不能太粗，否则不同规则会互相挡住；也不能太细，否则同一阶段的重复消息挡不住。比较合适的是把 agent、规则和时间窗口放进同一个去重键：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">agent_id + rule_id + window_start</span><br></pre></td></tr></table></figure>
-
-<p>Redis zset 也会帮忙收敛一部分重复候选。相同 member 重复写入时，后写入会更新 score。Cron 真正发消息时，还要按 agent&#x2F;rule&#x2F;window 抢锁。</p>
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:33ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">agent_id + rule_id + window_start</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="agent_id + rule_id + window_start"><div></div></button></div></figure></div>
+<p>Redis zset 也会帮忙收敛一部分重复候选。相同 member 重复写入时，后写入会更新 score。Cron 真正发消息时，还要按 agent/rule/window 抢锁。</p>
 <p>HCM 是最后一道保护。</p>
 <p>收到异常消息后，HCM 重新读取当前状态、任务数、skill group 归属和规则配置。只有当前事实还满足规则，才写 <code>status_table</code> 和 <code>unified_work_status_log</code>。如果 agent 已经有任务，或者状态已经被别的路径改走，这条候选会被丢掉。</p>
 <p>跨 region 之后，状态链路多了三类开关：</p>
-<table>
-<thead>
-<tr>
-<th>开关</th>
-<th>作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>流量调度</td>
-<td>控制请求进哪个 region</td>
-</tr>
-<tr>
-<td>MQ mirror</td>
-<td>控制事件是否跨 region 复制</td>
-</tr>
-<tr>
-<td><code>active_idc</code></td>
-<td>控制哪个 region 可以发送异常状态消息</td>
-</tr>
-</tbody></table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="开关 · 作用"><table><thead><tr><th>开关</th><th>作用</th></tr></thead><tbody><tr><td>流量调度</td><td>控制请求进哪个 region</td></tr><tr><td>MQ mirror</td><td>控制事件是否跨 region 复制</td></tr><tr><td><code>active_idc</code></td><td>控制哪个 region 可以发送异常状态消息</td></tr></tbody></table></div>
 <p>这三个开关要分开：请求入口、事件复制、状态发送权可以按不同节奏切换。这样切流、回滚和演练才有操作空间。</p>
 <p>版本 6 把 mirror 后的事件变成安全状态变更：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>active_idc</code></td>
-<td>两个 region 都能算，但只能一个 region 发状态变更</td>
-<td>leader 归属</td>
-</tr>
-<tr>
-<td>agent&#x2F;rule&#x2F;window 锁</td>
-<td>同一个到期候选可能被看见多次</td>
-<td>幂等键</td>
-</tr>
-<tr>
-<td>HCM 二次校验</td>
-<td>重复或过期候选不能写出旧状态</td>
-<td>防御式写校验</td>
-</tr>
-<tr>
-<td>流量 &#x2F; mirror &#x2F; emit 三套开关</td>
-<td>请求、事件复制、写权限切换节奏不同</td>
-<td>正交控制面</td>
-</tr>
-</tbody></table>
-<h2 id="问题-9：TT-和-IES-拆分时，怎么不打断老链路？"><a href="#问题-9：TT-和-IES-拆分时，怎么不打断老链路？" class="headerlink" title="问题 9：TT 和 IES 拆分时，怎么不打断老链路？"></a>问题 9：TT 和 IES 拆分时，怎么不打断老链路？</h2><p>HCM&#x2F;Heartbeat 后来同时服务 IES 和 TT 侧业务。两边共用 HCM、Heartbeat、DB、MQ 和 routing 更新链路时，发布、容量和容灾都会绑在一起。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td><code>active_idc</code></td><td>两个 region 都能算，但只能一个 region 发状态变更</td><td>leader 归属</td></tr><tr><td>agent/rule/window 锁</td><td>同一个到期候选可能被看见多次</td><td>幂等键</td></tr><tr><td>HCM 二次校验</td><td>重复或过期候选不能写出旧状态</td><td>防御式写校验</td></tr><tr><td>流量 / mirror / emit 三套开关</td><td>请求、事件复制、写权限切换节奏不同</td><td>正交控制面</td></tr></tbody></table></div>
+<h2 id="问题-9tt-和主业务线拆分时怎么不打断老链路">问题 9：TT 和主业务线拆分时，怎么不打断老链路？<a class="heading-anchor" href="#问题-9tt-和主业务线拆分时怎么不打断老链路" aria-label="§ 问题 9：TT 和主业务线拆分时，怎么不打断老链路？"></a></h2>
+<p>HCM/Heartbeat 后来同时服务主业务线（下文图和代码里记作 Main）和 TT 侧业务。两边共用 HCM、Heartbeat、DB、MQ 和 routing 更新链路时，发布、容量和容灾都会绑在一起。</p>
 <p>TT 内容侧要拆出去，最简单的做法是新建 TT HCM、TT Heartbeat、TT DB 和 TT MQ，然后让上游一次性切走。</p>
 <p>这个方案风险很高。HCM 连着登录、状态更新、skill group、任务数、路由、WFM 和 binlog 传播。一次性切干净，任何一个字段、过滤条件或 MQ 消费组出错，都会影响接单和状态同步。</p>
 <p>所以第一阶段先做共存。</p>
-<p><img src="/img/hcm-heartbeat-design/v7-tt-ies-coexistence.png" alt="版本 7：TT 拆分先进入共存阶段"></p>
-<p>图 8：TT upstream 先迁到 TT HCM，写入事实仍由 IES HCM 承担。图片由 gpt-image-2 生成。dsyncer 和转发逻辑保留回滚空间。</p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v7-split-coexistence.png" alt="版本 7：TT 拆分先进入共存阶段" loading="lazy" decoding="async"></figure>
+<p>图 8：TT upstream 先迁到 TT HCM，写入事实仍由主业务线 HCM（Main HCM）承担。图片由 gpt-image-2 生成。dsyncer 和转发逻辑保留回滚空间。</p>
 <p>第一阶段的链路是：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">TT upstream</span><br><span class="line">-&gt; TT HCM</span><br><span class="line">-&gt; forward RPC to IES HCM</span><br><span class="line">-&gt; IES DB</span><br><span class="line">-&gt; dsyncer</span><br><span class="line">-&gt; TT DB</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:26ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">TT upstream</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> TT HCM</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> forward RPC to Main HCM</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Main DB</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> dsyncer</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> TT DB</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="TT upstream-> TT HCM-> forward RPC to Main HCM-> Main DB-> dsyncer-> TT DB"><div></div></button></div></figure></div>
 <p>这一步的目标很明确：先把调用入口迁走，写入事实先留在旧链路。</p>
 <p>为了让旧 HCM 知道哪些数据要转给 TT，需要加 ownership filter。判断路径是：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">agent_id</span><br><span class="line">-&gt; agent_skill_group_rel</span><br><span class="line">-&gt; skill_group</span><br><span class="line">-&gt; access_party</span><br><span class="line">-&gt; TT or IES</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:24ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">agent_id</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> agent_skill_group_rel</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> skill_group</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> access_party</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> TT or Main</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="agent_id-> agent_skill_group_rel-> skill_group-> access_party-> TT or Main"><div></div></button></div></figure></div>
 <p>判断结果写 Redis cache。cache miss 时查 DB，拿到 access party 后再写回。工作状态、agent-skillgroup 关系和 routing 更新都可以按这个结果过滤。</p>
-<p>这层改造带来的好处是可回滚。TT HCM 出问题，可以继续走 IES 原链路。filter 出问题，也可以通过配置关掉转发，先保住旧路径。</p>
+<p>这层改造带来的好处是可回滚。TT HCM 出问题，可以继续走主业务线原链路。filter 出问题，也可以通过配置关掉转发，先保住旧路径。</p>
 <p>版本 7 是迁移桥：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>TT HCM 入口</td>
-<td>上游可以先迁入口，不必一次切完写链路</td>
-<td>绞杀者模式</td>
-</tr>
-<tr>
-<td>转发 RPC 到 IES HCM</td>
-<td>第一阶段仍由旧事实源写状态</td>
-<td>兼容适配器</td>
-</tr>
-<tr>
-<td>dsyncer</td>
-<td>TT 侧先建立本地读模型，写入仍留在旧路径</td>
-<td>数据复制</td>
-</tr>
-<tr>
-<td>ownership filter</td>
-<td>TT 和 IES 数据要按 agent 归属拆开</td>
-<td>按领域归属路由</td>
-</tr>
-<tr>
-<td>Redis ownership cache</td>
-<td>归属判断是高频读</td>
-<td>read-through cache</td>
-</tr>
-<tr>
-<td>配置开关</td>
-<td>迁移出问题要能不发版回滚</td>
-<td>feature flag &#x2F; 回滚杠杆</td>
-</tr>
-</tbody></table>
-<h2 id="问题-10：什么时候可以真的拆开？"><a href="#问题-10：什么时候可以真的拆开？" class="headerlink" title="问题 10：什么时候可以真的拆开？"></a>问题 10：什么时候可以真的拆开？</h2><p>共存阶段跑稳之后，才进入第二阶段。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td>TT HCM 入口</td><td>上游可以先迁入口，不必一次切完写链路</td><td>绞杀者模式</td></tr><tr><td>转发 RPC 到主业务线 HCM</td><td>第一阶段仍由旧事实源写状态</td><td>兼容适配器</td></tr><tr><td>dsyncer</td><td>TT 侧先建立本地读模型，写入仍留在旧路径</td><td>数据复制</td></tr><tr><td>ownership filter</td><td>TT 和主业务线数据要按 agent 归属拆开</td><td>按领域归属路由</td></tr><tr><td>Redis ownership cache</td><td>归属判断是高频读</td><td>read-through cache</td></tr><tr><td>配置开关</td><td>迁移出问题要能不发版回滚</td><td>feature flag / 回滚杠杆</td></tr></tbody></table></div>
+<h2 id="问题-10什么时候可以真的拆开">问题 10：什么时候可以真的拆开？<a class="heading-anchor" href="#问题-10什么时候可以真的拆开" aria-label="§ 问题 10：什么时候可以真的拆开？"></a></h2>
+<p>共存阶段跑稳之后，才进入第二阶段。</p>
 <p>第二阶段要把写入、事件、MQ 和 routing 更新都拆开：</p>
-<p><img src="/img/hcm-heartbeat-design/v8-tt-ies-isolation.png" alt="版本 8：迁移后隔离 TT 和 IES"></p>
-<p>图 9：拆分完成后，TT 和 IES 各自拥有 upstream、HCM、DB、MQ 和 routing 更新链路。图片由 gpt-image-2 生成。</p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v8-split-isolation.png" alt="版本 8：迁移后隔离两侧" loading="lazy" decoding="async"></figure>
+<p>图 9：拆分完成后，TT 和主业务线各自拥有 upstream、HCM、DB、MQ 和 routing 更新链路。图片由 gpt-image-2 生成。</p>
 <p>拆分动作包括：</p>
 <ol>
-<li>TT HCM 停止把 RPC 转发到 IES HCM。</li>
-<li>IES 到 TT 的 dsyncer 停止。</li>
-<li>IES heartbeat&#x2F;MQ 停止消费 TT agent 消息。</li>
+<li>TT HCM 停止把 RPC 转发到主业务线 HCM。</li>
+<li>主业务线到 TT 的 dsyncer 停止。</li>
+<li>主业务线 heartbeat/MQ 停止消费 TT agent 消息。</li>
 <li>TT routing 只消费 TT 侧状态更新。</li>
-<li>IES routing 只消费 IES 侧状态更新。</li>
+<li>主业务线 routing 只消费本侧状态更新。</li>
 </ol>
 <p>拆完后，旧 HCM 侧减少约 3,000 个 agent 和约 2,000 QPS。</p>
 <p>这里要验证两件事：服务已经拆出来，两边的状态事实也各自闭合。</p>
 <ul>
 <li>TT agent 的心跳只进入 TT 侧。</li>
 <li>TT agent 的状态只由 TT HCM 提交。</li>
-<li>TT 状态变化只进 TT routing&#x2F;WFM&#x2F;data 链路。</li>
-<li>IES 侧保留原有路径，不被 TT 发布和切流影响。</li>
+<li>TT 状态变化只进 TT routing/WFM/data 链路。</li>
+<li>主业务线保留原有路径，不被 TT 发布和切流影响。</li>
 </ul>
-<p>这时 TT&#x2F;IES 拆分才算完成。</p>
+<p>这时 TT 与主业务线的拆分才算完成。</p>
 <p>版本 8 是把迁移桥拆掉：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>停止转发</td>
-<td>TT 写入不再依赖 IES 可用性</td>
-<td>服务归属</td>
-</tr>
-<tr>
-<td>停止 dsyncer</td>
-<td>临时同步链路不能永久留在系统里</td>
-<td>迁移产物下线</td>
-</tr>
-<tr>
-<td>TT &#x2F; IES 独立 MQ</td>
-<td>事件要留在自己的业务边界内</td>
-<td>bounded context</td>
-</tr>
-<tr>
-<td>独立 routing 消费者</td>
-<td>路由更新不能跨 ownership 边界</td>
-<td>消费者归属</td>
-</tr>
-<tr>
-<td>闭合性校验</td>
-<td>拆分完成要证明事实和副作用都在本侧闭合</td>
-<td>不变量验证</td>
-</tr>
-</tbody></table>
-<h2 id="问题-11：前端动作没进来，系统怎么发现？"><a href="#问题-11：前端动作没进来，系统怎么发现？" class="headerlink" title="问题 11：前端动作没进来，系统怎么发现？"></a>问题 11：前端动作没进来，系统怎么发现？</h2><p>状态计算依赖输入事件。后端 RPC 全绿，只能说明后端还活着，说明不了用户动作真的进了 Heartbeat。</p>
-<p>GCP -&gt; NO1A 切流后，出现过 agent 频繁 abnormal。人还在工作台操作，系统却判断他长时间没动作。最后查到的问题在工作台长链路配置：<code>keyup</code> &#x2F; <code>keydown</code> 事件没有稳定进入 Heartbeat。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td>停止转发</td><td>TT 写入不再依赖主业务线可用性</td><td>服务归属</td></tr><tr><td>停止 dsyncer</td><td>临时同步链路不能永久留在系统里</td><td>迁移产物下线</td></tr><tr><td>TT / 主业务线独立 MQ</td><td>事件要留在自己的业务边界内</td><td>bounded context</td></tr><tr><td>独立 routing 消费者</td><td>路由更新不能跨 ownership 边界</td><td>消费者归属</td></tr><tr><td>闭合性校验</td><td>拆分完成要证明事实和副作用都在本侧闭合</td><td>不变量验证</td></tr></tbody></table></div>
+<h2 id="问题-11前端动作没进来系统怎么发现">问题 11：前端动作没进来，系统怎么发现？<a class="heading-anchor" href="#问题-11前端动作没进来系统怎么发现" aria-label="§ 问题 11：前端动作没进来，系统怎么发现？"></a></h2>
+<p>状态计算依赖输入事件。后端 RPC 全绿，只能说明后端还活着，说明不了用户动作真的进了 Heartbeat。</p>
+<p>一次跨 region 切流后，出现过 agent 频繁 abnormal。人还在工作台操作，系统却判断他长时间没动作。最后查到的问题在工作台长链路配置：<code>keyup</code> / <code>keydown</code> 事件没有稳定进入 Heartbeat。</p>
 <p>HCM 错误率覆盖不到这段输入链路。状态计算前面要加一层输入健康检查。</p>
-<p><img src="/img/hcm-heartbeat-design/v9-input-health.png" alt="版本 9：监控输入事件链路"></p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v9-input-health.png" alt="版本 9：监控输入事件链路" loading="lazy" decoding="async"></figure>
 <p>图 10：状态计算之前先确认用户动作事件稳定进入系统。图片由 gpt-image-2 生成。Workbench SDK、WS-API、Frontier、Heartbeat 接收、Raw MQ 都要上报输入健康指标。</p>
 <p>输入健康可以按几个维度看：</p>
-<table>
-<thead>
-<tr>
-<th>指标</th>
-<th>用途</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>event_rate&#123;event_type, region, channel&#125;</code></td>
-<td>看点击、输入、心跳等事件是否突然下降</td>
-</tr>
-<tr>
-<td><code>client_lag</code></td>
-<td>看客户端动作到服务端接收的延迟</td>
-</tr>
-<tr>
-<td><code>frontier_error_rate</code></td>
-<td>看长链通道是否异常</td>
-</tr>
-<tr>
-<td><code>ws_register_failure</code></td>
-<td>看 module&#x2F;entity 注册是否失败</td>
-</tr>
-<tr>
-<td><code>short_poll_lag</code></td>
-<td>看短链补偿是否跟得上</td>
-</tr>
-<tr>
-<td><code>raw_mq_lag</code></td>
-<td>看事件进入 MQ 后是否堆积</td>
-</tr>
-<tr>
-<td><code>synthetic_action</code></td>
-<td>每个 region 定时打模拟动作，验证链路能跑通</td>
-</tr>
-<tr>
-<td><code>no_action_ratio</code></td>
-<td>看异常候选是否突然集中在某个 region、版本或 channel</td>
-</tr>
-</tbody></table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="指标 · 用途"><table><thead><tr><th>指标</th><th>用途</th></tr></thead><tbody><tr><td><code>event_rate{event_type, region, channel}</code></td><td>看点击、输入、心跳等事件是否突然下降</td></tr><tr><td><code>client_lag</code></td><td>看客户端动作到服务端接收的延迟</td></tr><tr><td><code>frontier_error_rate</code></td><td>看长链通道是否异常</td></tr><tr><td><code>ws_register_failure</code></td><td>看 module/entity 注册是否失败</td></tr><tr><td><code>short_poll_lag</code></td><td>看短链补偿是否跟得上</td></tr><tr><td><code>raw_mq_lag</code></td><td>看事件进入 MQ 后是否堆积</td></tr><tr><td><code>synthetic_action</code></td><td>每个 region 定时打模拟动作，验证链路能跑通</td></tr><tr><td><code>no_action_ratio</code></td><td>看异常候选是否突然集中在某个 region、版本或 channel</td></tr></tbody></table></div>
 <p>工程上更稳的做法是把输入健康接进规则层。</p>
 <p>如果某个 region 或工作台版本的输入健康已经异常，自动 abnormal 规则应该降级：延长窗口、暂停自动切异常，或者只发提醒。等输入链路恢复后，再回到正常计算。</p>
 <p>这样做会牺牲一部分自动化程度，但能避免“因为采集链路断了，把正在工作的人切成异常”。</p>
 <p>版本 9 补的是输入可观测性：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>输入健康指标</td>
-<td>后端成功率不能证明用户动作已经进来</td>
-<td>端到端可观测</td>
-</tr>
-<tr>
-<td><code>frontier_error_rate</code> &#x2F; <code>ws_register_failure</code></td>
-<td>长链和注册失败要有自己的信号</td>
-<td>分层遥测</td>
-</tr>
-<tr>
-<td><code>short_poll_lag</code></td>
-<td>降级路径也要被度量</td>
-<td>fallback 可观测</td>
-</tr>
-<tr>
-<td>synthetic action</td>
-<td>低流量场景下，被动指标可能看不出链路断裂</td>
-<td>主动探测</td>
-</tr>
-<tr>
-<td>规则降级</td>
-<td>输入不健康时，自动化规则要先收住</td>
-<td>业务规则熔断</td>
-</tr>
-</tbody></table>
-<h2 id="问题-12：HCM-已经写状态，下游还是旧状态怎么办？"><a href="#问题-12：HCM-已经写状态，下游还是旧状态怎么办？" class="headerlink" title="问题 12：HCM 已经写状态，下游还是旧状态怎么办？"></a>问题 12：HCM 已经写状态，下游还是旧状态怎么办？</h2><p>状态提交成功以后，下游还要拿到同一个事实。这里出过一个很典型的事故：US-TTP ES down 时，WFM 的 Omni-channel view 没有反映实时状态。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td>输入健康指标</td><td>后端成功率不能证明用户动作已经进来</td><td>端到端可观测</td></tr><tr><td><code>frontier_error_rate</code> / <code>ws_register_failure</code></td><td>长链和注册失败要有自己的信号</td><td>分层遥测</td></tr><tr><td><code>short_poll_lag</code></td><td>降级路径也要被度量</td><td>fallback 可观测</td></tr><tr><td>synthetic action</td><td>低流量场景下，被动指标可能看不出链路断裂</td><td>主动探测</td></tr><tr><td>规则降级</td><td>输入不健康时，自动化规则要先收住</td><td>业务规则熔断</td></tr></tbody></table></div>
+<h2 id="问题-12hcm-已经写状态下游还是旧状态怎么办">问题 12：HCM 已经写状态，下游还是旧状态怎么办？<a class="heading-anchor" href="#问题-12hcm-已经写状态下游还是旧状态怎么办" aria-label="§ 问题 12：HCM 已经写状态，下游还是旧状态怎么办？"></a></h2>
+<p>状态提交成功以后，下游还要拿到同一个事实。这里出过一个很典型的事故：美区 ES down 时，WFM 的 Omni-channel view 没有反映实时状态。</p>
 <p>排查时，HCM DB 里的 agent 已经 offline，HCM 到 WFM 的消息看起来也发成功了。最后发现 binlog 到 HCM MQ 堆了约 300k 条消息。work status handler 本身没慢，另一个依赖 ES 的 handler 超时了。多个 handler 共用一条消费链路，慢 handler 把工作状态传播拖住了。</p>
 <p>这个问题把 V4 的状态传播继续往前推一层：状态变更要有独立车道。</p>
-<p><img src="/img/hcm-heartbeat-design/v10-handler-isolation.png" alt="版本 10：隔离状态传播 handler"></p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v10-handler-isolation.png" alt="版本 10：隔离状态传播 handler" loading="lazy" decoding="async"></figure>
 <p>图 11：binlog 下游按业务语义拆成独立 handler。图片由 gpt-image-2 生成。Search handler 变慢时，work status handler 仍然可以把状态送到 WFM 和 routing。</p>
 <p>更好的目标形态是把状态变化当成一等事件处理：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HCM transaction</span><br><span class="line">-&gt; status_table</span><br><span class="line">-&gt; status_change_outbox</span><br><span class="line">-&gt; work_status_dispatcher</span><br><span class="line">-&gt; status MQ</span><br><span class="line">-&gt; WFM / Routing</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:25ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">HCM transaction</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> status_table</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> status_change_outbox</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> work_status_dispatcher</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> status MQ</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> WFM / Routing</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="HCM transaction-> status_table-> status_change_outbox-> work_status_dispatcher-> status MQ-> WFM / Routing"><div></div></button></div></figure></div>
 <p><code>status_change_outbox</code> 和状态写入放在同一个事务里。dispatcher 只负责把 outbox 里的状态事件送到状态 MQ。</p>
-<p>Search、analytics、audit 这些消费者可以继续消费 binlog 或订阅自己的事件流，但它们不应该和 work status propagation 共用同一个阻塞点。慢 handler 要进入自己的 retry &#x2F; DLQ，不能拖住 WFM 和 routing。</p>
+<p>Search、analytics、audit 这些消费者可以继续消费 binlog 或订阅自己的事件流，但它们不应该和 work status propagation 共用同一个阻塞点。慢 handler 要进入自己的 retry / DLQ，不能拖住 WFM 和 routing。</p>
 <p>这层还要补端到端指标：</p>
-<table>
-<thead>
-<tr>
-<th>指标</th>
-<th>说明</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>status_commit_to_mq_latency</code></td>
-<td>HCM 写 DB 到状态消息发出的延迟</td>
-</tr>
-<tr>
-<td><code>mq_to_wfm_latency</code></td>
-<td>状态 MQ 到 WFM 消费完成的延迟</td>
-</tr>
-<tr>
-<td><code>handler_lag&#123;handler&#125;</code></td>
-<td>每个 handler 自己的堆积</td>
-</tr>
-<tr>
-<td><code>handler_error_rate&#123;handler&#125;</code></td>
-<td>每个 handler 自己的错误率</td>
-</tr>
-<tr>
-<td><code>downstream_state_age</code></td>
-<td>下游看到的状态距离 HCM 提交多久</td>
-</tr>
-</tbody></table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="指标 · 说明"><table><thead><tr><th>指标</th><th>说明</th></tr></thead><tbody><tr><td><code>status_commit_to_mq_latency</code></td><td>HCM 写 DB 到状态消息发出的延迟</td></tr><tr><td><code>mq_to_wfm_latency</code></td><td>状态 MQ 到 WFM 消费完成的延迟</td></tr><tr><td><code>handler_lag{handler}</code></td><td>每个 handler 自己的堆积</td></tr><tr><td><code>handler_error_rate{handler}</code></td><td>每个 handler 自己的错误率</td></tr><tr><td><code>downstream_state_age</code></td><td>下游看到的状态距离 HCM 提交多久</td></tr></tbody></table></div>
 <p>状态系统最怕“主库已经对了，下游还错着”。只有把提交、出站、消费分开看，才能知道慢在哪一段。</p>
 <p>版本 10 隔离的是状态传播链路：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>status_change_outbox</code></td>
-<td>DB 提交和出站事件要一起成功或一起失败</td>
-<td>事务 outbox</td>
-</tr>
-<tr>
-<td><code>work_status_dispatcher</code></td>
-<td>工作状态不能排在无关 handler 后面</td>
-<td>专用 worker</td>
-</tr>
-<tr>
-<td>handler 独立 retry &#x2F; DLQ</td>
-<td>慢消费者需要自己的恢复通道</td>
-<td>bulkhead 隔离</td>
-</tr>
-<tr>
-<td>端到端延迟指标</td>
-<td>下游旧状态要能定位到具体段</td>
-<td>pipeline 可观测</td>
-</tr>
-<tr>
-<td>对账方向</td>
-<td>下游状态可能偏离 HCM 事实</td>
-<td>最终一致性修复</td>
-</tr>
-</tbody></table>
-<h2 id="问题-13：热读接口把-HCM-打爆怎么办？"><a href="#问题-13：热读接口把-HCM-打爆怎么办？" class="headerlink" title="问题 13：热读接口把 HCM 打爆怎么办？"></a>问题 13：热读接口把 HCM 打爆怎么办？</h2><p><code>GetWorkStatus</code> 是这条链路里的热接口。Compute 要查它，上游也要查它。一次 OOM 事故里，downstream error rate spike 和 <code>GetWorkStatus</code> 流量峰值对齐。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td><code>status_change_outbox</code></td><td>DB 提交和出站事件要一起成功或一起失败</td><td>事务 outbox</td></tr><tr><td><code>work_status_dispatcher</code></td><td>工作状态不能排在无关 handler 后面</td><td>专用 worker</td></tr><tr><td>handler 独立 retry / DLQ</td><td>慢消费者需要自己的恢复通道</td><td>bulkhead 隔离</td></tr><tr><td>端到端延迟指标</td><td>下游旧状态要能定位到具体段</td><td>pipeline 可观测</td></tr><tr><td>对账方向</td><td>下游状态可能偏离 HCM 事实</td><td>最终一致性修复</td></tr></tbody></table></div>
+<h2 id="问题-13热读接口把-hcm-打爆怎么办">问题 13：热读接口把 HCM 打爆怎么办？<a class="heading-anchor" href="#问题-13热读接口把-hcm-打爆怎么办" aria-label="§ 问题 13：热读接口把 HCM 打爆怎么办？"></a></h2>
+<p><code>GetWorkStatus</code> 是这条链路里的热接口。Compute 要查它，上游也要查它。一次 OOM 事故里，downstream error rate spike 和 <code>GetWorkStatus</code> 流量峰值对齐。</p>
 <p>这说明状态系统还需要容量防线。</p>
-<p><img src="/img/hcm-heartbeat-design/v11-status-read-guard.png" alt="版本 11：保护热状态读接口"></p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v11-status-read-guard.png" alt="版本 11：保护热状态读接口" loading="lazy" decoding="async"></figure>
 <p>图 12：<code>GetWorkStatus</code> 前面加 quota，内部按调用方隔离线程池，后面用短 TTL cache 和自动扩容信号保护 DB。图片由 gpt-image-2 生成。</p>
 <p>这里的目标是把不同调用方隔开。单个上游出问题时，故障范围停在自己的预算里。</p>
 <p><code>GetWorkStatus</code> 至少需要这几层保护：</p>
-<table>
-<thead>
-<tr>
-<th>防线</th>
-<th>作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>per-caller quota</td>
-<td>单个上游打爆时，先限制这个上游</td>
-</tr>
-<tr>
-<td>bulkhead pool</td>
-<td>Compute、WFM、管理台等调用方分开线程池</td>
-</tr>
-<tr>
-<td>read cache</td>
-<td>短 TTL 缓存状态，挡住重复读</td>
-</tr>
-<tr>
-<td>stale read budget</td>
-<td>非写路径允许读到短时间内的旧状态</td>
-</tr>
-<tr>
-<td>circuit breaker</td>
-<td>DB 或依赖异常时快速失败</td>
-</tr>
-<tr>
-<td>autoscale signal</td>
-<td>按 QPS、heap、GC、p99 延迟扩容</td>
-</tr>
-</tbody></table>
-<p>Heartbeat Compute 侧也要配合。比如同一个 agent 在短时间内连续上报动作，不需要每条事件都 RPC 查一次当前状态。可以按 agent 做小窗口合并，或者读取本地&#x2F;Redis 状态快照，再把最终提交交给 HCM recheck。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="防线 · 作用"><table><thead><tr><th>防线</th><th>作用</th></tr></thead><tbody><tr><td>per-caller quota</td><td>单个上游打爆时，先限制这个上游</td></tr><tr><td>bulkhead pool</td><td>Compute、WFM、管理台等调用方分开线程池</td></tr><tr><td>read cache</td><td>短 TTL 缓存状态，挡住重复读</td></tr><tr><td>stale read budget</td><td>非写路径允许读到短时间内的旧状态</td></tr><tr><td>circuit breaker</td><td>DB 或依赖异常时快速失败</td></tr><tr><td>autoscale signal</td><td>按 QPS、heap、GC、p99 延迟扩容</td></tr></tbody></table></div>
+<p>Heartbeat Compute 侧也要配合。比如同一个 agent 在短时间内连续上报动作，不需要每条事件都 RPC 查一次当前状态。可以按 agent 做小窗口合并，或者读取本地/Redis 状态快照，再把最终提交交给 HCM recheck。</p>
 <p>这层改造把 <code>GetWorkStatus</code> 从“谁来都查 DB”变成“有预算、有隔离、有降级的状态读服务”。</p>
 <p>版本 11 把热读接口变成受保护的服务：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>per-caller quota</td>
-<td>单个上游可能打爆共享状态读</td>
-<td>公平性和准入控制</td>
-</tr>
-<tr>
-<td>bulkhead pool</td>
-<td>不同调用方不能抢光彼此 worker</td>
-<td>bulkhead 隔离</td>
-</tr>
-<tr>
-<td>短 TTL cache</td>
-<td>重复读不能每次都打 DB</td>
-<td>cache-aside</td>
-</tr>
-<tr>
-<td>stale read budget</td>
-<td>部分读路径可以用新鲜度换可用性</td>
-<td>显式一致性预算</td>
-</tr>
-<tr>
-<td>circuit breaker</td>
-<td>依赖坏掉时要快速失败</td>
-<td>故障收敛</td>
-</tr>
-<tr>
-<td>Compute 侧合并</td>
-<td>同一 agent 短时间多事件可以合并读</td>
-<td>请求合并</td>
-</tr>
-</tbody></table>
-<h2 id="问题-14：查询改动怎么安全上线？"><a href="#问题-14：查询改动怎么安全上线？" class="headerlink" title="问题 14：查询改动怎么安全上线？"></a>问题 14：查询改动怎么安全上线？</h2><p>HCM 4.3 的 DB query rollback 暴露的是发布防线。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td>per-caller quota</td><td>单个上游可能打爆共享状态读</td><td>公平性和准入控制</td></tr><tr><td>bulkhead pool</td><td>不同调用方不能抢光彼此 worker</td><td>bulkhead 隔离</td></tr><tr><td>短 TTL cache</td><td>重复读不能每次都打 DB</td><td>cache-aside</td></tr><tr><td>stale read budget</td><td>部分读路径可以用新鲜度换可用性</td><td>显式一致性预算</td></tr><tr><td>circuit breaker</td><td>依赖坏掉时要快速失败</td><td>故障收敛</td></tr><tr><td>Compute 侧合并</td><td>同一 agent 短时间多事件可以合并读</td><td>请求合并</td></tr></tbody></table></div>
+<h2 id="问题-14查询改动怎么安全上线">问题 14：查询改动怎么安全上线？<a class="heading-anchor" href="#问题-14查询改动怎么安全上线" aria-label="§ 问题 14：查询改动怎么安全上线？"></a></h2>
+<p>HCM 4.3 的 DB query rollback 暴露的是发布防线。</p>
 <p>canary 阶段看起来正常，ROW 后出现新错误日志。原因是两个 <code>LEFT JOIN</code> 放大了 <code>count</code> SQL 的数据量，最后打到 DB timeout。</p>
 <p>“先 canary 再全量”覆盖不了这类问题。canary 流量小，数据分布也可能偏，复杂查询要单独过成本检查。</p>
-<p><img src="/img/hcm-heartbeat-design/v12-query-release-guard.png" alt="版本 12：让查询改动可控上线"></p>
+<figure class="figure"><img src="/img/hcm-heartbeat-design/v12-query-release-guard.png" alt="版本 12：让查询改动可控上线" loading="lazy" decoding="async"></figure>
 <p>图 13：查询改动先经过 feature flag、canary、shadow query、EXPLAIN 和慢 SQL 监控。图片由 gpt-image-2 生成。异常时切回 old query。</p>
 <p>查询发布可以按这条路径走：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">query change</span><br><span class="line">-&gt; feature flag</span><br><span class="line">-&gt; canary</span><br><span class="line">-&gt; shadow query</span><br><span class="line">-&gt; row traffic</span><br><span class="line">-&gt; auto rollback</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:16ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">query change</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> feature flag</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> canary</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> shadow query</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> row traffic</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> auto rollback</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="query change-> feature flag-> canary-> shadow query-> row traffic-> auto rollback"><div></div></button></div></figure></div>
 <p><code>shadow query</code> 不参与线上返回，只比较结果和成本。发布系统要看几类信号：</p>
-<table>
-<thead>
-<tr>
-<th>信号</th>
-<th>动作</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>EXPLAIN</code> row estimate 超阈值</td>
-<td>拦住发布</td>
-</tr>
-<tr>
-<td>shadow query 结果不一致</td>
-<td>拦住发布</td>
-</tr>
-<tr>
-<td>p99 查询耗时超过预算</td>
-<td>降级或回滚</td>
-</tr>
-<tr>
-<td>新错误日志增加</td>
-<td>回滚</td>
-</tr>
-<tr>
-<td>DB timeout 增加</td>
-<td>回滚</td>
-</tr>
-</tbody></table>
-<p>对查询路径来说，feature flag 不能只开关整个功能。更实用的是按 filter 字段选择 old query 或 join query：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">simple filter -&gt; old query</span><br><span class="line">join filter   -&gt; join query</span><br></pre></td></tr></table></figure>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="信号 · 动作"><table><thead><tr><th>信号</th><th>动作</th></tr></thead><tbody><tr><td><code>EXPLAIN</code> row estimate 超阈值</td><td>拦住发布</td></tr><tr><td>shadow query 结果不一致</td><td>拦住发布</td></tr><tr><td>p99 查询耗时超过预算</td><td>降级或回滚</td></tr><tr><td>新错误日志增加</td><td>回滚</td></tr><tr><td>DB timeout 增加</td><td>回滚</td></tr></tbody></table></div>
+<p>对查询路径来说，feature flag 不能只开关整个功能。更实用的是按 filter 字段选择 old query 或 join query：</p>
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:27ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">simple filter -> old query</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">join filter   -> join query</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="simple filter -> old queryjoin filter   -> join query"><div></div></button></div></figure></div>
 <p>这样某个复杂 filter 出问题时，可以只回退这条查询路径，不影响其他查询。</p>
 <p>版本 12 给数据访问加发布门禁：</p>
-<table>
-<thead>
-<tr>
-<th>节点 &#x2F; 改动</th>
-<th>解决的问题</th>
-<th>软件工程概念</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>feature flag</td>
-<td>查询行为需要运行时回滚</td>
-<td>渐进式发布</td>
-</tr>
-<tr>
-<td>canary</td>
-<td>新查询先吃小流量</td>
-<td>受控暴露</td>
-</tr>
-<tr>
-<td>shadow query</td>
-<td>结果和成本可以先验证，不影响线上返回</td>
-<td>dark launch</td>
-</tr>
-<tr>
-<td><code>EXPLAIN</code> 成本预算</td>
-<td>昂贵查询计划要在进流量前拦住</td>
-<td>静态成本门禁</td>
-</tr>
-<tr>
-<td>慢 SQL &#x2F; 错误预算</td>
-<td>运行时成本可能和 canary 预期不同</td>
-<td>自动回滚信号</td>
-</tr>
-<tr>
-<td>filter 级 fallback</td>
-<td>一个复杂 filter 出问题，不该回滚所有查询</td>
-<td>细粒度 kill switch</td>
-</tr>
-</tbody></table>
-<h2 id="后续还要解决什么？"><a href="#后续还要解决什么？" class="headerlink" title="后续还要解决什么？"></a>后续还要解决什么？</h2><p>上面的 V9 到 V12 把系统推成一个状态平台。输入链路、计算链路、提交链路、传播链路、容量链路、发布链路都要能被单独观测和单独降级。</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="节点 / 改动 · 解决的问题 · 软件工程概念"><table><thead><tr><th>节点 / 改动</th><th>解决的问题</th><th>软件工程概念</th></tr></thead><tbody><tr><td>feature flag</td><td>查询行为需要运行时回滚</td><td>渐进式发布</td></tr><tr><td>canary</td><td>新查询先吃小流量</td><td>受控暴露</td></tr><tr><td>shadow query</td><td>结果和成本可以先验证，不影响线上返回</td><td>dark launch</td></tr><tr><td><code>EXPLAIN</code> 成本预算</td><td>昂贵查询计划要在进流量前拦住</td><td>静态成本门禁</td></tr><tr><td>慢 SQL / 错误预算</td><td>运行时成本可能和 canary 预期不同</td><td>自动回滚信号</td></tr><tr><td>filter 级 fallback</td><td>一个复杂 filter 出问题，不该回滚所有查询</td><td>细粒度 kill switch</td></tr></tbody></table></div>
+<h2 id="后续还要解决什么">后续还要解决什么？<a class="heading-anchor" href="#后续还要解决什么" aria-label="§ 后续还要解决什么？"></a></h2>
+<p>上面的 V9 到 V12 把系统推成一个状态平台。输入链路、计算链路、提交链路、传播链路、容量链路、发布链路都要能被单独观测和单独降级。</p>
 <p>后面还可以继续扩：</p>
-<table>
-<thead>
-<tr>
-<th>问题</th>
-<th>扩展方向</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>规则变多以后怎么验证</td>
-<td>做 rule simulator，用历史事件回放新规则，看会影响多少 agent</td>
-</tr>
-<tr>
-<td>状态错误怎么快速定位</td>
-<td>做 per-agent timeline，把输入事件、候选、zset、HCM 提交、下游消费串起来</td>
-</tr>
-<tr>
-<td>多 region 会不会脑裂</td>
-<td>定期演练 <code>active_idc</code> 切换，检查重复消息和丢消息</td>
-</tr>
-<tr>
-<td>下游状态长期落后怎么处理</td>
-<td>增加状态 reconciliation job，把 WFM&#x2F;routing 与 HCM 事实对账</td>
-</tr>
-<tr>
-<td>热读缓存会不会读脏</td>
-<td>给缓存结果加版本号和过期预算，写路径仍由 HCM recheck 收口</td>
-</tr>
-</tbody></table>
-<h2 id="最终设计"><a href="#最终设计" class="headerlink" title="最终设计"></a>最终设计</h2><p>回到最开始的问题：怎么知道一个运营是否在线？</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="问题 · 扩展方向"><table><thead><tr><th>问题</th><th>扩展方向</th></tr></thead><tbody><tr><td>规则变多以后怎么验证</td><td>做 rule simulator，用历史事件回放新规则，看会影响多少 agent</td></tr><tr><td>状态错误怎么快速定位</td><td>做 per-agent timeline，把输入事件、候选、zset、HCM 提交、下游消费串起来</td></tr><tr><td>多 region 会不会脑裂</td><td>定期演练 <code>active_idc</code> 切换，检查重复消息和丢消息</td></tr><tr><td>下游状态长期落后怎么处理</td><td>增加状态 reconciliation job，把 WFM/routing 与 HCM 事实对账</td></tr><tr><td>热读缓存会不会读脏</td><td>给缓存结果加版本号和过期预算，写路径仍由 HCM recheck 收口</td></tr></tbody></table></div>
+<h2 id="最终设计">最终设计<a class="heading-anchor" href="#最终设计" aria-label="§ 最终设计"></a></h2>
+<p>回到最开始的问题：怎么知道一个运营是否在线？</p>
 <p>回到开头那张最终目标图，可以按两条线看：数据面和控制面。</p>
 <p>数据面负责把用户动作变成状态事实：</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Agent UI</span><br><span class="line">-&gt; Workbench SDK</span><br><span class="line">-&gt; WS-API</span><br><span class="line">-&gt; Frontier</span><br><span class="line">-&gt; Heartbeat Service</span><br><span class="line">-&gt; Raw MQ</span><br><span class="line">-&gt; Compute</span><br><span class="line">-&gt; Redis zset</span><br><span class="line">-&gt; Exception MQ</span><br><span class="line">-&gt; HCM</span><br><span class="line">-&gt; DB + Outbox</span><br><span class="line">-&gt; Status MQ</span><br><span class="line">-&gt; WFM / Routing / Analytics</span><br></pre></td></tr></table></figure>
-
+<div class="expressive-code"><figure class="frame"><figcaption class="header"></figcaption><pre data-language="text" class="wrap" style="--ecMaxLine:28ch"><code><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">Agent UI</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Workbench SDK</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> WS-API</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Frontier</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Heartbeat Service</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Raw MQ</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Compute</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Redis zset</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Exception MQ</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> HCM</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> DB + Outbox</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> Status MQ</span></div></div><div class="ec-line"><div class="code"><span style="--0:#393a34;--1:#dbd7caee">-> WFM / Routing / Analytics</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Agent UI-> Workbench SDK-> WS-API-> Frontier-> Heartbeat Service-> Raw MQ-> Compute-> Redis zset-> Exception MQ-> HCM-> DB + Outbox-> Status MQ-> WFM / Routing / Analytics"><div></div></button></div></figure></div>
 <p>控制面负责让这条链路在异常时还能收住：</p>
 <ul>
 <li>前端负责上报动作和心跳。</li>
@@ -1288,166 +1048,89 @@
 <li>Outbox 和 handler 隔离保护工作状态传播。</li>
 <li>quota、cache、bulkhead 和 circuit breaker 保护热读接口。</li>
 <li>query gate 控制复杂查询发布。</li>
-<li>TT&#x2F;IES ownership 控制 agent、skill group、MQ 和 routing 更新归属。</li>
+<li>TT/主业务线 ownership 控制 agent、skill group、MQ 和 routing 更新归属。</li>
 </ul>
 <p>这个设计看起来比第一版复杂很多。每一层都是被上一个问题推出来的：</p>
-<table>
-<thead>
-<tr>
-<th>版本</th>
-<th>新问题</th>
-<th>新增设计</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>V0</td>
-<td>怎么记录最近活跃</td>
-<td><code>last_seen_at</code></td>
-</tr>
-<tr>
-<td>V1</td>
-<td>UI 到 Heartbeat 的事件怎么可靠进入系统</td>
-<td>Workbench SDK + WS-API + Frontier + Raw MQ</td>
-</tr>
-<tr>
-<td>V2</td>
-<td>事件怎么变成状态判断</td>
-<td>Compute + <code>GetWorkStatus</code></td>
-</tr>
-<tr>
-<td>V3</td>
-<td>多分钟窗口怎么计算</td>
-<td>Redis zset + Cron</td>
-</tr>
-<tr>
-<td>V4</td>
-<td>谁写最终状态，下游怎么拿事实</td>
-<td>HCM + DB&#x2F;binlog&#x2F;status MQ</td>
-</tr>
-<tr>
-<td>V5</td>
-<td>跨 region 切流时事件怎么不断</td>
-<td>MQ mirror</td>
-</tr>
-<tr>
-<td>V6</td>
-<td>mirror 之后重复事件怎么处理</td>
-<td><code>active_idc</code> + dedupe + HCM recheck</td>
-</tr>
-<tr>
-<td>V7</td>
-<td>TT 拆分怎么保留回滚路径</td>
-<td>TT HCM 转发 + ownership filter + dsyncer</td>
-</tr>
-<tr>
-<td>V8</td>
-<td>怎么把 TT&#x2F;IES 真正拆开</td>
-<td>独立 HCM&#x2F;DB&#x2F;MQ&#x2F;routing 链路</td>
-</tr>
-<tr>
-<td>V9</td>
-<td>前端动作没进来怎么发现</td>
-<td>input health + synthetic action</td>
-</tr>
-<tr>
-<td>V10</td>
-<td>下游状态被慢 handler 拖住怎么办</td>
-<td>handler isolation + outbox + DLQ</td>
-</tr>
-<tr>
-<td>V11</td>
-<td>热读接口把 HCM 打爆怎么办</td>
-<td>quota + cache + bulkhead + load shedding</td>
-</tr>
-<tr>
-<td>V12</td>
-<td>查询改动怎么安全上线</td>
-<td>feature flag + shadow query + auto rollback</td>
-</tr>
-</tbody></table>
-<p>最开始的问题只是“这个人还在不在线”。最后系统回答的是一组更具体的问题：这个 agent 最近有没有动作，输入事件链路是否健康，当前有没有任务，属于哪个 skill group，规则是否覆盖他，哪个 region 可以发异常，状态能不能提交，下游是否拿到了同一个事实，热读接口是否在预算内，查询发布是否能回滚，TT 和 IES 的 ownership 是否已经分开。</p>
-
-<div id="gitalk-container"></div>
-<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
-
-		<script>
-		var gitalkConfig = {"clientID":"xxxxxx","clientSecret":"xxxxxx","repo":"gitalk","owner":"clean99","admin":["clean99"],"distractionFreeMode":false};
-	    gitalkConfig.id = md5(location.pathname);
-		var gitalk = new Gitalk(gitalkConfig);
-	    gitalk.render("gitalk-container");
-	    </script>
-    </div>
-    <footer>
-      <p><a class="classtest-link" href="/tags/Software-Engineering/" rel="tag">Software Engineering</a>, <a class="classtest-link" href="/tags/fault-tolerance/" rel="tag">fault-tolerance</a>, <a class="classtest-link" href="/tags/reliability/" rel="tag">reliability</a> — <time datetime="2026-06-19T04:00:00.000Z">Jun 19, 2026</time></p>
-    </footer>
-  </article>
-  
 
 
-          <div class="row mt-2">
-  
-    <div class="eight columns">
-      <p id="madewith">
-        &copy; 2026 Koh Hom.
-        
-          <a href="mailto:xff9924@gmail.com">邮箱</a>
-        
-        <a href="https://github.com/clean99" target="_blank" rel="noreferrer">GitHub</a>
-        <a href="/atom.xml">RSS</a>
-        <a href="/zh/Links">友链</a>
-      </p>
-    </div>
 
-    <!-- Sepcial thanks to https://simpleicons.org/ for the icons -->
-    <div class="four columns mb-3 posisi" >
 
-      
-      <a class="ml-0 footer-link icon" href="https://github.com/clean99" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="GitHub">
-        <svg class="github svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-      </a>
-      
 
-      
-      <a class="ml-0 footer-link icon" href="https://www.linkedin.com/in/hom-koh-42019a204" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="LinkedIn">
-        <svg class="linkedin svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>LinkedIn</title><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-      </a>
-      
 
-      
-      <a class="ml-0 footer-link icon" href="https://twitter.com/Clean993" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Twitter">
-        <svg class="twitter svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Twitter</title><path d="M23.954 4.569c-.885.389-1.83.654-2.825.775 1.014-.611 1.794-1.574 2.163-2.723-.951.555-2.005.959-3.127 1.184-.896-.959-2.173-1.559-3.591-1.559-2.717 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 13.999-7.496 13.999-13.986 0-.209 0-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/></svg>
-      </a>
-      
 
-      
-      <a class="ml-0 footer-link icon" href="https://www.instagram.com/xu.feng.7712/" target="_blank" style="text-decoration: none" rel="noreferrer" aria-label="Instagram">
-        <svg class="instagram svg-hov" width="18" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Instagram</title><path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/></svg>
-      </a>
-      
 
-    </div>
-  
-</div>
 
-        </div>
-      </div>
 
-    </div>
 
-  </div>
-  <script src="/js/nanobar.min.js"></script>
-  <script>
-    var options = {
-      classname: 'nanobar',
-      id: 'myNanobar'
-    };
-    var nanobar = new Nanobar(options);
-    nanobar.go(30);
-    nanobar.go(76);
-    nanobar.go(100);
-  </script>
-  
 
-</body>
 
-</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="table-scroll" role="region" tabindex="0" aria-label="版本 · 新问题 · 新增设计"><table><thead><tr><th>版本</th><th>新问题</th><th>新增设计</th></tr></thead><tbody><tr><td>V0</td><td>怎么记录最近活跃</td><td><code>last_seen_at</code></td></tr><tr><td>V1</td><td>UI 到 Heartbeat 的事件怎么可靠进入系统</td><td>Workbench SDK + WS-API + Frontier + Raw MQ</td></tr><tr><td>V2</td><td>事件怎么变成状态判断</td><td>Compute + <code>GetWorkStatus</code></td></tr><tr><td>V3</td><td>多分钟窗口怎么计算</td><td>Redis zset + Cron</td></tr><tr><td>V4</td><td>谁写最终状态，下游怎么拿事实</td><td>HCM + DB/binlog/status MQ</td></tr><tr><td>V5</td><td>跨 region 切流时事件怎么不断</td><td>MQ mirror</td></tr><tr><td>V6</td><td>mirror 之后重复事件怎么处理</td><td><code>active_idc</code> + dedupe + HCM recheck</td></tr><tr><td>V7</td><td>TT 拆分怎么保留回滚路径</td><td>TT HCM 转发 + ownership filter + dsyncer</td></tr><tr><td>V8</td><td>怎么把 TT 和主业务线真正拆开</td><td>独立 HCM/DB/MQ/routing 链路</td></tr><tr><td>V9</td><td>前端动作没进来怎么发现</td><td>input health + synthetic action</td></tr><tr><td>V10</td><td>下游状态被慢 handler 拖住怎么办</td><td>handler isolation + outbox + DLQ</td></tr><tr><td>V11</td><td>热读接口把 HCM 打爆怎么办</td><td>quota + cache + bulkhead + load shedding</td></tr><tr><td>V12</td><td>查询改动怎么安全上线</td><td>feature flag + shadow query + auto rollback</td></tr></tbody></table></div>
+<p>最开始的问题只是“这个人还在不在线”。最后系统回答的是一组更具体的问题：这个 agent 最近有没有动作，输入事件链路是否健康，当前有没有任务，属于哪个 skill group，规则是否覆盖他，哪个 region 可以发异常，状态能不能提交，下游是否拿到了同一个事实，热读接口是否在预算内，查询发布是否能回滚，TT 和主业务线的 ownership 是否已经分开。</p>  </div> <footer class="post-foot" data-pagefind-ignore data-astro-cid-ssdmjifj> <ul class="tags" role="list" aria-label="主题" data-astro-cid-ssdmjifj> <li data-astro-cid-ssdmjifj> <a class="chip" href="/zh/tags/software-engineering/" rel="tag" data-astro-cid-ssdmjifj>
+#软件工程 </a> </li><li data-astro-cid-ssdmjifj> <a class="chip" href="/zh/tags/reliability/" rel="tag" data-astro-cid-ssdmjifj>
+#可靠性 </a> </li><li data-astro-cid-ssdmjifj> <a class="chip" href="/zh/tags/fault-tolerance/" rel="tag" data-astro-cid-ssdmjifj>
+#容错 </a> </li> </ul> <a class="arrow-link source" href="https://github.com/clean99/clean99.github.io/blob/dev/content/posts/Designing-an-Operations-Heartbeat-System-zh.md" data-astro-cid-ssdmjifj> 在 GitHub 查看源码 </a> </footer> </article> <aside class="toc-slot-rail" data-astro-cid-ssdmjifj> <nav class="toc toc-rail" aria-labelledby="toc-rail" data-toc data-pagefind-ignore data-astro-cid-7k3pnqyz>  <p id="toc-rail" class="label" data-astro-cid-7k3pnqyz> 本页目录 </p> <ol role="list" data-astro-cid-7k3pnqyz> <li data-astro-cid-7k3pnqyz> <a href="#问题-1怎么知道运营有没有活跃" data-astro-cid-7k3pnqyz>问题 1：怎么知道运营有没有活跃？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-2ui-到-heartbeat-的事件怎么可靠进入系统" data-astro-cid-7k3pnqyz>问题 2：UI 到 Heartbeat 的事件怎么可靠进入系统？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-3怎么把事件变成状态判断" data-astro-cid-7k3pnqyz>问题 3：怎么把事件变成状态判断？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-4怎么计算多久没有动作" data-astro-cid-7k3pnqyz>问题 4：怎么计算“多久没有动作”？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-5谁可以写最终状态" data-astro-cid-7k3pnqyz>问题 5：谁可以写最终状态？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-6下游怎么拿到一致的状态" data-astro-cid-7k3pnqyz>问题 6：下游怎么拿到一致的状态？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-7跨-region-切流时事件怎么不断" data-astro-cid-7k3pnqyz>问题 7：跨 region 切流时，事件怎么不断？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-8mirror-之后重复事件怎么处理" data-astro-cid-7k3pnqyz>问题 8：mirror 之后，重复事件怎么处理？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-9tt-和主业务线拆分时怎么不打断老链路" data-astro-cid-7k3pnqyz>问题 9：TT 和主业务线拆分时，怎么不打断老链路？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-10什么时候可以真的拆开" data-astro-cid-7k3pnqyz>问题 10：什么时候可以真的拆开？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-11前端动作没进来系统怎么发现" data-astro-cid-7k3pnqyz>问题 11：前端动作没进来，系统怎么发现？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-12hcm-已经写状态下游还是旧状态怎么办" data-astro-cid-7k3pnqyz>问题 12：HCM 已经写状态，下游还是旧状态怎么办？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-13热读接口把-hcm-打爆怎么办" data-astro-cid-7k3pnqyz>问题 13：热读接口把 HCM 打爆怎么办？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#问题-14查询改动怎么安全上线" data-astro-cid-7k3pnqyz>问题 14：查询改动怎么安全上线？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#后续还要解决什么" data-astro-cid-7k3pnqyz>后续还要解决什么？</a> </li><li data-astro-cid-7k3pnqyz> <a href="#最终设计" data-astro-cid-7k3pnqyz>最终设计</a> </li> </ol>  </nav> </aside> <nav class="post-nav" aria-label="更早 / 更新" data-astro-cid-ssdmjifj> <a class="older" href="/zh/2026/06/11/What-Happens-When-You-Type-Let-A-Equals-1/" rel="prev" data-astro-prefetch data-astro-cid-ssdmjifj> <span class="label" data-astro-cid-ssdmjifj>← 更早</span> <span class="nav-title" data-astro-cid-ssdmjifj>当输入 let a = 1; 的时候，解释器发生了什么？</span> </a> <a class="newer" href="/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/" rel="next" data-astro-prefetch data-astro-cid-ssdmjifj> <span class="label" data-astro-cid-ssdmjifj>更新 →</span> <span class="nav-title" data-astro-cid-ssdmjifj>从工程视角理解电商增长数据的本质</span> </a> </nav> <section class="related" aria-labelledby="related-title" data-astro-cid-ssdmjifj> <div class="section-head" data-astro-cid-ssdmjifj> <h2 id="related-title" data-astro-cid-ssdmjifj>继续阅读</h2> <a class="arrow-link" href="/zh/writing/" data-astro-cid-ssdmjifj> 全部文章 </a> </div> <ol class="ledger" role="list" data-astro-cid-oxezsu4a> <li class="row" data-area="engineering" data-astro-cid-oxezsu4a> <time class="date label" datetime="2024-05-06T16:45:11+08:00" data-astro-cid-oxezsu4a> 2024.05.06 </time> <div class="main" data-astro-cid-oxezsu4a> <a class="title" href="/zh/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/" data-astro-prefetch data-astro-cid-oxezsu4a> 使用 Error Boundary 构建容错 React 应用（Error Boundary 最佳实践） </a> <p class="summary" data-astro-cid-oxezsu4a>本文将展示如何利用 error boundary 的最佳实践来构建一个健壮且容错的 React 应用，包括：何时使用 Error Boundary、构建带有错误处理和错误上报功能的 Error Boundary HOC。</p> </div> <p class="meta label" data-astro-cid-oxezsu4a> <span class="area" data-astro-cid-oxezsu4a>工程</span>  <span class="minutes" data-astro-cid-oxezsu4a>3 分钟阅读</span> </p> </li><li class="row" data-area="engineering" data-astro-cid-oxezsu4a> <time class="date label" datetime="2026-07-02T17:30:00+08:00" data-astro-cid-oxezsu4a> 2026.07.02 </time> <div class="main" data-astro-cid-oxezsu4a> <a class="title" href="/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/" data-astro-prefetch data-astro-cid-oxezsu4a> 从工程视角理解电商增长数据的本质 </a> <p class="summary" data-astro-cid-oxezsu4a>最近转进 TikTok Shop 一个做电商增长的新组，由于自己之前没有接触过增长工程师这个专业，所以借着团队内现有项目和 GPT 学了一轮，我了解到了数据在增长工程里几乎是最重要的东西，以下是我的学习增长数据心得，本文纯…</p> </div> <p class="meta label" data-astro-cid-oxezsu4a> <span class="area" data-astro-cid-oxezsu4a>工程</span> <span class="case" data-astro-cid-oxezsu4a>项目复盘</span> <span class="minutes" data-astro-cid-oxezsu4a>8 分钟阅读</span> </p> </li><li class="row" data-area="engineering" data-astro-cid-oxezsu4a> <time class="date label" datetime="2026-06-11T10:40:02+08:00" data-astro-cid-oxezsu4a> 2026.06.11 </time> <div class="main" data-astro-cid-oxezsu4a> <a class="title" href="/zh/2026/06/11/What-Happens-When-You-Type-Let-A-Equals-1/" data-astro-prefetch data-astro-cid-oxezsu4a> 当输入 let a = 1; 的时候，解释器发生了什么？ </a> <p class="summary" data-astro-cid-oxezsu4a>我以前也把 let a = 1 想成过 new Number(1) 的简写。这个模型能解释一个现象：为什么 a.toString() 可以跑。</p> </div> <p class="meta label" data-astro-cid-oxezsu4a> <span class="area" data-astro-cid-oxezsu4a>工程</span>  <span class="minutes" data-astro-cid-oxezsu4a>4 分钟阅读</span> </p> </li> </ol> </section> </div>  </main> <footer class="site-footer" data-astro-cid-nns7i3if> <div class="wrap grid" data-astro-cid-nns7i3if> <div class="sign" data-astro-cid-nns7i3if> <svg class="seal" viewBox="0 0 64 64" width="40px" height="40px" aria-hidden="true" focusable="false" data-astro-cid-v3e57phd> <rect width="64" height="64" rx="9" fill="var(--seal-red, #b8321f)" data-astro-cid-v3e57phd></rect> <rect x="4.5" y="4.5" width="55" height="55" rx="5.5" fill="none" stroke="var(--seal-paper, #f4f1ea)" stroke-width="2" data-astro-cid-v3e57phd></rect> <path fill="var(--seal-paper, #f4f1ea)" d="M33.8 10.3L42.0 11.5Q42.0 11.9 41.6 12.1Q41.3 12.3 40.4 12.3L40.4 12.3Q39.6 14.0 38.6 15.7L38.6 15.7L42.6 15.7L45.9 12.6L51.2 17.1Q50.9 17.5 50.6 17.6Q50.2 17.7 49.4 17.8L49.4 17.8Q47.6 21.4 44.6 24.2L44.6 24.2Q45.3 24.4 46.1 24.6L46.1 24.6Q50.0 25.6 54 26.1L54 26.1L54.0 26.6Q52.3 27.0 51.2 28.4Q50.2 29.8 49.8 31.9L49.8 31.9Q47.9 31.3 46.2 30.5L46.2 30.5L47.0 31.1Q47.8 31.8 49.0 32.7Q50.1 33.6 50.9 34.4L50.9 34.4Q50.8 35.1 49.7 35.1L49.7 35.1L42.6 35.1L42.6 39.4L43.5 39.4L46.0 36.1L46.8 36.7Q47.6 37.3 48.7 38.2Q49.8 39.1 50.6 39.9L50.6 39.9Q50.6 40.3 50.2 40.5Q49.9 40.7 49.4 40.7L49.4 40.7L42.6 40.7L42.6 45.0L45.6 45.0L48.4 41.3L49.3 41.9Q50.2 42.7 51.4 43.7Q52.6 44.7 53.5 45.5L53.5 45.5Q53.4 46.3 52.3 46.3L52.3 46.3L42.6 46.3L42.6 52.2Q42.6 52.4 41.8 52.7Q41.1 53.1 40.0 53.4Q38.9 53.7 37.7 53.7L37.7 53.7L36.6 53.7L36.6 46.3L28.1 46.3L27.8 45.0L36.6 45.0L36.6 40.7L30.3 40.7L30.0 39.4L36.6 39.4L36.6 35.1L29.6 35.1L29.2 33.9L36.6 33.9L36.6 29.7L44.1 30.4Q44.0 30.8 43.7 31.1Q43.4 31.4 42.6 31.5L42.6 31.5L42.6 33.9L43.6 33.9L46.2 30.5Q44.4 29.7 42.7 28.7L42.7 28.7Q41.6 28.1 40.5 27.3L40.5 27.3Q35.5 30.5 28.5 32.0L28.5 32.0L28.2 31.5Q33.9 28.9 37.8 24.8L37.8 24.8Q37.8 24.8 37.8 24.8L37.8 24.8Q37.5 24.5 37.2 24.1L37.2 24.1Q35.9 22.6 34.9 20.6L34.9 20.6Q34.3 21.2 33.7 21.8L33.7 21.8Q31.6 23.9 29.0 25.4L29.0 25.4L28.6 25.1Q29.9 23.3 30.9 20.9Q32.0 18.4 32.7 15.7Q33.5 12.9 33.8 10.3L33.8 10.3ZM11.1 19.1L16.9 19.6Q16.9 20.0 16.6 20.2Q16.4 20.5 15.8 20.6L15.8 20.6L15.8 21.6L15.9 21.7L15.9 40.0Q16.4 40.0 17.0 39.9L17.0 39.9L17.0 11.6L23.5 12.2Q23.4 12.7 23.1 13.0Q22.8 13.3 22.0 13.4L22.0 13.4L22.0 39.7Q22.6 39.7 23.2 39.6L23.2 39.6L23.2 18.9L29.2 19.5Q29.2 19.8 28.9 20.1Q28.7 20.4 28.0 20.5L28.0 20.5L28.0 44.2Q28.0 44.4 27.4 44.7Q26.8 45.1 25.9 45.4Q25.0 45.6 24.1 45.6L24.1 45.6L23.2 45.6L23.2 41.4Q21.1 42.3 18.6 43.2L18.6 43.2Q16.3 44.0 13.8 44.9L13.8 44.9Q13.1 46.0 12.3 46.3L12.3 46.3L10 41.3Q10.7 40.8 10.9 40.3Q11.1 39.9 11.1 39.2L11.1 39.2L11.1 19.1ZM39.9 22.3L39.9 22.3Q41.7 19.7 42.8 16.9L42.8 16.9L37.8 16.9Q37.7 17.1 37.5 17.3L37.5 17.3Q36.8 18.4 35.9 19.5L35.9 19.5Q37.3 20.8 39.0 21.7L39.0 21.7Q39.4 22.0 39.9 22.3Z" data-astro-cid-v3e57phd></path> </svg> <p data-astro-cid-nns7i3if> <span class="name" data-astro-cid-nns7i3if> Koh Hom <span lang="zh-CN" data-astro-cid-nns7i3if>许峰</span> </span> <span class="label" data-astro-cid-nns7i3if>
+© 2022–2026 </span> </p> </div> <ul class="links" role="list" data-astro-cid-nns7i3if> <li data-astro-cid-nns7i3if> <a href="/zh/atom.xml" type="application/atom+xml" data-astro-cid-nns7i3if> RSS </a> </li><li data-astro-cid-nns7i3if> <a href="/" hreflang="en" data-astro-cid-nns7i3if> EN </a> </li><li data-astro-cid-nns7i3if> <a href="https://github.com/clean99" rel="me" data-astro-cid-nns7i3if> GitHub </a> </li><li data-astro-cid-nns7i3if> <a href="mailto:xff9924@gmail.com" data-astro-cid-nns7i3if> 邮件 </a> </li> </ul> <nav class="footnav" aria-label="主导航" data-astro-cid-nns7i3if> <ul role="list" data-astro-cid-nns7i3if> <li data-astro-cid-nns7i3if> <a href="/zh/writing/" data-astro-prefetch data-astro-cid-nns7i3if> 文章 </a> </li><li data-astro-cid-nns7i3if> <a href="/zh/projects/" data-astro-prefetch data-astro-cid-nns7i3if> 作品 </a> </li><li data-astro-cid-nns7i3if> <a href="/zh/tags/" data-astro-prefetch data-astro-cid-nns7i3if> 主题 </a> </li><li data-astro-cid-nns7i3if> <a href="/zh/about/" data-astro-prefetch data-astro-cid-nns7i3if> 关于 </a> </li><li data-astro-cid-nns7i3if> <a href="/zh/links/" data-astro-prefetch data-astro-cid-nns7i3if> 链接 </a> </li><li data-astro-cid-nns7i3if> <a href="/zh/ai-coding-lab/" data-astro-prefetch data-astro-cid-nns7i3if> AI 编程实验室 </a> </li><li data-astro-cid-nns7i3if> <a href="/llms.txt" data-astro-prefetch data-astro-cid-nns7i3if> llms.txt </a> </li> </ul> </nav> <p class="colophon" data-astro-cid-nns7i3if>手写内容，Astro 构建，纯静态 HTML 交付。</p> <a class="top arrow-link" href="#top" data-astro-cid-nns7i3if> 回到顶部 </a> </div> </footer> <dialog class="search" aria-labelledby="search-title" data-search-dialog data-loading="正在加载索引…" data-empty="没有匹配的文章。" data-unavailable="搜索索引在生产构建后可用。" data-count-one="1 条结果" data-count-other="{n} 条结果" data-astro-cid-e66w4awt> <form method="dialog" class="panel" role="search" data-astro-cid-e66w4awt> <h2 id="search-title" class="visually-hidden" data-astro-cid-e66w4awt> 搜索 </h2> <div class="field" data-astro-cid-e66w4awt> <svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" focusable="false" data-astro-cid-e66w4awt> <circle cx="8.5" cy="8.5" r="5.75" fill="none" stroke="currentColor" stroke-width="1.6" data-astro-cid-e66w4awt></circle> <path d="m13 13 4.25 4.25" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" data-astro-cid-e66w4awt></path> </svg> <input type="search" name="q" placeholder="搜索文章、主题、代码…" aria-label="搜索" aria-describedby="search-status" autocomplete="off" spellcheck="false" enterkeyhint="go" data-search-input data-astro-cid-e66w4awt> <button type="submit" class="close" aria-label="关闭搜索" formnovalidate data-astro-cid-e66w4awt>
+Esc
+</button> </div> <p id="search-status" class="status label" role="status" aria-live="polite" data-search-status data-astro-cid-e66w4awt></p> <ol class="results" role="list" data-search-results data-astro-cid-e66w4awt></ol> <p class="hint label" aria-hidden="true" data-astro-cid-e66w4awt> ↑ ↓ 选择 · Enter 打开 · Esc 关闭 </p> </form> </dialog><script type="module">function e(e){return e.altKey?!1:(e.metaKey||e.ctrlKey)&&e.key.toLowerCase()===`k`?!0:e.key===`/`&&!e.metaKey&&!e.ctrlKey&&!e.inEditable}function t(e,t,n){if(n===0)return-1;let r=e+t;return r<-1?n-1:r>=n?-1:r}function n(e){return{url:e.url.replace(/index\.html$/,``),title:e.meta?.title?.replace(/ · Koh Hom$/,``)||e.url,excerpt:e.excerpt}}var r=Function(`url`,`return import(url)`),i=document.querySelector(`[data-search-dialog]`),a=i?.querySelector(`[data-search-input]`),o=i?.querySelector(`[data-search-results]`),s=i?.querySelector(`[data-search-status]`),c;function l(){return c??=(async()=>{try{let e=await r(`/pagefind/pagefind.js`);return await e.options({excerptLength:22}),await e.init(),e}catch{return}})(),c}if(i&&a&&o&&s){let r=i.dataset,c=-1,u=()=>[...o.querySelectorAll(`a`)],d=e=>{s.textContent=e},f=()=>{c===-1?a.focus():u()[c]?.focus()},p=e=>{o.replaceChildren(...e.map(e=>{let t=document.createElement(`li`),n=document.createElement(`a`);n.href=e.url;let r=document.createElement(`span`);r.className=`hit-title`,r.textContent=e.title;let i=document.createElement(`span`);return i.className=`hit-excerpt`,i.innerHTML=e.excerpt,n.append(r,i),t.append(n),t})),c=-1;let t=e.length;d(t===0?r.empty:t===1?r.countOne:r.countOther.replace(`{n}`,String(t)))},m=async()=>{let e=a.value.trim();if(!e){o.replaceChildren(),d(``);return}d(r.loading);let t=await l();if(!t){d(r.unavailable);return}let i=await t.debouncedSearch(e,{},160);if(!i||a.value.trim()!==e)return;let s=await Promise.all(i.results.slice(0,8).map(e=>e.data()));p(s.map(n))},h=()=>{i.open||(l(),i.showModal(),a.focus(),a.select())};for(let e of document.querySelectorAll(`[data-search-open]`))e.addEventListener(`click`,h),e.addEventListener(`pointerenter`,()=>void l(),{once:!0}),e.addEventListener(`focus`,()=>void l(),{once:!0});document.addEventListener(`keydown`,t=>{if(i.open||t.defaultPrevented)return;let n=!!t.target?.closest(`input, textarea, select, [contenteditable='true']`);e({key:t.key,metaKey:t.metaKey,ctrlKey:t.ctrlKey,altKey:t.altKey,inEditable:n})&&(t.preventDefault(),h())}),a.addEventListener(`input`,()=>void m()),i.addEventListener(`keydown`,e=>{if(e.key===`ArrowDown`||e.key===`ArrowUp`)e.preventDefault(),c=t(c,e.key===`ArrowDown`?1:-1,u().length),f();else if(e.key===`Enter`&&e.target===a){e.preventDefault();let t=u()[0];t&&window.location.assign(t.href)}}),i.addEventListener(`click`,e=>{e.target===i&&i.close()})}</script> </body> </html><script type="module">function e(){return document.querySelector(`link[rel="canonical"]`)?.href??location.href.split(`#`)[0]}for(let t of document.querySelectorAll(`[data-copy-link]`)){let n=t.querySelector(`[data-copy-label]`)??t,r=n.textContent??``,i;t.addEventListener(`click`,async()=>{try{await navigator.clipboard.writeText(e())}catch{return}n.textContent=t.dataset.copied??r,t.dataset.state=`copied`,clearTimeout(i),i=window.setTimeout(()=>{n.textContent=r,delete t.dataset.state},2e3)})}var t=/^[\w-]{11}$/;function n(e){return typeof e==`string`&&t.test(e)}function r(e){if(!n(e))throw Error(`Not a YouTube video id: ${e}`);return`https://www.youtube-nocookie.com/embed/${e}?autoplay=1&rel=0`}document.addEventListener(`click`,e=>{if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;let t=e.target?.closest(`a.video-facade[data-youtube]`),i=t?.dataset.youtube;if(!t||!n(i))return;e.preventDefault();let a=document.createElement(`iframe`);a.src=r(i),a.title=t.textContent?.trim()||`YouTube video`,a.allow=`accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share`,a.allowFullscreen=!0,a.referrerPolicy=`strict-origin-when-cross-origin`,t.replaceWith(a),a.focus()});</script>

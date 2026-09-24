@@ -1,37 +1,46 @@
-# Koh Hom — Software, AI, and Inner Practice
+# Koh Hom — Engineer's Field Notes
 
-> Notes on software, AI, systems, and the practice of living well. A bilingual personal knowledge site by Koh Hom (Xu Feng).
+> Field notes from Koh Hom (Xu Feng), a frontend engineer: case studies on browser-grade tab systems, web performance, testing, and AI agents that ship.
 
-## About the Author
+## Case studies
 
-Koh Hom is a software engineer currently working on frontend systems. His writing covers reliable software, frontend architecture, AI-assisted development, learning systems, and inner practice.
+- [Understanding ecommerce growth data from an engineering perspective](https://clean99.github.io/2026/07/02/Ecommerce-Growth-Data-Engineering/index.md): I recently moved to a new team working on ecommerce growth at TikTok Shop. I had not worked as a growth engineer before, so I used the team's existing projects and GPT to learn the area. The biggest thing I learned is…
+- [Designing an Operations Heartbeat System](https://clean99.github.io/2026/06/19/Designing-an-Operations-Heartbeat-System/index.md): A system design write-up on turning UI activity events into reliable agent state across compute windows, HCM state commits, downstream propagation, multi-region cutover, and service split boundaries.
+- [Workspace v2 tab system performance: first load, hot switch, and background pressure](https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/index.md): A performance write-up about separating first load, hot tab switch, background pressure, and the gates that kept false wins out.
+- [Workspace v2 tab system: browser tabs inside a workspace](https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/index.md): How we made workspace tabs keep state, survive refresh, share real URLs, and stop hidden runtimes from leaking side effects.
+- [Automated AI performance optimization with a harness and goal-driven loop](https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/index.md): What changed when I made an AI agent optimize performance against a harness instead of against its own guesses.
 
-## Main Paths
+## Writing
 
-- Engineering: frontend systems, reliability, performance, testing, and architecture.
-- AI & Agents: AI-assisted development, agent systems, automation, and human-AI workflows.
-- Systems & Learning: learning methods, abstractions, mental models, and computer science notes.
-- Mind & Practice: Buddhism, attention, reading notes, and reflections on living well.
+- [JavaScript garbage collection: generations, hosts, and leaks](https://clean99.github.io/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/index.md): While reviewing JavaScript runtime internals, I kept seeing GC reduced to one sentence: when objects are no longer used, the engine frees them.
+- [How JavaScript runs: from source code to JIT optimization](https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/index.md): While relearning JavaScript, I got stuck on a basic-sounding question: when we say JavaScript "runs," how much of it has already been compiled?
+- [Agent Skills: The Functional Blueprint for AI Agents](https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/index.md): A practical model for treating agent skills as reusable functions with clear triggers, inputs, outputs, and composition rules.
+- [Vibe Coding vs Spec-Driven Coding: The Evolution of AI-Assisted Development](https://clean99.github.io/2026/03/18/Vibe-Coding-VS-Spec-Driven-Coding/index.md): A comparison of vibe coding and spec-driven coding as two different operating modes for AI-assisted software development.
+- [SEO from First Principles — A Deep Dive through My Blog's Overhaul](https://clean99.github.io/2026/03/10/A-Complete-SEO-Overhaul-for-My-Hexo-Blog/index.md): Most SEO guides give you a checklist: add this meta tag, install that plugin, set this config. But checklists don't help you understand why — and without understanding why, you'll never know what you're missing.
+- [Building Fault Tolerant React App With Error Boundary(Error Boundary Best Practice)](https://clean99.github.io/2024/05/06/Building-Fault-Tolerant-React-App-With-Error-Boundary/index.md): How to use React Error Boundaries as a practical reliability boundary instead of a decorative catch-all.
+- [React Runtime Performance Optimization](https://clean99.github.io/2024/04/16/React-Performance-Optimization/index.md): A practical tour of React runtime performance bottlenecks, rendering cost, memoization, and browser-side calculation limits.
+- [React Server Component Internals(Source Code Review)](https://clean99.github.io/2024/04/10/React-Server-Component-Internals/index.md): A source-level walkthrough of React Server Components and the engineering model behind server-driven component rendering.
+- [Learning How React Hooks Work by Building a Naive useState](https://clean99.github.io/2024/04/10/Learning-How-React-Hooks-Work-by-Building-a-Naive-useState/index.md): (This is a classic question of Chinese style interview, we call it '八股文', which basically means that the questions is too classic and everyone can answer it by remembering it)
+- [How to Design GOOD Test Cases](https://clean99.github.io/2024/04/10/How-to-Design-GOOD-Test-Cases/index.md): A testing note on designing cases around real risk, behavior coverage, and maintainable feedback loops.
+- [The Software Engineering Concept behind Tailwind CSS(Compared with StyleX)](https://clean99.github.io/2024/04/10/The-Software-Engineering-Concept-behind-Tailwind-CSS/index.md): This article will show you how TailwindCSS can really increase our productivity and project maintainability by better organizing our code in certain scenarios.
+- [Web Performance Optimization Strategies and Practices](https://clean99.github.io/2024/04/10/Web-Performance-Optimization/index.md): Web performance optimization is crucial and it has a lot of ways to implement, this is a note of how I optimize my company's project, and come up with several generic strategies that can be applied in different…
+- [Build a Redux from Scratch(Redux Source Code Review)](https://clean99.github.io/2023/11/28/build-a-redux-from-scratch/index.md): A state is nothing more than a getter/setter.
+- [Crafting GPT-based Customer Support Chatbot from 0 to 1 — Algorithm Portion](https://clean99.github.io/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/index.md): This article introduces how to craft a smart GPT-based customer support chatbot that can answer users' questions and interact with them by applying different kinds of techniques from OpenAI.
+- [Applying Automatic Testing in The Development Cycle](https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/index.md): Testing is a critical aspect of any software development process. Ensuring that an application functions as expected and is free of defects is essential for delivering a high-quality product to end-users. In this…
+- [Introducing Code Complexity Metric: Cognitive Complexity](https://clean99.github.io/2023/03/04/Introducing-Code-Complexity-Metric-Cognitive-Complexity/index.md): When we say that someone's code quality is bad, in most of the time, what we really mean is that the code is hard to understand. Many developers prefer to start a new project from scratch rather than add features to a…
+- [Use Modular Design with ChatGPT to Generate Code](https://clean99.github.io/2023/02/22/Use-Modular-Design-with-ChatGPT-to-Generate-Code/index.md): You can find all the code of this article in this codesandbox.
+- [How I Use ChatGPT in My Daily Work&Study?](https://clean99.github.io/2023/02/22/How-I-Use-ChatGPT-in-My-Daily-Work-Study/index.md): ChatGPT has garnered significant attention since its release and has become a popular tool for many professionals. While it's been widely discussed, it's important to explore how ChatGPT can benefit us in our day-to-day…
+- [Does Github Copilot Worth It?](https://clean99.github.io/2022/12/18/Does-Github-Copilot-Worth-It/index.md): I personally use copilot to speed up my coding for a long time. I've discovered some use cases where git copilot can help me a lot. For me, copilot speeds up my coding progress by at least 30%. So it's definitely a good…
+- [How Testing Speeds Up Your Development](https://clean99.github.io/2022/08/18/How-Testing-Speeds-Up-Your-Development/index.md): As frontend developers, most of us don't like to write testing because "it will slow down development". I didn't write tests before and I can feel your pain about writing tests for a "fast-changing" frontend project…
+- [Some Common Mistakes in React Testing](https://clean99.github.io/2022/07/24/Some-Common-Mistakes-in-React-Testing/index.md): Most of the frontend developers (at least those who I met) dislike writing tests. I asked them why, and the answer is simple: We don't have time to do that! Well, I would like to tell you that, writing tests in the…
+- [Testing Best Practice Tdd](https://clean99.github.io/2022/07/24/Testing-Best-Practice-Tdd/index.md): In general, when modeling phenomena in science and engineering, we begin with simplified, incomplete models. As we examine things in greater detail, these simple models become inadequate and must be replaced by more…
+- [SICPJS 2. Building Abstractions with Data](https://clean99.github.io/2022/05/02/SICPJS-2-Building-Abstractions-with-Data/index.md): Compound data: just like compound function, we enhance our expressive power of our language. And elevate the conceptual level at which we can design our programs. Glue data together: compound data glue data together to…
+- [Build a Toy Browser with NodeJS](https://clean99.github.io/2022/04/27/Build-a-Toy-Browser-with-NodeJS/index.md): That's right, I dig another hole to myself. I saw this interesting book called Web Browser Engineering, which teach to build a browser with python. Since I'm learning SICPJS now, and I will build a compiler at the end…
+- [SICPJS 1. Building Abstractions with Functions](https://clean99.github.io/2022/04/25/SICPJS-1-Building-Abstractions-with-Functions/index.md): computational processes(a sorcerer's idea of a spirit): ideas, can't be seen or touch but solve the problem and direct the real world program(a sorcerer's spells)：prescribe computational processes by programming…
+- [SICPJS thinking about the book and study plan / catalog](https://clean99.github.io/2022/04/24/SICPJS-What-I-think-and-what-I-ve-done/index.md): A learning note on why SICPJS matters and how I approached the book as a long-term abstraction practice.
 
-## Key Pages
+## Profile
 
-- Home: https://clean99.github.io/
-- Writing: https://clean99.github.io/writing/
-- Projects: https://clean99.github.io/projects/
-- For Interviewers: https://clean99.github.io/interviewers/
-- About: https://clean99.github.io/About/
-
-## Selected Engineering and AI Posts
-
-- [Workspace v2 Tab System: Building Browser Tabs Inside Workspace](https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/)
-- [Workspace v2 Tab System Performance: First Load, Hot Switch, And Background Pressure](https://clean99.github.io/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/)
-- [Automated AI Performance Optimization with Harness and Goal-Driven Loops](https://clean99.github.io/2026/05/16/Automated-AI-Performance-Optimization-with-Harness-and-Goal-Driven-Loops/)
-- [Agent Skills: The Functional Blueprint for AI Agents](https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/)
-
-## Links
-
-- Blog: https://clean99.github.io
-- GitHub: https://github.com/clean99
-- LinkedIn: https://www.linkedin.com/in/hom-koh-42019a204
-- RSS Feed: https://clean99.github.io/atom.xml
-- Sitemap: https://clean99.github.io/sitemap.xml
+- [Koh Hom](https://clean99.github.io/about/): Software Engineer. Field notes from Koh Hom (Xu Feng), a frontend engineer: case studies on browser-grade tab systems, web performance, testing, and AI agents that ship.
+- [All writing](https://clean99.github.io/writing/): Every note, newest first.
+- [Full archive (all posts, both languages)](https://clean99.github.io/llms-full.txt): The same index with every published post inlined as Markdown.

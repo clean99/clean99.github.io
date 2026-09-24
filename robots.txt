@@ -1,18 +1,13 @@
+# Everything here is public: text, images, feeds, and the markdown twins.
+# Retrieval and answering engines are named so no default can exclude them.
+
 User-agent: *
 Allow: /
-Allow: /archives/
-Allow: /categories/
-Allow: /tags/
-Allow: /about/
 
-Disallow: /vendors/
-Disallow: /js/
-Disallow: /css/
-Disallow: /fonts/
-Disallow: /fancybox/
-
-# AI Crawlers - Welcome
 User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
 Allow: /
 
 User-agent: ChatGPT-User
@@ -21,10 +16,44 @@ Allow: /
 User-agent: ClaudeBot
 Allow: /
 
+User-agent: Claude-User
+Allow: /
+
 User-agent: PerplexityBot
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: Applebot
 Allow: /
 
 User-agent: Google-Extended
 Allow: /
 
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
 Sitemap: https://clean99.github.io/sitemap.xml
+Host: https://clean99.github.io
