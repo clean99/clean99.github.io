@@ -5,6 +5,7 @@ tags: [Software Engineering, Data, Growth]
 lang: en
 i18n_key: Ecommerce-Growth-Data-Engineering
 case_study:
+  team: "TikTok Shop, ecommerce growth"
   stack: [A/B testing, deeplink, btm_chain, funnel analysis, cohort retention analysis, multi-touch attribution]
   impact:
     - "Decomposed GMV into an engineering funnel (UV x PDP arrival x add-to-cart x checkout x payment success x orders per buyer x AOV) so a drop can be traced to the step that caused it."
@@ -14,7 +15,7 @@ case_study:
   links: []
 ---
 
-> I recently moved to a new team working on Southeast Asia TikTok Shop marketing and user growth. I had not worked as a growth engineer before, so I used the team's existing projects and GPT to learn the area. The biggest thing I learned is that data is one of the most important things in growth engineering. These are my notes from that learning process, written by hand.
+> I recently moved to a new team working on ecommerce growth at TikTok Shop. I had not worked as a growth engineer before, so I used the team's existing projects and GPT to learn the area. The biggest thing I learned is that data is one of the most important things in growth engineering. These are my notes from that learning process, written by hand.
 
 Engineering and drawing pages are two different things, and they produce different results.
 

@@ -9,6 +9,8 @@ audience: [public, interviewers]
 lang: en
 i18n_key: Workspace-v2-Tab-System-Browser-Grade-Tabs
 case_study:
+  period: "2026 Q2"
+  team: "TikTok Shop, ecommerce frontend"
   stack: [React, TypeScript, React Query, BroadcastChannel, History API, iframe]
   impact:
     - "Tabs survive refresh and stay identical across windows: BFF stores the opened tab list, React Query makes the local window instant, BroadcastChannel makes other windows refetch."

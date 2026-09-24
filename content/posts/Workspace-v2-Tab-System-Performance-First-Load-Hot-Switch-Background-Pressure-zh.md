@@ -10,6 +10,8 @@ lang: zh
 i18n_key: Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure
 permalink: zh/2026/05/18/Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure/
 case_study:
+  period: "2026 Q2"
+  team: "TikTok Shop 电商前端"
   stack: [CDP Chrome, React, Seto sandbox, iframe, requestIdleCallback, WebSocket]
   impact:
     - "冷切换 p95 duration 从 `1829.8ms` 降到 `812.3ms`（`-55.6%`），p95 post-visible blocking 从 `1193.7ms` 降到 `8.7ms`（`-99.3%`），主要准备工作被移到点击前。"

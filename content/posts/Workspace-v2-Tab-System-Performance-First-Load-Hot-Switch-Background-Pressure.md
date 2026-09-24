@@ -9,6 +9,8 @@ audience: [public, interviewers]
 lang: en
 i18n_key: Workspace-v2-Tab-System-Performance-First-Load-Hot-Switch-Background-Pressure
 case_study:
+  period: "2026 Q2"
+  team: "TikTok Shop, ecommerce frontend"
   stack: [CDP Chrome, React, Seto sandbox, iframe, requestIdleCallback, WebSocket]
   impact:
     - "Cold tab switch p95 duration fell from 1829.8ms to 812.3ms (-55.6%), and p95 post-visible blocking fell from 1193.7ms to 8.7ms (-99.3%) after moving prewarm before the click."

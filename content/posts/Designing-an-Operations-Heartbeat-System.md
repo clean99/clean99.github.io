@@ -9,6 +9,8 @@ audience: [public, interviewers]
 lang: en
 i18n_key: Designing-an-Operations-Heartbeat-System
 case_study:
+  role: "HCM and Heartbeat full-stack owner"
+  period: "2024 Q3 – 2025 Q2"
   stack: [Redis, MQ, DBus, binlog, Elasticsearch, WebSocket, RPC]
   impact:
     - "The HCM and Heartbeat path serves 47,149 agents, 7,000 skill groups, about 4,000 QPS, and 141 upstream services."

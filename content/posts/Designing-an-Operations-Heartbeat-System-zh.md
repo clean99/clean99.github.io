@@ -8,6 +8,16 @@ featured: true
 audience: [public, interviewers]
 lang: zh
 i18n_key: Designing-an-Operations-Heartbeat-System
+case_study:
+  role: "HCM 与心跳服务全栈负责人"
+  period: "2024 Q3 – 2025 Q2"
+  stack: [Redis, MQ, DBus, binlog, Elasticsearch, WebSocket, RPC]
+  impact:
+    - "我维护的 HCM/Heartbeat 链路服务 47,149 个 agent、7,000 个 skill group、约 4,000 QPS 和 141 个上游调用方。"
+    - "TT/IES 拆分后，旧 HCM 侧减少约 3,000 个 agent 和约 2,000 QPS，TT 的心跳、状态提交和路由在 TT 内闭环。"
+    - "US-TTP 一次事故里，binlog 到 HCM MQ 链路堆积约 300k 条消息，依赖 ES 的 handler 阻塞了共享消费；事后补了 handler 维度耗时指标，并把 binlog 直接发 RMQ 的工作状态链路列入改造。"
+    - "GCP -> NO1A 切流后，keyup/keydown 事件没有稳定进入 Heartbeat，正常工作的 agent 被判成 abnormal；之后在状态计算前加了输入健康指标和自动规则降级。"
+  links: []
 permalink: zh/2026/06/19/Designing-an-Operations-Heartbeat-System/
 ---
 

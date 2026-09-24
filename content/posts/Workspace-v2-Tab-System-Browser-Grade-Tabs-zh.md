@@ -6,6 +6,8 @@ lang: zh
 i18n_key: Workspace-v2-Tab-System-Browser-Grade-Tabs
 permalink: zh/2026/05/18/Workspace-v2-Tab-System-Browser-Grade-Tabs/
 case_study:
+  period: "2026 Q2"
+  team: "TikTok Shop 电商前端"
   stack: [React, TypeScript, React Query, BroadcastChannel, History API, iframe]
   impact:
     - "刷新不丢 tab，多窗口不一致的问题也解决了：BFF 存打开的 tab，React Query 让当前窗口立刻响应，BroadcastChannel 通知其他窗口 invalidate 后重新拉取。"
