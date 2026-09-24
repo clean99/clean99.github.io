@@ -23,10 +23,10 @@ const COPY = {
     otherLang: "Topics"
   },
   zh: {
-    title: "主题 — 前端、Web 性能、测试、React 与 AI Agent",
+    title: "主题：前端、Web 性能、测试、React 与 AI Agent",
     eyebrow: "主题",
     heading: "主题",
-    lead: "我写过的全部主题，按文章数量排序。最重的排在前面，长尾在下面的完整列表里。",
+    lead: "我写过的全部主题，按文章数量排序。写得多的排在前面，完整的列表在下面。",
     description: "按主题浏览许峰的工程笔记：前端架构、Web 性能、React、软件测试、可靠性与 AI 辅助开发。",
     tagTitle: (label: string) => `${label} — 工程笔记`,
     tagDescription: (label: string, n: number) =>

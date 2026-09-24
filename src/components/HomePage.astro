@@ -14,6 +14,7 @@ interface Props {
 
 const { lang } = Astro.props;
 const ui = t(lang);
+// Segments carry their own spacing; the h1 renders them as one expression so zh gains no spaces.
 const [titleLead, titleAccent, titleTail] = ui.heroTitle;
 
 const posts = (await allPosts()).filter((post) => !post.draft);
@@ -41,11 +42,7 @@ const colophon = `${AUTHOR.nativeName} · ${t("zh").siteTagline}`;
   <section class="hero wrap" aria-labelledby="hero-title">
     <div class="hero-text">
       <p class="eyebrow label">{ui.siteTagline}</p>
-      <h1 id="hero-title">
-        {titleLead}
-        <em>{titleAccent}</em>
-        {titleTail}
-      </h1>
+      <h1 id="hero-title">{[titleLead, <em>{titleAccent}</em>, titleTail]}</h1>
       <p class="lede">{ui.heroLede}</p>
       <p class="actions">
         <a class="button" href={localizePath("/projects/", lang)} data-astro-prefetch>

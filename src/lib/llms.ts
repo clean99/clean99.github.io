@@ -80,7 +80,7 @@ export function llmsSections(input: LlmsInput): LlmsSection[] {
           description:
             lang === "en"
               ? "The same index with every published post inlined as Markdown."
-              : "同一份索引，附全部已发布文章的 Markdown 全文。"
+              : "本索引的完整版，附上全部已发布文章的 Markdown 全文。"
         });
       })
     )

@@ -50,7 +50,7 @@ const COPY = {
   zh: {
     eyebrow: "关于",
     title: "许峰 Koh Hom",
-    lede: "软件工程师，专注前端系统。我把关于构建、思考和好好生活的学习都写下来。",
+    lede: "软件工程师，专注前端系统。这里写构建、思考，也写怎么好好生活。",
     panelLabel: "速览",
     nameLabel: "姓名",
     nameValue: `${AUTHOR.nativeName} · ${AUTHOR.name}`,
@@ -62,11 +62,11 @@ const COPY = {
     contactLabel: "其他",
     areasTitle: "我正在探索",
     areas: [
-      { title: "前端架构与性能", blurb: "当越来越多产品逻辑进入同一个页面，系统依然要保持快。" },
-      { title: "测试、可靠性与可维护性", blurb: "让失败尽早暴露，让代码保持可改。" },
-      { title: "AI Agent 与 AI 辅助开发", blurb: "让 Agent 可靠而不只是惊艳的工程约束。" },
-      { title: "学习系统与心智模型", blurb: "SICP、抽象，以及如何学习。" },
-      { title: "佛学、注意力与内在实践", blurb: "更清楚地工作和生活。" }
+      { title: "前端架构与性能", blurb: "越来越多产品逻辑挤进同一个页面，系统还是得快。" },
+      { title: "测试、可靠性与可维护性", blurb: "让失败尽早暴露，也让代码一直改得动。" },
+      { title: "AI Agent 与 AI 辅助开发", blurb: "给 Agent 加上工程约束，让它在真实项目里稳定干活。" },
+      { title: "学习系统与心智模型", blurb: "SICP、抽象，还有怎么学东西。" },
+      { title: "佛学、注意力与内在实践", blurb: "把工作和生活看得更清楚。" }
     ],
     elsewhere: [
       { label: "GitHub", value: AUTHOR.githubHandle },

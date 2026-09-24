@@ -38,7 +38,7 @@ export const NOT_FOUND_COPY = {
     documentTitle: "页面不存在 · 许峰",
     eyebrow: "404",
     title: "这个页面不存在",
-    lede: "你访问的地址在站点里找不到。它可能被移动过，也可能链接里有笔误。",
+    lede: "站点里没有这个地址。可能被移动过，也可能链接里有笔误。",
     home: "返回首页",
     homePath: "/zh/",
     writing: "浏览全部文章",

@@ -26,12 +26,11 @@ const COPY = {
     browseTopics: "Browse by topic"
   },
   zh: {
-    title: "文章 — 前端架构、Web 性能、测试与 AI Agent",
+    title: "文章：前端架构、Web 性能、测试与 AI Agent",
     eyebrow: "全部文章",
     heading: "文章",
-    lead: "这里收录我发表的全部工程笔记，按时间倒序：前端架构与 Web 性能、软件测试与可靠性、系统设计复盘，以及 AI 辅助工程的一线实践。",
-    description:
-      "许峰的工程笔记全量归档：前端架构、Web 性能、React 内部机制、软件测试与 AI Agent，按年份分组，可按领域筛选。",
+    lead: "我发表过的工程笔记都在这里，按时间倒序：前端架构与 Web 性能、软件测试与可靠性、系统设计复盘，以及 AI 辅助开发里的具体做法。",
+    description: "许峰的工程笔记，按年份分组，可按领域筛选：前端架构、Web 性能、React 内部机制、软件测试与 AI Agent。",
     filterLabel: "按领域筛选",
     allAreas: "全部",
     groupLabel: (year: number) => `${year} 年的笔记`,

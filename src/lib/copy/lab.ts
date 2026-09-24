@@ -52,13 +52,13 @@ const COPY = {
   zh: {
     eyebrow: "公开 Agent 工作台",
     title: "AI Coding Skills",
-    lede: "我创建的 AI coding skills 目录，从私有 setup 仓库生成。页面只展示自建 skills 和关键 agent 配置的脱敏公开内容。",
+    lede: "我写的 AI coding skills 目录，内容从私有的 setup 仓库生成。页面只展示自建 skills 和关键 agent 配置，且都已脱敏。",
     statementTitle: "作者声明",
     statement:
-      "这些 skills 和配置是我的日常 AI 编程工作流样本。页面不会发布密钥、内部平台细节、个人路径或私有仓库入口；展示内容已在生成阶段脱敏。",
+      "这些 skills 和配置是我日常 AI 编程工作流的样本。页面不发布密钥、内部平台细节、个人路径或私有仓库入口；展示的内容在生成时已经脱敏。",
     pipelineTitle: "更新流水线",
     pipelineSteps: [
-      { title: "监听 setup 更新", blurb: "私有 setup 仓库是唯一事实来源。" },
+      { title: "监听 setup 更新", blurb: "一切以私有的 setup 仓库为准。" },
       { title: "筛选自建 skills", blurb: "只保留自建 skills 与关键 agent 配置。" },
       { title: "生成脱敏预览", blurb: "名称、路径与密钥会被重写。" },
       { title: "发布静态 catalog", blurb: "页面读取生成的 JSON。" }
@@ -87,9 +87,9 @@ const COPY = {
       sanitized: (n: number) => `${n} 项已脱敏`,
       entries: (n: number) => `${n} 个条目`
     },
-    note: "名称、路径和内容在生成 catalog 时已脱敏。本页不在运行时请求任何数据。",
+    note: "名称、路径和内容在生成 catalog 时已脱敏。页面打开后不会再请求任何数据。",
     workLabel: "相关文章",
-    workLede: "这套目录背后的长文论证。"
+    workLede: "这套目录为什么这么做，写在下面这些文章里。"
   }
 } satisfies Record<Lang, unknown>;
 

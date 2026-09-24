@@ -30,9 +30,9 @@ export const AREA_BLURBS: Record<Lang, Record<Area, string>> = {
   },
   zh: {
     engineering: "前端架构、性能、测试，以及生产环境里的可靠性。",
-    ai: "Agent、AI 辅助开发，以及让它们可靠落地的工程约束。",
+    ai: "Agent、AI 辅助开发，以及让它们稳定跑起来的工程约束。",
     systems: "SICP、抽象、心智模型，以及如何学习。",
-    mind: "注意力、佛学，以及好好工作、好好生活的练习。",
+    mind: "注意力、佛学，以及怎样把工作和生活过好。",
     life: "其他值得记下来的事。"
   }
 };
