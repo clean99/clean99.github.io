@@ -3,7 +3,7 @@
   <title>许峰 Koh Hom — 前端工程笔记</title>
   <subtitle>许峰（Koh Hom）的前端工程笔记：浏览器级标签页系统、Web 性能、测试和 AI Agent 的项目复盘与文章。</subtitle>
   <id>https://clean99.github.io/zh/atom.xml</id>
-  <updated>2026-07-02T09:30:00.000Z</updated>
+  <updated>2026-11-23T01:30:00.000Z</updated>
   <link rel="self" type="application/atom+xml" href="https://clean99.github.io/zh/atom.xml"/>
   <link rel="alternate" type="text/html" href="https://clean99.github.io/zh/"/>
   <author>
@@ -13,6 +13,30 @@
   </author>
   <rights>© Koh Hom</rights>
   <generator uri="https://astro.build" version="7">Astro</generator>
+  <entry>
+    <title>AI 时代的状态管理选型：我选 Zustand</title>
+    <id>https://clean99.github.io/zh/2026/11/23/Why-I-Chose-Zustand-for-Agent-Written-Frontend-Code/</id>
+    <link rel="alternate" type="text/html" href="https://clean99.github.io/zh/2026/11/23/Why-I-Chose-Zustand-for-Agent-Written-Frontend-Code/"/>
+    <published>2026-11-23T01:30:00.000Z</published>
+    <updated>2026-11-23T01:30:00.000Z</updated>
+    <author>
+      <name>Koh Hom</name>
+      <uri>https://github.com/clean99</uri>
+      <email>xff9924@gmail.com</email>
+    </author>
+    <content type="html" xml:base="https://clean99.github.io/zh/2026/11/23/Why-I-Chose-Zustand-for-Agent-Written-Frontend-Code/">(...args) =&gt; {
+		if (!validateArgs(args)) throw new AstroError({
+			...InvalidComponentArgs,
+			message: InvalidComponentArgs.message(name)
+		});
+		return cb(...args);
+	}</content>
+    <summary type="text">团队要靠 Coding Agent 完成一次大型电商 Web 迁移。动工前我对比了 useEffect 联动、Redux Toolkit、MobX、Jotai 和 Zustand，最后选了 Zustand，并给它配了目录、Lint 和验证三层约束。</summary>
+    <category term="frontend" label="前端"/>
+    <category term="react" label="React"/>
+    <category term="ai" label="AI"/>
+    <category term="software-engineering" label="软件工程"/>
+  </entry>
   <entry>
     <title>从工程视角理解电商增长数据的本质</title>
     <id>https://clean99.github.io/zh/2026/07/02/Ecommerce-Growth-Data-Engineering/</id>
@@ -471,13 +495,6 @@
       <uri>https://github.com/clean99</uri>
       <email>xff9924@gmail.com</email>
     </author>
-    <content type="html" xml:base="https://clean99.github.io/zh/2023/06/10/Crafting-GPT-based-Customer-Support-Chatbot-Algorithm/">(...args) =&gt; {
-		if (!validateArgs(args)) throw new AstroError({
-			...InvalidComponentArgs,
-			message: InvalidComponentArgs.message(name)
-		});
-		return cb(...args);
-	}</content>
     <summary type="text">本文介绍如何运用 OpenAI 的多种技术，打造一个能够回答用户问题并与其进行交互的智能 GPT 客服聊天机器人。</summary>
     <category term="ai" label="AI"/>
     <category term="chatgpt" label="ChatGPT"/>

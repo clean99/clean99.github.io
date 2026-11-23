@@ -12,6 +12,7 @@
 
 ## 文章
 
+- [AI 时代的状态管理选型：我选 Zustand](https://clean99.github.io/zh/2026/11/23/Why-I-Chose-Zustand-for-Agent-Written-Frontend-Code/index.md): 团队要靠 Coding Agent 完成一次大型电商 Web 迁移。动工前我对比了 useEffect 联动、Redux Toolkit、MobX、Jotai 和 Zustand，最后选了 Zustand，并给它配了目录、Lint 和验证三层约束。
 - [当输入 let a = 1; 的时候，解释器发生了什么？](https://clean99.github.io/zh/2026/06/11/What-Happens-When-You-Type-Let-A-Equals-1/index.md): 我以前也把 let a = 1 想成过 new Number(1) 的简写。这个模型能解释一个现象：为什么 a.toString() 可以跑。
 - [JavaScript GC 机制：分代、宿主和常见泄漏](https://clean99.github.io/zh/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/index.md): 今天继续补 JavaScript 运行机制时，我发现 GC 很容易被说成一句空话：对象不用了，引擎会自动回收。
 - [JavaScript 的运行机制：从源码到 JIT 优化](https://clean99.github.io/zh/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/index.md): 今天重学 JavaScript 时，我卡在一个看起来很基础的问题上：我们说 JS “运行”时，它到底已经被编译到了哪一步？

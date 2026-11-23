@@ -3,7 +3,7 @@
   <title>Koh Hom — Engineer&apos;s Field Notes</title>
   <subtitle>Field notes from Koh Hom (Xu Feng), a frontend engineer: case studies on browser-grade tab systems, web performance, testing, and AI agents that ship.</subtitle>
   <id>https://clean99.github.io/atom.xml</id>
-  <updated>2026-07-02T09:30:00.000Z</updated>
+  <updated>2026-11-23T01:30:00.000Z</updated>
   <link rel="self" type="application/atom+xml" href="https://clean99.github.io/atom.xml"/>
   <link rel="alternate" type="text/html" href="https://clean99.github.io/"/>
   <author>
@@ -13,6 +13,30 @@
   </author>
   <rights>© Koh Hom</rights>
   <generator uri="https://astro.build" version="7">Astro</generator>
+  <entry>
+    <title>Why I Chose Zustand for Agent-Written Frontend Code</title>
+    <id>https://clean99.github.io/2026/11/23/Why-I-Chose-Zustand-for-Agent-Written-Frontend-Code/</id>
+    <link rel="alternate" type="text/html" href="https://clean99.github.io/2026/11/23/Why-I-Chose-Zustand-for-Agent-Written-Frontend-Code/"/>
+    <published>2026-11-23T01:30:00.000Z</published>
+    <updated>2026-11-23T01:30:00.000Z</updated>
+    <author>
+      <name>Koh Hom</name>
+      <uri>https://github.com/clean99</uri>
+      <email>xff9924@gmail.com</email>
+    </author>
+    <content type="html" xml:base="https://clean99.github.io/2026/11/23/Why-I-Chose-Zustand-for-Agent-Written-Frontend-Code/">(...args) =&gt; {
+		if (!validateArgs(args)) throw new AstroError({
+			...InvalidComponentArgs,
+			message: InvalidComponentArgs.message(name)
+		});
+		return cb(...args);
+	}</content>
+    <summary type="text">My team is moving a large ecommerce web app into another repository, with coding agents writing most of the code. Before we started I compared useEffect chains, Redux Toolkit, MobX, Jotai and Zustand, and picked Zustand.</summary>
+    <category term="frontend" label="Frontend"/>
+    <category term="react" label="React"/>
+    <category term="ai" label="AI"/>
+    <category term="software-engineering" label="Software Engineering"/>
+  </entry>
   <entry>
     <title>Understanding ecommerce growth data from an engineering perspective</title>
     <id>https://clean99.github.io/2026/07/02/Ecommerce-Growth-Data-Engineering/</id>
@@ -470,13 +494,6 @@
       <uri>https://github.com/clean99</uri>
       <email>xff9924@gmail.com</email>
     </author>
-    <content type="html" xml:base="https://clean99.github.io/2023/04/01/Applying-Automatic-Testing-in-The-Development-Cycle/">(...args) =&gt; {
-		if (!validateArgs(args)) throw new AstroError({
-			...InvalidComponentArgs,
-			message: InvalidComponentArgs.message(name)
-		});
-		return cb(...args);
-	}</content>
     <summary type="text">Testing is a critical aspect of any software development process. Ensuring that an application functions as expected and is free of defects is essential for delivering a high-quality product to end-users. In this…</summary>
     <category term="testing" label="Testing"/>
     <category term="software-engineering" label="Software Engineering"/>

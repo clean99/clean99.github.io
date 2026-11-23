@@ -12,6 +12,7 @@
 
 ## Writing
 
+- [Why I Chose Zustand for Agent-Written Frontend Code](https://clean99.github.io/2026/11/23/Why-I-Chose-Zustand-for-Agent-Written-Frontend-Code/index.md): My team is moving a large ecommerce web app into another repository, with coding agents writing most of the code. Before we started I compared useEffect chains, Redux Toolkit, MobX, Jotai and Zustand, and picked Zustand.
 - [JavaScript garbage collection: generations, hosts, and leaks](https://clean99.github.io/2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/index.md): While reviewing JavaScript runtime internals, I kept seeing GC reduced to one sentence: when objects are no longer used, the engine frees them.
 - [How JavaScript runs: from source code to JIT optimization](https://clean99.github.io/2026/06/05/Modern-JavaScript-Is-Not-Just-Interpreted/index.md): While relearning JavaScript, I got stuck on a basic-sounding question: when we say JavaScript "runs," how much of it has already been compiled?
 - [Agent Skills: The Functional Blueprint for AI Agents](https://clean99.github.io/2026/03/23/Agent-Skills-The-Functional-Blueprint-for-AI-Agents/index.md): A practical model for treating agent skills as reusable functions with clear triggers, inputs, outputs, and composition rules.
