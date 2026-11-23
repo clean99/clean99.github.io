@@ -30,6 +30,7 @@
 /2026/06/08/JavaScript-Garbage-Collection-Generations-Hosts-Leaks/
 /2026/06/19/Designing-an-Operations-Heartbeat-System/
 /2026/07/02/Ecommerce-Growth-Data-Engineering/
+/2026/11/23/Why-I-Chose-Zustand-for-Agent-Written-Frontend-Code/
 /404
 /About/
 /ai-coding-lab/
@@ -102,6 +103,7 @@
 /zh/2026/06/11/What-Happens-When-You-Type-Let-A-Equals-1/
 /zh/2026/06/19/Designing-an-Operations-Heartbeat-System/
 /zh/2026/07/02/Ecommerce-Growth-Data-Engineering/
+/zh/2026/11/23/Why-I-Chose-Zustand-for-Agent-Written-Frontend-Code/
 /zh/About/
 /zh/ai-coding-lab/
 /zh/interviewers/
